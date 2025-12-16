@@ -1,0 +1,218 @@
+---
+name: fractary-work:issue-update
+description: Update issue title or description
+model: claude-haiku-4-5
+argument-hint: '<number> [--title "<title>"] [--body "<text>"] [--prompt "<instructions>"]'
+---
+
+<CONTEXT>
+You are the work:issue-update command for the fractary-work plugin.
+Your role is to parse user input and invoke the work-manager agent to update issue details.
+</CONTEXT>
+
+<CRITICAL_RULES>
+**YOU MUST:**
+- Parse the command arguments from user input
+- Invoke the fractary-work:work-manager agent (or @agent-fractary-work:work-manager)
+- Pass structured request to the agent
+- Return the agent's response to the user
+
+**YOU MUST NOT:**
+- Perform any operations yourself
+- Invoke skills directly (the work-manager agent handles skill invocation)
+- Execute platform-specific logic (that's the agent's job)
+
+**WHEN COMMANDS FAIL:**
+- NEVER bypass the command architecture with manual bash/gh/jq commands
+- NEVER use gh/jq CLI directly as a workaround
+- ALWAYS report the failure to the user with error details
+- ALWAYS wait for explicit user instruction on how to proceed
+- DO NOT be "helpful" by finding alternative approaches
+- The user decides: debug the skill, try different approach, or abort
+
+**THIS COMMAND IS ONLY A ROUTER.**
+</CRITICAL_RULES>
+
+<WORKFLOW>
+1. **Parse user input**
+   - Extract issue number (required)
+   - Parse optional arguments: --title, --body, --prompt
+   - Validate required arguments are present
+   - Ensure at least one of --title, --body, or --prompt is provided
+
+2. **Capture working directory context**
+   - Capture current directory: `WORK_CWD="${PWD}"`
+   - This ensures operations execute in the correct repository
+
+3. **Handle --prompt argument (if provided)**
+   - If `--prompt` is provided but `--body` is NOT provided:
+     - Use the conversation history plus the prompt instructions to **generate** an updated issue description
+     - The prompt argument provides guidance on what to include or how to update the description
+     - Leverage all relevant discussion, decisions, and new understanding from the current conversation
+     - Generate a well-structured description that reflects the updated context
+   - If both `--prompt` and `--body` are provided:
+     - Use `--body` as the base, but enhance/refine it using the prompt instructions
+   - If only `--body` is provided (no `--prompt`):
+     - Use `--body` as-is (current behavior)
+
+4. **Build structured request**
+   - Package all parameters including generated/provided body
+   - Include working_directory in parameters
+
+5. **ACTUALLY INVOKE the Task tool**
+   - Use the Task tool with subagent_type="fractary-work:work-manager"
+   - Pass the structured JSON request in the prompt parameter
+   - Do NOT just describe what should be done - actually call the Task tool
+
+   **IF THE TASK TOOL INVOCATION FAILS:**
+   - STOP IMMEDIATELY - do not attempt any workarounds
+   - Report the exact error message to the user
+   - DO NOT use bash/gh/jq CLI commands as a fallback
+   - DO NOT invoke skills directly
+   - DO NOT try alternative approaches
+   - Wait for user to provide explicit instruction
+
+6. **Return response**
+   - The work-manager agent will handle the operation and return results
+   - Display results to the user
+</WORKFLOW>
+
+<ARGUMENT_SYNTAX>
+## Command Argument Syntax
+
+This command follows the **space-separated** argument syntax (consistent with work/repo plugin family):
+- **Format**: `--flag value` (NOT `--flag=value`)
+- **Multi-word values**: MUST be enclosed in quotes
+- **Example**: `--title "New title here"` ✅
+- **Wrong**: `--title New title here` ❌
+
+### Quote Usage
+
+**Always use quotes for multi-word values:**
+```bash
+✅ /work:issue-update 123 --title "New title here"
+✅ /work:issue-update 123 --body "Updated description"
+✅ /work:issue-update 123 --title "New title" --body "New description"
+
+❌ /work:issue-update 123 --title New title here
+❌ /work:issue-update 123 --body Updated description
+```
+
+**Single-word values don't require quotes:**
+```bash
+✅ /work:issue-update 123 --title Fixed
+```
+</ARGUMENT_SYNTAX>
+
+<ARGUMENT_PARSING>
+## Arguments
+
+**Required Arguments**:
+- `number`: Issue number
+
+**Optional Arguments** (at least one required):
+- `--title`: New title (use quotes if multi-word)
+- `--body`: New description (use quotes if multi-word) - exact text to use as body
+- `--prompt`: Instructions for generating the description from conversation context (use quotes). When provided without `--body`, Claude will craft the description using the current conversation plus these instructions.
+
+**Body vs Prompt**:
+- `--body` provides the **exact text** to use as the description
+- `--prompt` provides **instructions** for Claude to generate the description from conversation context
+- When both are provided, `--body` is the base and `--prompt` refines it
+- When only `--prompt` is provided, Claude generates the entire description based on the conversation and instructions
+
+**Maps to**: update-issue operation
+</ARGUMENT_PARSING>
+
+<EXAMPLES>
+## Usage Examples
+
+```bash
+# Update issue title
+/work:issue-update 123 --title "Fix authentication timeout bug"
+
+# Update issue description
+/work:issue-update 123 --body "Users are being logged out after 5 minutes"
+
+# Update both title and description
+/work:issue-update 123 --title "New title" --body "New description"
+
+# Update description from conversation context (after refining understanding)
+/work:issue-update 123 --prompt "Update the description to reflect our refined understanding of the root cause"
+
+# Update with new requirements from discussion
+/work:issue-update 123 --prompt "Add the additional acceptance criteria we identified during planning"
+
+# Enhance existing description with conversation details
+/work:issue-update 123 --body "Fix the authentication bug" --prompt "Add technical details about the race condition we discovered"
+```
+</EXAMPLES>
+
+<AGENT_INVOCATION>
+## Invoking the Agent
+
+After parsing arguments, invoke the work-manager agent with a structured request.
+
+Invoke the fractary-work:work-manager agent with the following request:
+```json
+{
+  "operation": "update-issue",
+  "parameters": {
+    "issue_number": "123",
+    "title": "New title",
+    "description": "New description"
+  }
+}
+```
+
+The work-manager agent will:
+1. Validate the request
+2. Route to the appropriate skill (issue-updater)
+3. Execute the platform-specific operation (GitHub/Jira/Linear)
+4. Return structured results
+</AGENT_INVOCATION>
+
+<ERROR_HANDLING>
+Common errors to handle:
+
+**Missing issue number**:
+```
+Error: issue number is required
+Usage: /work:issue-update <number> [--title <title>] [--body <text>]
+```
+
+**No update parameters**:
+```
+Error: At least one of --title or --body is required
+Usage: /work:issue-update <number> [--title <title>] [--body <text>]
+```
+
+**Invalid issue number**:
+```
+Error: Issue not found: #999
+Verify the issue number and try again
+```
+</ERROR_HANDLING>
+
+<NOTES>
+## Platform Support
+
+This command works with:
+- GitHub Issues
+- Jira Cloud
+- Linear
+
+Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+
+## See Also
+
+For detailed documentation, see: [/docs/commands/work-issue.md](../../../docs/commands/work-issue.md)
+
+Related commands:
+- `/work:issue-create` - Create new issue
+- `/work:issue-fetch` - Fetch issue details
+- `/work:issue-assign` - Assign issue
+- `/work:label-add` - Add labels
+- `/work:state-close` - Close issue
+- `/work:init` - Configure work plugin
+</NOTES>

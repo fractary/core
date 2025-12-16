@@ -1,0 +1,5 @@
+{
+  "timestamp": "2025-12-16T21:25:48Z",
+  "prompt": "{\"session_id\":\"5297232e-f6a8-4398-8815-631e7e1bf112\",\"transcript_path\":\"/home/jmcwilliam/.claude/projects/-mnt-c-GitHub-fractary-core/5297232e-f6a8-4398-8815-631e7e1bf112.jsonl\",\"cwd\":\"/mnt/c/GitHub/fractary/core\",\"permission_mode\":\"bypassPermissions\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"git commit and push all\"} ",
+  "prompt_short": "{\"session_id\":\"5297232e-f6a8-4398-881..."
+}
