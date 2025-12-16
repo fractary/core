@@ -1,8 +1,18 @@
 /**
- * @fractary/faber - GitLab Repo Provider
+ * @fractary/core - GitLab Repo Provider
  *
- * Repository operations via GitLab API.
- * TODO: Full implementation
+ * ⚠️ STUB IMPLEMENTATION - NOT YET FUNCTIONAL
+ *
+ * This provider is included for future compatibility but is not currently implemented.
+ * All methods will throw ProviderError when called.
+ *
+ * Use GitHubRepoProvider for a fully functional repository provider.
+ *
+ * Future implementation will include:
+ * - GitLab REST API integration
+ * - Group/project configuration
+ * - Merge Request operations
+ * - Branch management
  */
 
 import {

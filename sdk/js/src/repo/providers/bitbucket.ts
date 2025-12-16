@@ -1,8 +1,18 @@
 /**
- * @fractary/faber - Bitbucket Repo Provider
+ * @fractary/core - Bitbucket Repo Provider
  *
- * Repository operations via Bitbucket API.
- * TODO: Full implementation
+ * ⚠️ STUB IMPLEMENTATION - NOT YET FUNCTIONAL
+ *
+ * This provider is included for future compatibility but is not currently implemented.
+ * All methods will throw ProviderError when called.
+ *
+ * Use GitHubRepoProvider for a fully functional repository provider.
+ *
+ * Future implementation will include:
+ * - Bitbucket REST API v2 integration
+ * - Workspace/project configuration
+ * - Pull Request operations
+ * - Branch management
  */
 
 import {

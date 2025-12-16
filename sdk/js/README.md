@@ -2,6 +2,8 @@
 
 Fractary Core SDK - Primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation.
 
+> **⚠️ Alpha Release (v0.1.0)** - This is an early-stage release with limited platform support. Only GitHub is fully implemented. Other providers (Bitbucket, GitLab, Jira, Linear) are included as stubs for future compatibility but will throw errors if used.
+
 ## Overview
 
 `@fractary/core` provides foundational SDKs for common development operations across multiple platforms and services. This package is designed to be used by higher-level frameworks like `@fractary/faber` and can also be used standalone for building custom workflows.
@@ -9,17 +11,17 @@ Fractary Core SDK - Primitive operations for work tracking, repository managemen
 ## Features
 
 ### Work Tracking
-Unified interface for work item management across:
-- GitHub Issues
-- Jira Cloud
-- Linear
+Unified interface for work item management:
+- ✅ **GitHub Issues** - Fully implemented
+- ⚠️ **Jira Cloud** - Stub only (not functional)
+- ⚠️ **Linear** - Stub only (not functional)
 
 ### Repository Management
-Git and repository operations with support for:
-- GitHub
-- GitLab
-- Bitbucket
-- Local Git operations
+Git and repository operations:
+- ✅ **GitHub** - Fully implemented
+- ⚠️ **GitLab** - Stub only (not functional)
+- ⚠️ **Bitbucket** - Stub only (not functional)
+- ✅ **Local Git operations** - Fully implemented
 
 ### Specification Management
 Create and manage technical specifications with templates and validation.

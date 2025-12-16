@@ -1,8 +1,18 @@
 /**
- * @fractary/faber - Linear Work Provider
+ * @fractary/core - Linear Work Provider
  *
- * Work tracking via Linear GraphQL API.
- * TODO: Full implementation
+ * ⚠️ STUB IMPLEMENTATION - NOT YET FUNCTIONAL
+ *
+ * This provider is included for future compatibility but is not currently implemented.
+ * All methods will throw ProviderError when called.
+ *
+ * Use GitHubWorkProvider for a fully functional work tracking provider.
+ *
+ * Future implementation will include:
+ * - Linear GraphQL API integration
+ * - Issue creation and management
+ * - Project and team support
+ * - Cycle management
  */
 
 import {

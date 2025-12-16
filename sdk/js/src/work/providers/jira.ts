@@ -1,8 +1,18 @@
 /**
- * @fractary/faber - Jira Work Provider
+ * @fractary/core - Jira Work Provider
  *
- * Work tracking via Jira REST API.
- * TODO: Full implementation
+ * ⚠️ STUB IMPLEMENTATION - NOT YET FUNCTIONAL
+ *
+ * This provider is included for future compatibility but is not currently implemented.
+ * All methods will throw ProviderError when called.
+ *
+ * Use GitHubWorkProvider for a fully functional work tracking provider.
+ *
+ * Future implementation will include:
+ * - Jira Cloud REST API v3 integration
+ * - Issue creation and management
+ * - Custom field mapping
+ * - Sprint and epic support
  */
 
 import {
