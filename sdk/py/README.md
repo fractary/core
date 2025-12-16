@@ -1,9 +1,11 @@
-# @fractary/core (Python)
+# fractary-core (Python)
+
+> **⚠️ Alpha Release (v0.1.0)** - This is an early-stage release with limited platform support. Only GitHub is currently implemented for work tracking. Repository providers are not yet implemented.
 
 Core primitives for FABER workflows providing framework-agnostic abstractions for:
 
-- **Work Tracking** - Unified interface for GitHub Issues, Jira, and Linear
-- **Repository Management** - Git operations and platform-specific features (GitHub, GitLab, Bitbucket)
+- **Work Tracking** - ✅ GitHub Issues (fully implemented); ⚠️ Jira and Linear (not yet implemented)
+- **Repository Management** - ✅ Local Git operations (fully implemented); ⚠️ Platform providers (not yet implemented)
 - **Specifications** - Creation, validation, and management of work specifications
 - **Logging** - Structured logging for FABER workflows with phase tracking
 - **File Storage** - Cross-platform file operations with support for local and cloud storage

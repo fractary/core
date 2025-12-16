@@ -17,7 +17,7 @@
     "fractary-faber": {
       "source": {
         "source": "github",
-        "repo": "fractary/codex"
+        "repo": "fractary/faber"
       }
     }
   },

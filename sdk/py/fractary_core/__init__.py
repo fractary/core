@@ -5,7 +5,7 @@ This package provides framework-agnostic abstractions for work tracking,
 repository management, specifications, logging, file storage, and documentation.
 """
 
-__version__ = "1.0.0"
+__version__ = "0.1.0"
 
 from fractary_core.work.manager import WorkManager, Issue, WorkType, Comment
 from fractary_core.repo.manager import RepoManager, Branch, Commit, PullRequest
