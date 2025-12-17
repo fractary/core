@@ -2,10 +2,29 @@
 
 Command-line interface for Fractary Core SDK - work tracking, repository management, specifications, logging, file storage, and documentation.
 
+[![npm version](https://img.shields.io/npm/v/@fractary/core-cli.svg)](https://www.npmjs.com/package/@fractary/core-cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Overview
+
+The Fractary Core CLI provides command-line access to all core operations including work tracking, repository management, specification management, logging, file storage, and documentation. It's designed for automation, scripting, and CI/CD integration.
+
+### Key Features
+
+- **6 Command Modules**: work, repo, spec, logs, file, docs
+- **Multi-Platform Support**: GitHub, GitLab, Bitbucket, Jira, Linear
+- **JSON Output**: Machine-readable output for scripting
+- **Configuration Files**: YAML/JSON configuration support
+- **Environment Variables**: Flexible configuration options
+
 ## Installation
 
 ```bash
+# Install globally
 npm install -g @fractary/core-cli
+
+# Or use with npx (no installation required)
+npx @fractary/core-cli [command]
 ```
 
 ## Usage
@@ -307,7 +326,20 @@ program.parse();
 
 MIT
 
-## Related Projects
+## Documentation
 
-- [@fractary/core](../sdk/js) - Core SDK for JavaScript/TypeScript
-- [fractary/core](../) - Fractary Core monorepo
+- **[Complete CLI Reference](../../README.md#cli)** - Full command documentation
+- **[Configuration Guide](../../docs/guides/configuration.md)** - Configuration options
+- **[Integration Guide](../../docs/guides/integration.md)** - CI/CD integration
+- **[Examples](../../docs/examples/)** - Usage examples and scripts
+
+## Related Packages
+
+- **[@fractary/core](../sdk/js/)** - Core SDK for JavaScript/TypeScript
+- **[@fractary/core-mcp](../mcp/server/)** - MCP server for AI agents
+
+## Links
+
+- [GitHub Repository](https://github.com/fractary/core)
+- [Issue Tracker](https://github.com/fractary/core/issues)
+- [NPM Package](https://www.npmjs.com/package/@fractary/core-cli)

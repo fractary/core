@@ -252,13 +252,21 @@ npm run typecheck
 
 MIT
 
+## Documentation
+
+- **[MCP Server Documentation](../../../README.md#mcp-server)** - Server setup and integration
+- **[Configuration Guide](../../../docs/guides/configuration.md)** - Configuration options
+- **[Integration Guide](../../../docs/guides/integration.md)** - Integration patterns
+- **[API Reference](../../../docs/guides/api-reference.md)** - Complete tool reference
+
 ## Related Packages
 
-- [@fractary/core](../sdk/js) - Core SDK
-- [@fractary/core-cli](../cli) - Command-line interface
+- **[@fractary/core](../../sdk/js/)** - Core SDK for JavaScript/TypeScript
+- **[@fractary/core-cli](../../cli/)** - Command-line interface
 
 ## Links
 
 - [GitHub Repository](https://github.com/fractary/core)
 - [Issue Tracker](https://github.com/fractary/core/issues)
+- [NPM Package](https://www.npmjs.com/package/@fractary/core-mcp)
 - [MCP Protocol Specification](https://spec.modelcontextprotocol.io/)

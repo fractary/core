@@ -1,1 +1,317 @@
-# core
+# Fractary Core
+
+Core SDK for Fractary - Primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Overview
+
+The Fractary Core SDK provides foundational infrastructure for managing software development workflows across multiple platforms. It implements primitive operations for work tracking (GitHub Issues, Jira, Linear), repository management (GitHub, GitLab, Bitbucket), specification management, logging, file storage, and documentation.
+
+### Key Features
+
+- **Multi-Platform Work Tracking**: Unified interface for GitHub Issues, Jira, and Linear
+- **Repository Management**: Git operations with GitHub, GitLab, and Bitbucket integration
+- **Specification Management**: Create, validate, and refine technical specifications
+- **Log Management**: Capture, search, and archive session logs
+- **File Storage**: Local and remote file operations with validation
+- **Documentation Management**: Create, search, and export documentation
+- **Type-Safe**: Full TypeScript support with comprehensive type definitions
+
+## SDKs
+
+This monorepo contains SDK implementations for multiple languages:
+
+| Language | Package | Status | Install |
+|----------|---------|--------|---------|
+| **JavaScript/TypeScript** | [`@fractary/core`](./sdk/js/) | Ready | `npm install @fractary/core` |
+| **Python** | [`fractary-core`](./sdk/py/) | Planned | `pip install fractary-core` |
+
+## CLI
+
+A command-line interface is available for all core operations:
+
+| Tool | Package | Status | Install |
+|------|---------|--------|---------|
+| **Core CLI** | [`@fractary/core-cli`](./cli/) | Ready | `npm install -g @fractary/core-cli` |
+
+**Quick example:**
+```bash
+# Work tracking
+fractary-core work issue fetch 123
+fractary-core work issue create "Bug: Login fails" --type bug
+
+# Repository operations
+fractary-core repo commit --message "Add feature" --type feat
+fractary-core repo branch create feature/new-ui
+
+# Specification management
+fractary-core spec validate SPEC-20241216
+fractary-core spec create --title "API Design"
+
+# Log management
+fractary-core logs search --query "error" --type session
+fractary-core logs capture session-001
+
+# File operations
+fractary-core file write data.json --content '{"key":"value"}'
+fractary-core file list --pattern "*.json"
+
+# Documentation
+fractary-core docs create guide-001 --title "User Guide"
+fractary-core docs search --query "authentication"
+```
+
+See the [CLI documentation](./cli/README.md) for full command reference.
+
+## MCP Server
+
+A standalone Model Context Protocol server for AI agent integration:
+
+| Tool | Package | Status | Install |
+|------|---------|--------|---------|
+| **MCP Server** | [`@fractary/core-mcp`](./mcp/server/) | Ready | `npx @fractary/core-mcp` |
+
+The MCP server provides 81 tools across 6 modules for AI agents to interact with core operations.
+
+**Quick example:**
+```bash
+# Run MCP server with stdio transport (default)
+npx @fractary/core-mcp
+
+# Run with custom config
+npx @fractary/core-mcp --config .fractary/core.yaml
+```
+
+**Claude Code integration:**
+Add to `.claude/settings.json`:
+```json
+{
+  "mcpServers": {
+    "fractary-core": {
+      "command": "npx",
+      "args": ["-y", "@fractary/core-mcp"]
+    }
+  }
+}
+```
+
+See the [MCP Server documentation](./mcp/server/README.md) for full reference.
+
+## Claude Code Plugins
+
+Claude Code plugins are available for enhanced workflow integration:
+
+| Plugin | Package | Status |
+|--------|---------|--------|
+| **work** | `fractary-work` | Ready |
+| **repo** | `fractary-repo` | Ready |
+| **spec** | `fractary-spec` | Ready |
+| **logs** | `fractary-logs` | Ready |
+| **file** | `fractary-file` | Ready |
+| **docs** | `fractary-docs` | Ready |
+
+Plugins provide agents, slash commands, and tools for Claude Code integration.
+
+## Quick Start
+
+### JavaScript/TypeScript
+
+```typescript
+import { WorkManager } from '@fractary/core/work'
+import { RepoManager } from '@fractary/core/repo'
+import { SpecManager } from '@fractary/core/spec'
+
+// Work tracking
+const workManager = new WorkManager({
+  provider: 'github',
+  config: {
+    owner: 'myorg',
+    repo: 'myrepo',
+    token: process.env.GITHUB_TOKEN
+  }
+})
+
+const issue = await workManager.fetchIssue(123)
+console.log(issue.title)
+
+// Repository operations
+const repoManager = new RepoManager({
+  provider: 'github',
+  config: {
+    owner: 'myorg',
+    repo: 'myrepo',
+    token: process.env.GITHUB_TOKEN
+  }
+})
+
+await repoManager.createBranch('feature/new-feature', 'main')
+
+// Specification management
+const specManager = new SpecManager()
+const spec = await specManager.create({
+  title: 'API Design',
+  type: 'feature',
+  content: 'Design REST API for user management'
+})
+```
+
+## Project Structure
+
+```
+core/
+├── sdk/
+│   ├── js/                 # JavaScript/TypeScript SDK
+│   │   ├── src/            # TypeScript source
+│   │   │   ├── work/       # Work tracking module
+│   │   │   ├── repo/       # Repository module
+│   │   │   ├── spec/       # Specification module
+│   │   │   ├── logs/       # Logging module
+│   │   │   ├── file/       # File storage module
+│   │   │   └── docs/       # Documentation module
+│   │   ├── tests/          # Test suite
+│   │   └── package.json    # npm configuration
+│   └── py/                 # Python SDK (planned)
+├── cli/                    # Command-line interface
+│   ├── src/                # CLI source
+│   │   └── commands/       # Command implementations
+│   └── package.json        # npm configuration
+├── mcp/
+│   └── server/             # MCP server (standalone)
+│       ├── src/            # Server source
+│       │   ├── tools/      # Tool definitions
+│       │   └── handlers/   # Tool handlers
+│       └── package.json    # npm configuration
+├── plugins/                # Claude Code plugins
+│   ├── work/               # Work tracking plugin
+│   ├── repo/               # Repository plugin
+│   ├── spec/               # Specification plugin
+│   ├── logs/               # Logging plugin
+│   ├── file/               # File storage plugin
+│   ├── docs/               # Documentation plugin
+│   └── status/             # Status plugin
+├── docs/                   # Shared documentation
+├── specs/                  # Feature specifications
+└── README.md               # This file
+```
+
+## Documentation
+
+### SDK Documentation
+
+- [JavaScript SDK](./sdk/js/README.md) - Installation and API reference for JS/TS
+- [Python SDK](./sdk/py/README.md) - Installation and API reference for Python (planned)
+
+### CLI Documentation
+
+- [CLI Reference](./cli/README.md) - Complete command reference and usage examples
+
+### MCP Server Documentation
+
+- [MCP Server Reference](./mcp/server/README.md) - Server setup and tool reference
+
+### Guides
+
+- [API Reference](./docs/guides/api-reference.md) - Comprehensive API documentation
+- [Configuration Guide](./docs/guides/configuration.md) - Configuration options
+- [Integration Guide](./docs/guides/integration.md) - How to integrate into your projects
+- [Troubleshooting Guide](./docs/guides/troubleshooting.md) - Common issues and solutions
+
+### Examples
+
+- [Usage Examples](./docs/examples/) - Real-world integration patterns and code samples
+
+## Development
+
+### JavaScript SDK
+
+```bash
+cd sdk/js
+npm install
+npm run build
+npm test
+```
+
+### CLI
+
+```bash
+cd cli
+npm install
+npm run build
+npm test
+```
+
+### MCP Server
+
+```bash
+cd mcp/server
+npm install
+npm run build
+npm test
+```
+
+## Modules
+
+### Work Tracking
+
+Manage work items across GitHub Issues, Jira, and Linear:
+
+- Create, update, and fetch issues
+- Manage comments, labels, and milestones
+- Search and filter issues
+- Track issue state and assignments
+
+### Repository Management
+
+Git and platform operations:
+
+- Branch management (create, delete, list)
+- Commit operations with semantic versioning
+- Pull request workflows
+- Tag management
+- Worktree support
+- Multi-platform support (GitHub, GitLab, Bitbucket)
+
+### Specification Management
+
+Technical specification workflows:
+
+- Create and validate specifications
+- Template-based generation
+- Refinement and versioning
+- Specification search and indexing
+
+### Log Management
+
+Session and operation logging:
+
+- Capture session logs
+- Search and filter logs
+- Archive and export
+- Log type classification
+
+### File Storage
+
+File operations with validation:
+
+- Read, write, list, delete operations
+- Pattern matching and filtering
+- Local and remote storage
+- File validation and safety checks
+
+### Documentation Management
+
+Documentation workflows:
+
+- Create and update documentation
+- Search and indexing
+- Export to multiple formats
+- Version tracking
+
+## License
+
+MIT © Fractary
+
+## Contributing
+
+For issues or contributions, please visit the [GitHub repository](https://github.com/fractary/core).

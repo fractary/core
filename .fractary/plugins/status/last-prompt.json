@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-17T17:25:56Z",
-  "prompt": "{\"session_id\":\"61529095-ac5c-4fbc-afc2-f5fd3f34829d\",\"transcript_path\":\"/home/jmcwilliam/.claude/projects/-mnt-c-GitHub-fractary-core/61529095-ac5c-4fbc-afc2-f5fd3f34829d.jsonl\",\"cwd\":\"/mnt/c/GitHub/fractary/core\",\"permission_mode\":\"bypassPermissions\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"we are showing a lot of files to commit, is it possible some need to be added to the .gitignore\"} ",
-  "prompt_short": "{\"session_id\":\"61529095-ac5c-4fbc-afc..."
+  "timestamp": "2025-12-17T21:52:09Z",
+  "prompt": "{\"session_id\":\"0136c797-d5ed-4664-b273-edab58875e0f\",\"transcript_path\":\"/home/jmcwilliam/.claude/projects/-mnt-c-GitHub-fractary-core/0136c797-d5ed-4664-b273-edab58875e0f.jsonl\",\"cwd\":\"/mnt/c/GitHub/fractary/core\",\"permission_mode\":\"bypassPermissions\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"/fractary-repo:commit-and-push \"} ",
+  "prompt_short": "{\"session_id\":\"0136c797-d5ed-4664-b27..."
 }
