@@ -31,7 +31,7 @@ function createPRCreateCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        const pr = await repoManager.createPullRequest({
+        const pr = await repoManager.createPR({
           title: options.title,
           body: options.body,
           base: options.base,
@@ -65,7 +65,7 @@ function createPRListCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        const prs = await repoManager.listPullRequests({
+        const prs = await repoManager.listPRs({
           state: options.state,
           author: options.author,
         });
@@ -103,8 +103,8 @@ function createPRMergeCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        const result = await repoManager.mergePullRequest(parseInt(number, 10), {
-          mergeMethod: options.strategy,
+        const result = await repoManager.mergePR(parseInt(number, 10), {
+          strategy: options.strategy,
           deleteBranch: options.deleteBranch,
         });
 
@@ -134,24 +134,24 @@ function createPRReviewCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        let event = 'COMMENT';
+        let action: 'approve' | 'request_changes' | 'comment' = 'comment';
         if (options.approve) {
-          event = 'APPROVE';
+          action = 'approve';
         } else if (options.requestChanges) {
-          event = 'REQUEST_CHANGES';
+          action = 'request_changes';
         }
 
-        const review = await repoManager.reviewPullRequest(parseInt(number, 10), {
-          event,
-          body: options.comment,
+        const review = await repoManager.reviewPR(parseInt(number, 10), {
+          action,
+          comment: options.comment,
         });
 
         if (options.json) {
           console.log(JSON.stringify({ status: 'success', data: review }, null, 2));
         } else {
-          if (event === 'APPROVE') {
+          if (action === 'approve') {
             console.log(chalk.green(`✓ Approved pull request #${number}`));
-          } else if (event === 'REQUEST_CHANGES') {
+          } else if (action === 'request_changes') {
             console.log(chalk.yellow(`✓ Requested changes on pull request #${number}`));
           } else {
             console.log(chalk.green(`✓ Commented on pull request #${number}`));

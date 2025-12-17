@@ -142,9 +142,9 @@ function createLogsReadCommand(): Command {
           const colorFn = getTypeColor(log.type);
           console.log(colorFn(chalk.bold(`[${log.type.toUpperCase()}] ${log.title}`)));
           console.log(chalk.gray(`ID: ${log.id}`));
-          console.log(chalk.gray(`Timestamp: ${log.timestamp}`));
-          if (log.issueNumber) {
-            console.log(chalk.gray(`Issue: #${log.issueNumber}`));
+          console.log(chalk.gray(`Timestamp: ${log.metadata.date}`));
+          if (log.metadata.issue_number) {
+            console.log(chalk.gray(`Issue: #${log.metadata.issue_number}`));
           }
           console.log('\n' + log.content);
         }
@@ -166,10 +166,10 @@ function createLogsSearchCommand(): Command {
     .action(async (options) => {
       try {
         const logManager = await getLogManager();
-        const logs = await logManager.searchLogs(options.query, {
+        const logs = logManager.searchLogs({
+          query: options.query,
           type: options.type,
           issueNumber: options.issue ? parseInt(options.issue, 10) : undefined,
-          useRegex: options.regex,
         });
 
         const limitedLogs = options.limit ? logs.slice(0, parseInt(options.limit, 10)) : logs;
@@ -240,16 +240,16 @@ function createLogsArchiveCommand(): Command {
       try {
         const logManager = await getLogManager();
         const result = await logManager.archiveLogs({
-          maxAge: parseInt(options.maxAge, 10),
+          maxAgeDays: parseInt(options.maxAge, 10),
           compress: options.compress,
         });
 
         if (options.json) {
           console.log(JSON.stringify({ status: 'success', data: result }, null, 2));
         } else {
-          console.log(chalk.green(`✓ Archived ${result.count} logs`));
-          if (result.archivePath) {
-            console.log(chalk.gray(`  Archive: ${result.archivePath}`));
+          console.log(chalk.green(`✓ Archived ${result.archived.length} logs`));
+          if (result.deleted && result.deleted.length > 0) {
+            console.log(chalk.gray(`  Deleted: ${result.deleted.length} old archives`));
           }
         }
       } catch (error) {

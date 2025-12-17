@@ -7,13 +7,7 @@
 
 import chalk from 'chalk';
 import { SDKNotAvailableError } from '../sdk/factory';
-
-/**
- * Output options for error handling
- */
-export interface OutputOptions {
-  json?: boolean;
-}
+import type { OutputOptions } from './output';
 
 /**
  * Custom CLI error class

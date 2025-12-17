@@ -29,8 +29,9 @@ function createWorktreeCreateCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        const worktree = await repoManager.createWorktree(branch, {
-          path: options.path,
+        const worktree = repoManager.createWorktree({
+          branch,
+          path: options.path || `.worktrees/${branch}`,
           workId: options.workId,
         });
 
@@ -83,9 +84,7 @@ function createWorktreeRemoveCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        await repoManager.removeWorktree(path, {
-          force: options.force,
-        });
+        repoManager.removeWorktree(path, options.force);
 
         if (options.json) {
           console.log(JSON.stringify({ status: 'success', data: { path } }, null, 2));

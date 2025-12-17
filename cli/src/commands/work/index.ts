@@ -517,7 +517,7 @@ function createMilestoneCreateCommand(): Command {
         const milestone = await workManager.createMilestone({
           title: options.title,
           description: options.description,
-          dueOn: options.dueOn,
+          due_on: options.dueOn,
         });
 
         if (options.json) {
@@ -539,7 +539,7 @@ function createMilestoneListCommand(): Command {
     .action(async (options) => {
       try {
         const workManager = await getWorkManager();
-        const milestones = await workManager.listMilestones({ state: options.state });
+        const milestones = await workManager.listMilestones(options.state || 'all');
 
         if (options.json) {
           console.log(JSON.stringify({ status: 'success', data: milestones }, null, 2));

@@ -146,7 +146,7 @@ function createSpecUpdateCommand(): Command {
           title: options.title,
           content: options.content,
           workId: options.workId,
-          status: options.status,
+          validationStatus: options.status,
         });
 
         if (options.json) {
@@ -173,22 +173,16 @@ function createSpecValidateCommand(): Command {
         if (options.json) {
           console.log(JSON.stringify({ status: 'success', data: result }, null, 2));
         } else {
-          if (result.valid) {
-            console.log(chalk.green(`✓ Specification is valid`));
-          } else {
-            console.log(chalk.red(`✗ Specification is invalid`));
-            if (result.errors && result.errors.length > 0) {
-              console.log(chalk.yellow('\nErrors:'));
-              result.errors.forEach((error: string) => {
-                console.log(chalk.red(`  - ${error}`));
-              });
-            }
-            if (result.warnings && result.warnings.length > 0) {
-              console.log(chalk.yellow('\nWarnings:'));
-              result.warnings.forEach((warning: string) => {
-                console.log(chalk.yellow(`  - ${warning}`));
-              });
-            }
+          console.log(chalk.bold(`Validation Result: ${result.status.toUpperCase()}`));
+          console.log(chalk.gray(`Score: ${result.score}%`));
+
+          if (result.checks.requirements) {
+            const req = result.checks.requirements;
+            console.log(chalk.gray(`\nRequirements: ${req.completed}/${req.total} - ${req.status}`));
+          }
+          if (result.checks.acceptanceCriteria) {
+            const ac = result.checks.acceptanceCriteria;
+            console.log(chalk.gray(`Acceptance Criteria: ${ac.met}/${ac.total} - ${ac.status}`));
           }
         }
       } catch (error) {

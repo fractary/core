@@ -29,16 +29,17 @@ function createTagCreateCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        const tag = await repoManager.createTag(name, {
+        repoManager.createTag(name, {
+          name,
           message: options.message,
           sign: options.sign,
           force: options.force,
         });
 
         if (options.json) {
-          console.log(JSON.stringify({ status: 'success', data: tag }, null, 2));
+          console.log(JSON.stringify({ status: 'success', data: { name } }, null, 2));
         } else {
-          console.log(chalk.green(`✓ Created tag: ${tag.name}`));
+          console.log(chalk.green(`✓ Created tag: ${name}`));
           if (options.message) {
             console.log(chalk.gray('Annotated tag'));
           }
@@ -63,14 +64,18 @@ function createTagPushCommand(): Command {
         const repoManager = await getRepoManager();
 
         if (name === 'all') {
-          await repoManager.pushTags(options.remote);
+          // Push all tags - get list and push each
+          const tags = repoManager.listTags();
+          for (const tag of tags) {
+            repoManager.pushTag(tag.name, options.remote);
+          }
           if (options.json) {
-            console.log(JSON.stringify({ status: 'success', data: { pushed: 'all' } }, null, 2));
+            console.log(JSON.stringify({ status: 'success', data: { pushed: tags.length } }, null, 2));
           } else {
-            console.log(chalk.green(`✓ Pushed all tags to ${options.remote}`));
+            console.log(chalk.green(`✓ Pushed ${tags.length} tags to ${options.remote}`));
           }
         } else {
-          await repoManager.pushTag(name, options.remote);
+          repoManager.pushTag(name, options.remote);
           if (options.json) {
             console.log(
               JSON.stringify({ status: 'success', data: { tag: name, remote: options.remote } }, null, 2)

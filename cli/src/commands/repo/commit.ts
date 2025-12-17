@@ -23,35 +23,22 @@ export function createCommitCommand(): Command {
 
         // Stage all changes if requested
         if (options.all) {
-          await repoManager.stage('.');
+          repoManager.stage(['.']);
         }
 
-        // Build commit message
-        let message = options.message;
-
-        if (options.type) {
-          const scope = options.scope ? `(${options.scope})` : '';
-          const breaking = options.breaking ? '!' : '';
-          message = `${options.type}${scope}${breaking}: ${options.message}`;
-        }
-
-        // Add work ID to footer if provided
-        if (options.workId) {
-          message += `\n\nWork-ID: ${options.workId}`;
-        }
-
-        // Add breaking change footer if marked
-        if (options.breaking && !message.includes('BREAKING CHANGE:')) {
-          message += '\n\nBREAKING CHANGE: ' + options.message;
-        }
-
-        const commit = await repoManager.commit(message);
+        const commit = repoManager.commit({
+          message: options.message,
+          type: options.type,
+          scope: options.scope,
+          workId: options.workId,
+          breaking: options.breaking,
+        });
 
         if (options.json) {
           console.log(JSON.stringify({ status: 'success', data: commit }, null, 2));
         } else {
-          console.log(chalk.green(`✓ Created commit: ${commit.hash?.substring(0, 7)}`));
-          console.log(chalk.gray(message.split('\n')[0]));
+          console.log(chalk.green(`✓ Created commit: ${commit.sha?.substring(0, 7)}`));
+          console.log(chalk.gray(commit.message.split('\n')[0]));
         }
       } catch (error) {
         handleError(error, options);

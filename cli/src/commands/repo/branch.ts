@@ -65,7 +65,7 @@ function createBranchDeleteCommand(): Command {
         }
 
         if (options.location === 'both' || options.location === 'remote') {
-          await repoManager.deleteBranch(name, { remote: true, force: options.force });
+          await repoManager.deleteBranch(name, { location: 'remote', force: options.force });
           if (!options.json) {
             console.log(chalk.green(`✓ Deleted remote branch: ${name}`));
           }

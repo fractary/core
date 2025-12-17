@@ -29,9 +29,9 @@ export function createStatusCommand(): Command {
             });
           }
 
-          if (status.unstaged && status.unstaged.length > 0) {
-            console.log(chalk.yellow('\nUnstaged changes:'));
-            status.unstaged.forEach((file: string) => {
+          if (status.modified && status.modified.length > 0) {
+            console.log(chalk.yellow('\nModified changes:'));
+            status.modified.forEach((file: string) => {
               console.log(chalk.yellow(`  M ${file}`));
             });
           }
@@ -45,7 +45,7 @@ export function createStatusCommand(): Command {
 
           if (
             (!status.staged || status.staged.length === 0) &&
-            (!status.unstaged || status.unstaged.length === 0) &&
+            (!status.modified || status.modified.length === 0) &&
             (!status.untracked || status.untracked.length === 0)
           ) {
             console.log(chalk.green('\nWorking tree clean'));
@@ -68,14 +68,14 @@ export function createPushCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        const result = await repoManager.push({
+        repoManager.push({
           remote: options.remote,
           setUpstream: options.setUpstream,
           force: options.force,
         });
 
         if (options.json) {
-          console.log(JSON.stringify({ status: 'success', data: result }, null, 2));
+          console.log(JSON.stringify({ status: 'success' }, null, 2));
         } else {
           console.log(chalk.green(`✓ Pushed to ${options.remote}`));
           if (options.setUpstream) {
@@ -98,18 +98,20 @@ export function createPullCommand(): Command {
       try {
         const repoManager = await getRepoManager();
 
-        const result = await repoManager.pull({
+        repoManager.pull({
           remote: options.remote,
           rebase: options.rebase,
         });
 
         if (options.json) {
-          console.log(JSON.stringify({ status: 'success', data: result }, null, 2));
+          console.log(JSON.stringify({ status: 'success' }, null, 2));
         } else {
           console.log(chalk.green(`✓ Pulled from ${options.remote}`));
-          if (result.conflicts && result.conflicts.length > 0) {
+          // Note: Check status separately for conflicts
+          const status = repoManager.getStatus();
+          if (status.conflicts && status.conflicts.length > 0) {
             console.log(chalk.yellow('\nConflicts detected:'));
-            result.conflicts.forEach((file: string) => {
+            status.conflicts.forEach((file: string) => {
               console.log(chalk.yellow(`  ! ${file}`));
             });
           }

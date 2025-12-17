@@ -71,5 +71,8 @@
   "bugs": {
     "url": "https://github.com/fractary/core/issues"
   },
-  "homepage": "https://github.com/fractary/core/tree/main/cli#readme"
+  "homepage": "https://github.com/fractary/core/tree/main/cli#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }
