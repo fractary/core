@@ -45,13 +45,36 @@ export async function loadConfig(): Promise<Config> {
   const config: Config = {};
 
   // 1. Load from environment variables
-  if (process.env.GITHUB_TOKEN) {
+  // Priority order: GITHUB > JIRA > LINEAR for work, GITHUB > GITLAB > BITBUCKET for repo
+  // Only set if not already configured (respects priority)
+
+  // Work configuration (GitHub takes priority)
+  if (process.env.GITHUB_TOKEN && !config.work) {
     config.work = {
       platform: 'github',
       owner: process.env.GITHUB_OWNER,
       repo: process.env.GITHUB_REPO,
       token: process.env.GITHUB_TOKEN,
     };
+  }
+
+  if (process.env.JIRA_TOKEN && !config.work) {
+    config.work = {
+      platform: 'jira',
+      token: process.env.JIRA_TOKEN,
+      project: process.env.JIRA_PROJECT,
+    };
+  }
+
+  if (process.env.LINEAR_API_KEY && !config.work) {
+    config.work = {
+      platform: 'linear',
+      token: process.env.LINEAR_API_KEY,
+    };
+  }
+
+  // Repo configuration (GitHub takes priority)
+  if (process.env.GITHUB_TOKEN && !config.repo) {
     config.repo = {
       platform: 'github',
       owner: process.env.GITHUB_OWNER,
@@ -60,22 +83,7 @@ export async function loadConfig(): Promise<Config> {
     };
   }
 
-  if (process.env.JIRA_TOKEN) {
-    config.work = {
-      platform: 'jira',
-      token: process.env.JIRA_TOKEN,
-      project: process.env.JIRA_PROJECT,
-    };
-  }
-
-  if (process.env.LINEAR_API_KEY) {
-    config.work = {
-      platform: 'linear',
-      token: process.env.LINEAR_API_KEY,
-    };
-  }
-
-  if (process.env.GITLAB_TOKEN) {
+  if (process.env.GITLAB_TOKEN && !config.repo) {
     config.repo = {
       platform: 'gitlab',
       owner: process.env.GITLAB_OWNER,
@@ -84,7 +92,7 @@ export async function loadConfig(): Promise<Config> {
     };
   }
 
-  if (process.env.BITBUCKET_TOKEN) {
+  if (process.env.BITBUCKET_TOKEN && !config.repo) {
     config.repo = {
       platform: 'bitbucket',
       owner: process.env.BITBUCKET_OWNER,
@@ -128,7 +136,11 @@ export async function loadConfig(): Promise<Config> {
         // Use first config file found
         break;
       } catch (error) {
-        console.error(`Failed to load config from ${configPath}:`, error);
+        // Sanitize error message to prevent token exposure
+        const sanitizedError = error instanceof Error
+          ? error.message.replace(/(token|key|password|secret)["']?\s*:\s*["']?[^"',}\s]+/gi, '$1: [REDACTED]')
+          : 'Unknown error';
+        console.error(`Failed to load config from ${configPath}:`, sanitizedError);
       }
     }
   }

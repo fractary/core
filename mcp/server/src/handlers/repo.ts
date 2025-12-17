@@ -1,7 +1,23 @@
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { RepoManager } from '@fractary/core/repo';
 import { Config } from '../config.js';
-import { successResult, errorResult } from './helpers.js';
+import {
+  successResult,
+  errorResult,
+  isValidBranchLocation,
+  isValidBranchType,
+  isValidCommitType,
+  isValidPrState,
+  isValidReviewAction,
+  isValidMergeStrategy,
+  isValidIssueState,
+  validateRepoConfig
+} from './helpers.js';
+
+/**
+ * NOTE: All handlers in this file validate config.repo before use
+ * Pattern: if (!validateRepoConfig(config)) { return errorResult(...) }
+ */
 
 // ============================================================================
 // Repository Status
@@ -12,8 +28,12 @@ export async function handleRepoStatus(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
-    const status = manager.getStatus();
+    const status = await manager.getStatus();
     return successResult(status);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -27,7 +47,7 @@ export async function handleRepoBranchCurrent(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    const branch = manager.getCurrentBranch();
+    const branch = await manager.getCurrentBranch();
     return successResult({ branch });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -41,7 +61,7 @@ export async function handleRepoIsDirty(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    const dirty = manager.isDirty();
+    const dirty = await manager.isDirty();
     return successResult({ dirty });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -59,7 +79,7 @@ export async function handleRepoDiff(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    const diff = manager.getDiff({
+    const diff = await manager.getDiff({
       staged: params.staged,
       base: params.base,
       head: params.head,
@@ -105,10 +125,14 @@ export async function handleRepoBranchDelete(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.location && !isValidBranchLocation(params.location)) {
+      return errorResult(`Invalid location: ${params.location}. Must be 'local', 'remote', or 'both'`);
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.deleteBranch(params.name, {
       force: params.force,
-      location: params.location as 'local' | 'remote' | 'both' | undefined,
+      location: isValidBranchLocation(params.location) ? params.location : undefined,
     });
     return successResult({ deleted: true, branch: params.name });
   } catch (error: unknown) {
@@ -164,7 +188,7 @@ export async function handleRepoCheckout(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.checkout(params.branch);
+    await manager.checkout(params.branch);
     return successResult({ checked_out: params.branch });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -181,9 +205,13 @@ export async function handleRepoBranchNameGenerate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!isValidBranchType(params.type)) {
+      return errorResult(`Invalid type: ${params.type}. Must be 'feature', 'fix', 'chore', or 'docs'`);
+    }
+
     const manager = new RepoManager(config.repo);
-    const name = manager.generateBranchName({
-      type: params.type as 'feature' | 'fix' | 'chore' | 'docs',
+    const name = await manager.generateBranchName({
+      type: params.type,
       description: params.description,
       workId: params.work_id,
     });
@@ -204,7 +232,7 @@ export async function handleRepoStage(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.stage(params.patterns);
+    await manager.stage(params.patterns);
     return successResult({ staged: params.patterns });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -218,7 +246,7 @@ export async function handleRepoStageAll(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.stageAll();
+    await manager.stageAll();
     return successResult({ staged_all: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -232,7 +260,7 @@ export async function handleRepoUnstage(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.unstage(params.patterns);
+    await manager.unstage(params.patterns);
     return successResult({ unstaged: params.patterns });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -256,10 +284,14 @@ export async function handleRepoCommit(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.type && !isValidCommitType(params.type)) {
+      return errorResult(`Invalid type: ${params.type}. Must be 'feat', 'fix', 'docs', 'style', 'refactor', 'test', or 'chore'`);
+    }
+
     const manager = new RepoManager(config.repo);
-    const commit = manager.commit({
+    const commit = await manager.commit({
       message: params.message,
-      type: params.type as 'feat' | 'fix' | 'docs' | 'style' | 'refactor' | 'test' | 'chore' | undefined,
+      type: isValidCommitType(params.type) ? params.type : undefined,
       scope: params.scope,
       body: params.body,
       breaking: params.breaking,
@@ -278,7 +310,7 @@ export async function handleRepoCommitGet(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    const commit = manager.getCommit(params.ref);
+    const commit = await manager.getCommit(params.ref);
     return successResult(commit);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -298,7 +330,7 @@ export async function handleRepoCommitList(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    const commits = manager.listCommits({
+    const commits = await manager.listCommits({
       limit: params.limit,
       branch: params.branch,
       since: params.since,
@@ -327,7 +359,7 @@ export async function handleRepoPush(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.push({
+    await manager.push({
       branch: params.branch,
       remote: params.remote,
       force: params.force,
@@ -350,7 +382,7 @@ export async function handleRepoPull(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.pull({
+    await manager.pull({
       branch: params.branch,
       remote: params.remote,
       rebase: params.rebase,
@@ -368,7 +400,7 @@ export async function handleRepoFetch(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.fetch(params.remote);
+    await manager.fetch(params.remote);
     return successResult({ fetched: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -430,11 +462,15 @@ export async function handleRepoPrUpdate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.state && !isValidPrState(params.state)) {
+      return errorResult(`Invalid state: ${params.state}. Must be 'open' or 'closed'`);
+    }
+
     const manager = new RepoManager(config.repo);
     const pr = await manager.updatePR(params.number, {
       title: params.title,
       body: params.body,
-      state: params.state as 'open' | 'closed' | undefined,
+      state: isValidPrState(params.state) ? params.state : undefined,
     });
     return successResult(pr);
   } catch (error: unknown) {
@@ -469,9 +505,13 @@ export async function handleRepoPrReview(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!isValidReviewAction(params.action)) {
+      return errorResult(`Invalid action: ${params.action}. Must be 'approve', 'request_changes', or 'comment'`);
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.reviewPR(params.number, {
-      action: params.action as 'approve' | 'request_changes' | 'comment',
+      action: params.action,
       comment: params.comment,
     });
     return successResult({ reviewed: true });
@@ -524,9 +564,13 @@ export async function handleRepoPrMerge(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.strategy && !isValidMergeStrategy(params.strategy)) {
+      return errorResult(`Invalid strategy: ${params.strategy}. Must be 'merge', 'squash', or 'rebase'`);
+    }
+
     const manager = new RepoManager(config.repo);
     const pr = await manager.mergePR(params.number, {
-      strategy: params.strategy as 'merge' | 'squash' | 'rebase' | undefined,
+      strategy: isValidMergeStrategy(params.strategy) ? params.strategy : undefined,
       deleteBranch: params.delete_branch,
     });
     return successResult(pr);
@@ -545,9 +589,13 @@ export async function handleRepoPrList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.state && !isValidIssueState(params.state)) {
+      return errorResult(`Invalid state: ${params.state}. Must be 'open', 'closed', or 'all'`);
+    }
+
     const manager = new RepoManager(config.repo);
     const prs = await manager.listPRs({
-      state: params.state as 'open' | 'closed' | 'all' | undefined,
+      state: isValidIssueState(params.state) ? params.state : undefined,
       author: params.author,
       limit: params.limit,
     });
@@ -575,7 +623,7 @@ export async function handleRepoTagCreate(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.createTag(params.name, {
+    await manager.createTag(params.name, {
       name: params.name,
       message: params.message,
       sha: params.sha,
@@ -596,7 +644,7 @@ export async function handleRepoTagDelete(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.deleteTag(params.name);
+    await manager.deleteTag(params.name);
     return successResult({ tag: params.name, deleted: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -613,7 +661,7 @@ export async function handleRepoTagPush(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.pushTag(params.name, params.remote);
+    await manager.pushTag(params.name, params.remote);
     return successResult({ tag: params.name, pushed: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -630,7 +678,7 @@ export async function handleRepoTagList(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    const tags = manager.listTags({
+    const tags = await manager.listTags({
       pattern: params.pattern,
       latest: params.latest,
     });
@@ -655,7 +703,7 @@ export async function handleRepoWorktreeCreate(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    const worktree = manager.createWorktree({
+    const worktree = await manager.createWorktree({
       path: params.path,
       branch: params.branch,
       baseBranch: params.base_branch,
@@ -673,7 +721,7 @@ export async function handleRepoWorktreeList(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    const worktrees = manager.listWorktrees();
+    const worktrees = await manager.listWorktrees();
     return successResult(worktrees);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -690,7 +738,7 @@ export async function handleRepoWorktreeRemove(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.removeWorktree(params.path, params.force);
+    await manager.removeWorktree(params.path, params.force);
     return successResult({ path: params.path, removed: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -704,7 +752,7 @@ export async function handleRepoWorktreePrune(
 ): Promise<CallToolResult> {
   try {
     const manager = new RepoManager(config.repo);
-    manager.pruneWorktrees();
+    await manager.pruneWorktrees();
     return successResult({ pruned: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

@@ -1,7 +1,19 @@
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { WorkManager } from '@fractary/core/work';
 import { Config } from '../config.js';
-import { successResult, errorResult } from './helpers.js';
+import {
+  successResult,
+  errorResult,
+  isValidIssueState,
+  isValidPrState,
+  isValidFaberContext,
+  validateWorkConfig
+} from './helpers.js';
+
+/**
+ * NOTE: All handlers in this file validate config.work before use
+ * Pattern: if (!validateWorkConfig(config)) { return errorResult(...) }
+ */
 
 /**
  * Handler for fractary_work_issue_fetch
@@ -11,6 +23,10 @@ export async function handleWorkIssueFetch(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const issue = await manager.fetchIssue(params.issue_number);
     return successResult(issue);
@@ -62,11 +78,15 @@ export async function handleWorkIssueUpdate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.state && !isValidPrState(params.state)) {
+      return errorResult(`Invalid state: ${params.state}. Must be 'open' or 'closed'`);
+    }
+
     const manager = new WorkManager(config.work);
     const issue = await manager.updateIssue(params.issue_number, {
       title: params.title,
       body: params.body,
-      state: params.state as 'open' | 'closed' | undefined,
+      state: isValidPrState(params.state) ? params.state : undefined,
     });
     return successResult(issue);
   } catch (error: unknown) {
@@ -179,9 +199,13 @@ export async function handleWorkIssueSearch(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.state && !isValidIssueState(params.state)) {
+      return errorResult(`Invalid state: ${params.state}. Must be 'open', 'closed', or 'all'`);
+    }
+
     const manager = new WorkManager(config.work);
     const issues = await manager.searchIssues(params.query || '', {
-      state: params.state as 'open' | 'closed' | 'all' | undefined,
+      state: isValidIssueState(params.state) ? params.state : undefined,
       labels: params.labels,
       assignee: params.assignee,
       milestone: params.milestone,
@@ -224,11 +248,15 @@ export async function handleWorkCommentCreate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.faber_context && !isValidFaberContext(params.faber_context)) {
+      return errorResult(`Invalid faber_context: ${params.faber_context}. Must be 'frame', 'architect', 'build', 'evaluate', or 'release'`);
+    }
+
     const manager = new WorkManager(config.work);
     const comment = await manager.createComment(
       params.issue_number,
       params.body,
-      params.faber_context as 'frame' | 'architect' | 'build' | 'evaluate' | 'release' | undefined
+      isValidFaberContext(params.faber_context) ? params.faber_context : undefined
     );
     return successResult(comment);
   } catch (error: unknown) {
@@ -371,8 +399,12 @@ export async function handleWorkMilestoneList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (params.state && !isValidIssueState(params.state)) {
+      return errorResult(`Invalid state: ${params.state}. Must be 'open', 'closed', or 'all'`);
+    }
+
     const manager = new WorkManager(config.work);
-    const milestones = await manager.listMilestones(params.state as 'open' | 'closed' | 'all' | undefined);
+    const milestones = await manager.listMilestones(isValidIssueState(params.state) ? params.state : undefined);
     return successResult(milestones);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
