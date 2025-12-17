@@ -1,6 +1,7 @@
-import { existsSync, readFileSync } from 'fs';
+import { access, readFile } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
+import { constants } from 'fs';
 
 /**
  * Configuration interface for the MCP server
@@ -108,38 +109,41 @@ export async function loadConfig(): Promise<Config> {
   ];
 
   for (const configPath of configPaths) {
-    if (existsSync(configPath)) {
-      try {
-        const fileContent = readFileSync(configPath, 'utf-8');
-        const fileConfig = JSON.parse(fileContent) as Config;
+    try {
+      // Check if file exists using async access
+      await access(configPath, constants.F_OK);
 
-        // Merge file config with existing config (env vars take precedence)
-        if (fileConfig.work && !config.work) {
-          config.work = fileConfig.work;
-        }
-        if (fileConfig.repo && !config.repo) {
-          config.repo = fileConfig.repo;
-        }
-        if (fileConfig.spec) {
-          config.spec = { ...fileConfig.spec, ...config.spec };
-        }
-        if (fileConfig.logs) {
-          config.logs = { ...fileConfig.logs, ...config.logs };
-        }
-        if (fileConfig.file) {
-          config.file = { ...fileConfig.file, ...config.file };
-        }
-        if (fileConfig.docs) {
-          config.docs = { ...fileConfig.docs, ...config.docs };
-        }
+      // Read file asynchronously
+      const fileContent = await readFile(configPath, 'utf-8');
+      const fileConfig = JSON.parse(fileContent) as Config;
 
-        // Use first config file found
-        break;
-      } catch (error) {
-        // Sanitize error message to prevent token exposure
-        const sanitizedError = error instanceof Error
-          ? error.message.replace(/(token|key|password|secret)["']?\s*:\s*["']?[^"',}\s]+/gi, '$1: [REDACTED]')
-          : 'Unknown error';
+      // Merge file config with existing config (env vars take precedence)
+      if (fileConfig.work && !config.work) {
+        config.work = fileConfig.work;
+      }
+      if (fileConfig.repo && !config.repo) {
+        config.repo = fileConfig.repo;
+      }
+      if (fileConfig.spec) {
+        config.spec = { ...fileConfig.spec, ...config.spec };
+      }
+      if (fileConfig.logs) {
+        config.logs = { ...fileConfig.logs, ...config.logs };
+      }
+      if (fileConfig.file) {
+        config.file = { ...fileConfig.file, ...config.file };
+      }
+      if (fileConfig.docs) {
+        config.docs = { ...fileConfig.docs, ...config.docs };
+      }
+
+      // Use first config file found
+      break;
+    } catch (error) {
+      // File doesn't exist or read error - skip to next path
+      if (error instanceof Error && 'code' in error && error.code !== 'ENOENT') {
+        // Sanitize error message to prevent token exposure (only for non-ENOENT errors)
+        const sanitizedError = error.message.replace(/(token|key|password|secret)["']?\s*:\s*["']?[^"',}\s]+/gi, '$1: [REDACTED]');
         console.error(`Failed to load config from ${configPath}:`, sanitizedError);
       }
     }

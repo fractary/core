@@ -46,6 +46,10 @@ export async function handleRepoBranchCurrent(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const branch = await manager.getCurrentBranch();
     return successResult({ branch });
@@ -60,6 +64,10 @@ export async function handleRepoIsDirty(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const dirty = await manager.isDirty();
     return successResult({ dirty });
@@ -78,6 +86,10 @@ export async function handleRepoDiff(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const diff = await manager.getDiff({
       staged: params.staged,
@@ -104,6 +116,10 @@ export async function handleRepoBranchCreate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const branch = await manager.createBranch(params.name, {
       baseBranch: params.base_branch,
@@ -150,6 +166,10 @@ export async function handleRepoBranchList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const branches = await manager.listBranches({
       pattern: params.pattern,
@@ -168,6 +188,10 @@ export async function handleRepoBranchGet(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const branch = await manager.getBranch(params.name);
 
@@ -187,6 +211,10 @@ export async function handleRepoCheckout(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.checkout(params.branch);
     return successResult({ checked_out: params.branch });
@@ -231,6 +259,10 @@ export async function handleRepoStage(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.stage(params.patterns);
     return successResult({ staged: params.patterns });
@@ -245,6 +277,10 @@ export async function handleRepoStageAll(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.stageAll();
     return successResult({ staged_all: true });
@@ -423,6 +459,10 @@ export async function handleRepoPrCreate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const pr = await manager.createPR({
       title: params.title,

@@ -51,6 +51,10 @@ export async function handleWorkIssueCreate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const issue = await manager.createIssue({
       title: params.title,
@@ -106,6 +110,10 @@ export async function handleWorkIssueAssign(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const issue = await manager.assignIssue(params.issue_number, params.assignee);
     return successResult(issue);
@@ -123,6 +131,10 @@ export async function handleWorkIssueUnassign(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const issue = await manager.unassignIssue(params.issue_number);
     return successResult(issue);
@@ -143,6 +155,10 @@ export async function handleWorkIssueClose(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
 
     // Add comment if provided
@@ -169,6 +185,10 @@ export async function handleWorkIssueReopen(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
 
     // Add comment if provided
@@ -226,6 +246,10 @@ export async function handleWorkIssueClassify(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const issue = await manager.fetchIssue(params.issue_number);
     const workType = await manager.classifyWorkType(issue);
@@ -277,6 +301,10 @@ export async function handleWorkCommentList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const comments = await manager.listComments(params.issue_number, {
       limit: params.limit,
@@ -300,6 +328,10 @@ export async function handleWorkLabelAdd(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const labels = await manager.addLabels(params.issue_number, params.labels);
     return successResult(labels);
@@ -320,6 +352,10 @@ export async function handleWorkLabelRemove(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     await manager.removeLabels(params.issue_number, params.labels);
     return successResult({ removed: true });
@@ -340,6 +376,10 @@ export async function handleWorkLabelSet(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const labels = await manager.setLabels(params.issue_number, params.labels);
     return successResult(labels);
@@ -357,6 +397,10 @@ export async function handleWorkLabelList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const labels = await manager.listLabels(params.issue_number);
     return successResult(labels);
@@ -378,6 +422,10 @@ export async function handleWorkMilestoneCreate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const milestone = await manager.createMilestone({
       title: params.title,
@@ -423,6 +471,10 @@ export async function handleWorkMilestoneSet(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const issue = await manager.setMilestone(params.issue_number, params.milestone);
     return successResult(issue);
@@ -440,6 +492,10 @@ export async function handleWorkMilestoneRemove(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     const manager = new WorkManager(config.work);
     const issue = await manager.removeMilestone(params.issue_number);
     return successResult(issue);
