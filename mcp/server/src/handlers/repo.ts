@@ -141,6 +141,10 @@ export async function handleRepoBranchDelete(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     if (params.location && !isValidBranchLocation(params.location)) {
       return errorResult(`Invalid location: ${params.location}. Must be 'local', 'remote', or 'both'`);
     }
@@ -233,6 +237,10 @@ export async function handleRepoBranchNameGenerate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     if (!isValidBranchType(params.type)) {
       return errorResult(`Invalid type: ${params.type}. Must be 'feature', 'fix', 'chore', or 'docs'`);
     }
@@ -295,6 +303,10 @@ export async function handleRepoUnstage(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.unstage(params.patterns);
     return successResult({ unstaged: params.patterns });
@@ -320,6 +332,10 @@ export async function handleRepoCommit(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     if (params.type && !isValidCommitType(params.type)) {
       return errorResult(`Invalid type: ${params.type}. Must be 'feat', 'fix', 'docs', 'style', 'refactor', 'test', or 'chore'`);
     }
@@ -345,6 +361,10 @@ export async function handleRepoCommitGet(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const commit = await manager.getCommit(params.ref);
     return successResult(commit);
@@ -365,6 +385,10 @@ export async function handleRepoCommitList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const commits = await manager.listCommits({
       limit: params.limit,
@@ -394,6 +418,10 @@ export async function handleRepoPush(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.push({
       branch: params.branch,
@@ -417,6 +445,10 @@ export async function handleRepoPull(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.pull({
       branch: params.branch,
@@ -435,6 +467,10 @@ export async function handleRepoFetch(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.fetch(params.remote);
     return successResult({ fetched: true });
@@ -483,6 +519,10 @@ export async function handleRepoPrGet(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const pr = await manager.getPR(params.number);
     return successResult(pr);
@@ -502,6 +542,10 @@ export async function handleRepoPrUpdate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     if (params.state && !isValidPrState(params.state)) {
       return errorResult(`Invalid state: ${params.state}. Must be 'open' or 'closed'`);
     }
@@ -527,6 +571,10 @@ export async function handleRepoPrComment(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.addPRComment(params.number, params.body);
     return successResult({ commented: true });
@@ -545,6 +593,10 @@ export async function handleRepoPrReview(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     if (!isValidReviewAction(params.action)) {
       return errorResult(`Invalid action: ${params.action}. Must be 'approve', 'request_changes', or 'comment'`);
     }
@@ -569,6 +621,10 @@ export async function handleRepoPrRequestReview(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.requestReview(params.number, params.reviewers);
     return successResult({ requested: true });
@@ -586,6 +642,10 @@ export async function handleRepoPrApprove(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.approvePR(params.number, params.comment);
     return successResult({ approved: true });
@@ -604,6 +664,10 @@ export async function handleRepoPrMerge(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     if (params.strategy && !isValidMergeStrategy(params.strategy)) {
       return errorResult(`Invalid strategy: ${params.strategy}. Must be 'merge', 'squash', or 'rebase'`);
     }
@@ -629,6 +693,10 @@ export async function handleRepoPrList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     if (params.state && !isValidIssueState(params.state)) {
       return errorResult(`Invalid state: ${params.state}. Must be 'open', 'closed', or 'all'`);
     }
@@ -662,6 +730,10 @@ export async function handleRepoTagCreate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.createTag(params.name, {
       name: params.name,
@@ -683,6 +755,10 @@ export async function handleRepoTagDelete(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.deleteTag(params.name);
     return successResult({ tag: params.name, deleted: true });
@@ -700,6 +776,10 @@ export async function handleRepoTagPush(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.pushTag(params.name, params.remote);
     return successResult({ tag: params.name, pushed: true });
@@ -717,6 +797,10 @@ export async function handleRepoTagList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const tags = await manager.listTags({
       pattern: params.pattern,
@@ -742,6 +826,10 @@ export async function handleRepoWorktreeCreate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const worktree = await manager.createWorktree({
       path: params.path,
@@ -760,6 +848,10 @@ export async function handleRepoWorktreeList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const worktrees = await manager.listWorktrees();
     return successResult(worktrees);
@@ -777,6 +869,10 @@ export async function handleRepoWorktreeRemove(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.removeWorktree(params.path, params.force);
     return successResult({ path: params.path, removed: true });
@@ -791,6 +887,10 @@ export async function handleRepoWorktreePrune(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     await manager.pruneWorktrees();
     return successResult({ pruned: true });
@@ -809,6 +909,10 @@ export async function handleRepoWorktreeCleanup(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateRepoConfig(config)) {
+      return errorResult('Repository configuration is missing or incomplete. Please configure repo.platform and repo.token.');
+    }
+
     const manager = new RepoManager(config.repo);
     const result = await manager.cleanupWorktrees({
       merged: params.merged,

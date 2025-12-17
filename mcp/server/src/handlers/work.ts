@@ -82,6 +82,10 @@ export async function handleWorkIssueUpdate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     if (params.state && !isValidPrState(params.state)) {
       return errorResult(`Invalid state: ${params.state}. Must be 'open' or 'closed'`);
     }
@@ -219,6 +223,10 @@ export async function handleWorkIssueSearch(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     if (params.state && !isValidIssueState(params.state)) {
       return errorResult(`Invalid state: ${params.state}. Must be 'open', 'closed', or 'all'`);
     }
@@ -272,6 +280,10 @@ export async function handleWorkCommentCreate(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     if (params.faber_context && !isValidFaberContext(params.faber_context)) {
       return errorResult(`Invalid faber_context: ${params.faber_context}. Must be 'frame', 'architect', 'build', 'evaluate', or 'release'`);
     }
@@ -447,6 +459,10 @@ export async function handleWorkMilestoneList(
   config: Config
 ): Promise<CallToolResult> {
   try {
+    if (!validateWorkConfig(config)) {
+      return errorResult('Work configuration is missing or incomplete. Please configure work.platform and work.token.');
+    }
+
     if (params.state && !isValidIssueState(params.state)) {
       return errorResult(`Invalid state: ${params.state}. Must be 'open', 'closed', or 'all'`);
     }

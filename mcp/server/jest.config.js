@@ -4,7 +4,14 @@ export default {
   roots: ['<rootDir>/src'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: {
+        isolatedModules: true,
+      },
+      diagnostics: {
+        ignoreCodes: [151002],
+      },
+    }],
   },
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -12,7 +19,7 @@ export default {
     '!src/**/*.test.ts',
     '!src/**/*.spec.ts',
   ],
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 80,
       functions: 80,
@@ -21,5 +28,8 @@ export default {
     },
   },
   moduleFileExtensions: ['ts', 'js', 'json'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   verbose: true,
 };
