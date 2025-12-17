@@ -95,5 +95,8 @@
   "bugs": {
     "url": "https://github.com/fractary/core/issues"
   },
-  "homepage": "https://github.com/fractary/core#readme"
+  "homepage": "https://github.com/fractary/core#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }
