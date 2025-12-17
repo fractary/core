@@ -1,7 +1,9 @@
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { FileManager } from '@fractary/core/file';
+import { minimatch } from 'minimatch';
 import { Config } from '../config.js';
 import { successResult, errorResult } from './helpers.js';
+import { validatePath } from './security.js';
 
 /**
  * Handler for fractary_file_read
@@ -14,9 +16,14 @@ export async function handleFileRead(
   config: Config
 ): Promise<CallToolResult> {
   try {
-    const manager = new FileManager({ basePath: config.file?.basePath || '.fractary/files' });
-    const content = await manager.read(params.path);
-    return successResult({ path: params.path, content });
+    const basePath = config.file?.basePath || '.fractary/files';
+
+    // Validate path to prevent directory traversal
+    const safePath = validatePath(params.path, basePath);
+
+    const manager = new FileManager({ basePath });
+    const content = await manager.read(safePath);
+    return successResult({ path: safePath, content });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return errorResult(`Error reading file: ${message}`);
@@ -36,17 +43,22 @@ export async function handleFileWrite(
   config: Config
 ): Promise<CallToolResult> {
   try {
-    const manager = new FileManager({ basePath: config.file?.basePath || '.fractary/files' });
+    const basePath = config.file?.basePath || '.fractary/files';
+
+    // Validate path to prevent directory traversal
+    const safePath = validatePath(params.path, basePath);
+
+    const manager = new FileManager({ basePath });
 
     // Check if file exists and overwrite is false
     if (params.overwrite === false) {
-      const exists = await manager.exists(params.path);
+      const exists = await manager.exists(safePath);
       if (exists) {
-        return errorResult(`File already exists and overwrite is false: ${params.path}`);
+        return errorResult(`File already exists and overwrite is false: ${safePath}`);
       }
     }
 
-    const path = await manager.write(params.path, params.content);
+    const path = await manager.write(safePath, params.content);
     return successResult({ path, written: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -66,14 +78,19 @@ export async function handleFileList(
   config: Config
 ): Promise<CallToolResult> {
   try {
-    const manager = new FileManager({ basePath: config.file?.basePath || '.fractary/files' });
-    const files = await manager.list(params.path);
+    const basePath = config.file?.basePath || '.fractary/files';
 
-    // Apply pattern filtering if provided (simple glob matching)
+    // Validate path to prevent directory traversal (if provided)
+    const safePath = params.path ? validatePath(params.path, basePath) : undefined;
+
+    const manager = new FileManager({ basePath });
+    const files = await manager.list(safePath);
+
+    // Apply pattern filtering if provided using safe minimatch library
     let filteredFiles = files;
     if (params.pattern) {
-      const regex = new RegExp(params.pattern.replace(/\*/g, '.*').replace(/\?/g, '.'));
-      filteredFiles = files.filter((file: string) => regex.test(file));
+      // Use minimatch for safe glob pattern matching (prevents ReDoS attacks)
+      filteredFiles = files.filter((file: string) => minimatch(file, params.pattern as string));
     }
 
     return successResult({ files: filteredFiles, count: filteredFiles.length });
@@ -91,9 +108,14 @@ export async function handleFileDelete(
   config: Config
 ): Promise<CallToolResult> {
   try {
-    const manager = new FileManager({ basePath: config.file?.basePath || '.fractary/files' });
-    await manager.delete(params.path);
-    return successResult({ path: params.path, deleted: true });
+    const basePath = config.file?.basePath || '.fractary/files';
+
+    // Validate path to prevent directory traversal
+    const safePath = validatePath(params.path, basePath);
+
+    const manager = new FileManager({ basePath });
+    await manager.delete(safePath);
+    return successResult({ path: safePath, deleted: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return errorResult(`Error deleting file: ${message}`);
@@ -108,9 +130,14 @@ export async function handleFileExists(
   config: Config
 ): Promise<CallToolResult> {
   try {
-    const manager = new FileManager({ basePath: config.file?.basePath || '.fractary/files' });
-    const exists = await manager.exists(params.path);
-    return successResult({ path: params.path, exists });
+    const basePath = config.file?.basePath || '.fractary/files';
+
+    // Validate path to prevent directory traversal
+    const safePath = validatePath(params.path, basePath);
+
+    const manager = new FileManager({ basePath });
+    const exists = await manager.exists(safePath);
+    return successResult({ path: safePath, exists });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return errorResult(`Error checking file existence: ${message}`);
@@ -129,18 +156,24 @@ export async function handleFileCopy(
   config: Config
 ): Promise<CallToolResult> {
   try {
-    const manager = new FileManager({ basePath: config.file?.basePath || '.fractary/files' });
+    const basePath = config.file?.basePath || '.fractary/files';
+
+    // Validate both source and destination paths to prevent directory traversal
+    const safeSource = validatePath(params.source, basePath);
+    const safeDestination = validatePath(params.destination, basePath);
+
+    const manager = new FileManager({ basePath });
 
     // Check if destination exists and overwrite is false
     if (params.overwrite === false) {
-      const exists = await manager.exists(params.destination);
+      const exists = await manager.exists(safeDestination);
       if (exists) {
-        return errorResult(`Destination already exists and overwrite is false: ${params.destination}`);
+        return errorResult(`Destination already exists and overwrite is false: ${safeDestination}`);
       }
     }
 
-    const path = await manager.copy(params.source, params.destination);
-    return successResult({ source: params.source, destination: path, copied: true });
+    const path = await manager.copy(safeSource, safeDestination);
+    return successResult({ source: safeSource, destination: path, copied: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return errorResult(`Error copying file: ${message}`);
@@ -159,18 +192,24 @@ export async function handleFileMove(
   config: Config
 ): Promise<CallToolResult> {
   try {
-    const manager = new FileManager({ basePath: config.file?.basePath || '.fractary/files' });
+    const basePath = config.file?.basePath || '.fractary/files';
+
+    // Validate both source and destination paths to prevent directory traversal
+    const safeSource = validatePath(params.source, basePath);
+    const safeDestination = validatePath(params.destination, basePath);
+
+    const manager = new FileManager({ basePath });
 
     // Check if destination exists and overwrite is false
     if (params.overwrite === false) {
-      const exists = await manager.exists(params.destination);
+      const exists = await manager.exists(safeDestination);
       if (exists) {
-        return errorResult(`Destination already exists and overwrite is false: ${params.destination}`);
+        return errorResult(`Destination already exists and overwrite is false: ${safeDestination}`);
       }
     }
 
-    const path = await manager.move(params.source, params.destination);
-    return successResult({ source: params.source, destination: path, moved: true });
+    const path = await manager.move(safeSource, safeDestination);
+    return successResult({ source: safeSource, destination: path, moved: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return errorResult(`Error moving file: ${message}`);

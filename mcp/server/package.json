@@ -49,13 +49,15 @@
   "homepage": "https://github.com/fractary/core/tree/main/mcp/server#readme",
   "dependencies": {
     "@fractary/core": "^0.1.0",
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "minimatch": "^10.1.1"
   },
   "peerDependencies": {
     "@fractary/core": "^0.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
+    "@types/minimatch": "^5.1.2",
     "@types/node": "^20.10.6",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",

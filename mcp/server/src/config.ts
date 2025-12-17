@@ -2,6 +2,7 @@ import { access, readFile } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
 import { constants } from 'fs';
+import { sanitizeSecrets } from './handlers/security.js';
 
 /**
  * Configuration interface for the MCP server
@@ -142,9 +143,11 @@ export async function loadConfig(): Promise<Config> {
     } catch (error) {
       // File doesn't exist or read error - skip to next path
       if (error instanceof Error && 'code' in error && error.code !== 'ENOENT') {
-        // Sanitize error message to prevent token exposure (only for non-ENOENT errors)
-        const sanitizedError = error.message.replace(/(token|key|password|secret)["']?\s*:\s*["']?[^"',}\s]+/gi, '$1: [REDACTED]');
-        console.error(`Failed to load config from ${configPath}:`, sanitizedError);
+        // Sanitize error message to prevent token/secret exposure (only for non-ENOENT errors)
+        // Uses comprehensive secret detection to catch tokens, API keys, bearer auth, etc.
+        const sanitizedError = sanitizeSecrets(error.message);
+        const sanitizedPath = sanitizeSecrets(configPath);
+        console.error(`Failed to load config from ${sanitizedPath}:`, sanitizedError);
       }
     }
   }
