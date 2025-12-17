@@ -1,0 +1,72 @@
+{
+  "name": "@fractary/core-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Fractary Core SDK - universal tool access for work, repo, spec, logs, file, docs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "fractary-core-mcp": "dist/server.js"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "fractary",
+    "claude",
+    "sdk",
+    "work-tracking",
+    "repository",
+    "git",
+    "specifications",
+    "documentation"
+  ],
+  "author": "Fractary",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fractary/core.git",
+    "directory": "mcp/server"
+  },
+  "bugs": {
+    "url": "https://github.com/fractary/core/issues"
+  },
+  "homepage": "https://github.com/fractary/core/tree/main/mcp/server#readme",
+  "dependencies": {
+    "@fractary/core": "^0.1.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "minimatch": "^10.1.1"
+  },
+  "peerDependencies": {
+    "@fractary/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/minimatch": "^5.1.2",
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
