@@ -5,9 +5,7 @@ model: claude-haiku-4-5
 argument-hint: 'create | delete | list'
 ---
 
-**DEPRECATED**: This command has been split into focused single-purpose commands.
-
-Use instead:
-- `/fractary-repo:branch-create` - Create a new Git branch
-- `/fractary-repo:branch-delete` - Delete a Git branch
-- `/fractary-repo:branch-list` - List branches with filtering
+**DEPRECATED**: Use focused single-purpose commands instead:
+- `/fractary-repo:branch-create`
+- `/fractary-repo:branch-delete`
+- `/fractary-repo:branch-list`

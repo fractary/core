@@ -5,9 +5,7 @@ model: claude-haiku-4-5
 argument-hint: 'create | push | list'
 ---
 
-**DEPRECATED**: This command has been split into focused single-purpose commands.
-
-Use instead:
-- `/fractary-repo:tag-create` - Create a new Git tag
-- `/fractary-repo:tag-push` - Push tag(s) to remote
-- `/fractary-repo:tag-list` - List tags with filtering
+**DEPRECATED**: Use focused single-purpose commands instead:
+- `/fractary-repo:tag-create`
+- `/fractary-repo:tag-push`
+- `/fractary-repo:tag-list`

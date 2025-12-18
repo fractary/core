@@ -1,24 +1,9 @@
 ---
 name: fractary-repo:tag-list
-description: List tags with optional filtering
+description: List Git tags - delegates to fractary-repo:tag-list agent
+allowed-tools: Task
 model: claude-haiku-4-5
 argument-hint: '[--pattern <pattern>] [--latest <n>]'
 ---
 
-List Git tags with optional pattern filtering.
-
-Use the **Task** tool to invoke agent `fractary-repo:tag-list`:
-```
-Task(
-  subagent_type="fractary-repo:tag-list",
-  description="List Git tags",
-  prompt="Parse arguments and list tags"
-)
-```
-
-**Usage:**
-```
-/fractary-repo:tag-list
-/fractary-repo:tag-list --pattern "v1.*"
-/fractary-repo:tag-list --latest 5
-```
+Delegates to fractary-repo:tag-list agent for listing Git tags.

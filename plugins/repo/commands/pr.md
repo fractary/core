@@ -5,10 +5,8 @@ model: claude-haiku-4-5
 argument-hint: 'create | comment | review | merge'
 ---
 
-**DEPRECATED**: This command has been split into focused single-purpose commands.
-
-Use instead:
-- `/fractary-repo:pr-create` - Create a new pull request
-- `/fractary-repo:pr-comment` - Add a comment to a PR
-- `/fractary-repo:pr-review` - Review a PR
-- `/fractary-repo:pr-merge` - Merge a pull request
+**DEPRECATED**: Use focused single-purpose commands instead:
+- `/fractary-repo:pr-create`
+- `/fractary-repo:pr-comment`
+- `/fractary-repo:pr-review`
+- `/fractary-repo:pr-merge`
