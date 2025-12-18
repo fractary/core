@@ -220,7 +220,7 @@ server.tool({
 });
 ```
 
-**Why MCP is preferred:**
+**Why MCP is preferred (when it fits):**
 - ✅ No LLM invocation required (instant)
 - ✅ Structured input/output
 - ✅ Zero context cost
@@ -230,22 +230,109 @@ server.tool({
 - ✅ **Consistent integration** - Same MCP interface across different frameworks
 - ✅ **Minimal integration work** - Frameworks handle MCP natively
 - ✅ **Beyond coding** - Works in chat interfaces and other non-coding contexts
+- ✅ **Isolated context works well** - Most deterministic operations don't need conversation context
 
-**Fallback Chain:**
+**When MCP is NOT preferred:**
+
+MCP has limitations in specific scenarios. Use alternatives when:
+
+**1. Local File Operations**
 ```
-1. MCP Tool (wraps SDK)     ← Preferred
-2. SDK via Python script     ← If MCP not available
-3. Bash CLI                  ← Last resort
+❌ MCP: May not have filesystem write/delete access
+✅ Alternative: SDK via Python script with direct file access
+```
+
+MCP servers run in isolated environments and may not have permission to:
+- Write files to local filesystem
+- Delete local files
+- Modify local project files
+
+**Use case example:** Creating/deleting cache files, writing config files locally
+**Solution:** SDK via Python script with direct filesystem access
+
+**2. Requires Full Conversation Context**
+```
+❌ MCP: Runs in isolated context, no access to conversation history
+✅ Alternative: Skill (runs in main context) or pass context explicitly
+```
+
+MCP tools don't see:
+- Full conversation history
+- Previous user messages
+- Ongoing discussion context
+- Decisions made earlier in conversation
+
+**Use case example:** Drafting PR description based on conversation about the feature
+**Solution:** Skill prepares context, or pass summary to MCP explicitly
+
+**3. Parent Agent Needs Process Insight**
+```
+❌ MCP: Black box - just returns result
+✅ Alternative: Skill (parent observes process) or detailed logging
+```
+
+If the calling agent needs to:
+- Observe intermediate steps
+- React to what's happening inside
+- Monitor progress in real-time
+- Make decisions based on internal state
+
+**Use case example:** Complex multi-step analysis where parent might want to stop early
+**Solution:** Use Skill so parent agent can observe, or return detailed progress info
+
+**4. Deep Shared Context Required**
+```
+❌ MCP: Separate, isolated context
+✅ Alternative: Skill (shared context) or explicit context passing
+```
+
+When operation needs:
+- Access to variables/state from parent
+- To modify parent agent's context
+- Continuous back-and-forth with parent
+- Deep integration with parent's reasoning
+
+**Use case example:** Iterative refinement where operation and parent exchange info
+**Solution:** Skill for shared context, or structure as conversation loop
+
+### When to Use What
+
+| Scenario | Use | Why |
+|----------|-----|-----|
+| Deterministic + isolated context OK | **MCP** | Fast, efficient, reusable |
+| Deterministic + needs local file write | **SDK via Python** | Direct filesystem access |
+| Deterministic + needs conversation context | **Skill** or pass context | Access to full history |
+| Deterministic + parent needs insight | **Skill** or detailed results | Parent can observe process |
+| Deterministic + deep shared context | **Skill** | Shared context/state |
+| Non-deterministic reasoning | **Agent** | Requires LLM |
+
+**The key question for MCP:** Is totally separate, isolated context acceptable?
+- ✅ **YES (most cases)** → MCP is preferred
+- ❌ **NO (needs context/insight)** → Use Skill or direct SDK
+
+**Access Pattern Hierarchy:**
+```
+1. MCP Tool (wraps SDK)           ← Preferred for most deterministic ops
+2. Skill (if context/insight needed) ← When isolation is a problem
+3. SDK via Python script          ← For local file operations
+4. Bash CLI                       ← Last resort, platform-dependent
 ```
 
 ### Strategic Decision Framework
 
-**When deciding where to implement logic:**
+**When deciding where to implement logic and how to access it:**
 
 ```
 Is it deterministic (same input → same output)?
 ├─ YES → Extract to CODE
+│   │
 │   ├─ Reusable across systems? → SDK (preferred)
+│   │   │
+│   │   ├─ Isolated context OK? → MCP Tool (wraps SDK) ✅ Preferred
+│   │   ├─ Needs conversation context? → Skill (or pass context)
+│   │   ├─ Needs local file writes? → SDK via Python script
+│   │   └─ Parent needs insight? → Skill (or detailed results)
+│   │
 │   ├─ Project-specific? → Local script
 │   └─ Very simple? → Bash script
 │
@@ -253,16 +340,37 @@ Is it deterministic (same input → same output)?
     └─ Requires reasoning/creativity/context
 ```
 
+**The MCP Decision Point:**
+
+Once you've decided to extract to SDK, ask:
+```
+Can this operation work in isolated context?
+├─ YES (most cases) → MCP Tool ✅
+│   - No conversation history needed
+│   - No local file writes
+│   - Parent only needs result
+│   - Totally separate context OK
+│
+└─ NO (special cases) → Alternative
+    ├─ Needs conversation → Skill or explicit context
+    ├─ Needs file writes → SDK via Python
+    └─ Parent needs insight → Skill or detailed results
+```
+
 **Examples:**
 
 | Operation | Deterministic? | Where? | Why? |
 |-----------|---------------|---------|------|
-| Create Git branch | ✅ Yes | SDK + MCP | Same process every time |
-| Parse JSON response | ✅ Yes | SDK + MCP | Structured transformation |
+| Create Git branch | ✅ Yes | SDK + MCP | Same process every time, isolated OK |
+| Parse JSON response | ✅ Yes | SDK + MCP | Structured transformation, isolated OK |
 | Generate commit message | ❌ No | Agent | Requires analysis of changes |
-| Validate branch name | ✅ Yes | SDK + MCP | Rule-based validation |
+| Validate branch name | ✅ Yes | SDK + MCP | Rule-based validation, isolated OK |
 | Suggest architecture | ❌ No | Agent | Requires creative reasoning |
-| Execute git commands | ✅ Yes | SDK + MCP | Deterministic operations |
+| Execute git commands | ✅ Yes | SDK + MCP | Deterministic operations, isolated OK |
+| Write local cache file | ✅ Yes | SDK + Python | Deterministic BUT needs file write |
+| Draft PR from conversation | ✅ Mostly | Skill + SDK | Deterministic format BUT needs conversation context |
+| Multi-step analysis with early stopping | ❌ No | Agent | Parent needs to observe and decide |
+| Delete local config files | ✅ Yes | SDK + Python | Deterministic BUT needs file delete access |
 
 ### Impact on Plugin Architecture: Where Logic Lives
 
