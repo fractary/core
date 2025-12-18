@@ -414,18 +414,268 @@ Result: Semantic commit with generated message
 
 **Each command gets its own dedicated agent.**
 
-Why?
-- ✅ No routing decisions ("which skill should I use?")
-- ✅ Focused, small agent definitions (60-100 lines)
-- ✅ Specific auto-trigger descriptions with examples
-- ✅ Isolated failures (one broken agent doesn't affect others)
-- ✅ Parallel development (agents evolve independently)
+This is about **correctness and effectiveness**, not just efficiency.
 
-Manager agents create reliability problems:
-- ❌ Must decide which skill/operation to execute
-- ❌ Generic descriptions make auto-triggering unreliable
-- ❌ Large, complex agent definitions
-- ❌ Single point of failure
+### Why Dedicated Agents Work Better
+
+**1. Focus Improves Correctness**
+
+The more limited and precise an agent's scope, the more likely it does its job **right**.
+
+**Problem with broad agents:**
+```markdown
+# Manager agent handles: branches, commits, PRs, tags, worktrees
+<WORKFLOW>
+If operation is "branch" → do branch stuff
+If operation is "commit" → do commit stuff
+If operation is "pr" → do PR stuff
+...
+</WORKFLOW>
+```
+
+Issues:
+- ❌ Agent loaded with unrelated context (branch logic when creating commits)
+- ❌ Confusion from multiple responsibilities
+- ❌ Harder to stay focused on specific task
+- ❌ More opportunities for mistakes
+
+**Solution with dedicated agents:**
+```markdown
+# branch-create agent (focused on ONE thing)
+<WORKFLOW>
+1. Parse branch creation arguments
+2. Call fractary_repo_branch_create
+3. Return result
+</WORKFLOW>
+```
+
+Benefits:
+- ✅ Agent only sees branch creation context
+- ✅ No unrelated information to distract
+- ✅ Clear, focused mission
+- ✅ Higher success rate
+
+**The focused agent does its job RIGHT because it's not confused by unrelated concerns.**
+
+**2. Fine-Grained Tool Control**
+
+Dedicated agents let you restrict tools to exactly what's needed:
+
+**Manager agent (overly permissive):**
+```yaml
+# Must grant ALL tools for ALL operations
+tools:
+  - fractary_repo_branch_create
+  - fractary_repo_branch_delete
+  - fractary_repo_commit
+  - fractary_repo_push
+  - fractary_repo_pr_create
+  - fractary_repo_tag_create
+  # ... 20+ tools
+```
+
+Problems:
+- ❌ Agent can accidentally call wrong tool
+- ❌ Security: too many permissions
+- ❌ Confusion: which tool for what?
+
+**Dedicated agent (precise permissions):**
+```yaml
+# branch-create agent: ONLY what it needs
+tools:
+  - fractary_repo_branch_create
+  - fractary_work_issue_fetch  # if using work items
+```
+
+Benefits:
+- ✅ Can't accidentally call wrong tool
+- ✅ Security: minimal permissions
+- ✅ Clarity: obvious which tool to use
+- ✅ Less confusion = higher correctness
+
+**3. Model Selection Optimization**
+
+Different operations need different model capabilities:
+
+**Manager agent (highest common denominator):**
+```yaml
+# Must use most expensive model for ANY operation
+model: claude-sonnet-4-5  # $15/million tokens
+```
+
+Why? Because:
+- Some operations need complex reasoning
+- Can't switch models mid-agent
+- Must provision for worst case
+- **Pay premium for simple operations**
+
+**Dedicated agents (right model for job):**
+```yaml
+# branch-create agent (deterministic)
+model: claude-haiku-4-5  # $1/million tokens
+
+# pr-review agent (complex reasoning)
+model: claude-sonnet-4-5  # $15/million tokens
+
+# commit agent (simple)
+model: claude-haiku-4-5  # $1/million tokens
+```
+
+Benefits:
+- ✅ **15x cost savings** on simple operations
+- ✅ Fast operations use fast model
+- ✅ Complex operations get powerful model
+- ✅ Right tool for right job
+
+**Example cost comparison:**
+
+| Operation | Manager (Sonnet) | Dedicated (Haiku) | Savings |
+|-----------|-----------------|-------------------|---------|
+| List branches | $0.015 | $0.001 | **93%** |
+| Create branch | $0.015 | $0.001 | **93%** |
+| Simple commit | $0.015 | $0.001 | **93%** |
+| Review PR | $0.015 | $0.015 | 0% (needs Sonnet) |
+
+**With dedicated agents:** 3 of 4 operations run 15x cheaper.
+
+**4. Context and Token Optimization**
+
+Smaller, focused agents = less context needed:
+
+**Manager agent:**
+```markdown
+# Must include ALL operation contexts
+- How to create branches
+- How to delete branches
+- How to create commits
+- How to push commits
+- How to create PRs
+- How to review PRs
+- How to create tags
+# ... 20+ operation descriptions
+```
+
+Size: ~500 lines, ~2000 tokens per invocation
+
+**Dedicated agent:**
+```markdown
+# Only branch creation context
+- How to create branches
+# That's it
+```
+
+Size: ~80 lines, ~300 tokens per invocation
+
+**Token savings: 85%** per operation
+
+**5. No Routing Decisions**
+
+Manager agents must decide **which operation** to execute:
+
+```markdown
+# Manager agent workflow
+1. Parse user request
+2. Determine operation type (branch? commit? PR?)  ← Routing decision
+3. Execute appropriate logic
+```
+
+Problems:
+- ❌ Can misinterpret request
+- ❌ Routing adds failure mode
+- ❌ Extra LLM reasoning step
+- ❌ Less reliable
+
+Dedicated agents have **hardcoded flow**:
+
+```markdown
+# branch-create agent workflow
+1. Parse branch creation arguments
+2. Create branch
+# No routing, no decisions, just execute
+```
+
+Benefits:
+- ✅ No misinterpretation
+- ✅ Deterministic path
+- ✅ Fewer failure modes
+- ✅ More reliable
+
+**6. Specific Auto-Trigger Descriptions**
+
+Dedicated agents can have precise descriptions:
+
+**Manager agent (generic):**
+```markdown
+description: Handles repository operations including branches, commits, PRs, and tags.
+```
+
+Problem: Too generic for auto-triggering
+- When should this trigger?
+- "Create branch" or "Create PR" both match
+- LLM uncertain which to use
+
+**Dedicated agents (specific):**
+```markdown
+# branch-create agent
+description: Create Git branches. MUST BE USED when user wants to create a new branch.
+
+Examples:
+- "Create a branch for issue 123"
+- "Make a feature branch"
+- "New branch from main"
+```
+
+Benefits:
+- ✅ Precise matching
+- ✅ Clear trigger conditions
+- ✅ Reliable auto-invocation
+
+**7. Isolated Failures**
+
+When one operation breaks, it doesn't affect others:
+
+**Manager agent:**
+- Bug in PR logic → entire agent broken
+- Can't create branches, commits, or anything
+- Single point of failure
+
+**Dedicated agents:**
+- Bug in pr-create → only PR creation affected
+- branch-create, commit, tag still work fine
+- Isolated failures
+
+**8. Parallel Development**
+
+Teams can work on agents independently:
+
+**Manager agent:**
+- One developer at a time
+- Conflicts when editing
+- Must coordinate changes
+- Bottleneck
+
+**Dedicated agents:**
+- Multiple developers simultaneously
+- No conflicts (different files)
+- Independent evolution
+- Parallel progress
+
+### Summary: Why Dedicated Agents Win
+
+| Aspect | Manager Agent | Dedicated Agent |
+|--------|---------------|-----------------|
+| **Correctness** | Confused by unrelated context | Focused, does job right |
+| **Tool Permissions** | Wide swath (20+ tools) | Minimal (2-3 tools) |
+| **Model Cost** | Always expensive (Sonnet) | Right model for job (Haiku when possible) |
+| **Context Size** | Large (~2000 tokens) | Small (~300 tokens) |
+| **Routing** | Must decide operation | Hardcoded flow |
+| **Auto-Trigger** | Generic description | Specific examples |
+| **Failure Scope** | Entire agent broken | Isolated to one operation |
+| **Development** | Sequential, bottleneck | Parallel, independent |
+
+**The primary benefit is correctness through focus.** Cost and efficiency are secondary bonuses.
+
+**Dedicated agents do their jobs right because they're not distracted by unrelated concerns.**
 
 ### Principle 3: Skills for Expertise, Not Execution
 
