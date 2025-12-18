@@ -1,5 +1,5 @@
 ---
-name: branch-delete
+name: fractary-repo:branch-delete
 description: Delete Git branches locally, remotely, or both with safety checks
 tools: fractary_repo_branch_delete, fractary_repo_branch_get
 model: claude-haiku-4-5

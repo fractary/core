@@ -1,5 +1,5 @@
 ---
-name: pull
+name: fractary-repo:pull
 description: Pull branches from remote repository with merge or rebase options
 tools: fractary_repo_pull, fractary_repo_branch_current
 model: claude-haiku-4-5

@@ -1,5 +1,5 @@
 ---
-name: tag-list
+name: fractary-repo:tag-list
 description: List Git tags with optional filtering
 tools: fractary_repo_tag_list
 model: claude-haiku-4-5

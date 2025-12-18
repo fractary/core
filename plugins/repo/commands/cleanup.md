@@ -7,7 +7,14 @@ argument-hint: '[--delete] [--merged] [--inactive] [--days <n>] [--location <whe
 
 Clean up stale and merged branches with safety checks.
 
-Invokes the **cleanup** agent to identify and optionally delete old branches.
+Use the **Task** tool to invoke agent `fractary-repo:cleanup`:
+```
+Task(
+  subagent_type="fractary-repo:cleanup",
+  description="Cleanup branches",
+  prompt="Parse arguments and cleanup old branches"
+)
+```
 
 **Usage:**
 ```

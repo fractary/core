@@ -1,5 +1,5 @@
 ---
-name: init-permissions
+name: fractary-repo:init-permissions
 description: Configure Claude Code permissions for repo plugin operations
 tools: fractary_repo_status
 model: claude-haiku-4-5

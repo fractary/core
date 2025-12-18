@@ -7,7 +7,14 @@ argument-hint: ''
 
 List all Git worktrees in the repository.
 
-Invokes the **worktree-list** agent to display worktrees.
+Use the **Task** tool to invoke agent `fractary-repo:worktree-list`:
+```
+Task(
+  subagent_type="fractary-repo:worktree-list",
+  description="List worktrees",
+  prompt="List all worktrees"
+)
+```
 
 **Usage:**
 ```

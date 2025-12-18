@@ -1,5 +1,5 @@
 ---
-name: cleanup
+name: fractary-repo:cleanup
 description: Clean up stale and merged branches safely
 tools: fractary_repo_branch_list, fractary_repo_branch_delete
 model: claude-haiku-4-5

@@ -7,7 +7,14 @@ argument-hint: '["message"] [--type <type>] [--work-id <id>] [--scope <scope>] [
 
 Commit and push changes to remote in one atomic operation.
 
-Invokes the **commit-and-push** agent to handle both operations.
+Use the **Task** tool to invoke agent `fractary-repo:commit-and-push`:
+```
+Task(
+  subagent_type="fractary-repo:commit-and-push",
+  description="Commit and push",
+  prompt="Parse arguments and commit then push in one operation"
+)
+```
 
 **Usage:**
 ```

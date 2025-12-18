@@ -7,7 +7,14 @@ argument-hint: '<tag_name|all> [--remote <name>]'
 
 Push Git tags to remote repository.
 
-Invokes the **tag-push** agent to handle pushing tags.
+Use the **Task** tool to invoke agent `fractary-repo:tag-push`:
+```
+Task(
+  subagent_type="fractary-repo:tag-push",
+  description="Push Git tag",
+  prompt="Parse arguments and push tag"
+)
+```
 
 **Usage:**
 ```

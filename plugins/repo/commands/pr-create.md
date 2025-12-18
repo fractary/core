@@ -7,7 +7,14 @@ argument-hint: '"<title>" [--body "<text>"] [--prompt "<instructions>"] [--base 
 
 Create a pull request for the current branch.
 
-Invokes the **pr-create** agent to handle PR creation.
+Use the **Task** tool to invoke agent `fractary-repo:pr-create`:
+```
+Task(
+  subagent_type="fractary-repo:pr-create",
+  description="Create pull request",
+  prompt="Parse arguments and create PR"
+)
+```
 
 **Usage:**
 ```

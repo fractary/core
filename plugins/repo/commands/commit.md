@@ -7,7 +7,14 @@ argument-hint: '["message"] [--type <type>] [--work-id <id>] [--scope <scope>] [
 
 Create Git commits using conventional commit format.
 
-Invokes the **commit** agent to create semantic commits.
+Use the **Task** tool to invoke agent `fractary-repo:commit`:
+```
+Task(
+  subagent_type="fractary-repo:commit",
+  description="Create semantic commit",
+  prompt="Parse arguments and create commit with conventional format"
+)
+```
 
 **Usage:**
 ```

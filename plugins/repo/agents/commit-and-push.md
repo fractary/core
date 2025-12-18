@@ -1,5 +1,5 @@
 ---
-name: commit-and-push
+name: fractary-repo:commit-and-push
 description: Create semantic commit and push to remote in one operation
 tools: fractary_repo_commit, fractary_repo_push, fractary_repo_is_dirty, fractary_repo_stage_all
 model: claude-haiku-4-5

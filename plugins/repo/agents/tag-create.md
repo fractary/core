@@ -1,5 +1,5 @@
 ---
-name: tag-create
+name: fractary-repo:tag-create
 description: Create Git tags with optional message and signing
 tools: fractary_repo_tag_create
 model: claude-haiku-4-5

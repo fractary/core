@@ -1,5 +1,5 @@
 ---
-name: push
+name: fractary-repo:push
 description: Push branches to remote repository with safety checks
 tools: fractary_repo_push, fractary_repo_branch_current
 model: claude-haiku-4-5

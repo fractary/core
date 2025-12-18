@@ -1,5 +1,5 @@
 ---
-name: branch-list
+name: fractary-repo:branch-list
 description: List Git branches with optional filtering by pattern, merge status, or staleness
 tools: fractary_repo_branch_list
 model: claude-haiku-4-5

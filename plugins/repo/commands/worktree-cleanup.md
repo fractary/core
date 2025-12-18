@@ -7,7 +7,14 @@ argument-hint: '[--merged] [--stale] [--days <n>] [--dry-run]'
 
 Clean up merged or stale Git worktrees.
 
-Invokes the **worktree-cleanup** agent to handle cleanup.
+Use the **Task** tool to invoke agent `fractary-repo:worktree-cleanup`:
+```
+Task(
+  subagent_type="fractary-repo:worktree-cleanup",
+  description="Cleanup worktrees",
+  prompt="Parse arguments and cleanup worktrees"
+)
+```
 
 **Usage:**
 ```

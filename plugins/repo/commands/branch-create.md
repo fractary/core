@@ -7,7 +7,14 @@ argument-hint: '["<branch-name-or-description>"] [--base <branch>] [--prefix <pr
 
 Create a Git branch from work items, descriptions, or direct names.
 
-Invokes the **branch-create** agent to handle branch creation with flexible naming modes.
+Use the **Task** tool to invoke agent `fractary-repo:branch-create`:
+```
+Task(
+  subagent_type="fractary-repo:branch-create",
+  description="Create branch",
+  prompt="Parse arguments and create branch with flexible naming modes"
+)
+```
 
 **Usage:**
 ```

@@ -1,5 +1,5 @@
 ---
-name: pr-review
+name: fractary-repo:pr-review
 description: Review pull requests with approve, request changes, or comment actions
 tools: fractary_repo_pr_review, fractary_repo_pr_get, fractary_repo_diff
 model: claude-haiku-4-5

@@ -1,5 +1,5 @@
 ---
-name: branch-create
+name: fractary-repo:branch-create
 description: Create Git branches from work items, descriptions, or direct names with optional worktree and spec creation
 tools: fractary_repo_branch_create, fractary_repo_branch_name_generate, fractary_repo_checkout
 model: claude-haiku-4-5

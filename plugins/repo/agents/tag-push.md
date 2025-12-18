@@ -1,5 +1,5 @@
 ---
-name: tag-push
+name: fractary-repo:tag-push
 description: Push Git tags to remote repository
 tools: fractary_repo_tag_push
 model: claude-haiku-4-5

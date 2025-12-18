@@ -7,7 +7,14 @@ argument-hint: '[--pattern <pattern>] [--latest <n>]'
 
 List Git tags with optional pattern filtering.
 
-Invokes the **tag-list** agent to display tags.
+Use the **Task** tool to invoke agent `fractary-repo:tag-list`:
+```
+Task(
+  subagent_type="fractary-repo:tag-list",
+  description="List Git tags",
+  prompt="Parse arguments and list tags"
+)
+```
 
 **Usage:**
 ```

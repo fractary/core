@@ -1,5 +1,5 @@
 ---
-name: worktree-remove
+name: fractary-repo:worktree-remove
 description: Remove Git worktrees safely
 tools: fractary_repo_worktree_remove
 model: claude-haiku-4-5

@@ -1,5 +1,5 @@
 ---
-name: worktree-list
+name: fractary-repo:worktree-list
 description: List Git worktrees with branch information
 tools: fractary_repo_worktree_list
 model: claude-haiku-4-5

@@ -7,7 +7,14 @@ argument-hint: '<pr_number> [--action "analyze|approve|request_changes|comment" 
 
 Analyze or review a pull request with approve, request changes, or comment actions.
 
-Invokes the **pr-review** agent to handle the review.
+Use the **Task** tool to invoke agent `fractary-repo:pr-review`:
+```
+Task(
+  subagent_type="fractary-repo:pr-review",
+  description="Review pull request",
+  prompt="Parse arguments and review PR"
+)
+```
 
 **Usage:**
 ```

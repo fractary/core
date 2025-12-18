@@ -1,5 +1,5 @@
 ---
-name: init
+name: fractary-repo:init
 description: Initialize and configure the repo plugin for GitHub, GitLab, or Bitbucket
 tools: fractary_repo_status
 model: claude-haiku-4-5

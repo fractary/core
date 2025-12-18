@@ -7,7 +7,14 @@ argument-hint: '[branch_name] [--location <local|remote|both>] [--force] [--work
 
 Delete a Git branch from local, remote, or both locations.
 
-Invokes the **branch-delete** agent to handle deletion with safety checks.
+Use the **Task** tool to invoke agent `fractary-repo:branch-delete`:
+```
+Task(
+  subagent_type="fractary-repo:branch-delete",
+  description="Delete branch {branch_name}",
+  prompt="Parse arguments and delete the specified branch"
+)
+```
 
 **Usage:**
 ```

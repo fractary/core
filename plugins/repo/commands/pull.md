@@ -7,7 +7,14 @@ argument-hint: '[branch_name] [--remote <name>] [--rebase] [--strategy <strategy
 
 Pull Git branches from remote repository.
 
-Invokes the **pull** agent to handle pulling with merge or rebase options.
+Use the **Task** tool to invoke agent `fractary-repo:pull`:
+```
+Task(
+  subagent_type="fractary-repo:pull",
+  description="Pull branch from remote",
+  prompt="Parse arguments and pull with merge or rebase options"
+)
+```
 
 **Usage:**
 ```

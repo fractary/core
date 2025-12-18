@@ -1,5 +1,5 @@
 ---
-name: pr-comment
+name: fractary-repo:pr-comment
 description: Add comments to pull requests
 tools: fractary_repo_pr_comment, fractary_repo_pr_get
 model: claude-haiku-4-5

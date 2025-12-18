@@ -7,7 +7,14 @@ argument-hint: '<pr_number> [--strategy <strategy>] [--delete-branch] [--worktre
 
 Merge a pull request with configurable merge strategy.
 
-Invokes the **pr-merge** agent to handle merging.
+Use the **Task** tool to invoke agent `fractary-repo:pr-merge`:
+```
+Task(
+  subagent_type="fractary-repo:pr-merge",
+  description="Merge pull request",
+  prompt="Parse arguments and merge PR"
+)
+```
 
 **Usage:**
 ```

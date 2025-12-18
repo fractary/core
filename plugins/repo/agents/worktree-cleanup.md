@@ -1,5 +1,5 @@
 ---
-name: worktree-cleanup
+name: fractary-repo:worktree-cleanup
 description: Clean up merged and stale worktrees
 tools: fractary_repo_worktree_cleanup, fractary_repo_worktree_list
 model: claude-haiku-4-5

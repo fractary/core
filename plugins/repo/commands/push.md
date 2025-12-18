@@ -7,7 +7,14 @@ argument-hint: '[branch_name] [--remote <name>] [--set-upstream] [--force]'
 
 Push Git branches to remote repository.
 
-Invokes the **push** agent to handle pushing with safety checks.
+Use the **Task** tool to invoke agent `fractary-repo:push`:
+```
+Task(
+  subagent_type="fractary-repo:push",
+  description="Push branch to remote",
+  prompt="Parse arguments and push with safety checks"
+)
+```
 
 **Usage:**
 ```

@@ -1,5 +1,5 @@
 ---
-name: pr-create
+name: fractary-repo:pr-create
 description: Create pull requests with title, body, and optional draft mode
 tools: fractary_repo_pr_create, fractary_repo_branch_current, fractary_repo_diff
 model: claude-haiku-4-5

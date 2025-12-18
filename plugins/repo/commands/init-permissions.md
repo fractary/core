@@ -7,7 +7,14 @@ argument-hint: ''
 
 Configure Claude Code permissions in `.claude/settings.json` for safe repository operations.
 
-Invokes the **init-permissions** agent to set up required permissions.
+Use the **Task** tool to invoke agent `fractary-repo:init-permissions`:
+```
+Task(
+  subagent_type="fractary-repo:init-permissions",
+  description="Configure permissions",
+  prompt="Setup required permissions"
+)
+```
 
 **Usage:**
 ```

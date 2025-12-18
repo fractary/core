@@ -7,7 +7,14 @@ argument-hint: '[--stale] [--merged] [--days <n>] [--pattern <pattern>]'
 
 List Git branches with optional filtering by pattern, merge status, or staleness.
 
-Invokes the **branch-list** agent to display branches.
+Use the **Task** tool to invoke agent `fractary-repo:branch-list`:
+```
+Task(
+  subagent_type="fractary-repo:branch-list",
+  description="List branches",
+  prompt="Parse arguments and list branches with specified filters"
+)
+```
 
 **Usage:**
 ```

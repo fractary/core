@@ -7,7 +7,14 @@ argument-hint: '<tag_name> [--message "<text>"] [--commit <sha>] [--sign] [--for
 
 Create a Git tag for versioning and release management.
 
-Invokes the **tag-create** agent to handle tag creation.
+Use the **Task** tool to invoke agent `fractary-repo:tag-create`:
+```
+Task(
+  subagent_type="fractary-repo:tag-create",
+  description="Create Git tag",
+  prompt="Parse arguments and create tag"
+)
+```
 
 **Usage:**
 ```

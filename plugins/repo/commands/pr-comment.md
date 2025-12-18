@@ -7,7 +7,14 @@ argument-hint: '<pr_number> ["<comment>"] [--prompt "<instructions>"]'
 
 Add a comment to a pull request.
 
-Invokes the **pr-comment** agent to post the comment.
+Use the **Task** tool to invoke agent `fractary-repo:pr-comment`:
+```
+Task(
+  subagent_type="fractary-repo:pr-comment",
+  description="Comment on PR",
+  prompt="Parse arguments and post comment"
+)
+```
 
 **Usage:**
 ```
