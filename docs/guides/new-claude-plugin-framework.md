@@ -710,19 +710,24 @@ Benefits:
 
 **6. Specific Auto-Trigger Descriptions**
 
-Dedicated agents can have precise descriptions:
+Dedicated agents enable **proactive auto-triggering** - Claude can invoke them automatically at any point, not just via manual commands.
 
-**Manager agent (generic):**
+**Why this matters:**
+
+When you have focused agents with clear descriptions, Claude can identify and use them automatically during any conversation, without you explicitly running a command.
+
+**Manager agent (too generic for auto-trigger):**
 ```markdown
 description: Handles repository operations including branches, commits, PRs, and tags.
 ```
 
-Problem: Too generic for auto-triggering
-- When should this trigger?
-- "Create branch" or "Create PR" both match
-- LLM uncertain which to use
+Problems:
+- ❌ Too generic - when should this trigger?
+- ❌ "Create branch" or "Create PR" both match
+- ❌ LLM uncertain which to use
+- ❌ Unlikely to auto-trigger (too vague)
 
-**Dedicated agents (specific):**
+**Dedicated agents (precise, auto-triggerable):**
 ```markdown
 # branch-create agent
 description: Create Git branches. MUST BE USED when user wants to create a new branch.
@@ -736,7 +741,43 @@ Examples:
 Benefits:
 - ✅ Precise matching
 - ✅ Clear trigger conditions
-- ✅ Reliable auto-invocation
+- ✅ **Reliable auto-invocation**
+- ✅ Claude proactively uses it when appropriate
+
+**Skills vs Agents for Auto-Triggering:**
+
+| Aspect | Skills | Agents |
+|--------|--------|--------|
+| **Description length** | ~100 characters (very limited) | No limit (can be extensive) |
+| **Examples allowed** | Minimal | Robust examples encouraged |
+| **Auto-trigger reliability** | Limited (short description) | Excellent (detailed description) |
+| **Invocation control** | Optional (treated loosely) | Enforceable via `allowed-tools: Task` |
+
+**Skills are severely limited** in description length (~100 characters), making them poor for auto-triggering. **Agents have no such limitation** - you can provide robust examples and detailed trigger conditions.
+
+**Forced Invocation (Commands → Agents):**
+
+The 1:1 command-agent relationship enables reliable forced invocation:
+
+```yaml
+# Command forces specific agent via Task tool restriction
+allowed-tools: Task(fractary-repo:branch-create)
+```
+
+This ensures:
+- ✅ Command always invokes correct agent
+- ✅ No interpretation ambiguity
+- ✅ Deterministic invocation path
+
+**vs Manager agents:**
+- ❌ Command must describe operation in text
+- ❌ Manager interprets what to do
+- ❌ Something can get lost in interpretation
+
+**vs Skills:**
+- ❌ Skills treated more optionally
+- ❌ Harder to force specific skill use
+- ❌ No `allowed-tools` enforcement for skills
 
 **7. Isolated Failures**
 
@@ -768,22 +809,104 @@ Teams can work on agents independently:
 - Independent evolution
 - Parallel progress
 
+**9. Parallel Agent Execution (Limited)**
+
+Dedicated agents enable concurrent operations - you can invoke multiple agent instances simultaneously:
+
+**Use case:** Process multiple items concurrently
+```typescript
+// Invoke multiple agents in parallel (single message, multiple Task calls)
+Task({ subagent_type: "fractary-repo:branch-create", prompt: "Create branch for issue 123" })
+Task({ subagent_type: "fractary-repo:branch-create", prompt: "Create branch for issue 456" })
+Task({ subagent_type: "fractary-repo:branch-create", prompt: "Create branch for issue 789" })
+```
+
+**Current limitations:**
+- ⚠️ **Limited scale**: Unreliable with 4+ parallel agents
+- ⚠️ **Lock file risks**: Can cause corruption at scale
+- ⚠️ **No progress monitoring**: Must wait for all to complete
+- ⚠️ **No termination control**: Can't interrupt running agents
+
+**When parallel execution helps:**
+- ✅ 2-3 independent operations
+- ✅ Operations don't share resources
+- ✅ Can tolerate potential failures
+
+**When to avoid:**
+- ❌ 4+ agents (unreliable)
+- ❌ Shared resource access (lock conflicts)
+- ❌ Critical operations (risk of corruption)
+
+**Manager agents can't do this:**
+- Manager = single instance handling all operations
+- Must process sequentially
+- No concurrency benefit
+
+**Note:** This feature has limitations and is being improved. See [Issue #3013](https://github.com/anthropics/claude-code/issues/3013) for current status.
+
+**10. Background Execution (Not Yet Available)**
+
+**Requested feature** (not currently implemented): The ability to run agents in background while continuing main work.
+
+**Example use case:**
+```typescript
+// PROPOSED (NOT CURRENTLY AVAILABLE)
+Task({
+  subagent_type: "fractary-repo:commit",
+  prompt: "Create commit with changes",
+  run_in_background: true  // Not yet supported
+})
+// Continue working while agent commits in background
+```
+
+**What this would enable:**
+- ⚠️ Start long-running agent (e.g., commit, PR creation)
+- ⚠️ Continue main conversation work
+- ⚠️ Check results later when needed
+- ⚠️ Don't block on agent completion
+
+**Current reality:**
+- ❌ All agents block until completion
+- ❌ No background execution available
+- ❌ Must wait for agent to finish
+
+**Workarounds today:**
+- Use Bash tool with `run_in_background: true` for shell commands
+- Keep agent tasks small and fast
+- Accept blocking behavior
+
+**Feature status:**
+- Highly requested: [Issue #9905](https://github.com/anthropics/claude-code/issues/9905), [Issue #5236](https://github.com/anthropics/claude-code/issues/5236)
+- On roadmap but not implemented
+- Bash tool already supports this pattern
+
+**Why dedicated agents will benefit:**
+Once background execution is available, dedicated agents will excel:
+- Each agent is small, self-contained
+- Easy to spawn in background
+- Clear completion criteria
+- Manager agents too large/complex for background
+
 ### Summary: Why Dedicated Agents Win
 
 | Aspect | Manager Agent | Dedicated Agent |
 |--------|---------------|-----------------|
-| **Correctness** | Confused by unrelated context | Focused, does job right |
-| **Tool Permissions** | Wide swath (20+ tools) | Minimal (2-3 tools) |
-| **Model Cost** | Always expensive (Sonnet) | Right model for job (Haiku when possible) |
-| **Context Size** | Large (~2000 tokens) | Small (~300 tokens) |
-| **Routing** | Must decide operation | Hardcoded flow |
-| **Auto-Trigger** | Generic description | Specific examples |
-| **Failure Scope** | Entire agent broken | Isolated to one operation |
-| **Development** | Sequential, bottleneck | Parallel, independent |
+| **1. Correctness** | Confused by unrelated context | Focused, does job right |
+| **2. Tool Permissions** | Wide swath (20+ tools) | Minimal (2-3 tools) |
+| **3. Model Cost** | Always expensive (Sonnet) | Right model for job (Haiku when possible) |
+| **4. Context Size** | Large (~2000 tokens) | Small (~300 tokens) |
+| **5. Routing** | Must decide operation | Hardcoded flow |
+| **6. Auto-Trigger** | Generic description (~100 chars) | Detailed with examples (unlimited) |
+| **7. Failure Scope** | Entire agent broken | Isolated to one operation |
+| **8. Development** | Sequential, bottleneck | Parallel, independent |
+| **9. Parallel Execution** | Single instance only | Multiple instances (2-3 reliable) |
+| **10. Background Ready** | Too large/complex | Small, self-contained (when available) |
 
-**The primary benefit is correctness through focus.** Cost and efficiency are secondary bonuses.
+**The primary benefit is correctness through focus.** Cost, efficiency, and flexibility are secondary bonuses.
 
 **Dedicated agents do their jobs right because they're not distracted by unrelated concerns.**
+
+**10 comprehensive benefits** demonstrate why dedicated agents are superior across every dimension - from correctness to cost to future-readiness.
 
 ### Principle 3: Skills for Expertise, Not Execution
 
