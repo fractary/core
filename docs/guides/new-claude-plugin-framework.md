@@ -191,6 +191,30 @@ This is a **physical enforcement mechanism** that prevents Claude from:
 - Solving the problem without delegating
 - Bypassing the agent architecture
 
+**Parameter-Based Restrictions:**
+
+The `allowed-tools` field supports fine-grained restrictions using the syntax `ToolName(parameter:value)`:
+
+```yaml
+# Restrict to specific agent only
+allowed-tools: Task(fractary-repo:commit)
+
+# Restrict to specific skill only
+allowed-tools: Skill(fractary-pr-context-preparer)
+
+# Restrict to namespace with wildcard
+allowed-tools: Task(fractary-repo:*)
+
+# Multiple specific restrictions
+allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
+```
+
+This provides:
+- ✅ Exact control over which agents/skills can be invoked
+- ✅ Namespace isolation (e.g., only fractary-repo:* agents)
+- ✅ Clear audit trail of permitted operations
+- ✅ Security against unintended invocations
+
 **Instructive Prompt Pattern:**
 Commands should show the Task invocation explicitly:
 
@@ -259,14 +283,23 @@ Command (allowed-tools: Skill, Task)
 - **Agent only**: Agent needs OUTPUT/result only
 - **Hybrid pattern**: Main agent needs to observe PROCESS of preparation
 
-**Tool Restriction with Skills:**
+**Tool Restriction with Skills (Parameter-Based Syntax):**
 ```yaml
-# Allow specific skill + Task tool
+# Allow specific skill only + any Task
 allowed-tools: Skill(fractary-pr-context-preparer), Task
 
-# Or allow all skills in namespace
-allowed-tools: Skill(fractary-repo:*), Task
+# Or restrict both skill and agent to namespace
+allowed-tools: Skill(fractary-repo:*), Task(fractary-repo:*)
+
+# Or allow specific skill + specific agent
+allowed-tools: Skill(fractary-pr-context-preparer), Task(fractary-repo:pr-create)
 ```
+
+**Syntax Pattern:** `ToolName(parameter:value)` where:
+- `parameter` is the skill/agent name or namespace
+- `:` separates parameter from value
+- `*` is a wildcard for "any" within that namespace
+- Multiple tools separated by commas
 
 **Example Flow:**
 1. Command restricted to `Skill, Task`
@@ -377,7 +410,7 @@ Task(
 ---
 name: fractary-repo:pr-create
 description: Create pull request with conversation context
-allowed-tools: Skill(fractary-pr-context-preparer), Task
+allowed-tools: Skill(fractary-pr-context-preparer), Task(fractary-repo:pr-create)
 model: claude-sonnet-4-5
 argument-hint: '["title"] [--body "<text>"] [--base <branch>]'
 ---
@@ -396,6 +429,12 @@ Task(
   prompt="Create PR: title='{title}', context={prepared_context}"
 )
 ```
+
+**Note:** This example uses parameter-based restrictions:
+- `Skill(fractary-pr-context-preparer)` - Only this specific skill allowed
+- `Task(fractary-repo:pr-create)` - Only this specific agent allowed
+
+This prevents the command from invoking other skills or agents.
 
 **What NOT to include:**
 - ❌ Argument parsing logic
@@ -1176,17 +1215,31 @@ git commit -m "docs(plugin): update for v3.0 architecture"
 - ❌ Restate what the agent will do (agent knows its job)
 - ❌ Add redundant skill references (if agent always uses them)
 
-**Tool Restriction Examples:**
+**Tool Restriction Examples (Parameter-Based Syntax):**
 ```yaml
-# Standard delegation
+# Standard delegation - any agent
 allowed-tools: Task
 
-# Hybrid with specific skill
+# Restrict to specific agent only
+allowed-tools: Task(fractary-repo:commit)
+
+# Restrict to namespace (all agents in fractary-repo)
+allowed-tools: Task(fractary-repo:*)
+
+# Hybrid with specific skill + any agent
 allowed-tools: Skill(fractary-pr-context-preparer), Task
 
-# Hybrid with namespace
-allowed-tools: Skill(fractary-repo:*), Task
+# Hybrid with specific skill + specific agent
+allowed-tools: Skill(fractary-pr-context-preparer), Task(fractary-repo:pr-create)
+
+# Hybrid with namespace restrictions on both
+allowed-tools: Skill(fractary-repo:*), Task(fractary-repo:*)
+
+# Multiple bash commands only (example from official docs)
+allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
 ```
+
+**Syntax Pattern:** `ToolName(parameter:value)` where parameter is the specific skill/agent/command to allow, and `*` is a wildcard.
 
 ### 5. Context Efficiency
 
@@ -1878,6 +1931,57 @@ Instead of loading a generic claude.md for all agents:
 - Keep agents self-contained (everything in the agent .md file)
 - Pass specific context via the prompt parameter
 - Use a "prime command" if you need to load project-specific context
+
+### Q: How do I use parameter-based tool restrictions?
+
+**A:** Use the syntax `ToolName(parameter:value)` to restrict which specific tools can be invoked.
+
+**Syntax:**
+```yaml
+allowed-tools: ToolName(parameter:value)
+```
+
+Where:
+- `ToolName` is Task, Skill, Bash, etc.
+- `parameter` is the specific skill/agent/command name
+- `:` separates parameter from value
+- `*` is a wildcard for "any" within that scope
+- Multiple tools separated by commas
+
+**Examples:**
+
+**Restrict to specific agent:**
+```yaml
+allowed-tools: Task(fractary-repo:commit)
+# Can only invoke fractary-repo:commit agent
+```
+
+**Restrict to namespace:**
+```yaml
+allowed-tools: Task(fractary-repo:*)
+# Can invoke any agent in fractary-repo namespace
+```
+
+**Hybrid with restrictions:**
+```yaml
+allowed-tools: Skill(fractary-pr-context-preparer), Task(fractary-repo:pr-create)
+# Can only use that specific skill and that specific agent
+```
+
+**Restrict bash commands (from official docs):**
+```yaml
+allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
+# Can only run these specific git commands
+```
+
+**Benefits:**
+- ✅ Exact control over permitted operations
+- ✅ Clear audit trail
+- ✅ Security against unintended invocations
+- ✅ Namespace isolation
+- ✅ Self-documenting permissions
+
+**Best Practice:** Use the most restrictive permission that still allows the command to function. Start with specific restrictions, only broaden with wildcards if needed.
 
 ### Q: When should I use the Hybrid Preparation Pattern?
 
