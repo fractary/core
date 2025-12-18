@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:pr-comment
-description: Add comments to pull requests
+description: Add comments to pull requests MUST BE USED for all pr-comment operations from fractary-repo:pr-comment command. Use PROACTIVELY when user requests pr comment operations.
 tools: fractary_repo_pr_comment, fractary_repo_pr_get
 model: claude-haiku-4-5
 ---

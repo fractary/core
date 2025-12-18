@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:tag-create
-description: Create Git tags with optional message and signing
+description: Create Git tags with optional message and signing MUST BE USED for all tag-create operations from fractary-repo:tag-create command. Use PROACTIVELY when user requests tag create operations.
 tools: fractary_repo_tag_create
 model: claude-haiku-4-5
 ---

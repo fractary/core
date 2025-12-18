@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:pr-review
-description: Review pull requests with approve, request changes, or comment actions
+description: Review pull requests with approve, request changes, or comment actions MUST BE USED for all pr-review operations from fractary-repo:pr-review command. Use PROACTIVELY when user requests pr review operations.
 tools: fractary_repo_pr_review, fractary_repo_pr_get, fractary_repo_diff
 model: claude-haiku-4-5
 ---

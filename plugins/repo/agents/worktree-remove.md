@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:worktree-remove
-description: Remove Git worktrees safely
+description: Remove Git worktrees safely MUST BE USED for all worktree-remove operations from fractary-repo:worktree-remove command. Use PROACTIVELY when user requests worktree remove operations.
 tools: fractary_repo_worktree_remove
 model: claude-haiku-4-5
 ---

@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:branch-list
-description: List Git branches with optional filtering by pattern, merge status, or staleness
+description: List Git branches with optional filtering by pattern, merge status, or staleness MUST BE USED for all branch-list operations from fractary-repo:branch-list command. Use PROACTIVELY when user requests branch list operations.
 tools: fractary_repo_branch_list
 model: claude-haiku-4-5
 ---

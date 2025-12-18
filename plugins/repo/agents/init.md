@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:init
-description: Initialize and configure the repo plugin for GitHub, GitLab, or Bitbucket
+description: Initialize and configure the repo plugin for GitHub, GitLab, or Bitbucket MUST BE USED for all init operations from fractary-repo:init command. Use PROACTIVELY when user requests init operations.
 tools: fractary_repo_status
 model: claude-haiku-4-5
 ---

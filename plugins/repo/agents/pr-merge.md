@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:pr-merge
-description: Merge pull requests with configurable merge strategy
+description: Merge pull requests with configurable merge strategy MUST BE USED for all pr-merge operations from fractary-repo:pr-merge command. Use PROACTIVELY when user requests pr merge operations.
 tools: fractary_repo_pr_merge, fractary_repo_pr_get, fractary_repo_worktree_remove
 model: claude-haiku-4-5
 ---

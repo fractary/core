@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:tag-push
-description: Push Git tags to remote repository
+description: Push Git tags to remote repository MUST BE USED for all tag-push operations from fractary-repo:tag-push command. Use PROACTIVELY when user requests tag push operations.
 tools: fractary_repo_tag_push
 model: claude-haiku-4-5
 ---

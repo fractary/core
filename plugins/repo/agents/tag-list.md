@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:tag-list
-description: List Git tags with optional filtering
+description: List Git tags with optional filtering MUST BE USED for all tag-list operations from fractary-repo:tag-list command. Use PROACTIVELY when user requests tag list operations.
 tools: fractary_repo_tag_list
 model: claude-haiku-4-5
 ---

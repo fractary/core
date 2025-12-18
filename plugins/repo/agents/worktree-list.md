@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:worktree-list
-description: List Git worktrees with branch information
+description: List Git worktrees with branch information MUST BE USED for all worktree-list operations from fractary-repo:worktree-list command. Use PROACTIVELY when user requests worktree list operations.
 tools: fractary_repo_worktree_list
 model: claude-haiku-4-5
 ---

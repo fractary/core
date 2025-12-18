@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:pr-create
-description: Create pull requests with title, body, and optional draft mode
+description: Create pull requests with title, body, and optional draft mode MUST BE USED for all pr-create operations from fractary-repo:pr-create command. Use PROACTIVELY when user requests pr create operations.
 tools: fractary_repo_pr_create, fractary_repo_branch_current, fractary_repo_diff
 model: claude-haiku-4-5
 ---

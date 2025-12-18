@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:pull
-description: Pull branches from remote repository with merge or rebase options
+description: Pull branches from remote repository with merge or rebase options. MUST BE USED for all pull operations from fractary-repo:pull command. Use PROACTIVELY when user requests pulling branches.
 tools: fractary_repo_pull, fractary_repo_branch_current
 model: claude-haiku-4-5
 ---

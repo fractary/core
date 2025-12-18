@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:commit-and-push
-description: Create semantic commit and push to remote in one operation
+description: Create semantic commit and push to remote in one operation MUST BE USED for all commit-and-push operations from fractary-repo:commit-and-push command. Use PROACTIVELY when user requests commit and push operations.
 tools: fractary_repo_commit, fractary_repo_push, fractary_repo_is_dirty, fractary_repo_stage_all
 model: claude-haiku-4-5
 ---

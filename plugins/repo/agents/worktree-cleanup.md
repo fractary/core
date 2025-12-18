@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:worktree-cleanup
-description: Clean up merged and stale worktrees
+description: Clean up merged and stale worktrees MUST BE USED for all worktree-cleanup operations from fractary-repo:worktree-cleanup command. Use PROACTIVELY when user requests worktree cleanup operations.
 tools: fractary_repo_worktree_cleanup, fractary_repo_worktree_list
 model: claude-haiku-4-5
 ---

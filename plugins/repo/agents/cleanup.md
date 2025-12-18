@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:cleanup
-description: Clean up stale and merged branches safely
+description: Clean up stale and merged branches safely MUST BE USED for all cleanup operations from fractary-repo:cleanup command. Use PROACTIVELY when user requests cleanup operations.
 tools: fractary_repo_branch_list, fractary_repo_branch_delete
 model: claude-haiku-4-5
 ---

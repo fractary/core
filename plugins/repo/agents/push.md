@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:push
-description: Push branches to remote repository with safety checks
+description: Push branches to remote repository with safety checks. MUST BE USED for all push operations from fractary-repo:push command. Use PROACTIVELY when user requests pushing branches.
 tools: fractary_repo_push, fractary_repo_branch_current
 model: claude-haiku-4-5
 ---
