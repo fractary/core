@@ -226,6 +226,10 @@ server.tool({
 - ✅ Zero context cost
 - ✅ Cacheable, fast
 - ✅ Easy to test
+- ✅ **Robust framework support** - Works in Claude Code, ChatGPT, Cursor, and most agentic frameworks
+- ✅ **Consistent integration** - Same MCP interface across different frameworks
+- ✅ **Minimal integration work** - Frameworks handle MCP natively
+- ✅ **Beyond coding** - Works in chat interfaces and other non-coding contexts
 
 **Fallback Chain:**
 ```
@@ -260,34 +264,151 @@ Is it deterministic (same input → same output)?
 | Suggest architecture | ❌ No | Agent | Requires creative reasoning |
 | Execute git commands | ✅ Yes | SDK + MCP | Deterministic operations |
 
-### Impact on Plugin Architecture
+### Impact on Plugin Architecture: Where Logic Lives
 
-This principle **informs where to build features:**
+This principle **informs where logic should live** - not whether to build a plugin.
 
-**DON'T build in plugin (LLM-controlled):**
-- ❌ Data validation logic
-- ❌ API calls with fixed parameters
-- ❌ File transformations
-- ❌ Parsing structured data
-- ❌ Platform detection
-- ❌ Configuration management
+**You always build plugins** - the question is: **what's inside them?**
 
-**DO build in plugin (requires LLM):**
-- ✅ Analyzing code changes for commit messages
-- ✅ Interpreting user intent from natural language
+### The Plugin Spectrum
+
+Plugins exist on a spectrum from ultra-lightweight to reasoning-heavy:
+
+**Pattern 1: Ultra-Lightweight Command → MCP**
+```markdown
+# Command file (5 lines)
+---
+name: fractary-repo:branch-create
+allowed-tools: Task(fractary-repo:branch-create)
+---
+
+Invokes fractary-repo:branch-create agent.
+```
+- Plugin = minimal wrapper
+- All logic in SDK via MCP
+- Fast, deterministic, reusable
+
+**Pattern 2: Agent Orchestrates SDK**
+```markdown
+# Agent orchestrates multiple deterministic operations
+<WORKFLOW>
+1. Call fractary_repo_branch_current (MCP → SDK)
+2. Call fractary_work_issue_fetch (MCP → SDK)
+3. Call fractary_repo_branch_create (MCP → SDK)
+</WORKFLOW>
+```
+- Plugin = orchestration logic
+- Deterministic operations in SDK
+- Agent provides workflow intelligence
+
+**Pattern 3: Hybrid (Reasoning + Deterministic)**
+```markdown
+# Agent: Analyze changes and draft commit message (LLM reasoning)
+# Then: Pass to SDK to create commit (deterministic)
+<WORKFLOW>
+1. Call fractary_repo_diff (MCP → SDK) - get changes
+2. Analyze diff and draft message (LLM reasoning)
+3. Call fractary_repo_commit(message) (MCP → SDK) - create commit
+</WORKFLOW>
+```
+- Plugin = reasoning + orchestration
+- Reasoning in agent (LLM)
+- Execution in SDK (deterministic)
+
+### Where Logic Should Live
+
+**Logic in SDK/Code (deterministic):**
+- ✅ Data validation
+- ✅ API calls with fixed parameters
+- ✅ File transformations
+- ✅ Parsing structured data
+- ✅ Platform detection
+- ✅ Configuration management
+- ✅ Git operations
+- ✅ CRUD operations
+
+**Logic in Plugin Agent (requires LLM):**
+- ✅ Analyzing code changes
+- ✅ Interpreting user intent
 - ✅ Suggesting improvements based on context
-- ✅ Orchestrating multiple deterministic operations
-- ✅ Making decisions based on complex criteria
+- ✅ Orchestrating multiple SDK operations
+- ✅ Making decisions with complex criteria
+- ✅ Generating content (commit messages, PR descriptions)
+- ✅ Choosing between multiple strategies
 
-**The agent's job:** Orchestrate deterministic code, provide reasoning layer.
-**The code's job:** Execute deterministic operations reliably.
+**Logic in Plugin Command (minimal):**
+- ✅ Argument hints
+- ✅ Tool restrictions
+- ✅ Agent invocation instructions
 
-This separation creates:
-- Faster operations (less LLM invocation)
-- Lower costs (fewer tokens)
-- Better reliability (deterministic code doesn't vary)
-- Easier testing (code can be unit tested)
-- Greater reusability (SDK works everywhere)
+### Real-World Examples
+
+**Example 1: Pure Deterministic (Pattern 1)**
+```
+User: /fractary-repo:branch-list --stale
+  ↓
+Command: 5 lines, invokes agent
+  ↓
+Agent: 60 lines, calls fractary_repo_branch_list
+  ↓
+SDK: Deterministic list operation
+  ↓
+Result: List of stale branches
+```
+- Plugin is thin wrapper
+- All logic in SDK
+- Fast, consistent, reusable
+
+**Example 2: Orchestration (Pattern 2)**
+```
+User: /fractary-repo:branch-create --work-id 123
+  ↓
+Command: 5 lines, invokes agent
+  ↓
+Agent: 80 lines, orchestrates:
+  1. fractary_work_issue_fetch(123) → SDK
+  2. fractary_repo_branch_name_generate → SDK
+  3. fractary_repo_branch_create → SDK
+  ↓
+Result: Branch created with semantic name
+```
+- Plugin provides workflow
+- Each step deterministic (SDK)
+- Orchestration in agent
+
+**Example 3: Hybrid Reasoning (Pattern 3)**
+```
+User: /fractary-repo:commit (no message provided)
+  ↓
+Command: 5 lines, invokes agent
+  ↓
+Agent: 100 lines:
+  1. fractary_repo_diff → SDK (deterministic)
+  2. Analyze diff, draft message (LLM reasoning)
+  3. fractary_repo_commit(message) → SDK (deterministic)
+  ↓
+Result: Semantic commit with generated message
+```
+- Plugin provides analysis (LLM)
+- Operations are deterministic (SDK)
+- Best of both worlds
+
+### Design Principles
+
+**The Rule:**
+- **Deterministic logic** → SDK (code, tests, reusable)
+- **Reasoning logic** → Agent (LLM, orchestration, analysis)
+- **Interface** → Command (lightweight, restrictions)
+
+**Benefits of this separation:**
+- ✅ Faster operations (less LLM for deterministic parts)
+- ✅ Lower costs (fewer tokens for routine operations)
+- ✅ Better reliability (deterministic code doesn't vary)
+- ✅ Easier testing (SDK has unit tests)
+- ✅ Greater reusability (SDK works across frameworks)
+- ✅ Clear boundaries (what needs LLM vs what doesn't)
+
+**The plugin always exists** - it's the interface for users. The strategic question is: what logic lives where?
 
 ### Principle 2: Dedicated Agents Over Manager Agents
 
