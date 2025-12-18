@@ -12,6 +12,14 @@ Status: Active
 
 1. [Overview](#overview)
 2. [Architecture Principles](#architecture-principles)
+   - Principle 1: MCP-First Design
+   - Principle 2: Dedicated Agents Over Manager Agents
+   - Principle 3: Skills for Expertise, Not Execution
+   - Principle 4: Platform Abstraction in SDK
+   - Principle 5: Ultra-Lightweight Commands with Tool Restriction
+   - Principle 6: Context Efficiency Through Isolation
+   - Principle 7: Hybrid Preparation Pattern (Advanced)
+   - Principle 8: Auto-Trigger Everything
 3. [Layer Breakdown](#layer-breakdown)
 4. [Technology Preference Order](#technology-preference-order)
 5. [Component Design](#component-design)
@@ -105,22 +113,34 @@ Manager agents create reliability problems:
 - ❌ Large, complex agent definitions
 - ❌ Single point of failure
 
-### Principle 3: Skills Are Obsolete
+### Principle 3: Skills for Expertise, Not Execution
 
-**With MCP handling heavy lifting, skills add unnecessary complexity.**
+**Skills have a new purpose in v3.0: providing organizational knowledge and expertise.**
 
-Skills were valuable when they:
-- Orchestrated multiple scripts (now MCP tools)
-- Conditionally loaded sub-workflows (now lightweight, load all)
-- Abstracted platform handlers (now SDK handles this)
+**OLD use case (obsolete):** Skills for execution
+- Orchestrating scripts → Now MCP tools handle this
+- Conditional workflows → Now agents handle this
+- Platform abstraction → Now SDK handles this
 
-Now agents can do what skills did:
-- Orchestrate MCP tool calls directly
-- Handle conditional logic inline (lightweight)
-- Remain auto-triggerable
-- Stay focused and small (60-100 lines)
+**NEW use case (recommended):** Skills for expertise
+- ✅ Organizational standards (commit format, PR template)
+- ✅ Best practices (code review checklist, security guidelines)
+- ✅ Templates (documentation format, branch naming)
+- ✅ Domain knowledge (architecture patterns, style guides)
+- ✅ Brand voice (user-facing text tone, terminology)
 
-**Don't create skills. Put orchestration logic in agents.**
+**When to create skills:**
+- Injecting organizational context agents should follow
+- Providing templates agents should use
+- Documenting standards agents should enforce
+
+**Examples:**
+- `commit-format` skill: Conventional commits + FABER metadata standards
+- `pr-template` skill: Required PR description sections
+- `code-review-checklist` skill: What to check during reviews
+- `api-design-standards` skill: REST API conventions
+
+**Agents read these skills** to get expertise, then execute operations following those standards.
 
 ### Principle 4: Platform Abstraction in SDK
 
@@ -148,17 +168,53 @@ The SDK:
 
 **Don't create handlers. Extend the SDK.**
 
-### Principle 5: Ultra-Lightweight Commands
+### Principle 5: Ultra-Lightweight Commands with Tool Restriction
 
-**Commands are thin wrappers that invoke agents.**
+**Commands are thin wrappers that delegate to agents using physical enforcement.**
 
 Commands should:
-- Be 5-10 lines of markdown
-- Just describe what the command does
-- Invoke the dedicated agent
+- Be 8-18 lines of markdown
+- Use `allowed-tools: Task` to enforce delegation
+- Show explicit Task tool invocation with parameters
 - Not contain logic, parsing, or orchestration
 
-The agent handles everything. The command is just a manual trigger interface.
+**Tool Restriction (Critical):**
+```yaml
+---
+name: fractary-plugin:command
+allowed-tools: Task  # Physical constraint - Claude cannot use other tools
+---
+```
+
+This is a **physical enforcement mechanism** that prevents Claude from:
+- Using Read/Write/Edit/Bash tools directly
+- Solving the problem without delegating
+- Bypassing the agent architecture
+
+**Instructive Prompt Pattern:**
+Commands should show the Task invocation explicitly:
+
+```markdown
+Create semantic commit using Task tool:
+
+Task(
+  subagent_type="fractary-repo:commit",
+  description="Create semantic commit",
+  prompt="Create commit: message='{message}', type={type}, work-id={work_id}"
+)
+```
+
+This teaches Claude:
+- HOW to invoke the agent (Task tool)
+- WHAT parameters to pass
+- HOW to format the prompt
+
+**What NOT to include:**
+- Don't restate what the agent will do (agent knows its job)
+- Only mention configuration if the agent has CHOICES
+- Don't add redundant skill references if agent always uses them
+
+The agent handles everything. The command is an instructive manual trigger interface with physical enforcement.
 
 ### Principle 6: Context Efficiency Through Isolation
 
@@ -176,7 +232,61 @@ This is especially important for operations that:
 - Generate verbose output
 - Need to track state across multiple steps
 
-### Principle 7: Auto-Trigger Everything
+### Principle 7: Hybrid Preparation Pattern (Advanced)
+
+**For context-dependent operations, use skills to prepare input from main conversation, then pass to agents.**
+
+Most operations work with agent-only delegation:
+```
+Command (allowed-tools: Task)
+  → Agent (isolated context, generates from git/API)
+```
+
+But some operations benefit from conversation context:
+```
+Command (allowed-tools: Skill, Task)
+  → Preparation Skill (main context, reads conversation)
+  → Execution Agent (isolated context, receives prepared input)
+```
+
+**When to use Hybrid Pattern:**
+- PR descriptions that should reference conversation discussion
+- Commit messages that need conversation context
+- Issue descriptions drawing from brainstorming session
+- Any output that improves with full conversation history
+
+**Decision Criteria:**
+- **Agent only**: Agent needs OUTPUT/result only
+- **Hybrid pattern**: Main agent needs to observe PROCESS of preparation
+
+**Tool Restriction with Skills:**
+```yaml
+# Allow specific skill + Task tool
+allowed-tools: Skill(fractary-pr-context-preparer), Task
+
+# Or allow all skills in namespace
+allowed-tools: Skill(fractary-repo:*), Task
+```
+
+**Example Flow:**
+1. Command restricted to `Skill, Task`
+2. Invokes `pr-context-preparer` skill (main context)
+   - Reads full conversation history
+   - Identifies key decisions and changes discussed
+   - Drafts PR summary incorporating conversation
+3. Passes prepared summary to `pr-create` agent (isolated context)
+   - Receives summary parameter
+   - Creates PR with prepared content
+   - Returns result
+
+**Benefits:**
+- ✅ Conversation context available where needed
+- ✅ Still efficient (agent execution isolated)
+- ✅ Best of both worlds
+
+**Important:** Only use when conversation context truly adds value. Most operations work fine with agent-only delegation.
+
+### Principle 8: Auto-Trigger Everything
 
 **Both commands AND agents should be auto-triggerable.**
 
@@ -191,39 +301,100 @@ Agents:
 
 **Write detailed agent descriptions with examples** to make auto-triggering reliable.
 
+**Agent Description Best Practices:**
+- Include "MUST BE USED for all {operation} operations from {command} command"
+- Add "Use PROACTIVELY when user requests {operation}"
+- Provide concrete examples of user requests
+- List common trigger phrases
+
 ---
 
 ## Layer Breakdown
 
 ### Layer 1: Commands
 
-**Purpose:** Manual trigger interface for agents
+**Purpose:** Manual trigger interface with enforced delegation to agents
 
 **File Location:** `plugins/{plugin}/commands/{command}.md`
 
-**Size:** 5-10 lines
+**Size:** 8-18 lines
 
 **Structure:**
 ```markdown
-# /plugin:command-name
+---
+name: fractary-plugin:command-name
+description: Brief description - delegates to agent
+allowed-tools: Task
+model: claude-haiku-4-5
+argument-hint: '[arg1] [--flag] [--option <value>]'
+---
 
 Brief description of what this command does.
 
-Invokes the {command-name} agent to handle the operation.
+Task tool invocation pattern:
+
+Task(
+  subagent_type="fractary-plugin:command-name",
+  description="Short description",
+  prompt="Operation: arg1={arg1}, flag={flag}, option={option}"
+)
 ```
 
+**Frontmatter Fields:**
+- `name`: Namespaced command name (fractary-plugin:command-name)
+- `description`: Brief description mentioning delegation
+- `allowed-tools: Task`: **CRITICAL** - Physical enforcement of delegation
+- `model`: Usually `claude-haiku-4-5` for efficiency
+- `argument-hint`: Shows expected parameters to user
+
 **Responsibilities:**
-- Describe the command for users
-- Invoke the dedicated agent
+- Describe what the command does
+- Show explicit Task tool invocation pattern
+- Restrict to Task tool only (enforcement)
 - Nothing else
 
-**Example:**
+**Example (Standard Pattern):**
 ```markdown
-# /repo:branch-create
+---
+name: fractary-repo:commit
+description: Create semantic commits - delegates to fractary-repo:commit agent
+allowed-tools: Task
+model: claude-haiku-4-5
+argument-hint: '["message"] [--type <type>] [--work-id <id>] [--scope <scope>]'
+---
 
-Create a Git branch from work items, descriptions, or direct names.
+Create semantic commit using Task tool:
 
-Invokes the branch-create agent to handle branch creation.
+Task(
+  subagent_type="fractary-repo:commit",
+  description="Create semantic commit",
+  prompt="Create commit: message='{message}', type={type}, work-id={work_id}"
+)
+```
+
+**Example (Hybrid Pattern with Skill):**
+```markdown
+---
+name: fractary-repo:pr-create
+description: Create pull request with conversation context
+allowed-tools: Skill(fractary-pr-context-preparer), Task
+model: claude-sonnet-4-5
+argument-hint: '["title"] [--body "<text>"] [--base <branch>]'
+---
+
+Create PR using hybrid pattern:
+
+1. Prepare context from conversation:
+
+Skill(skill="fractary-pr-context-preparer")
+
+2. Create PR with prepared content:
+
+Task(
+  subagent_type="fractary-repo:pr-create",
+  description="Create pull request",
+  prompt="Create PR: title='{title}', context={prepared_context}"
+)
 ```
 
 **What NOT to include:**
@@ -233,8 +404,10 @@ Invokes the branch-create agent to handle branch creation.
 - ❌ MCP tool calls
 - ❌ Error handling
 - ❌ Output formatting
+- ❌ Restating what the agent will do (agent knows its job)
+- ❌ Skill references if agent always uses them (redundant)
 
-All of that goes in the agent.
+**Key Principle:** Only include information that helps Claude make CHOICES about configuration. Don't repeat what the agent already knows.
 
 ### Layer 2: Dedicated Agents
 
@@ -246,10 +419,17 @@ All of that goes in the agent.
 
 **Structure:**
 ```markdown
-# {command-name} Agent
+---
+name: fractary-plugin:agent-name
+description: What this agent does. MUST BE USED for all {operation} operations from fractary-plugin:command command. Use PROACTIVELY when user requests {operation}.
+tools: fractary_plugin_tool_1, fractary_plugin_tool_2
+model: claude-haiku-4-5
+---
+
+# {agent-name} Agent
 
 ## Description
-Detailed description of what this agent does.
+Detailed description of what this agent does and when to use it.
 
 ## Use Cases
 **Use this agent when:**
@@ -268,9 +448,11 @@ List of arguments this agent accepts (from command or natural language)
 ## Workflow
 
 <WORKFLOW>
-1. Parse/extract arguments from command invocation or natural language
+1. Read expertise skills if applicable (e.g., fractary-commit-format)
 
-2. Conditional logic based on arguments:
+2. Parse/extract arguments from command invocation or natural language
+
+3. Conditional logic based on arguments:
 
    If condition A:
      - Call fractary_plugin_tool_1
@@ -284,16 +466,22 @@ List of arguments this agent accepts (from command or natural language)
    If condition C:
      - Call fractary_plugin_tool_4
 
-3. Handle errors:
+4. Handle errors:
    - If MCP call fails, return error message
    - If validation fails, return helpful guidance
 
-4. Format and return result
+5. Format and return result following expertise skill standards
 </WORKFLOW>
 
 ## Output
 Description of what this agent returns
 ```
+
+**Frontmatter Fields:**
+- `name`: Namespaced agent name (fractary-plugin:agent-name)
+- `description`: Include "MUST BE USED" and "Use PROACTIVELY" for auto-triggering
+- `tools`: List of MCP tools this agent can use
+- `model`: Usually `claude-haiku-4-5` for efficiency
 
 **Key Principles:**
 
@@ -327,6 +515,28 @@ Description of what this agent returns
 - ❌ Platform-specific code (use SDK)
 - ❌ Script execution (use MCP or SDK)
 - ❌ Routing to other agents/skills
+
+**Expertise Skills:**
+
+Agents should reference expertise skills when organizational standards matter:
+
+```markdown
+<WORKFLOW>
+1. Read fractary-commit-format skill for conventional commit standards
+
+2. Parse arguments and generate commit message
+
+3. Create commit following standards from skill
+</WORKFLOW>
+```
+
+**Common expertise skills:**
+- `fractary-commit-format`: Conventional commits + FABER metadata
+- `fractary-pr-template`: Standard PR structure
+- `fractary-code-review-checklist`: Review standards
+- `fractary-branch-naming`: Branch naming conventions
+
+Agents read these to get organizational knowledge, then apply it during execution.
 
 ### Layer 3: MCP Tools
 
@@ -446,7 +656,30 @@ export class PluginManager {
 
 When implementing operations, follow this preference order:
 
-### 1. MCP Tools (Highest Preference)
+### 0. Skills (For Expertise Only)
+
+**Use for:** Organizational knowledge and standards
+
+**Why:**
+- ✅ Provides expertise to agents
+- ✅ Centralizes organizational knowledge
+- ✅ Ensures consistency across operations
+- ✅ Easy to update standards in one place
+
+**Examples:**
+- `fractary-commit-format`: How to format commits
+- `fractary-pr-template`: What sections PRs need
+- `fractary-code-review-checklist`: What to check during reviews
+- `fractary-api-standards`: How to design APIs
+
+**NOT for:**
+- ❌ Execution/orchestration (use agents)
+- ❌ Data operations (use MCP tools)
+- ❌ Business logic (use SDK)
+
+**Agents read skills to learn standards, then execute operations following those standards.**
+
+### 1. MCP Tools (Highest Preference for Execution)
 
 **Use for:** All deterministic operations
 
@@ -926,10 +1159,13 @@ git commit -m "docs(plugin): update for v3.0 architecture"
 ### 4. Command Design
 
 **DO:**
-- ✅ Keep commands ultra-lightweight (5-10 lines)
-- ✅ Just describe and invoke agent
+- ✅ Keep commands ultra-lightweight (8-18 lines)
+- ✅ Use `allowed-tools: Task` to enforce delegation (CRITICAL)
+- ✅ Show explicit Task tool invocation pattern
 - ✅ Use clear, intuitive command names
 - ✅ Document what the command does (briefly)
+- ✅ Only mention configuration if agent has CHOICES
+- ✅ For hybrid pattern: `allowed-tools: Skill(specific-skill), Task`
 
 **DON'T:**
 - ❌ Put any logic in commands
@@ -937,6 +1173,20 @@ git commit -m "docs(plugin): update for v3.0 architecture"
 - ❌ Validate inputs in commands
 - ❌ Call MCP tools from commands
 - ❌ Include workflows in commands
+- ❌ Restate what the agent will do (agent knows its job)
+- ❌ Add redundant skill references (if agent always uses them)
+
+**Tool Restriction Examples:**
+```yaml
+# Standard delegation
+allowed-tools: Task
+
+# Hybrid with specific skill
+allowed-tools: Skill(fractary-pr-context-preparer), Task
+
+# Hybrid with namespace
+allowed-tools: Skill(fractary-repo:*), Task
+```
 
 ### 5. Context Efficiency
 
@@ -1543,14 +1793,24 @@ Example:
 
 ### Q: Should I ever create skills?
 
-**A:** In v3.0, skills are rarely needed. Put orchestration logic in agents instead.
+**A:** Yes, but for **expertise** not execution!
 
-Only create skills if:
-- You have a very specific shared utility used by multiple agents
-- The utility is purely deterministic (no reasoning)
-- It can't be an MCP tool
+**Create expertise skills for:**
+- ✅ Organizational standards (commit format, PR template)
+- ✅ Best practices (code review checklist, security guidelines)
+- ✅ Templates (documentation format, API design)
+- ✅ Brand voice (user-facing text tone)
+- ✅ Domain knowledge (architecture patterns)
 
-Even then, consider if it should just be another agent that other agents can call.
+**Don't create skills for:**
+- ❌ Orchestration (use agents)
+- ❌ Data operations (use MCP tools)
+- ❌ Business logic (use SDK)
+- ❌ Platform abstraction (use SDK)
+
+**Pattern:** Agents read expertise skills to learn standards, then execute operations following those standards.
+
+**Example:** `commit` agent reads `fractary-commit-format` skill to learn conventional commit format, then creates commits following that standard.
 
 ### Q: What if MCP doesn't support my operation?
 
@@ -1618,6 +1878,40 @@ Instead of loading a generic claude.md for all agents:
 - Keep agents self-contained (everything in the agent .md file)
 - Pass specific context via the prompt parameter
 - Use a "prime command" if you need to load project-specific context
+
+### Q: When should I use the Hybrid Preparation Pattern?
+
+**A:** When conversation context significantly improves the output.
+
+**Use agent-only delegation (most common):**
+```
+Command (allowed-tools: Task)
+  → Agent generates from git/API data
+```
+
+**Use for:** Most operations where git history, API data, or user parameters are sufficient.
+
+**Use hybrid pattern (advanced):**
+```
+Command (allowed-tools: Skill, Task)
+  → Preparation Skill (reads conversation)
+  → Execution Agent (receives prepared context)
+```
+
+**Use for:**
+- PR descriptions that should reference conversation discussion
+- Commit messages incorporating conversation decisions
+- Issue descriptions drawing from brainstorming
+- Any output improved by full conversation history
+
+**Decision criteria:**
+- **Agent only**: Main agent only needs OUTPUT/result
+- **Hybrid**: Main agent benefits from observing PROCESS of preparation
+
+**Trade-offs:**
+- Hybrid uses more context (skill runs in main)
+- But provides better results when conversation matters
+- Only use when the benefit justifies the cost
 
 ### Q: How long should agent descriptions be?
 
