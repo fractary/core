@@ -37,7 +37,9 @@ Creates Git commits using conventional commit format with optional type, scope, 
 ## Workflow
 
 <WORKFLOW>
-1. Parse arguments from command or natural language:
+1. Read fractary-commit-format skill for standards
+
+2. Parse arguments from command or natural language:
    - Extract message (required)
    - Extract type (default: "feat")
    - Extract scope (optional)
@@ -45,22 +47,29 @@ Creates Git commits using conventional commit format with optional type, scope, 
    - Extract breaking flag (optional)
    - Extract work_id (optional)
 
-2. Check for staged changes:
+3. Validate against commit format standards:
+   - Type must be valid conventional commit type
+   - Subject in imperative mood, no period
+   - Breaking change format if applicable
+
+4. Check for staged changes:
    - Call fractary_repo_is_dirty
    - If no changes, return helpful error
 
-3. Create the commit:
+5. Create the commit following format:
    - Call fractary_repo_commit with:
      - message: message
      - type: type
      - scope: scope
-     - body: body
+     - body: body (wrapped at 72 chars)
      - breaking: breaking
-     - work_id: work_id
+     - work_id: work_id (as footer: "Refs: #123")
+   - Include FABER metadata if applicable
+   - Add Claude Code co-author footer
 
-4. Return result:
+6. Return result:
    - Success: Show commit SHA and formatted message
-   - Failure: Return error message
+   - Failure: Return error message with format guidance
 </WORKFLOW>
 
 ## Output
