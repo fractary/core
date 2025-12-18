@@ -70,16 +70,16 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:state-reopen 123 --comment "Bug still present in production"
-✅ /work:state-reopen 123 --comment "Need to retest with new data"
+✅ /fractary-work:state-reopen 123 --comment "Bug still present in production"
+✅ /fractary-work:state-reopen 123 --comment "Need to retest with new data"
 
-❌ /work:state-reopen 123 --comment Bug still present
+❌ /fractary-work:state-reopen 123 --comment Bug still present
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:state-reopen 123
-✅ /work:state-reopen 123 --comment Regression
+✅ /fractary-work:state-reopen 123
+✅ /fractary-work:state-reopen 123 --comment Regression
 ```
 </ARGUMENT_SYNTAX>
 
@@ -100,13 +100,13 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Reopen issue
-/work:state-reopen 123
+/fractary-work:state-reopen 123
 
 # Reopen with explanation
-/work:state-reopen 123 --comment "Bug still occurring in production"
+/fractary-work:state-reopen 123 --comment "Bug still occurring in production"
 
 # Reopen with detailed comment
-/work:state-reopen 123 --comment "Need to retest - found edge case in v2.0"
+/fractary-work:state-reopen 123 --comment "Need to retest - found edge case in v2.0"
 ```
 </EXAMPLES>
 
@@ -139,7 +139,7 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:state-reopen <number>
+Usage: /fractary-work:state-reopen <number>
 ```
 
 **Already open**:
@@ -163,15 +163,15 @@ This command works with:
 - Jira Cloud (Maps to workflow states)
 - Linear (Maps to Linear workflow states)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-state.md](../../../docs/commands/work-state.md)
 
 Related commands:
-- `/work:state-close` - Close issue
-- `/work:state-transition` - Transition to workflow state
-- `/work:comment-create` - Add comment
-- `/work:init` - Configure work plugin
+- `/fractary-work:state-close` - Close issue
+- `/fractary-work:state-transition` - Transition to workflow state
+- `/fractary-work:comment-create` - Add comment
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

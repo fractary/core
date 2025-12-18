@@ -5,28 +5,28 @@ model: claude-haiku-4-5
 argument-hint: [--platform github|jira|linear] [--token <value>] [--yes] [--force]
 ---
 
-# /work:init - Work Plugin Setup Wizard
+# /fractary-work:init - Work Plugin Setup Wizard
 
 **Interactive setup wizard for the Fractary Work Plugin**
 
 ## Description
 
-The `/work:init` command provides an interactive setup wizard that guides you through configuring the Fractary Work Plugin for your project. It detects your environment, validates credentials, and creates the appropriate configuration file.
+The `/fractary-work:init` command provides an interactive setup wizard that guides you through configuring the Fractary Work Plugin for your project. It detects your environment, validates credentials, and creates the appropriate configuration file.
 
 ## Usage
 
 ```bash
 # Run setup wizard (interactive)
-/work:init
+/fractary-work:init
 
 # Setup with specific platform
-/work:init --platform github
+/fractary-work:init --platform github
 
 # Non-interactive mode with defaults
-/work:init --platform github --token $GITHUB_TOKEN --yes
+/fractary-work:init --platform github --token $GITHUB_TOKEN --yes
 
 # Force reconfigure
-/work:init --force
+/fractary-work:init --force
 ```
 
 ## Options
@@ -159,10 +159,10 @@ Config: .fractary/plugins/work/config.json
 
 Setup complete! Try these commands:
 
-  /work:issue create "New feature" --type feature
-  /work:issue fetch 123
-  /work:issue comment 123 "Working on this"
-  /work:state close 123
+  /fractary-work:issue create "New feature" --type feature
+  /fractary-work:issue fetch 123
+  /fractary-work:issue comment 123 "Working on this"
+  /fractary-work:state close 123
 
 Documentation: plugins/work/README.md
 ```
@@ -172,7 +172,7 @@ Documentation: plugins/work/README.md
 ### Example 1: Basic Interactive Setup
 
 ```bash
-$ /work:init
+$ /fractary-work:init
 
 # Wizard guides through all steps interactively
 # Detects GitHub from remote URL if present
@@ -184,7 +184,7 @@ $ /work:init
 
 ```bash
 $ export GITHUB_TOKEN="ghp_..."
-$ /work:init --platform github --yes
+$ /fractary-work:init --platform github --yes
 
 # Uses existing token from environment
 # Auto-detects owner/repo from git remote
@@ -196,7 +196,7 @@ $ /work:init --platform github --yes
 ```bash
 $ export JIRA_TOKEN="your_token"
 $ export JIRA_EMAIL="your@email.com"
-$ /work:init --platform jira
+$ /fractary-work:init --platform jira
 
 # Prompts for Jira URL and project key
 # Uses tokens from environment
@@ -206,7 +206,7 @@ $ /work:init --platform jira
 ### Example 4: Force Reconfigure
 
 ```bash
-$ /work:init --force
+$ /fractary-work:init --force
 
 # Overwrites existing configuration
 # Useful for fixing broken config
@@ -432,7 +432,7 @@ Or navigate to your git repository first:
 ## Implementation Notes
 
 <CONTEXT>
-You are the /work:init command for the Fractary work plugin.
+You are the /fractary-work:init command for the Fractary work plugin.
 You provide an interactive setup wizard that configures the plugin for the user's work tracking system.
 You detect platform, gather configuration, validate credentials, and create the config file.
 This is a GitHub-focused MVP - Jira and Linear support is simplified for now.
@@ -568,7 +568,7 @@ Repository: {owner}/{repo}
 
 Next steps:
 1. Ensure your token is set: export GITHUB_TOKEN="your_token"
-2. Test with: /work:issue-fetch 1
+2. Test with: /fractary-work:issue-fetch 1
 ```
 </IMPLEMENTATION>
 
@@ -644,5 +644,5 @@ export LINEAR_API_KEY="your_api_key"
 
 And test:
 ```bash
-/work:issue fetch --help
+/fractary-work:issue fetch --help
 ```

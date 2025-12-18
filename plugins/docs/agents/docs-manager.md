@@ -162,7 +162,7 @@ To fix:
 
 <INTEGRATION>
 This agent is used by:
-- **Direct Users**: Via commands (/docs:write, /docs:validate, etc.)
+- **Direct Users**: Via commands (/fractary-docs:write, /fractary-docs:validate, etc.)
 - **Other Agents**: For documentation needs
 - **FABER Workflows**: For generating workflow documentation
 

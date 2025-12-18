@@ -1,6 +1,6 @@
 ---
 name: fractary-work:comment
-description: "[DEPRECATED] Create and manage comments on work items - Use /work:comment-create or /work:comment-list instead"
+description: "[DEPRECATED] Create and manage comments on work items - Use /fractary-work:comment-create or /fractary-work:comment-list instead"
 model: claude-haiku-4-5
 argument-hint: create <issue_number> <text> | list <issue_number> [--limit <n>]
 ---
@@ -10,8 +10,8 @@ argument-hint: create <issue_number> <text> | list <issue_number> [--limit <n>]
 
 This multi-function command has been split into focused single-purpose commands for better usability:
 
-- `/work:comment-create` - Add a comment to an issue
-- `/work:comment-list` - List comments on an issue
+- `/fractary-work:comment-create` - Add a comment to an issue
+- `/fractary-work:comment-list` - List comments on an issue
 
 **Why this change?**
 - Simpler command structure (no subcommands)
@@ -20,8 +20,8 @@ This multi-function command has been split into focused single-purpose commands 
 - Consistent with Unix philosophy: do one thing well
 
 **Migration:**
-- `/work:comment create 123 "text"` → `/work:comment-create 123 "text"`
-- `/work:comment list 123` → `/work:comment-list 123`
+- `/fractary-work:comment create 123 "text"` → `/fractary-work:comment-create 123 "text"`
+- `/fractary-work:comment list 123` → `/fractary-work:comment-list 123`
 
 This command will be removed in the next major version. Please update your workflows to use the new single-purpose commands.
 </DEPRECATION_NOTICE>
@@ -89,17 +89,17 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:comment create 123 "Working on this now"
-✅ /work:comment create 123 "Investigated the bug - found the root cause"
+✅ /fractary-work:comment create 123 "Working on this now"
+✅ /fractary-work:comment create 123 "Investigated the bug - found the root cause"
 
-❌ /work:comment create 123 Working on this now
-❌ /work:comment create 123 Investigated the bug
+❌ /fractary-work:comment create 123 Working on this now
+❌ /fractary-work:comment create 123 Investigated the bug
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:comment create 123 LGTM
-✅ /work:comment list 123 --limit 5
+✅ /fractary-work:comment create 123 LGTM
+✅ /fractary-work:comment list 123 --limit 5
 ```
 
 **Comment text guidelines:**
@@ -125,7 +125,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:comment create 123 "Working on this now"
+/fractary-work:comment create 123 "Working on this now"
 → Invoke agent with {"operation": "create-comment", "parameters": {"issue_number": "123", "comment": "Working on this now"}}
 ```
 
@@ -143,7 +143,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:comment list 123
+/fractary-work:comment list 123
 → Invoke agent with {"operation": "list-comments", "parameters": {"issue_number": "123", "limit": 10}}
 ```
 </ARGUMENT_PARSING>
@@ -153,16 +153,16 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Add a comment
-/work:comment create 123 "Starting work on this issue"
+/fractary-work:comment create 123 "Starting work on this issue"
 
 # Add a longer comment
-/work:comment create 123 "Investigated the bug - it's caused by a race condition"
+/fractary-work:comment create 123 "Investigated the bug - it's caused by a race condition"
 
 # List comments
-/work:comment list 123
+/fractary-work:comment list 123
 
 # List recent comments only
-/work:comment list 123 --limit 5
+/fractary-work:comment list 123 --limit 5
 ```
 </EXAMPLES>
 
@@ -200,13 +200,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:comment create <issue_number> <text>
+Usage: /fractary-work:comment create <issue_number> <text>
 ```
 
 **Missing comment text**:
 ```
 Error: comment text is required
-Usage: /work:comment create <issue_number> <text>
+Usage: /fractary-work:comment create <issue_number> <text>
 ```
 
 **Invalid issue number**:
@@ -228,7 +228,7 @@ This command works with:
 - Jira Cloud
 - Linear
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## FABER Integration
 
@@ -239,7 +239,7 @@ When used within FABER workflows, comments automatically include phase informati
 For detailed documentation, see: [/docs/commands/work-comment.md](../../../docs/commands/work-comment.md)
 
 Related commands:
-- `/work:issue` - Manage issues
-- `/work:state` - Manage issue states
-- `/work:init` - Configure work plugin
+- `/fractary-work:issue` - Manage issues
+- `/fractary-work:state` - Manage issue states
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

@@ -136,7 +136,7 @@ Each document type defined by exactly 5 files:
 ### Negative
 
 ⚠️ **Migration required** - Frontmatter field change: `type:` → `fractary_doc_type:`
-⚠️ **Breaking changes** - Commands renamed: `/fractary-docs:*` → `/docs:*`
+⚠️ **Breaking changes** - Commands renamed: `/fractary-docs:*` → `/fractary-docs:*`
 ⚠️ **New mental model** - Users need to understand type context vs skills
 ⚠️ **Indirection** - Skills load type context dynamically (less obvious)
 

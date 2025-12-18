@@ -1,6 +1,6 @@
 ---
 name: fractary-work:state
-description: "[DEPRECATED] Manage issue lifecycle states - Use /work:state-close, /work:state-reopen, or /work:state-transition instead"
+description: "[DEPRECATED] Manage issue lifecycle states - Use /fractary-work:state-close, /fractary-work:state-reopen, or /fractary-work:state-transition instead"
 model: claude-haiku-4-5
 argument-hint: close <number> [--comment <text>] | reopen <number> [--comment <text>] | transition <number> <state>
 ---
@@ -10,9 +10,9 @@ argument-hint: close <number> [--comment <text>] | reopen <number> [--comment <t
 
 This multi-function command has been split into focused single-purpose commands for better usability:
 
-- `/work:state-close` - Close an issue
-- `/work:state-reopen` - Reopen a closed issue
-- `/work:state-transition` - Transition issue to a workflow state
+- `/fractary-work:state-close` - Close an issue
+- `/fractary-work:state-reopen` - Reopen a closed issue
+- `/fractary-work:state-transition` - Transition issue to a workflow state
 
 **Why this change?**
 - Simpler command structure (no subcommands)
@@ -21,9 +21,9 @@ This multi-function command has been split into focused single-purpose commands 
 - Consistent with Unix philosophy: do one thing well
 
 **Migration:**
-- `/work:state close 123` → `/work:state-close 123`
-- `/work:state reopen 123` → `/work:state-reopen 123`
-- `/work:state transition 123 in_progress` → `/work:state-transition 123 in_progress`
+- `/fractary-work:state close 123` → `/fractary-work:state-close 123`
+- `/fractary-work:state reopen 123` → `/fractary-work:state-reopen 123`
+- `/fractary-work:state transition 123 in_progress` → `/fractary-work:state-transition 123 in_progress`
 
 This command will be removed in the next major version. Please update your workflows to use the new single-purpose commands.
 </DEPRECATION_NOTICE>
@@ -91,18 +91,18 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:state close 123 --comment "Fixed in PR #456"
-✅ /work:state reopen 123 --comment "Bug still present in production"
+✅ /fractary-work:state close 123 --comment "Fixed in PR #456"
+✅ /fractary-work:state reopen 123 --comment "Bug still present in production"
 
-❌ /work:state close 123 --comment Fixed in PR #456
-❌ /work:state reopen 123 --comment Bug still present
+❌ /fractary-work:state close 123 --comment Fixed in PR #456
+❌ /fractary-work:state reopen 123 --comment Bug still present
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:state close 123
-✅ /work:state transition 123 in_progress
-✅ /work:state reopen 123 --reason regression
+✅ /fractary-work:state close 123
+✅ /fractary-work:state transition 123 in_progress
+✅ /fractary-work:state reopen 123 --reason regression
 ```
 
 **State values are exact keywords:**
@@ -128,7 +128,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:state close 123 --comment "Fixed in PR #456"
+/fractary-work:state close 123 --comment "Fixed in PR #456"
 → Invoke agent with {"operation": "close-issue", "parameters": {"issue_number": "123", "comment": "Fixed in PR #456", "reason": "completed"}}
 ```
 
@@ -145,7 +145,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:state reopen 123 --comment "Bug still present in v2.0"
+/fractary-work:state reopen 123 --comment "Bug still present in v2.0"
 → Invoke agent with {"operation": "reopen-issue", "parameters": {"issue_number": "123", "comment": "Bug still present in v2.0"}}
 ```
 
@@ -163,7 +163,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:state transition 123 in_progress
+/fractary-work:state transition 123 in_progress
 → Invoke agent with {"operation": "transition-state", "parameters": {"issue_number": "123", "state": "in_progress"}}
 ```
 </ARGUMENT_PARSING>
@@ -173,21 +173,21 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Close issue
-/work:state close 123
+/fractary-work:state close 123
 
 # Close with comment
-/work:state close 123 --comment "Fixed in PR #456"
+/fractary-work:state close 123 --comment "Fixed in PR #456"
 
 # Reopen issue
-/work:state reopen 123
+/fractary-work:state reopen 123
 
 # Reopen with explanation
-/work:state reopen 123 --comment "Bug still occurring in production"
+/fractary-work:state reopen 123 --comment "Bug still occurring in production"
 
 # Transition to specific state
-/work:state transition 123 in_progress
-/work:state transition 123 in_review
-/work:state transition 123 done
+/fractary-work:state transition 123 in_progress
+/fractary-work:state transition 123 in_review
+/fractary-work:state transition 123 done
 ```
 </EXAMPLES>
 
@@ -226,7 +226,7 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:state close <number>
+Usage: /fractary-work:state close <number>
 ```
 
 **Invalid state**:
@@ -267,7 +267,7 @@ This command works with:
 - Jira Cloud (Maps to workflow states)
 - Linear (Maps to Linear workflow states)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## FABER Integration
 
@@ -278,8 +278,8 @@ FABER workflows automatically manage state transitions through the workflow phas
 For detailed documentation, see: [/docs/commands/work-state.md](../../../docs/commands/work-state.md)
 
 Related commands:
-- `/work:issue` - Manage issues
-- `/work:comment` - Manage comments
-- `/work:label` - Manage labels
-- `/work:init` - Configure work plugin
+- `/fractary-work:issue` - Manage issues
+- `/fractary-work:comment` - Manage comments
+- `/fractary-work:label` - Manage labels
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

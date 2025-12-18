@@ -65,12 +65,12 @@ This command follows the **space-separated** argument syntax (consistent with wo
 ### Examples
 
 ```bash
-✅ /work:milestone-list
-✅ /work:milestone-list --state open
-✅ /work:milestone-list --state all --sort completeness
-✅ /work:milestone-list --sort due_date
+✅ /fractary-work:milestone-list
+✅ /fractary-work:milestone-list --state open
+✅ /fractary-work:milestone-list --state all --sort completeness
+✅ /fractary-work:milestone-list --sort due_date
 
-❌ /work:milestone-list --state=open
+❌ /fractary-work:milestone-list --state=open
 ```
 
 **State values are exact keywords:**
@@ -96,22 +96,22 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # List all open milestones (default)
-/work:milestone-list
+/fractary-work:milestone-list
 
 # List all milestones
-/work:milestone-list --state all
+/fractary-work:milestone-list --state all
 
 # List closed milestones
-/work:milestone-list --state closed
+/fractary-work:milestone-list --state closed
 
 # List sorted by completeness
-/work:milestone-list --sort completeness
+/fractary-work:milestone-list --sort completeness
 
 # List sorted by title
-/work:milestone-list --sort title
+/fractary-work:milestone-list --sort title
 
 # Combine filters
-/work:milestone-list --state open --sort due_date
+/fractary-work:milestone-list --state open --sort due_date
 ```
 </EXAMPLES>
 
@@ -162,15 +162,15 @@ This command works with:
 - Jira (maps to Versions or Sprints)
 - Linear (maps to Projects or Cycles)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-milestone.md](../../../docs/commands/work-milestone.md)
 
 Related commands:
-- `/work:milestone-create` - Create milestone
-- `/work:milestone-set` - Assign milestone to issue
-- `/work:milestone-close` - Close milestone
-- `/work:init` - Configure work plugin
+- `/fractary-work:milestone-create` - Create milestone
+- `/fractary-work:milestone-set` - Assign milestone to issue
+- `/fractary-work:milestone-close` - Close milestone
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

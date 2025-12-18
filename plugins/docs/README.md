@@ -41,64 +41,64 @@ The `fractary-docs` plugin provides a flexible, type-agnostic documentation mana
 
 ```bash
 # Create API documentation
-/docs:write api
+/fractary-docs:write api
 
 # Create ADR
-/docs:write adr
+/fractary-docs:write adr
 
 # Create dataset documentation
-/docs:write dataset
+/fractary-docs:write dataset
 
 # Batch create multiple docs
-/docs:write api docs/api/**/*.md --batch
+/fractary-docs:write api docs/api/**/*.md --batch
 ```
 
 ### 2. Validate Documentation
 
 ```bash
 # Validate all documentation
-/docs:validate
+/fractary-docs:validate
 
 # Validate specific file
-/docs:validate docs/api/user-api/README.md
+/fractary-docs:validate docs/api/user-api/README.md
 
 # Validate specific type
-/docs:validate --doc-type api
+/fractary-docs:validate --doc-type api
 
 # Validate and fix
-/docs:validate docs/ --fix
+/fractary-docs:validate docs/ --fix
 ```
 
 ### 3. List Documentation
 
 ```bash
 # List all documentation
-/docs:list
+/fractary-docs:list
 
 # List API docs only
-/docs:list --doc-type api
+/fractary-docs:list --doc-type api
 
 # List draft documents
-/docs:list --status draft
+/fractary-docs:list --status draft
 
 # Output as JSON
-/docs:list --format json
+/fractary-docs:list --format json
 
 # Output as markdown
-/docs:list --format markdown
+/fractary-docs:list --format markdown
 ```
 
 ### 4. Audit Documentation
 
 ```bash
 # Audit all documentation
-/docs:audit
+/fractary-docs:audit
 
 # Audit specific directory
-/docs:audit docs/api
+/fractary-docs:audit docs/api
 
 # Audit specific type
-/docs:audit --doc-type dataset
+/fractary-docs:audit --doc-type dataset
 ```
 
 ## Architecture
@@ -108,7 +108,7 @@ The plugin uses a **three-layer architecture** optimized for context efficiency:
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Layer 1: Commands (Entry Points)                      │
-│  /docs:write, /docs:validate, /docs:list, /docs:audit  │
+│  /fractary-docs:write, /fractary-docs:validate, /fractary-docs:list, /fractary-docs:audit  │
 └──────────────────────┬──────────────────────────────────┘
                        │
                        ▼
@@ -317,12 +317,12 @@ Create or update documentation with automatic validation and indexing.
 
 **Single document**:
 ```bash
-/docs:write api
+/fractary-docs:write api
 ```
 
 **Batch operation**:
 ```bash
-/docs:write api docs/api/**/*.md --batch
+/fractary-docs:write api docs/api/**/*.md --batch
 ```
 
 **Pipeline**:
@@ -345,7 +345,7 @@ Validate documentation against schema and quality rules.
 
 **Example**:
 ```bash
-/docs:validate docs/api/user-login/README.md
+/fractary-docs:validate docs/api/user-login/README.md
 ```
 
 ### Classify Operation (doc-classifier)
@@ -360,7 +360,7 @@ Auto-detect document type from path or content.
 **Example**:
 ```bash
 # Automatically detects "api" from path
-/docs:write docs/api/new-endpoint/README.md
+/fractary-docs:write docs/api/new-endpoint/README.md
 ```
 
 ### List Operation (doc-lister)
@@ -379,7 +379,7 @@ List and filter documentation with various output formats.
 
 **Example**:
 ```bash
-/docs:list --doc-type api --status published --format markdown
+/fractary-docs:list --doc-type api --status published --format markdown
 ```
 
 ### Audit Operation (docs-director)
@@ -459,7 +459,7 @@ Handles batch operations with pattern matching and parallel execution.
 
 **Example**:
 ```bash
-/docs:write api docs/api/**/README.md --batch
+/fractary-docs:write api docs/api/**/README.md --batch
 ```
 
 ## Agent Invocation
@@ -593,7 +593,7 @@ Use semantic versioning (semver.org)
 ### 3. Use immediately
 
 ```bash
-/docs:write changelog
+/fractary-docs:write changelog
 ```
 
 No skill changes needed! The operation skills automatically load the new type context.
@@ -626,8 +626,8 @@ fractary_doc_type: api
 
 **v2.0**:
 ```bash
-/docs:write api
-/docs:validate --doc-type api
+/fractary-docs:write api
+/fractary-docs:validate --doc-type api
 ```
 
 ### Skill Changes
@@ -715,10 +715,10 @@ service: AuthService
 
 ## Commands
 
-- `/docs:write <doc_type>` - Create or update documentation
-- `/docs:validate [path]` - Validate documentation
-- `/docs:list [options]` - List and filter documentation
-- `/docs:audit [directory]` - Audit documentation quality
+- `/fractary-docs:write <doc_type>` - Create or update documentation
+- `/fractary-docs:validate [path]` - Validate documentation
+- `/fractary-docs:list [options]` - List and filter documentation
+- `/fractary-docs:audit [directory]` - Audit documentation quality
 
 See individual command files in `commands/` for detailed usage.
 
@@ -849,10 +849,10 @@ plugins/docs/
 │   ├── audit/
 │   └── _untyped/
 └── commands/
-    ├── write.md                       # /docs:write
-    ├── validate.md                    # /docs:validate
-    ├── list.md                        # /docs:list
-    └── audit.md                       # /docs:audit
+    ├── write.md                       # /fractary-docs:write
+    ├── validate.md                    # /fractary-docs:validate
+    ├── list.md                        # /fractary-docs:list
+    └── audit.md                       # /fractary-docs:audit
 ```
 
 ## Version
@@ -861,7 +861,7 @@ plugins/docs/
 
 **Breaking changes from 1.x**:
 - Frontmatter field: `type:` → `fractary_doc_type:`
-- Commands: `/fractary-docs:*` → `/docs:*`
+- Commands: `/fractary-docs:*` → `/fractary-docs:*`
 - Skills: Type-specific → Operation-specific
 
 ## Contributing

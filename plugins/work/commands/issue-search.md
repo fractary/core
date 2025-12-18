@@ -78,18 +78,18 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:issue-search "authentication bug"
-✅ /work:issue-search "login timeout" --state open
+✅ /fractary-work:issue-search "authentication bug"
+✅ /fractary-work:issue-search "login timeout" --state open
 
-❌ /work:issue-search authentication bug
-❌ /work:issue-search login timeout --state open
+❌ /fractary-work:issue-search authentication bug
+❌ /fractary-work:issue-search login timeout --state open
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:issue-search authentication
-✅ /work:issue-search bug --state all
-✅ /work:issue-search login --limit 10
+✅ /fractary-work:issue-search authentication
+✅ /fractary-work:issue-search bug --state all
+✅ /fractary-work:issue-search login --limit 10
 ```
 </ARGUMENT_SYNTAX>
 
@@ -111,19 +111,19 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Search all issues
-/work:issue-search "authentication"
+/fractary-work:issue-search "authentication"
 
 # Search with multi-word query
-/work:issue-search "login timeout bug"
+/fractary-work:issue-search "login timeout bug"
 
 # Search only open issues
-/work:issue-search "authentication" --state open
+/fractary-work:issue-search "authentication" --state open
 
 # Search with result limit
-/work:issue-search "bug" --limit 10
+/fractary-work:issue-search "bug" --limit 10
 
 # Combine filters
-/work:issue-search "performance" --state closed --limit 5
+/fractary-work:issue-search "performance" --state closed --limit 5
 ```
 </EXAMPLES>
 
@@ -157,7 +157,7 @@ Common errors to handle:
 **Missing query**:
 ```
 Error: search query is required
-Usage: /work:issue-search <query> [--state <state>]
+Usage: /fractary-work:issue-search <query> [--state <state>]
 ```
 
 **Invalid state**:
@@ -169,7 +169,7 @@ Valid states: open, closed, all
 **Invalid limit**:
 ```
 Error: limit must be a positive number
-Usage: /work:issue-search <query> --limit <n>
+Usage: /fractary-work:issue-search <query> --limit <n>
 ```
 </ERROR_HANDLING>
 
@@ -188,14 +188,14 @@ This command works with:
 - Jira Cloud
 - Linear
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-issue.md](../../../docs/commands/work-issue.md)
 
 Related commands:
-- `/work:issue-list` - List issues with filters
-- `/work:issue-fetch` - Fetch issue details
-- `/work:init` - Configure work plugin
+- `/fractary-work:issue-list` - List issues with filters
+- `/fractary-work:issue-fetch` - Fetch issue details
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

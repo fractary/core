@@ -2,14 +2,14 @@
 model: claude-haiku-4-5
 ---
 
-# /docs:validate
+# /fractary-docs:validate
 
 Validate documentation against type-specific rules and schemas.
 
 ## Usage
 
 ```bash
-/docs:validate [file_path|pattern] [doc_type]
+/fractary-docs:validate [file_path|pattern] [doc_type]
 ```
 
 ## Arguments
@@ -21,19 +21,19 @@ Validate documentation against type-specific rules and schemas.
 
 ```bash
 # Validate single document (auto-detect type)
-/docs:validate docs/api/user-login/README.md
+/fractary-docs:validate docs/api/user-login/README.md
 
 # Validate single document with explicit type
-/docs:validate docs/api/user-login/README.md api
+/fractary-docs:validate docs/api/user-login/README.md api
 
 # Validate all API documents
-/docs:validate docs/api/**/*.md
+/fractary-docs:validate docs/api/**/*.md
 
 # Validate all documentation
-/docs:validate docs/
+/fractary-docs:validate docs/
 
 # Validate current directory
-/docs:validate
+/fractary-docs:validate
 ```
 
 ## What This Does
@@ -85,9 +85,9 @@ Warnings (1):
 
 ## Related Commands
 
-- `/docs:write` - Create or update documentation
-- `/docs:audit` - Audit all documentation
-- `/docs:list` - List documentation files
+- `/fractary-docs:write` - Create or update documentation
+- `/fractary-docs:audit` - Audit all documentation
+- `/fractary-docs:list` - List documentation files
 
 ---
 

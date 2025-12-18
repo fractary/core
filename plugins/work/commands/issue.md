@@ -1,6 +1,6 @@
 ---
 name: fractary-work:issue
-description: "[DEPRECATED] Create, fetch, update, search, and manage work items - Use /work:issue-create, /work:issue-fetch, /work:issue-list, /work:issue-update, /work:issue-assign, or /work:issue-search instead"
+description: "[DEPRECATED] Create, fetch, update, search, and manage work items - Use /fractary-work:issue-create, /fractary-work:issue-fetch, /fractary-work:issue-list, /fractary-work:issue-update, /fractary-work:issue-assign, or /fractary-work:issue-search instead"
 model: claude-haiku-4-5
 argument-hint: create <title> [--type <type>] [--body <text>] | fetch <number> | list [--state <state>] [--label <label>] | update <number> [--title <title>] [--body <text>] | assign <number> <user> | search <query>
 ---
@@ -10,12 +10,12 @@ argument-hint: create <title> [--type <type>] [--body <text>] | fetch <number> |
 
 This multi-function command has been split into focused single-purpose commands for better usability:
 
-- `/work:issue-create` - Create a new work item
-- `/work:issue-fetch` - Fetch and display issue details
-- `/work:issue-list` - List issues with filtering
-- `/work:issue-update` - Update issue title or description
-- `/work:issue-assign` - Assign issue to a user
-- `/work:issue-search` - Search issues by keyword
+- `/fractary-work:issue-create` - Create a new work item
+- `/fractary-work:issue-fetch` - Fetch and display issue details
+- `/fractary-work:issue-list` - List issues with filtering
+- `/fractary-work:issue-update` - Update issue title or description
+- `/fractary-work:issue-assign` - Assign issue to a user
+- `/fractary-work:issue-search` - Search issues by keyword
 
 **Why this change?**
 - Simpler command structure (no subcommands)
@@ -24,12 +24,12 @@ This multi-function command has been split into focused single-purpose commands 
 - Consistent with Unix philosophy: do one thing well
 
 **Migration:**
-- `/work:issue create "title"` → `/work:issue-create "title"`
-- `/work:issue fetch 123` → `/work:issue-fetch 123`
-- `/work:issue list --state open` → `/work:issue-list --state open`
-- `/work:issue update 123 --title "new"` → `/work:issue-update 123 --title "new"`
-- `/work:issue assign 123 @me` → `/work:issue-assign 123 @me`
-- `/work:issue search "query"` → `/work:issue-search "query"`
+- `/fractary-work:issue create "title"` → `/fractary-work:issue-create "title"`
+- `/fractary-work:issue fetch 123` → `/fractary-work:issue-fetch 123`
+- `/fractary-work:issue list --state open` → `/fractary-work:issue-list --state open`
+- `/fractary-work:issue update 123 --title "new"` → `/fractary-work:issue-update 123 --title "new"`
+- `/fractary-work:issue assign 123 @me` → `/fractary-work:issue-assign 123 @me`
+- `/fractary-work:issue search "query"` → `/fractary-work:issue-search "query"`
 
 This command will be removed in the next major version. Please update your workflows to use the new single-purpose commands.
 </DEPRECATION_NOTICE>
@@ -112,25 +112,25 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:issue create "Title with spaces" --body "Description with spaces"
-✅ /work:issue update 123 --title "New title here"
-✅ /work:issue create "Bug fix" --type bug --label high-priority
+✅ /fractary-work:issue create "Title with spaces" --body "Description with spaces"
+✅ /fractary-work:issue update 123 --title "New title here"
+✅ /fractary-work:issue create "Bug fix" --type bug --label high-priority
 
-❌ /work:issue create Title with spaces --body Description with spaces
-❌ /work:issue update 123 --title New title here
+❌ /fractary-work:issue create Title with spaces --body Description with spaces
+❌ /fractary-work:issue update 123 --title New title here
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:issue create "Title" --type feature
-✅ /work:issue list --state open
-✅ /work:issue fetch 123
+✅ /fractary-work:issue create "Title" --type feature
+✅ /fractary-work:issue list --state open
+✅ /fractary-work:issue fetch 123
 ```
 
 **Labels cannot contain spaces:**
 ```bash
-✅ /work:issue create "Title" --label urgent --label high-priority
-❌ /work:issue create "Title" --label "high priority"  # Spaces not supported in label values
+✅ /fractary-work:issue create "Title" --label urgent --label high-priority
+❌ /fractary-work:issue create "Title" --label "high priority"  # Spaces not supported in label values
 ```
 
 Use hyphens or underscores instead: `high-priority`, `high_priority`
@@ -158,13 +158,13 @@ Use hyphens or underscores instead: `high-priority`, `high_priority`
 
 **Example**:
 ```
-/work:issue create "Add CSV export" --type feature --body "Allow users to export data"
+/fractary-work:issue create "Add CSV export" --type feature --body "Allow users to export data"
 → Invoke agent with {"operation": "create-issue", "parameters": {"title": "Add CSV export", "description": "Allow users to export data", "labels": "type: feature"}}
 ```
 
 **Example with additional labels**:
 ```
-/work:issue create "Fix login bug" --type bug --label urgent --label security
+/fractary-work:issue create "Fix login bug" --type bug --label urgent --label security
 → Invoke agent with {"operation": "create-issue", "parameters": {"title": "Fix login bug", "labels": "type: bug,urgent,security"}}
 ```
 
@@ -178,7 +178,7 @@ Use hyphens or underscores instead: `high-priority`, `high_priority`
 
 **Example**:
 ```
-/work:issue fetch 123
+/fractary-work:issue fetch 123
 → Invoke agent with {"operation": "fetch-issue", "parameters": {"issue_number": "123"}}
 ```
 
@@ -196,7 +196,7 @@ Use hyphens or underscores instead: `high-priority`, `high_priority`
 
 **Example**:
 ```
-/work:issue list --state open --label bug
+/fractary-work:issue list --state open --label bug
 → Invoke agent with {"operation": "list-issues", "parameters": {"state": "open", "labels": ["bug"]}}
 ```
 
@@ -214,7 +214,7 @@ Use hyphens or underscores instead: `high-priority`, `high_priority`
 
 **Example**:
 ```
-/work:issue update 123 --title "New title"
+/fractary-work:issue update 123 --title "New title"
 → Invoke agent with {"operation": "update-issue", "parameters": {"issue_number": "123", "title": "New title"}}
 ```
 
@@ -229,7 +229,7 @@ Use hyphens or underscores instead: `high-priority`, `high_priority`
 
 **Example**:
 ```
-/work:issue assign 123 @me
+/fractary-work:issue assign 123 @me
 → Invoke agent with {"operation": "assign-issue", "parameters": {"issue_number": "123", "assignee": "current_user"}}
 ```
 
@@ -247,7 +247,7 @@ Use hyphens or underscores instead: `high-priority`, `high_priority`
 
 **Example**:
 ```
-/work:issue search "authentication"
+/fractary-work:issue search "authentication"
 → Invoke agent with {"operation": "search-issues", "parameters": {"query": "authentication", "state": "all"}}
 ```
 </ARGUMENT_PARSING>
@@ -257,29 +257,29 @@ Use hyphens or underscores instead: `high-priority`, `high_priority`
 
 ```bash
 # Create a new feature issue
-/work:issue create "Add CSV export feature" --type feature
+/fractary-work:issue create "Add CSV export feature" --type feature
 
 # Create a bug with description
-/work:issue create "Fix login timeout" --type bug --body "Users logged out after 5 minutes"
+/fractary-work:issue create "Fix login timeout" --type bug --body "Users logged out after 5 minutes"
 
 # Fetch issue details
-/work:issue fetch 123
+/fractary-work:issue fetch 123
 
 # List open issues
-/work:issue list
-/work:issue list --state open
+/fractary-work:issue list
+/fractary-work:issue list --state open
 
 # List issues by label
-/work:issue list --label bug
+/fractary-work:issue list --label bug
 
 # Update issue title
-/work:issue update 123 --title "Fix authentication timeout bug"
+/fractary-work:issue update 123 --title "Fix authentication timeout bug"
 
 # Assign issue to yourself
-/work:issue assign 123 @me
+/fractary-work:issue assign 123 @me
 
 # Search for issues
-/work:issue search "authentication"
+/fractary-work:issue search "authentication"
 ```
 </EXAMPLES>
 
@@ -325,7 +325,7 @@ When the user provides `--type <value>`, convert it to `"type: <value>"` label f
 - `--type chore` → `"type: chore"` label
 - `--type patch` → `"type: patch"` label
 
-Example: `/work:issue create "Title" --type bug --label urgent` becomes:
+Example: `/fractary-work:issue create "Title" --type bug --label urgent` becomes:
 ```json
 {
   "operation": "create-issue",
@@ -343,7 +343,7 @@ Common errors to handle:
 **Missing required argument**:
 ```
 Error: title is required
-Usage: /work:issue create <title> [--type <type>]
+Usage: /fractary-work:issue create <title> [--type <type>]
 ```
 
 **Invalid subcommand**:
@@ -355,7 +355,7 @@ Available: create, fetch, list, update, assign, search
 **Missing issue number**:
 ```
 Error: issue number is required
-Usage: /work:issue fetch <number>
+Usage: /fractary-work:issue fetch <number>
 ```
 </ERROR_HANDLING>
 
@@ -380,16 +380,16 @@ This command works with:
 - Jira Cloud
 - Linear
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/issue.md](../../../docs/commands/work-issue.md)
 
 Related commands:
-- `/work:comment` - Manage issue comments
-- `/work:state` - Manage issue states
-- `/work:label` - Manage issue labels
-- `/work:milestone` - Manage milestones
-- `/work:init` - Configure work plugin
+- `/fractary-work:comment` - Manage issue comments
+- `/fractary-work:state` - Manage issue states
+- `/fractary-work:label` - Manage issue labels
+- `/fractary-work:milestone` - Manage milestones
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

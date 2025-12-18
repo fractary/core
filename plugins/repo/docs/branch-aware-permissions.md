@@ -426,13 +426,13 @@ To auto-allow push to staging:
 **Solution**:
 ```bash
 # Validate settings
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 
 # Check what's configured
 cat .claude/settings.json | jq '.permissions.bash'
 
 # Re-run setup
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 ```
 
 ### Protected Branch Not Protected
@@ -450,7 +450,7 @@ cat .claude/settings.json | jq '.permissions.bash'
 ls -la .claude/settings.json
 
 # Validate settings
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 
 # Check for specific pattern
 cat .claude/settings.json | jq '.permissions.bash.requireApproval | index("git push origin main")'
@@ -473,10 +473,10 @@ cat .claude/settings.json | jq '.permissions.bash.requireApproval | index("git p
 # Check if in skip mode (look at Claude Code startup flags)
 
 # Validate settings
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 
 # Re-run setup to ensure deny rules in place
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 
 # Verify deny rules
 cat .claude/settings.json | jq '.permissions.bash.deny'
@@ -488,7 +488,7 @@ cat .claude/settings.json | jq '.permissions.bash.deny'
 
 ```bash
 cd my-project
-/repo:init-permissions
+/fractary-repo:init-permissions
 ```
 
 Each project gets its own settings.
@@ -518,7 +518,7 @@ vim .claude/settings.json
 
 ```bash
 # After editing settings manually
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 ### 5. Keep Backups Updated
@@ -583,5 +583,5 @@ cp .claude/settings.json .claude/settings.json.manual-backup
 **Ready to enable fast, safe workflows?**
 
 ```bash
-/repo:init-permissions
+/fractary-repo:init-permissions
 ```

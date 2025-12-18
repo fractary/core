@@ -243,7 +243,7 @@ When executing `git push origin main`:
 }
 ```
 
-**After running `/repo:init-permissions`**:
+**After running `/fractary-repo:init-permissions`**:
 ```json
 {
   "permissions": {
@@ -296,7 +296,7 @@ To verify the permission system works as documented:
 1. **Setup**:
    ```bash
    cd /path/to/test/project
-   /repo:init-permissions
+   /fractary-repo:init-permissions
    cat .claude/settings.json  # Verify permissions configured
    ```
 

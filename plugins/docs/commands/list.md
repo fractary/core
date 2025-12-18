@@ -2,14 +2,14 @@
 model: claude-haiku-4-5
 ---
 
-# /docs:list
+# /fractary-docs:list
 
 List and filter documentation files with metadata.
 
 ## Usage
 
 ```bash
-/docs:list [directory] [--doc-type <type>] [--status <status>] [--format <format>]
+/fractary-docs:list [directory] [--doc-type <type>] [--status <status>] [--format <format>]
 ```
 
 ## Arguments
@@ -23,22 +23,22 @@ List and filter documentation files with metadata.
 
 ```bash
 # List all documentation
-/docs:list
+/fractary-docs:list
 
 # List all API documentation
-/docs:list --doc-type api
+/fractary-docs:list --doc-type api
 
 # List draft documents
-/docs:list --status draft
+/fractary-docs:list --status draft
 
 # List dataset documentation in JSON format
-/docs:list docs/datasets --format json
+/fractary-docs:list docs/datasets --format json
 
 # List all ADRs in markdown format
-/docs:list docs/architecture/adrs --doc-type adr --format markdown
+/fractary-docs:list docs/architecture/adrs --doc-type adr --format markdown
 
 # List published guides
-/docs:list docs/guides --status published
+/fractary-docs:list docs/guides --status published
 ```
 
 ## Output Formats
@@ -86,9 +86,9 @@ Total: 3 documents
 
 ## Related Commands
 
-- `/docs:write` - Create or update documentation
-- `/docs:validate` - Validate documentation
-- `/docs:audit` - Audit all documentation
+- `/fractary-docs:write` - Create or update documentation
+- `/fractary-docs:validate` - Validate documentation
+- `/fractary-docs:audit` - Audit all documentation
 
 ---
 

@@ -69,17 +69,17 @@ Your role is to parse user input and invoke the work-manager agent to fetch issu
 ## Command Argument Syntax
 
 This command takes a simple positional argument:
-- **Format**: `/work:issue-fetch <number>`
+- **Format**: `/fractary-work:issue-fetch <number>`
 - **number**: Issue number (e.g., 123, not "#123")
 
 ### Examples
 
 ```bash
-✅ /work:issue-fetch 123
-✅ /work:issue-fetch 42
+✅ /fractary-work:issue-fetch 123
+✅ /fractary-work:issue-fetch 42
 
-❌ /work:issue-fetch #123  # Don't include # symbol
-❌ /work:issue-fetch       # Issue number required
+❌ /fractary-work:issue-fetch #123  # Don't include # symbol
+❌ /fractary-work:issue-fetch       # Issue number required
 ```
 </ARGUMENT_SYNTAX>
 
@@ -97,10 +97,10 @@ This command takes a simple positional argument:
 
 ```bash
 # Fetch issue details
-/work:issue-fetch 123
+/fractary-work:issue-fetch 123
 
 # Fetch different issue
-/work:issue-fetch 456
+/fractary-work:issue-fetch 456
 ```
 </EXAMPLES>
 
@@ -139,7 +139,7 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue number is required
-Usage: /work:issue-fetch <number>
+Usage: /fractary-work:issue-fetch <number>
 ```
 
 **Invalid issue number**:
@@ -157,16 +157,16 @@ This command works with:
 - Jira Cloud
 - Linear
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-issue.md](../../../docs/commands/work-issue.md)
 
 Related commands:
-- `/work:issue-create` - Create new issue
-- `/work:issue-list` - List issues
-- `/work:issue-update` - Update issue
-- `/work:comment-list` - List comments
-- `/work:init` - Configure work plugin
+- `/fractary-work:issue-create` - Create new issue
+- `/fractary-work:issue-list` - List issues
+- `/fractary-work:issue-update` - Update issue
+- `/fractary-work:comment-list` - List comments
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

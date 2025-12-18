@@ -17,7 +17,7 @@ Thank you for your interest in contributing to the fractary-docs plugin! This gu
 The fractary-docs plugin uses a **3-layer architecture** with **data-driven type context**:
 
 ```
-Layer 1: Commands (/docs:write, /docs:validate, etc.)
+Layer 1: Commands (/fractary-docs:write, /fractary-docs:validate, etc.)
    ↓
 Layer 2: Coordination (docs-manager, docs-director)
    ↓
@@ -295,10 +295,10 @@ Hierarchical (grouped by service, then version):
 
 ```bash
 # Create a test document
-/docs:write your-type
+/fractary-docs:write your-type
 
 # Validate it
-/docs:validate docs/{your-type}/*.md
+/fractary-docs:validate docs/{your-type}/*.md
 
 # Check the generated index
 cat docs/{your-type}/README.md
@@ -436,11 +436,11 @@ Test full workflows:
 
 ```bash
 # Test write → validate → index pipeline
-/docs:write api
+/fractary-docs:write api
 # Verify: document created, validated, index updated
 
 # Test batch operations
-/docs:write api docs/api/**/README.md --batch
+/fractary-docs:write api docs/api/**/README.md --batch
 ```
 
 ### Type Coverage
@@ -450,8 +450,8 @@ Test with multiple document types:
 ```bash
 for type in api adr dataset etl testing; do
     echo "Testing type: $type"
-    /docs:write $type
-    /docs:validate --doc-type $type
+    /fractary-docs:write $type
+    /fractary-docs:validate --doc-type $type
 done
 ```
 

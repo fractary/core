@@ -141,7 +141,7 @@ Next: Address incomplete items before archiving
   "suggested_fixes": [
     "Add missing test case for edge case handling",
     "Update README with new feature documentation",
-    "Re-run validation after fixes: /spec:validate"
+    "Re-run validation after fixes: /fractary-spec:validate"
   ]
 }
 ```
@@ -192,7 +192,7 @@ Next: Address incomplete items before archiving
   "error_analysis": "The specification file was not found - it may not have been created or the path is incorrect",
   "suggested_fixes": [
     "Verify spec path is correct",
-    "Create spec first: /spec:create --work-id 123",
+    "Create spec first: /fractary-spec:create --work-id 123",
     "List existing specs: ls specs/"
   ]
 }

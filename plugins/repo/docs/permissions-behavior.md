@@ -139,7 +139,7 @@ critical-prod-app/.claude/settings.json   # Strict permissions
 
 ### Conflict Resolution
 
-When you run `/repo:init-permissions`, the script intelligently merges permissions:
+When you run `/fractary-repo:init-permissions`, the script intelligently merges permissions:
 
 #### ✅ **Preserved**: Custom User Permissions
 
@@ -273,16 +273,16 @@ This helps you:
 
 ### 1. Start with Recommended Settings
 
-Run `/repo:init-permissions` to get safe defaults:
+Run `/fractary-repo:init-permissions` to get safe defaults:
 ```bash
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 ```
 
 ### 2. Validate Regularly
 
 Check your permissions periodically:
 ```bash
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 ### 3. Review Differences
@@ -314,8 +314,8 @@ If you add custom commands, understand:
 
 If settings become complex or problematic:
 ```bash
-/repo:init-permissions --mode reset   # Remove repo permissions
-/repo:init-permissions --mode setup   # Start fresh
+/fractary-repo:init-permissions --mode reset   # Remove repo permissions
+/fractary-repo:init-permissions --mode setup   # Start fresh
 ```
 
 ## Example Workflow
@@ -326,13 +326,13 @@ If settings become complex or problematic:
 cd my-project
 
 # Setup permissions
-/repo:init-permissions
+/fractary-repo:init-permissions
 
 # Review what was configured
 cat .claude/settings.json
 
 # Validate
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 ### Adding Custom Permissions
@@ -351,20 +351,20 @@ vim .claude/settings.json
 }
 
 # Validate (repo plugin won't remove it)
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 
 # Update with latest repo recommendations (preserves custom)
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 ```
 
 ### Fixing Conflicts
 
 ```bash
 # Validate and detect conflicts
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 
 # If conflicts detected, fix them
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 
 # Review result
 cat .claude/settings.json
@@ -416,7 +416,7 @@ Examples: `rm -rf /`, `git push --force origin main`, `gh repo delete`
 
 **Solution**: Run setup mode to deduplicate
 ```bash
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 ```
 
 ### Problem: Lost Custom Permissions
@@ -440,8 +440,8 @@ Custom permissions should NOT be lost if you run setup mode. If they are, file a
 vim .claude/settings.json
 
 # Option 2: Reset and reconfigure
-/repo:init-permissions --mode reset
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode reset
+/fractary-repo:init-permissions --mode setup
 ```
 
 ### Problem: Can't Execute Commands
@@ -457,7 +457,7 @@ cat .claude/settings.json
 vim .claude/settings.json
 
 # Or re-run setup
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 ```
 
 ## Advanced: Manual Configuration

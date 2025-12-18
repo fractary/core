@@ -61,7 +61,7 @@ Your role is to parse user input and invoke the work-manager agent to assign a m
 ## Command Argument Syntax
 
 This command takes two positional arguments:
-- **Format**: `/work:milestone-set <issue_number> <milestone>`
+- **Format**: `/fractary-work:milestone-set <issue_number> <milestone>`
 - **issue_number**: Issue number (e.g., 123, not "#123")
 - **milestone**: Milestone title or number
 
@@ -69,16 +69,16 @@ This command takes two positional arguments:
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:milestone-set 123 "v1.0 Release"
-✅ /work:milestone-set 123 "Sprint 5"
+✅ /fractary-work:milestone-set 123 "v1.0 Release"
+✅ /fractary-work:milestone-set 123 "Sprint 5"
 
-❌ /work:milestone-set 123 v1.0 Release
+❌ /fractary-work:milestone-set 123 v1.0 Release
 ```
 
 **Single-word values or numbers don't require quotes:**
 ```bash
-✅ /work:milestone-set 123 v1.0
-✅ /work:milestone-set 123 1  # Milestone number
+✅ /fractary-work:milestone-set 123 v1.0
+✅ /fractary-work:milestone-set 123 1  # Milestone number
 ```
 </ARGUMENT_SYNTAX>
 
@@ -97,13 +97,13 @@ This command takes two positional arguments:
 
 ```bash
 # Set milestone on issue
-/work:milestone-set 123 "v1.0 Release"
+/fractary-work:milestone-set 123 "v1.0 Release"
 
 # Set milestone by number
-/work:milestone-set 123 1
+/fractary-work:milestone-set 123 1
 
 # Set milestone with single-word title
-/work:milestone-set 456 v2.0
+/fractary-work:milestone-set 456 v2.0
 ```
 </EXAMPLES>
 
@@ -136,19 +136,19 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:milestone-set <issue_number> <milestone>
+Usage: /fractary-work:milestone-set <issue_number> <milestone>
 ```
 
 **Missing milestone**:
 ```
 Error: milestone is required
-Usage: /work:milestone-set <issue_number> <milestone>
+Usage: /fractary-work:milestone-set <issue_number> <milestone>
 ```
 
 **Milestone not found**:
 ```
 Error: Milestone not found: "v3.0 Release"
-List milestones: /work:milestone-list --state all
+List milestones: /fractary-work:milestone-list --state all
 ```
 
 **Invalid issue number**:
@@ -166,7 +166,7 @@ This command works with:
 - Jira (maps to Versions or Sprints)
 - Linear (maps to Projects or Cycles)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## FABER Integration
 
@@ -177,9 +177,9 @@ FABER workflows can automatically assign issues to release milestones during the
 For detailed documentation, see: [/docs/commands/work-milestone.md](../../../docs/commands/work-milestone.md)
 
 Related commands:
-- `/work:milestone-create` - Create milestone
-- `/work:milestone-list` - List milestones
-- `/work:milestone-remove` - Remove milestone from issue
-- `/work:milestone-close` - Close milestone
-- `/work:init` - Configure work plugin
+- `/fractary-work:milestone-create` - Create milestone
+- `/fractary-work:milestone-list` - List milestones
+- `/fractary-work:milestone-remove` - Remove milestone from issue
+- `/fractary-work:milestone-close` - Close milestone
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

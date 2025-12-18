@@ -19,7 +19,7 @@ When using the repo plugin without configured permissions, you'll experience:
 
 ### With Permission Configuration
 
-After running `/repo:init-permissions`, you get:
+After running `/fractary-repo:init-permissions`, you get:
 - ✅ **Zero prompts** for repo operations
 - ✅ **Faster workflow** - commands execute immediately
 - ✅ **Protection** against dangerous operations
@@ -29,12 +29,12 @@ After running `/repo:init-permissions`, you get:
 
 ```bash
 # Run this once after installing repo plugin
-/repo:init-permissions
+/fractary-repo:init-permissions
 
 # That's it! Now use repo commands without prompts
-/repo:branch create 123 "add export feature"
-/repo:commit "Add CSV export" --type feat --work-id 123
-/repo:push --set-upstream
+/fractary-repo:branch create 123 "add export feature"
+/fractary-repo:commit "Add CSV export" --type feat --work-id 123
+/fractary-repo:push --set-upstream
 ```
 
 ## What Gets Configured
@@ -183,20 +183,20 @@ wget | bash         # Remote code execution
 
 ## Command Reference
 
-### /repo:init-permissions
+### /fractary-repo:init-permissions
 
 Configure permissions for the repo plugin.
 
 ```bash
 # Setup (default) - Configure permissions
-/repo:init-permissions
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions
+/fractary-repo:init-permissions --mode setup
 
 # Validate - Check if permissions are correct
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 
 # Reset - Remove repo-specific permissions
-/repo:init-permissions --mode reset
+/fractary-repo:init-permissions --mode reset
 ```
 
 #### Parameters
@@ -213,7 +213,7 @@ Configure permissions for the repo plugin.
 **Scenario**: You just installed the repo plugin and want to configure permissions.
 
 ```bash
-/repo:init-permissions
+/fractary-repo:init-permissions
 ```
 
 **Output**:
@@ -261,7 +261,7 @@ Changes applied:
   • 0 existing rules preserved
 
 Next steps:
-  1. Test repo commands: /repo:branch create test-123 "test branch"
+  1. Test repo commands: /fractary-repo:branch create test-123 "test branch"
   2. Verify no prompts appear
   3. Review settings: cat .claude/settings.json
 ───────────────────────────────────────
@@ -272,7 +272,7 @@ Next steps:
 **Scenario**: You want to check if permissions are still correctly configured.
 
 ```bash
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 **Output**:
@@ -293,7 +293,7 @@ All critical permissions correctly configured
 **Scenario**: The repo plugin was updated with new commands and you want to ensure permissions are current.
 
 ```bash
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 ```
 
 **Output**:
@@ -315,7 +315,7 @@ PRESERVED: 50 existing rules
 **Scenario**: You want to remove repo-specific permissions and return to defaults.
 
 ```bash
-/repo:init-permissions --mode reset
+/fractary-repo:init-permissions --mode reset
 ```
 
 **Output**:
@@ -327,7 +327,7 @@ This will remove all repo-specific permissions
    Removed repo-specific permissions
    Backup: .claude/settings.json.backup
 
-To reconfigure: /repo:init-permissions --mode setup
+To reconfigure: /fractary-repo:init-permissions --mode setup
 ```
 
 ## Settings File Structure
@@ -498,10 +498,10 @@ Type `yes` to proceed, anything else cancels.
 claude plugin install fractary/repo
 
 # Configure permissions FIRST
-/repo:init-permissions
+/fractary-repo:init-permissions
 
 # Now use repo commands
-/repo:branch create 123 "my feature"
+/fractary-repo:branch create 123 "my feature"
 ```
 
 #### After Plugin Updates
@@ -510,22 +510,22 @@ claude plugin install fractary/repo
 git pull
 
 # Update permissions
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 ```
 
 #### If You Start Seeing Prompts
 ```bash
 # Validate permissions
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 
 # If validation fails, reconfigure
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 ```
 
 #### Before Important Work
 ```bash
 # Validate everything is set up correctly
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 ### Security Best Practices
@@ -542,14 +542,14 @@ git pull
 
 3. **Use Reset if Uncertain**
    ```bash
-   /repo:init-permissions --mode reset
-   /repo:init-permissions --mode setup
+   /fractary-repo:init-permissions --mode reset
+   /fractary-repo:init-permissions --mode setup
    ```
 
 4. **Validate After Manual Changes**
    ```bash
    # If you manually edit .claude/settings.json
-   /repo:init-permissions --mode validate
+   /fractary-repo:init-permissions --mode validate
    ```
 
 5. **Understand What You're Allowing**
@@ -575,7 +575,7 @@ ls -la .claude/
 mkdir -p .claude && chmod 755 .claude
 
 # Try again
-/repo:init-permissions
+/fractary-repo:init-permissions
 ```
 
 ### Problem: Invalid JSON Error
@@ -591,14 +591,14 @@ Backup: .claude/settings.json.backup
 mv .claude/settings.json.backup .claude/settings.json
 
 # Option 2: Reset to defaults
-/repo:init-permissions --mode reset
+/fractary-repo:init-permissions --mode reset
 
 # Option 3: Fix manually
 vim .claude/settings.json
 # Fix JSON syntax errors
 
 # Validate
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 ### Problem: Still Getting Permission Prompts
@@ -609,13 +609,13 @@ vim .claude/settings.json
 cat .claude/settings.json | jq '.permissions.bash.allow'
 
 # Validate permissions
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 **Solution**:
 ```bash
 # Re-run setup
-/repo:init-permissions --mode setup
+/fractary-repo:init-permissions --mode setup
 
 # If specific command missing, manually add to allow list
 # (or request it be added to repo plugin defaults)
@@ -663,7 +663,7 @@ vim .claude/settings.json
 jq empty .claude/settings.json
 
 # Test
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 ### Project-Specific Permissions
@@ -692,7 +692,7 @@ mkdir -p .claude
 cp ci/claude-settings.json .claude/settings.json
 
 # Validate
-/repo:init-permissions --mode validate
+/fractary-repo:init-permissions --mode validate
 ```
 
 ## Security Considerations
@@ -778,7 +778,7 @@ The repo plugin follows security best practices:
 
 ### Q: Do I need to run this for every project?
 
-**A**: Yes, each project has its own `.claude/settings.json`. Run `/repo:init-permissions` once per project.
+**A**: Yes, each project has its own `.claude/settings.json`. Run `/fractary-repo:init-permissions` once per project.
 
 ### Q: Will this affect other Claude Code plugins?
 
@@ -794,7 +794,7 @@ The repo plugin follows security best practices:
 
 ### Q: Can I reset to defaults?
 
-**A**: Yes, run `/repo:init-permissions --mode reset` to remove all repo-specific permissions.
+**A**: Yes, run `/fractary-repo:init-permissions --mode reset` to remove all repo-specific permissions.
 
 ### Q: How do I backup my settings?
 
@@ -810,4 +810,4 @@ The repo plugin follows security best practices:
 
 ---
 
-**Pro Tip**: Run `/repo:init-permissions` immediately after installing the repo plugin for the best experience!
+**Pro Tip**: Run `/fractary-repo:init-permissions` immediately after installing the repo plugin for the best experience!

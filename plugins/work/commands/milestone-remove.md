@@ -60,17 +60,17 @@ Your role is to parse user input and invoke the work-manager agent to remove a m
 ## Command Argument Syntax
 
 This command takes a simple positional argument:
-- **Format**: `/work:milestone-remove <issue_number>`
+- **Format**: `/fractary-work:milestone-remove <issue_number>`
 - **issue_number**: Issue number (e.g., 123, not "#123")
 
 ### Examples
 
 ```bash
-✅ /work:milestone-remove 123
-✅ /work:milestone-remove 42
+✅ /fractary-work:milestone-remove 123
+✅ /fractary-work:milestone-remove 42
 
-❌ /work:milestone-remove #123  # Don't include # symbol
-❌ /work:milestone-remove       # Issue number required
+❌ /fractary-work:milestone-remove #123  # Don't include # symbol
+❌ /fractary-work:milestone-remove       # Issue number required
 ```
 </ARGUMENT_SYNTAX>
 
@@ -88,10 +88,10 @@ This command takes a simple positional argument:
 
 ```bash
 # Remove milestone from issue
-/work:milestone-remove 123
+/fractary-work:milestone-remove 123
 
 # Remove milestone from different issue
-/work:milestone-remove 456
+/fractary-work:milestone-remove 456
 ```
 </EXAMPLES>
 
@@ -123,7 +123,7 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:milestone-remove <issue_number>
+Usage: /fractary-work:milestone-remove <issue_number>
 ```
 
 **Invalid issue number**:
@@ -147,16 +147,16 @@ This command works with:
 - Jira (maps to Versions or Sprints)
 - Linear (maps to Projects or Cycles)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-milestone.md](../../../docs/commands/work-milestone.md)
 
 Related commands:
-- `/work:milestone-create` - Create milestone
-- `/work:milestone-list` - List milestones
-- `/work:milestone-set` - Assign milestone to issue
-- `/work:milestone-close` - Close milestone
-- `/work:init` - Configure work plugin
+- `/fractary-work:milestone-create` - Create milestone
+- `/fractary-work:milestone-list` - List milestones
+- `/fractary-work:milestone-set` - Assign milestone to issue
+- `/fractary-work:milestone-close` - Close milestone
+- `/fractary-work:init` - Configure work plugin
 </NOTES>
