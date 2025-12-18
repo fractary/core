@@ -383,7 +383,7 @@ $doc_list
 ## Contributing
 
 To add a new $doc_type document:
-1. Use the appropriate command: \`/docs:write $doc_type\`
+1. Use the appropriate command: \`/fractary-docs:write $doc_type\`
 2. Follow the standard template and include all required sections
 3. Ensure frontmatter is complete with all required fields
 4. The index will automatically update after document creation

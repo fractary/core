@@ -61,17 +61,17 @@ Your role is to parse user input and invoke the work-manager agent to remove a l
 ## Command Argument Syntax
 
 This command takes two positional arguments:
-- **Format**: `/work:label-remove <number> <label>`
+- **Format**: `/fractary-work:label-remove <number> <label>`
 - **number**: Issue number (e.g., 123, not "#123")
 - **label**: Label name to remove (exact match required)
 
 **Label names cannot contain spaces:**
 ```bash
-✅ /work:label-remove 123 wontfix
-✅ /work:label-remove 123 high-priority
-✅ /work:label-remove 123 duplicate
+✅ /fractary-work:label-remove 123 wontfix
+✅ /fractary-work:label-remove 123 high-priority
+✅ /fractary-work:label-remove 123 duplicate
 
-❌ /work:label-remove 123 "high priority"  # Spaces not supported
+❌ /fractary-work:label-remove 123 "high priority"  # Spaces not supported
 ```
 </ARGUMENT_SYNTAX>
 
@@ -90,13 +90,13 @@ This command takes two positional arguments:
 
 ```bash
 # Remove a label
-/work:label-remove 123 wontfix
+/fractary-work:label-remove 123 wontfix
 
 # Remove priority label
-/work:label-remove 123 high-priority
+/fractary-work:label-remove 123 high-priority
 
 # Remove status label
-/work:label-remove 123 in-progress
+/fractary-work:label-remove 123 in-progress
 ```
 </EXAMPLES>
 
@@ -129,13 +129,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:label-remove <number> <label>
+Usage: /fractary-work:label-remove <number> <label>
 ```
 
 **Missing label name**:
 ```
 Error: label name is required
-Usage: /work:label-remove <number> <label>
+Usage: /fractary-work:label-remove <number> <label>
 ```
 
 **Label not found**:
@@ -153,15 +153,15 @@ This command works with:
 - Jira Cloud (simple text tags)
 - Linear (labels have colors, team-specific)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-label.md](../../../docs/commands/work-label.md)
 
 Related commands:
-- `/work:label-add` - Add label
-- `/work:label-list` - List labels
-- `/work:label-set` - Set all labels
-- `/work:init` - Configure work plugin
+- `/fractary-work:label-add` - Add label
+- `/fractary-work:label-list` - List labels
+- `/fractary-work:label-set` - Set all labels
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

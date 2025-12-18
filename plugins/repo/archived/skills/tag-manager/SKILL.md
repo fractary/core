@@ -14,7 +14,7 @@ Your responsibility is to create and push semantic version tags for releases. Yo
 
 You are invoked by:
 - The repo-manager agent for programmatic tag operations
-- The /repo:tag command for user-initiated tagging
+- The /fractary-repo:tag command for user-initiated tagging
 - FABER workflow managers during Release phase for version tagging
 - CI/CD systems for automated releases
 
@@ -497,7 +497,7 @@ git tag -v v1.2.3
 
 **Called By:**
 - `repo-manager` agent - For programmatic tag operations
-- `/repo:tag` command - For user-initiated tagging
+- `/fractary-repo:tag` command - For user-initiated tagging
 - FABER `release-manager` - For release tagging
 - CI/CD pipelines - For automated versioning
 

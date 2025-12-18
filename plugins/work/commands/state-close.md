@@ -70,17 +70,17 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:state-close 123 --comment "Fixed in PR #456"
-✅ /work:state-close 123 --comment "Duplicate of #100" --reason duplicate
+✅ /fractary-work:state-close 123 --comment "Fixed in PR #456"
+✅ /fractary-work:state-close 123 --comment "Duplicate of #100" --reason duplicate
 
-❌ /work:state-close 123 --comment Fixed in PR #456
+❌ /fractary-work:state-close 123 --comment Fixed in PR #456
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:state-close 123
-✅ /work:state-close 123 --reason duplicate
-✅ /work:state-close 123 --comment Fixed
+✅ /fractary-work:state-close 123
+✅ /fractary-work:state-close 123 --reason duplicate
+✅ /fractary-work:state-close 123 --comment Fixed
 ```
 
 **Reason values are exact keywords:**
@@ -106,16 +106,16 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Close issue
-/work:state-close 123
+/fractary-work:state-close 123
 
 # Close with comment
-/work:state-close 123 --comment "Fixed in PR #456"
+/fractary-work:state-close 123 --comment "Fixed in PR #456"
 
 # Close as duplicate
-/work:state-close 123 --reason duplicate --comment "Duplicate of #100"
+/fractary-work:state-close 123 --reason duplicate --comment "Duplicate of #100"
 
 # Close as wontfix
-/work:state-close 123 --reason wontfix --comment "Not addressing this"
+/fractary-work:state-close 123 --reason wontfix --comment "Not addressing this"
 ```
 </EXAMPLES>
 
@@ -149,7 +149,7 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:state-close <number>
+Usage: /fractary-work:state-close <number>
 ```
 
 **Invalid reason**:
@@ -181,7 +181,7 @@ This command works with:
 - Jira Cloud (Maps to workflow states)
 - Linear (Maps to Linear workflow states)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## FABER Integration
 
@@ -192,8 +192,8 @@ FABER workflows automatically close issues during the Release phase after succes
 For detailed documentation, see: [/docs/commands/work-state.md](../../../docs/commands/work-state.md)
 
 Related commands:
-- `/work:state-reopen` - Reopen issue
-- `/work:state-transition` - Transition to workflow state
-- `/work:comment-create` - Add comment
-- `/work:init` - Configure work plugin
+- `/fractary-work:state-reopen` - Reopen issue
+- `/fractary-work:state-transition` - Transition to workflow state
+- `/fractary-work:comment-create` - Add comment
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

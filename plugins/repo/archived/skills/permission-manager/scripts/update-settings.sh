@@ -1091,7 +1091,7 @@ find_command_location() {
 validate_permissions() {
     if [ ! -f "$SETTINGS_FILE" ]; then
         echo -e "${RED}✗${NC} Settings file not found: $SETTINGS_FILE"
-        echo "Run: /repo:init-permissions --mode setup"
+        echo "Run: /fractary-repo:init-permissions --mode setup"
         exit 1
     fi
 
@@ -1263,7 +1263,7 @@ validate_permissions() {
         echo ""
         echo "Your settings differ from the recommended configuration."
         echo ""
-        echo -e "${GREEN}To fix:${NC} /repo:init-permissions --mode setup"
+        echo -e "${GREEN}To fix:${NC} /fractary-repo:init-permissions --mode setup"
         echo ""
         echo "Setup mode will:"
         echo "  • Add all missing commands to correct categories"

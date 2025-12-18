@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:branch
-description: '[DEPRECATED] Use /repo:branch-create, /repo:branch-delete, or /repo:branch-list instead'
+description: '[DEPRECATED] Use /fractary-repo:branch-create, /fractary-repo:branch-delete, or /fractary-repo:branch-list instead'
 model: claude-haiku-4-5
 argument-hint: 'create | delete | list'
 ---

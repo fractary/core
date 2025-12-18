@@ -56,7 +56,7 @@ cp plugins/repo/config/repo.example.json ~/.fractary/repo/config.json
 ### 3. Built-in Defaults (Lowest Priority)
 Hard-coded defaults used if no configuration file exists.
 
-**Quick Setup**: Use `/repo:init` to create configuration interactively.
+**Quick Setup**: Use `/fractary-repo:init` to create configuration interactively.
 
 ## Configuration Structure
 
@@ -784,5 +784,5 @@ git remote set-url origin https://github.com/owner/repo.git
 - [GitHub Setup Guide](setup/github-setup.md)
 - [GitLab Setup Guide](setup/gitlab-setup.md)
 - [Bitbucket Setup Guide](setup/bitbucket-setup.md)
-- [Setup Wizard](/repo:init)
+- [Setup Wizard](/fractary-repo:init)
 - [Example Configuration](../config/repo.example.json)

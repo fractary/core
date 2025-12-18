@@ -154,14 +154,14 @@ Implements intelligent branch naming that generates semantic names from work ite
 
 Old syntax no longer supported:
 ```bash
-/repo:branch-create my-branch-name  # ❌ No longer works
+/fractary-repo:branch-create my-branch-name  # ❌ No longer works
 ```
 
 Use new syntax:
 ```bash
-/repo:branch-create "add CSV export"  # ✅ Description mode
-/repo:branch-create --work-id 123     # ✅ Work item mode
-/repo:branch-create feature/my-branch # ✅ Direct mode
+/fractary-repo:branch-create "add CSV export"  # ✅ Description mode
+/fractary-repo:branch-create --work-id 123     # ✅ Work item mode
+/fractary-repo:branch-create feature/my-branch # ✅ Direct mode
 ```
 
 ## Performance

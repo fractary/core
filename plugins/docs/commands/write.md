@@ -2,14 +2,14 @@
 model: claude-haiku-4-5
 ---
 
-# /docs:write
+# /fractary-docs:write
 
 Create or update documentation with automatic validation and indexing.
 
 ## Usage
 
 ```bash
-/docs:write <doc_type> [file_path] [options]
+/fractary-docs:write <doc_type> [file_path] [options]
 ```
 
 ## Arguments
@@ -29,25 +29,25 @@ Create or update documentation with automatic validation and indexing.
 
 ```bash
 # Create API documentation
-/docs:write api
+/fractary-docs:write api
 
 # Create dataset documentation with specific path
-/docs:write dataset docs/datasets/user-metrics/README.md
+/fractary-docs:write dataset docs/datasets/user-metrics/README.md
 
 # Create ADR with validation skipped
-/docs:write adr --skip-validation
+/fractary-docs:write adr --skip-validation
 
 # Batch write all API endpoints
-/docs:write api docs/api/**/*.md --batch
+/fractary-docs:write api docs/api/**/*.md --batch
 
 # Generate documentation from conversation context
-/docs:write api --prompt "Document the authentication endpoints we discussed, including the OAuth2 flow"
+/fractary-docs:write api --prompt "Document the authentication endpoints we discussed, including the OAuth2 flow"
 
 # Generate ADR capturing decision discussion
-/docs:write adr --prompt "Create an ADR for the database migration strategy we decided on"
+/fractary-docs:write adr --prompt "Create an ADR for the database migration strategy we decided on"
 
 # Generate guide from implementation discussion
-/docs:write guide --prompt "Write a guide covering the deployment process we walked through"
+/fractary-docs:write guide --prompt "Write a guide covering the deployment process we walked through"
 ```
 
 ## What This Does
@@ -76,9 +76,9 @@ You can provide documentation content conversationally. The command will:
 
 ## Related Commands
 
-- `/docs:validate` - Validate existing documentation
-- `/docs:list` - List documentation files
-- `/docs:audit` - Audit all documentation
+- `/fractary-docs:validate` - Validate existing documentation
+- `/fractary-docs:list` - List documentation files
+- `/fractary-docs:audit` - Audit all documentation
 
 ---
 

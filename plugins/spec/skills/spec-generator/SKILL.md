@@ -228,7 +228,7 @@ Hint: Use --force to create additional spec
   "error_analysis": "The specified work_id does not correspond to an existing issue",
   "suggested_fixes": [
     "Verify issue number is correct",
-    "Create the issue first: /work:issue-create",
+    "Create the issue first: /fractary-work:issue-create",
     "Generate standalone spec without work_id"
   ]
 }

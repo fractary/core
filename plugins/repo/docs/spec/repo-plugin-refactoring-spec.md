@@ -328,12 +328,12 @@ plugins/repo/
 **Goal**: Add slash commands for direct user interaction
 
 **Tasks**:
-1. ⏳ Create `/repo:branch` command
-2. ⏳ Create `/repo:commit` command
-3. ⏳ Create `/repo:push` command
-4. ⏳ Create `/repo:pr` command
-5. ⏳ Create `/repo:tag` command
-6. ⏳ Create `/repo:cleanup` command
+1. ⏳ Create `/fractary-repo:branch` command
+2. ⏳ Create `/fractary-repo:commit` command
+3. ⏳ Create `/fractary-repo:push` command
+4. ⏳ Create `/fractary-repo:pr` command
+5. ⏳ Create `/fractary-repo:tag` command
+6. ⏳ Create `/fractary-repo:cleanup` command
 
 **Command Requirements**:
 - Parse user arguments
@@ -420,12 +420,12 @@ plugins/repo/
 │   │   └── bitbucket-setup.md      # Bitbucket configuration guide
 │   └── migration.md                # Migration guide from v1.x
 ├── commands/
-│   ├── branch.md                   # /repo:branch command
-│   ├── commit.md                   # /repo:commit command
-│   ├── push.md                     # /repo:push command
-│   ├── pr.md                       # /repo:pr command
-│   ├── tag.md                      # /repo:tag command
-│   └── cleanup.md                  # /repo:cleanup command
+│   ├── branch.md                   # /fractary-repo:branch command
+│   ├── commit.md                   # /fractary-repo:commit command
+│   ├── push.md                     # /fractary-repo:push command
+│   ├── pr.md                       # /fractary-repo:pr command
+│   ├── tag.md                      # /fractary-repo:tag command
+│   └── cleanup.md                  # /fractary-repo:cleanup command
 ├── agents/
 │   └── repo-manager.md             # Refactored agent (decision logic only)
 └── skills/
@@ -1142,7 +1142,7 @@ Each handler declares:
 
 **Invoked By**:
 - `repo-manager` agent
-- `/repo:branch create` command
+- `/fractary-repo:branch create` command
 
 **Operations**:
 - `generate-branch-name`
@@ -1182,7 +1182,7 @@ Next: Create branch with branch-manager skill
 
 **Invoked By**:
 - `repo-manager` agent
-- `/repo:branch` command
+- `/fractary-repo:branch` command
 
 **Operations**:
 - `create-branch`
@@ -1215,7 +1215,7 @@ Branch: {branch_name}
 
 **Invoked By**:
 - `repo-manager` agent
-- `/repo:commit` command
+- `/fractary-repo:commit` command
 
 **Operations**:
 - `create-commit`
@@ -1247,7 +1247,7 @@ Message: {message}
 
 **Invoked By**:
 - `repo-manager` agent
-- `/repo:push` command
+- `/fractary-repo:push` command
 
 **Operations**:
 - `push-branch`
@@ -1279,7 +1279,7 @@ Remote: {remote}
 
 **Invoked By**:
 - `repo-manager` agent
-- `/repo:pr` command
+- `/fractary-repo:pr` command
 
 **Operations**:
 - `create-pr`
@@ -1314,7 +1314,7 @@ PR: #{pr_number or "new"}
 
 **Invoked By**:
 - `repo-manager` agent
-- `/repo:tag` command
+- `/fractary-repo:tag` command
 
 **Operations**:
 - `create-tag`
@@ -1347,7 +1347,7 @@ Tag: {tag_name}
 
 **Invoked By**:
 - `repo-manager` agent
-- `/repo:cleanup` command
+- `/fractary-repo:cleanup` command
 
 **Operations**:
 - `list-stale-branches`
@@ -1376,23 +1376,23 @@ Filters: {filters}
 
 ## Commands Specification
 
-### Command: /repo:branch
+### Command: /fractary-repo:branch
 
 **Purpose**: Manage Git branches (create, delete, list)
 
 **Syntax**:
 ```
-/repo:branch create <issue_id> <description> [--base <branch>]
-/repo:branch delete <branch_name> [--location local|remote|both] [--force]
-/repo:branch list [--stale] [--merged]
+/fractary-repo:branch create <issue_id> <description> [--base <branch>]
+/fractary-repo:branch delete <branch_name> [--location local|remote|both] [--force]
+/fractary-repo:branch list [--stale] [--merged]
 ```
 
 **Examples**:
 ```
-/repo:branch create 123 "add user export feature"
-/repo:branch create 456 "fix login bug" --base develop
-/repo:branch delete feat/old-feature --location both
-/repo:branch list --stale --merged
+/fractary-repo:branch create 123 "add user export feature"
+/fractary-repo:branch create 456 "fix login bug" --base develop
+/fractary-repo:branch delete feat/old-feature --location both
+/fractary-repo:branch list --stale --merged
 ```
 
 **Workflow**:
@@ -1403,19 +1403,19 @@ Filters: {filters}
 
 ---
 
-### Command: /repo:commit
+### Command: /fractary-repo:commit
 
 **Purpose**: Create semantic commits with FABER metadata
 
 **Syntax**:
 ```
-/repo:commit <message> --type <type> [--work-id <id>] [--context <context>]
+/fractary-repo:commit <message> --type <type> [--work-id <id>] [--context <context>]
 ```
 
 **Examples**:
 ```
-/repo:commit "Add CSV export functionality" --type feat --work-id 123
-/repo:commit "Fix authentication bug" --type fix --work-id 456 --context implementor
+/fractary-repo:commit "Add CSV export functionality" --type feat --work-id 123
+/fractary-repo:commit "Fix authentication bug" --type fix --work-id 456 --context implementor
 ```
 
 **Workflow**:
@@ -1426,20 +1426,20 @@ Filters: {filters}
 
 ---
 
-### Command: /repo:push
+### Command: /fractary-repo:push
 
 **Purpose**: Push branches to remote repository
 
 **Syntax**:
 ```
-/repo:push [<branch>] [--remote <remote>] [--set-upstream] [--force]
+/fractary-repo:push [<branch>] [--remote <remote>] [--set-upstream] [--force]
 ```
 
 **Examples**:
 ```
-/repo:push
-/repo:push feat/123-add-export --set-upstream
-/repo:push feat/456-fix-bug --force
+/fractary-repo:push
+/fractary-repo:push feat/123-add-export --set-upstream
+/fractary-repo:push feat/456-fix-bug --force
 ```
 
 **Workflow**:
@@ -1450,24 +1450,24 @@ Filters: {filters}
 
 ---
 
-### Command: /repo:pr
+### Command: /fractary-repo:pr
 
 **Purpose**: Manage pull requests (create, comment, review, merge)
 
 **Syntax**:
 ```
-/repo:pr create <title> [--body <description>] [--base <branch>] [--work-id <id>]
-/repo:pr comment <pr_number> <comment>
-/repo:pr review <pr_number> <action> [--comment <text>]
-/repo:pr merge <pr_number> [--strategy <strategy>] [--delete-branch]
+/fractary-repo:pr create <title> [--body <description>] [--base <branch>] [--work-id <id>]
+/fractary-repo:pr comment <pr_number> <comment>
+/fractary-repo:pr review <pr_number> <action> [--comment <text>]
+/fractary-repo:pr merge <pr_number> [--strategy <strategy>] [--delete-branch]
 ```
 
 **Examples**:
 ```
-/repo:pr create "Add user export feature" --body "Implements CSV export..." --work-id 123
-/repo:pr comment 456 "LGTM! Tests passing."
-/repo:pr review 456 approve --comment "Great work!"
-/repo:pr merge 456 --strategy squash --delete-branch
+/fractary-repo:pr create "Add user export feature" --body "Implements CSV export..." --work-id 123
+/fractary-repo:pr comment 456 "LGTM! Tests passing."
+/fractary-repo:pr review 456 approve --comment "Great work!"
+/fractary-repo:pr merge 456 --strategy squash --delete-branch
 ```
 
 **Workflow**:
@@ -1478,23 +1478,23 @@ Filters: {filters}
 
 ---
 
-### Command: /repo:tag
+### Command: /fractary-repo:tag
 
 **Purpose**: Create and push semantic version tags
 
 **Syntax**:
 ```
-/repo:tag create <tag_name> [--message <message>] [--sign]
-/repo:tag push <tag_name|all>
-/repo:tag list
+/fractary-repo:tag create <tag_name> [--message <message>] [--sign]
+/fractary-repo:tag push <tag_name|all>
+/fractary-repo:tag list
 ```
 
 **Examples**:
 ```
-/repo:tag create v1.2.3 --message "Release version 1.2.3"
-/repo:tag create v1.3.0 --sign
-/repo:tag push v1.2.3
-/repo:tag push all
+/fractary-repo:tag create v1.2.3 --message "Release version 1.2.3"
+/fractary-repo:tag create v1.3.0 --sign
+/fractary-repo:tag push v1.2.3
+/fractary-repo:tag push all
 ```
 
 **Workflow**:
@@ -1505,20 +1505,20 @@ Filters: {filters}
 
 ---
 
-### Command: /repo:cleanup
+### Command: /fractary-repo:cleanup
 
 **Purpose**: List and delete stale branches
 
 **Syntax**:
 ```
-/repo:cleanup [--dry-run] [--before <date>] [--merged-only]
+/fractary-repo:cleanup [--dry-run] [--before <date>] [--merged-only]
 ```
 
 **Examples**:
 ```
-/repo:cleanup --dry-run
-/repo:cleanup --before 2024-09-01 --merged-only
-/repo:cleanup
+/fractary-repo:cleanup --dry-run
+/fractary-repo:cleanup --before 2024-09-01 --merged-only
+/fractary-repo:cleanup
 ```
 
 **Workflow**:
@@ -1677,15 +1677,15 @@ Test full command → agent → skill → handler flow:
 
 ```bash
 # Test branch creation workflow
-/repo:branch create 123 "test feature"
+/fractary-repo:branch create 123 "test feature"
 # Verify: branch created, proper name format
 
 # Test commit workflow
-/repo:commit "Add test" --type feat --work-id 123
+/fractary-repo:commit "Add test" --type feat --work-id 123
 # Verify: commit created, proper format, metadata included
 
 # Test PR workflow
-/repo:pr create "Test PR" --work-id 123
+/fractary-repo:pr create "Test PR" --work-id 123
 # Verify: PR created, work item linked, FABER metadata included
 ```
 

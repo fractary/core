@@ -167,6 +167,6 @@ Related commands:
 - `/fractary-work:label-add` - Add label
 - `/fractary-work:label-remove` - Remove label
 - `/fractary-work:label-set` - Set all labels
-- `/work:issue-fetch` - Fetch issue details
+- `/fractary-work:issue-fetch` - Fetch issue details
 - `/fractary-work:init` - Configure work plugin
 </NOTES>

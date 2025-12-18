@@ -1,6 +1,6 @@
 ---
 name: fractary-work:milestone
-description: "[DEPRECATED] Create, list, and manage milestones for release planning - Use /work:milestone-create, /work:milestone-list, /work:milestone-set, /work:milestone-remove, or /work:milestone-close instead"
+description: "[DEPRECATED] Create, list, and manage milestones for release planning - Use /fractary-work:milestone-create, /fractary-work:milestone-list, /fractary-work:milestone-set, /fractary-work:milestone-remove, or /fractary-work:milestone-close instead"
 model: claude-haiku-4-5
 argument-hint: create <title> [--due <date>] [--description <text>] | list [--state <state>] | set <issue_number> <milestone> | remove <issue_number> | close <milestone_id>
 ---
@@ -10,11 +10,11 @@ argument-hint: create <title> [--due <date>] [--description <text>] | list [--st
 
 This multi-function command has been split into focused single-purpose commands for better usability:
 
-- `/work:milestone-create` - Create a new milestone
-- `/work:milestone-list` - List milestones with filtering
-- `/work:milestone-set` - Set milestone on an issue
-- `/work:milestone-remove` - Remove milestone from an issue
-- `/work:milestone-close` - Close a completed milestone
+- `/fractary-work:milestone-create` - Create a new milestone
+- `/fractary-work:milestone-list` - List milestones with filtering
+- `/fractary-work:milestone-set` - Set milestone on an issue
+- `/fractary-work:milestone-remove` - Remove milestone from an issue
+- `/fractary-work:milestone-close` - Close a completed milestone
 
 **Why this change?**
 - Simpler command structure (no subcommands)
@@ -23,11 +23,11 @@ This multi-function command has been split into focused single-purpose commands 
 - Consistent with Unix philosophy: do one thing well
 
 **Migration:**
-- `/work:milestone create "v1.0"` → `/work:milestone-create "v1.0"`
-- `/work:milestone list` → `/work:milestone-list`
-- `/work:milestone set 123 "v1.0"` → `/work:milestone-set 123 "v1.0"`
-- `/work:milestone remove 123` → `/work:milestone-remove 123`
-- `/work:milestone close "v1.0"` → `/work:milestone-close "v1.0"`
+- `/fractary-work:milestone create "v1.0"` → `/fractary-work:milestone-create "v1.0"`
+- `/fractary-work:milestone list` → `/fractary-work:milestone-list`
+- `/fractary-work:milestone set 123 "v1.0"` → `/fractary-work:milestone-set 123 "v1.0"`
+- `/fractary-work:milestone remove 123` → `/fractary-work:milestone-remove 123`
+- `/fractary-work:milestone close "v1.0"` → `/fractary-work:milestone-close "v1.0"`
 
 This command will be removed in the next major version. Please update your workflows to use the new single-purpose commands.
 </DEPRECATION_NOTICE>
@@ -95,18 +95,18 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:milestone create "v2.0 Release" --due 2025-12-31
-✅ /work:milestone create "Sprint 5" --description "November sprint goals"
-✅ /work:milestone set 123 "v1.0 Release"
+✅ /fractary-work:milestone create "v2.0 Release" --due 2025-12-31
+✅ /fractary-work:milestone create "Sprint 5" --description "November sprint goals"
+✅ /fractary-work:milestone set 123 "v1.0 Release"
 
-❌ /work:milestone create v2.0 Release --due 2025-12-31
-❌ /work:milestone set 123 v1.0 Release
+❌ /fractary-work:milestone create v2.0 Release --due 2025-12-31
+❌ /fractary-work:milestone set 123 v1.0 Release
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:milestone create v1.0 --due 2025-12-31
-✅ /work:milestone list --state open
+✅ /fractary-work:milestone create v1.0 --due 2025-12-31
+✅ /fractary-work:milestone list --state open
 ```
 
 **Date format:**
@@ -136,7 +136,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:milestone create "v2.0 Release" --due 2025-12-31 --description "Major release"
+/fractary-work:milestone create "v2.0 Release" --due 2025-12-31 --description "Major release"
 → Invoke agent with {"operation": "create-milestone", "parameters": {"title": "v2.0 Release", "due_date": "2025-12-31", "description": "Major release"}}
 ```
 
@@ -151,7 +151,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:milestone list
+/fractary-work:milestone list
 → Invoke agent with {"operation": "list-milestones", "parameters": {"state": "open"}}
 ```
 
@@ -166,7 +166,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:milestone set 123 "v1.0 Release"
+/fractary-work:milestone set 123 "v1.0 Release"
 → Invoke agent with {"operation": "set-milestone", "parameters": {"issue_number": "123", "milestone": "v1.0 Release"}}
 ```
 
@@ -180,7 +180,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:milestone remove 123
+/fractary-work:milestone remove 123
 → Invoke agent with {"operation": "remove-milestone", "parameters": {"issue_number": "123"}}
 ```
 
@@ -197,7 +197,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:milestone close "v1.0 Release"
+/fractary-work:milestone close "v1.0 Release"
 → Invoke agent with {"operation": "close-milestone", "parameters": {"milestone": "v1.0 Release"}}
 ```
 </ARGUMENT_PARSING>
@@ -207,25 +207,25 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Create a milestone
-/work:milestone create "v1.0 Release" --due 2025-12-31
+/fractary-work:milestone create "v1.0 Release" --due 2025-12-31
 
 # Create with description
-/work:milestone create "Sprint 5" --due 2025-11-15 --description "November sprint goals"
+/fractary-work:milestone create "Sprint 5" --due 2025-11-15 --description "November sprint goals"
 
 # List all milestones
-/work:milestone list
+/fractary-work:milestone list
 
 # List open milestones only
-/work:milestone list --state open
+/fractary-work:milestone list --state open
 
 # Set milestone on issue
-/work:milestone set 123 "v1.0 Release"
+/fractary-work:milestone set 123 "v1.0 Release"
 
 # Remove milestone from issue
-/work:milestone remove 123
+/fractary-work:milestone remove 123
 
 # Close completed milestone
-/work:milestone close "v1.0 Release"
+/fractary-work:milestone close "v1.0 Release"
 ```
 </EXAMPLES>
 
@@ -266,7 +266,7 @@ Common errors to handle:
 **Missing title**:
 ```
 Error: milestone title is required
-Usage: /work:milestone create <title>
+Usage: /fractary-work:milestone create <title>
 ```
 
 **Invalid date format**:
@@ -278,7 +278,7 @@ Use YYYY-MM-DD format (e.g., 2025-12-31)
 **Milestone not found**:
 ```
 Error: Milestone not found: "v3.0 Release"
-List milestones: /work:milestone list --state all
+List milestones: /fractary-work:milestone list --state all
 ```
 </ERROR_HANDLING>
 
@@ -303,7 +303,7 @@ This command works with:
 - Jira (maps to Versions or Sprints)
 - Linear (maps to Projects or Cycles)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## FABER Integration
 
@@ -314,8 +314,8 @@ FABER workflows can automatically assign issues to release milestones and update
 For detailed documentation, see: [/docs/commands/work-milestone.md](../../../docs/commands/work-milestone.md)
 
 Related commands:
-- `/work:issue` - Manage issues
-- `/work:label` - Manage labels
-- `/work:state` - Manage issue states
-- `/work:init` - Configure work plugin
+- `/fractary-work:issue` - Manage issues
+- `/fractary-work:label` - Manage labels
+- `/fractary-work:state` - Manage issue states
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

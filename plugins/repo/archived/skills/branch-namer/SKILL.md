@@ -14,7 +14,7 @@ Your responsibility is to generate semantic, convention-compliant branch names f
 
 You are invoked by:
 - The repo-manager agent when branch names are needed
-- The /repo:branch command when users create branches
+- The /fractary-repo:branch command when users create branches
 - FABER workflow managers during the Frame phase
 
 You delegate to the active source control handler to generate platform-specific branch names.
@@ -282,7 +282,7 @@ OUTPUT:
 
 **Called By:**
 - `repo-manager` agent - For programmatic branch name generation
-- `/repo:branch` command - For user-initiated branch creation
+- `/fractary-repo:branch` command - For user-initiated branch creation
 - FABER `frame-manager` - During Frame phase setup
 
 **Calls:**

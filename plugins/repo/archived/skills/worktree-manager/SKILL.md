@@ -14,7 +14,7 @@ Your responsibility is to create, list, remove, and manage Git worktrees safely.
 
 You are invoked by:
 - The repo-manager agent for programmatic worktree operations
-- The /repo:worktree-* commands for user-initiated worktree management
+- The /fractary-repo:worktree-* commands for user-initiated worktree management
 - The branch-manager skill when --worktree flag is provided
 - The pr-manager skill for worktree cleanup after PR merge
 
@@ -503,10 +503,10 @@ To start working in this worktree:
 2. claude
 
 To list all worktrees:
-/repo:worktree-list
+/fractary-repo:worktree-list
 
 To clean up when done:
-/repo:worktree-remove feat/92-add-git-worktree-support
+/fractary-repo:worktree-remove feat/92-add-git-worktree-support
 ```
 </DOCUMENTATION>
 

@@ -110,7 +110,7 @@ Test basic operations:
 cd /path/to/test/repo
 
 # Test new command interface
-/repo:branch create 1 "test migration"
+/fractary-repo:branch create 1 "test migration"
 
 # Test programmatic interface (should work as before)
 # If using with FABER, run a test workflow
@@ -122,22 +122,22 @@ Try the new slash commands:
 
 ```bash
 # Branch management
-/repo:branch list --stale --merged
+/fractary-repo:branch list --stale --merged
 
 # Semantic commits
-/repo:commit "Add feature" --type feat --work-id 123
+/fractary-repo:commit "Add feature" --type feat --work-id 123
 
 # Push with upstream
-/repo:push --set-upstream
+/fractary-repo:push --set-upstream
 
 # PR management
-/repo:pr create "feat: New feature" --work-id 123
+/fractary-repo:pr create "feat: New feature" --work-id 123
 
 # Tag management
-/repo:tag create v1.0.0 --message "Release"
+/fractary-repo:tag create v1.0.0 --message "Release"
 
 # Branch cleanup
-/repo:cleanup --merged
+/fractary-repo:cleanup --merged
 ```
 
 ## Configuration Migration
@@ -262,7 +262,7 @@ Same syntax works! Agent interface unchanged.
 **Alternative (v2.0)**:
 Use new commands:
 ```bash
-/repo:branch create 123 "new feature"
+/fractary-repo:branch create 123 "new feature"
 ```
 
 ### Scenario 4: Programmatic Usage
@@ -382,7 +382,7 @@ claude cache clear
 
 ```bash
 # Verify rollback worked
-/repo:branch create 1 "rollback test"
+/fractary-repo:branch create 1 "rollback test"
 ```
 
 ## Benefits of Migrating
@@ -440,11 +440,11 @@ claude cache clear
 
 **A**: Run these commands:
 ```bash
-/repo:branch create 1 "migration test"
-/repo:commit "Test commit" --type test --work-id 1
-/repo:push
+/fractary-repo:branch create 1 "migration test"
+/fractary-repo:commit "Test commit" --type test --work-id 1
+/fractary-repo:push
 git checkout main
-/repo:branch delete test/1-migration-test
+/fractary-repo:branch delete test/1-migration-test
 ```
 
 ### Q: What if I encounter issues?
@@ -462,7 +462,7 @@ After migrating, verify:
 - [ ] FABER integration works (if applicable)
 - [ ] Custom scripts work (if applicable)
 - [ ] Configuration loads correctly
-- [ ] New commands accessible (/repo:branch, /repo:commit, etc.)
+- [ ] New commands accessible (/fractary-repo:branch, /fractary-repo:commit, etc.)
 - [ ] Protected branch safety works
 - [ ] Authentication works (GITHUB_TOKEN set)
 

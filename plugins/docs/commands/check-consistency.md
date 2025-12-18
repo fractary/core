@@ -5,7 +5,7 @@ model: claude-haiku-4-5
 argument-hint: "[--fix] [--targets <files>] [--base <ref>]"
 ---
 
-# /docs:check-consistency
+# /fractary-docs:check-consistency
 
 Check if high-level project documentation (CLAUDE.md, README.md, etc.) is consistent with recent code changes.
 
@@ -13,16 +13,16 @@ Check if high-level project documentation (CLAUDE.md, README.md, etc.) is consis
 
 ```bash
 # Check all default targets
-/docs:check-consistency
+/fractary-docs:check-consistency
 
 # Check specific targets
-/docs:check-consistency --targets "CLAUDE.md,README.md"
+/fractary-docs:check-consistency --targets "CLAUDE.md,README.md"
 
 # Check and auto-fix (with confirmation)
-/docs:check-consistency --fix
+/fractary-docs:check-consistency --fix
 
 # Check against specific base branch
-/docs:check-consistency --base develop
+/fractary-docs:check-consistency --base develop
 ```
 
 ## Arguments

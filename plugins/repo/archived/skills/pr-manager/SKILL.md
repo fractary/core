@@ -14,7 +14,7 @@ Your responsibility is to manage the complete pull request lifecycle: creation, 
 
 You are invoked by:
 - The repo-manager agent for programmatic PR operations
-- The /repo:pr command for user-initiated PR management
+- The /fractary-repo:pr command for user-initiated PR management
 - FABER workflow managers during Release phase to create and merge PRs
 
 You delegate to the active source control handler to perform platform-specific PR operations.
@@ -493,7 +493,7 @@ SUGGESTED NEXT STEPS:
    d. Resolve conflicts in: {list conflicting files}
    e. Commit resolution: git commit
    f. Push changes: git push origin {head_branch}
-   g. Wait for CI to pass and re-analyze: /repo:pr-review {pr_number}
+   g. Wait for CI to pass and re-analyze: /fractary-repo:pr-review {pr_number}
 
 {Else if CI failures exist:}
 1. [FIX CI] Address failing CI checks
@@ -502,7 +502,7 @@ SUGGESTED NEXT STEPS:
    Fix issues on branch {head_branch}
 
 2. [RE-ANALYZE] After fixes, re-run analysis
-   Use: /repo:pr-review {pr_number}
+   Use: /fractary-repo:pr-review {pr_number}
 
 {Else if changes requested or critical issues in comments:}
 1. [ADDRESS ISSUES] Fix the issues identified in code review
@@ -513,28 +513,28 @@ SUGGESTED NEXT STEPS:
    Work on branch: {head_branch}
 
 2. [RE-ANALYZE] After fixes, re-run analysis
-   Use: /repo:pr-review {pr_number}
+   Use: /fractary-repo:pr-review {pr_number}
 
 3. [DISCUSS] If you disagree with the feedback
-   Add comment to discuss: /repo:pr-comment {pr_number} --comment "Your response"
+   Add comment to discuss: /fractary-repo:pr-comment {pr_number} --comment "Your response"
 
 {Else if review required but no reviews:}
 1. [WAIT FOR REVIEW] PR requires review approval
    Request review from team members
 
 2. [CHECK STATUS] Monitor review status
-   Use: /repo:pr-review {pr_number}
+   Use: /fractary-repo:pr-review {pr_number}
 
 {Else if ready to approve:}
 1. [APPROVE & MERGE] Approve and merge this PR
-   Use: /repo:pr-review {pr_number} --action approve --comment "Looks good!"
-   Then: /repo:pr-merge {pr_number}
+   Use: /fractary-repo:pr-review {pr_number} --action approve --comment "Looks good!"
+   Then: /fractary-repo:pr-merge {pr_number}
 
 2. [REQUEST CHANGES] Request additional changes (if you found issues)
-   Use: /repo:pr-review {pr_number} --action request_changes --comment "Your feedback"
+   Use: /fractary-repo:pr-review {pr_number} --action request_changes --comment "Your feedback"
 
 3. [ADD COMMENT] Add comment without formal review
-   Use: /repo:pr-comment {pr_number} --comment "Your feedback"
+   Use: /fractary-repo:pr-comment {pr_number} --comment "Your feedback"
 ```
 
 **CRITICAL OUTPUT REQUIREMENTS:**
@@ -918,7 +918,7 @@ See: `plugins/faber/docs/RESPONSE-FORMAT.md` for complete specification.
       "recommendation": "READY_TO_APPROVE"
     },
     "suggested_actions": [
-      {"action": "approve_and_merge", "commands": ["/repo:pr-review 456 approve", "/repo:pr-merge 456"]}
+      {"action": "approve_and_merge", "commands": ["/fractary-repo:pr-review 456 approve", "/fractary-repo:pr-merge 456"]}
     ]
   }
 }
@@ -1405,7 +1405,7 @@ Closes #{work_id}
 
 **Called By:**
 - `repo-manager` agent - For programmatic PR operations
-- `/repo:pr` command - For user-initiated PR management
+- `/fractary-repo:pr` command - For user-initiated PR management
 - FABER `release-manager` - For creating and managing release PRs
 
 **Calls:**

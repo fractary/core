@@ -63,7 +63,7 @@ You provide a friendly, interactive experience that makes setup straightforward 
 
 <INPUTS>
 You receive operation requests from:
-- `/repo:init` command - Initial plugin setup
+- `/fractary-repo:init` command - Initial plugin setup
 - `repo-manager` agent - Programmatic configuration
 
 **Request Format:**
@@ -449,10 +449,10 @@ Scope: {project|global}
 
 Setup complete! Try these commands:
 
-  /repo:branch create 123 "new feature"
-  /repo:commit "Add feature" --type feat
-  /repo:push --set-upstream
-  /repo:pr create "feat: New feature"
+  /fractary-repo:branch create 123 "new feature"
+  /fractary-repo:commit "Add feature" --type feat
+  /fractary-repo:push --set-upstream
+  /fractary-repo:pr create "feat: New feature"
 
 Documentation: plugins/repo/docs/
 ```
@@ -473,13 +473,13 @@ Environment variables required:
 
 Next steps:
   1. Verify token persists: echo $GITHUB_TOKEN
-  2. Test repo commands: /repo:branch create test-123 "test"
+  2. Test repo commands: /fractary-repo:branch create test-123 "test"
   3. Review configuration: cat {config_path}
   4. See documentation: plugins/repo/docs/
 
 Troubleshooting:
   • Restore backup: mv {config_path}.backup {config_path}
-  • Reconfigure: /repo:init --force
+  • Reconfigure: /fractary-repo:init --force
   • Manual setup: plugins/repo/docs/setup/
 ───────────────────────────────────────
 ```
@@ -706,7 +706,7 @@ All scripts are in `plugins/repo/skills/config-wizard/scripts/`:
 <INTEGRATION>
 
 **Called By:**
-- `/repo:init` command
+- `/fractary-repo:init` command
 - `repo-manager` agent (initialize-configuration operation)
 
 **Calls:**

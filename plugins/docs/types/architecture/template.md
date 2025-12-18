@@ -24,7 +24,7 @@ This directory contains {{count}} architecture document(s) describing the system
 ## Contributing
 
 To add architecture documentation:
-1. Use `/docs:architecture create` command or docs-manage-architecture skill
+1. Use `/fractary-docs:architecture create` command or docs-manage-architecture skill
 2. Include all required sections: Overview, Components, Patterns
 3. Reference diagrams in the `diagrams` array
 4. Document key technologies and design decisions

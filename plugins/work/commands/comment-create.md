@@ -82,17 +82,17 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:comment-create 123 "Working on this now"
-✅ /work:comment-create 123 "Investigated the bug - found the root cause"
+✅ /fractary-work:comment-create 123 "Working on this now"
+✅ /fractary-work:comment-create 123 "Investigated the bug - found the root cause"
 
-❌ /work:comment-create 123 Working on this now
-❌ /work:comment-create 123 Investigated the bug
+❌ /fractary-work:comment-create 123 Working on this now
+❌ /fractary-work:comment-create 123 Investigated the bug
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:comment-create 123 LGTM
-✅ /work:comment-create 123 Done
+✅ /fractary-work:comment-create 123 LGTM
+✅ /fractary-work:comment-create 123 Done
 ```
 
 **Comment text guidelines:**
@@ -128,25 +128,25 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Add a comment
-/work:comment-create 123 "Starting work on this issue"
+/fractary-work:comment-create 123 "Starting work on this issue"
 
 # Add a longer comment
-/work:comment-create 123 "Investigated the bug - it's caused by a race condition"
+/fractary-work:comment-create 123 "Investigated the bug - it's caused by a race condition"
 
 # Add a single-word comment
-/work:comment-create 123 LGTM
+/fractary-work:comment-create 123 LGTM
 
 # Add a comment with markdown
-/work:comment-create 123 "## Progress Update\n\n- Fixed authentication\n- Added tests\n- Updated docs"
+/fractary-work:comment-create 123 "## Progress Update\n\n- Fixed authentication\n- Added tests\n- Updated docs"
 
 # Generate comment from conversation context (after debugging session)
-/work:comment-create 123 --prompt "Summarize the root cause we identified and the fix we implemented"
+/fractary-work:comment-create 123 --prompt "Summarize the root cause we identified and the fix we implemented"
 
 # Generate progress update from conversation
-/work:comment-create 123 --prompt "Post a progress update covering the changes we made today"
+/fractary-work:comment-create 123 --prompt "Post a progress update covering the changes we made today"
 
 # Enhance existing comment with conversation context
-/work:comment-create 123 "Fixed the authentication bug" --prompt "Add technical details about the race condition we found"
+/fractary-work:comment-create 123 "Fixed the authentication bug" --prompt "Add technical details about the race condition we found"
 ```
 </EXAMPLES>
 
@@ -179,13 +179,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:comment-create <issue_number> <text>
+Usage: /fractary-work:comment-create <issue_number> <text>
 ```
 
 **Missing comment text**:
 ```
 Error: comment text is required
-Usage: /work:comment-create <issue_number> <text>
+Usage: /fractary-work:comment-create <issue_number> <text>
 ```
 
 **Invalid issue number**:
@@ -207,7 +207,7 @@ This command works with:
 - Jira Cloud
 - Linear
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## FABER Integration
 
@@ -218,8 +218,8 @@ When used within FABER workflows, comments automatically include phase informati
 For detailed documentation, see: [/docs/commands/work-comment.md](../../../docs/commands/work-comment.md)
 
 Related commands:
-- `/work:comment-list` - List comments
-- `/work:issue-fetch` - Fetch issue details
-- `/work:state-close` - Close issue with comment
-- `/work:init` - Configure work plugin
+- `/fractary-work:comment-list` - List comments
+- `/fractary-work:issue-fetch` - Fetch issue details
+- `/fractary-work:state-close` - Close issue with comment
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

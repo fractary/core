@@ -61,17 +61,17 @@ Your role is to parse user input and invoke the work-manager agent to set labels
 ## Command Argument Syntax
 
 This command takes multiple positional arguments:
-- **Format**: `/work:label-set <number> <label1> <label2> ...`
+- **Format**: `/fractary-work:label-set <number> <label1> <label2> ...`
 - **number**: Issue number (e.g., 123, not "#123")
 - **labels**: Space-separated list of label names (no spaces in individual labels)
 
 **Label names cannot contain spaces:**
 ```bash
-✅ /work:label-set 123 bug high-priority reviewed
-✅ /work:label-set 123 feature enhancement
-✅ /work:label-set 123 urgent
+✅ /fractary-work:label-set 123 bug high-priority reviewed
+✅ /fractary-work:label-set 123 feature enhancement
+✅ /fractary-work:label-set 123 urgent
 
-❌ /work:label-set 123 "high priority" bug  # Spaces not supported
+❌ /fractary-work:label-set 123 "high priority" bug  # Spaces not supported
 ```
 
 **Use hyphens or underscores instead:**
@@ -89,7 +89,7 @@ This command takes multiple positional arguments:
 
 **Maps to**: set-labels operation
 
-**Important**: This operation REPLACES all existing labels. To add labels without replacing, use `/work:label-add` instead.
+**Important**: This operation REPLACES all existing labels. To add labels without replacing, use `/fractary-work:label-add` instead.
 </ARGUMENT_PARSING>
 
 <EXAMPLES>
@@ -97,13 +97,13 @@ This command takes multiple positional arguments:
 
 ```bash
 # Set exact labels (replaces all existing)
-/work:label-set 123 bug high-priority security
+/fractary-work:label-set 123 bug high-priority security
 
 # Set single label (removes all others)
-/work:label-set 123 feature
+/fractary-work:label-set 123 feature
 
 # Set multiple labels
-/work:label-set 123 enhancement needs-review approved
+/fractary-work:label-set 123 enhancement needs-review approved
 ```
 </EXAMPLES>
 
@@ -136,13 +136,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:label-set <number> <label1> <label2> ...
+Usage: /fractary-work:label-set <number> <label1> <label2> ...
 ```
 
 **Missing labels**:
 ```
 Error: at least one label is required
-Usage: /work:label-set <number> <label1> <label2> ...
+Usage: /fractary-work:label-set <number> <label1> <label2> ...
 ```
 
 **Invalid issue number**:
@@ -157,7 +157,7 @@ Verify the issue number and try again
 
 This command REPLACES all existing labels on the issue with the specified labels. Any labels not in the provided list will be removed.
 
-If you want to add labels without removing existing ones, use `/work:label-add` instead.
+If you want to add labels without removing existing ones, use `/fractary-work:label-add` instead.
 
 ## Platform Support
 
@@ -166,15 +166,15 @@ This command works with:
 - Jira Cloud (simple text tags)
 - Linear (labels have colors, team-specific)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-label.md](../../../docs/commands/work-label.md)
 
 Related commands:
-- `/work:label-add` - Add label (non-destructive)
-- `/work:label-remove` - Remove label
-- `/work:label-list` - List labels
-- `/work:init` - Configure work plugin
+- `/fractary-work:label-add` - Add label (non-destructive)
+- `/fractary-work:label-remove` - Remove label
+- `/fractary-work:label-list` - List labels
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

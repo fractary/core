@@ -90,17 +90,17 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:issue-update 123 --title "New title here"
-✅ /work:issue-update 123 --body "Updated description"
-✅ /work:issue-update 123 --title "New title" --body "New description"
+✅ /fractary-work:issue-update 123 --title "New title here"
+✅ /fractary-work:issue-update 123 --body "Updated description"
+✅ /fractary-work:issue-update 123 --title "New title" --body "New description"
 
-❌ /work:issue-update 123 --title New title here
-❌ /work:issue-update 123 --body Updated description
+❌ /fractary-work:issue-update 123 --title New title here
+❌ /fractary-work:issue-update 123 --body Updated description
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:issue-update 123 --title Fixed
+✅ /fractary-work:issue-update 123 --title Fixed
 ```
 </ARGUMENT_SYNTAX>
 
@@ -129,22 +129,22 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Update issue title
-/work:issue-update 123 --title "Fix authentication timeout bug"
+/fractary-work:issue-update 123 --title "Fix authentication timeout bug"
 
 # Update issue description
-/work:issue-update 123 --body "Users are being logged out after 5 minutes"
+/fractary-work:issue-update 123 --body "Users are being logged out after 5 minutes"
 
 # Update both title and description
-/work:issue-update 123 --title "New title" --body "New description"
+/fractary-work:issue-update 123 --title "New title" --body "New description"
 
 # Update description from conversation context (after refining understanding)
-/work:issue-update 123 --prompt "Update the description to reflect our refined understanding of the root cause"
+/fractary-work:issue-update 123 --prompt "Update the description to reflect our refined understanding of the root cause"
 
 # Update with new requirements from discussion
-/work:issue-update 123 --prompt "Add the additional acceptance criteria we identified during planning"
+/fractary-work:issue-update 123 --prompt "Add the additional acceptance criteria we identified during planning"
 
 # Enhance existing description with conversation details
-/work:issue-update 123 --body "Fix the authentication bug" --prompt "Add technical details about the race condition we discovered"
+/fractary-work:issue-update 123 --body "Fix the authentication bug" --prompt "Add technical details about the race condition we discovered"
 ```
 </EXAMPLES>
 
@@ -178,13 +178,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue number is required
-Usage: /work:issue-update <number> [--title <title>] [--body <text>]
+Usage: /fractary-work:issue-update <number> [--title <title>] [--body <text>]
 ```
 
 **No update parameters**:
 ```
 Error: At least one of --title or --body is required
-Usage: /work:issue-update <number> [--title <title>] [--body <text>]
+Usage: /fractary-work:issue-update <number> [--title <title>] [--body <text>]
 ```
 
 **Invalid issue number**:
@@ -202,17 +202,17 @@ This command works with:
 - Jira Cloud
 - Linear
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-issue.md](../../../docs/commands/work-issue.md)
 
 Related commands:
-- `/work:issue-create` - Create new issue
-- `/work:issue-fetch` - Fetch issue details
-- `/work:issue-assign` - Assign issue
-- `/work:label-add` - Add labels
-- `/work:state-close` - Close issue
-- `/work:init` - Configure work plugin
+- `/fractary-work:issue-create` - Create new issue
+- `/fractary-work:issue-fetch` - Fetch issue details
+- `/fractary-work:issue-assign` - Assign issue
+- `/fractary-work:label-add` - Add labels
+- `/fractary-work:state-close` - Close issue
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

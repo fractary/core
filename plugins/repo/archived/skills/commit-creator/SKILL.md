@@ -14,7 +14,7 @@ Your responsibility is to create semantic, well-formatted Git commits that follo
 
 You are invoked by:
 - The repo-manager agent for programmatic commit creation
-- The /repo:commit command for user-initiated commits
+- The /fractary-repo:commit command for user-initiated commits
 - FABER workflow managers (Architect, Build, Evaluate phases) for stage-specific commits
 
 You delegate to the active source control handler to perform platform-specific Git commit operations.
@@ -452,7 +452,7 @@ OUTPUT:
 
 **Called By:**
 - `repo-manager` agent - For programmatic commit creation
-- `/repo:commit` command - For user-initiated commits
+- `/fractary-repo:commit` command - For user-initiated commits
 - FABER `architect-manager` - For specification commits
 - FABER `build-manager` - For implementation commits
 - FABER `evaluate-manager` - For test and fix commits

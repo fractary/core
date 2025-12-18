@@ -68,16 +68,16 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Date values need quotes:**
 ```bash
-✅ /work:comment-list 123 --since "2025-01-01"
-✅ /work:comment-list 123 --limit 5
+✅ /fractary-work:comment-list 123 --since "2025-01-01"
+✅ /fractary-work:comment-list 123 --limit 5
 
-❌ /work:comment-list 123 --since 2025-01-01  # Date should be quoted
+❌ /fractary-work:comment-list 123 --since 2025-01-01  # Date should be quoted
 ```
 
 **Numeric values don't require quotes:**
 ```bash
-✅ /work:comment-list 123
-✅ /work:comment-list 123 --limit 20
+✅ /fractary-work:comment-list 123
+✅ /fractary-work:comment-list 123 --limit 20
 ```
 
 **Date format:**
@@ -103,16 +103,16 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # List comments (default limit: 10)
-/work:comment-list 123
+/fractary-work:comment-list 123
 
 # List recent comments only
-/work:comment-list 123 --limit 5
+/fractary-work:comment-list 123 --limit 5
 
 # List comments since a date
-/work:comment-list 123 --since "2025-01-01"
+/fractary-work:comment-list 123 --since "2025-01-01"
 
 # Combine filters
-/work:comment-list 123 --limit 20 --since "2025-01-01"
+/fractary-work:comment-list 123 --limit 20 --since "2025-01-01"
 ```
 </EXAMPLES>
 
@@ -146,7 +146,7 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:comment-list <issue_number>
+Usage: /fractary-work:comment-list <issue_number>
 ```
 
 **Invalid issue number**:
@@ -158,7 +158,7 @@ Verify the issue number and try again
 **Invalid limit**:
 ```
 Error: limit must be a positive number
-Usage: /work:comment-list <issue_number> --limit <n>
+Usage: /fractary-work:comment-list <issue_number> --limit <n>
 ```
 
 **Invalid date format**:
@@ -176,14 +176,14 @@ This command works with:
 - Jira Cloud
 - Linear
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-comment.md](../../../docs/commands/work-comment.md)
 
 Related commands:
-- `/work:comment-create` - Add comment
-- `/work:issue-fetch` - Fetch issue details
-- `/work:init` - Configure work plugin
+- `/fractary-work:comment-create` - Add comment
+- `/fractary-work:issue-fetch` - Fetch issue details
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

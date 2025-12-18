@@ -272,21 +272,21 @@ Edit `~/.fractary/repo/config.json`:
 cd /path/to/your/repo
 
 # 2. Test branch creation
-/repo:branch create 1 "test setup"
+/fractary-repo:branch create 1 "test setup"
 
 # 3. Make a change
 echo "test" > test.txt
 git add test.txt
 
 # 4. Test commit
-/repo:commit "Test commit" --type test --work-id 1
+/fractary-repo:commit "Test commit" --type test --work-id 1
 
 # 5. Test push
-/repo:push --set-upstream
+/fractary-repo:push --set-upstream
 
 # 6. Clean up test branch
 git checkout main
-/repo:branch delete test/1-test-setup
+/fractary-repo:branch delete test/1-test-setup
 ```
 
 ## GitHub Enterprise Setup
@@ -440,7 +440,7 @@ gh repo view owner/repo
 
 **Solutions**:
 - Create PR instead of direct push
-- Use `/repo:pr create` command
+- Use `/fractary-repo:pr create` command
 - Check if you have admin override permissions
 
 ### Network Issues

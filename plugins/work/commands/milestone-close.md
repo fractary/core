@@ -68,17 +68,17 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:milestone-close "v1.0 Release"
-✅ /work:milestone-close "v1.0 Release" --comment "All issues completed successfully"
+✅ /fractary-work:milestone-close "v1.0 Release"
+✅ /fractary-work:milestone-close "v1.0 Release" --comment "All issues completed successfully"
 
-❌ /work:milestone-close v1.0 Release
-❌ /work:milestone-close "v1.0 Release" --comment All issues completed
+❌ /fractary-work:milestone-close v1.0 Release
+❌ /fractary-work:milestone-close "v1.0 Release" --comment All issues completed
 ```
 
 **Single-word values or numbers don't require quotes:**
 ```bash
-✅ /work:milestone-close v1.0
-✅ /work:milestone-close 1  # Milestone number
+✅ /fractary-work:milestone-close v1.0
+✅ /fractary-work:milestone-close 1  # Milestone number
 ```
 </ARGUMENT_SYNTAX>
 
@@ -99,16 +99,16 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Close milestone
-/work:milestone-close "v1.0 Release"
+/fractary-work:milestone-close "v1.0 Release"
 
 # Close with comment
-/work:milestone-close "v1.0 Release" --comment "All issues completed successfully"
+/fractary-work:milestone-close "v1.0 Release" --comment "All issues completed successfully"
 
 # Close by milestone number
-/work:milestone-close 1
+/fractary-work:milestone-close 1
 
 # Close with single-word title
-/work:milestone-close v1.0
+/fractary-work:milestone-close v1.0
 ```
 </EXAMPLES>
 
@@ -141,13 +141,13 @@ Common errors to handle:
 **Missing milestone**:
 ```
 Error: milestone is required
-Usage: /work:milestone-close <milestone_id> [--comment <text>]
+Usage: /fractary-work:milestone-close <milestone_id> [--comment <text>]
 ```
 
 **Milestone not found**:
 ```
 Error: Milestone not found: "v3.0 Release"
-List milestones: /work:milestone-list --state all
+List milestones: /fractary-work:milestone-list --state all
 ```
 
 **Already closed**:
@@ -165,7 +165,7 @@ This command works with:
 - Jira (maps to Versions or Sprints)
 - Linear (maps to Projects or Cycles)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## FABER Integration
 
@@ -176,9 +176,9 @@ FABER workflows can automatically close milestones when all associated issues ar
 For detailed documentation, see: [/docs/commands/work-milestone.md](../../../docs/commands/work-milestone.md)
 
 Related commands:
-- `/work:milestone-create` - Create milestone
-- `/work:milestone-list` - List milestones
-- `/work:milestone-set` - Assign milestone to issue
-- `/work:milestone-remove` - Remove milestone from issue
-- `/work:init` - Configure work plugin
+- `/fractary-work:milestone-create` - Create milestone
+- `/fractary-work:milestone-list` - List milestones
+- `/fractary-work:milestone-set` - Assign milestone to issue
+- `/fractary-work:milestone-remove` - Remove milestone from issue
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

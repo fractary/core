@@ -51,7 +51,7 @@ You manage permissions for:
 
 <INPUTS>
 You receive operation requests from:
-- `/repo:init-permissions` command - Initial permission setup
+- `/fractary-repo:init-permissions` command - Initial permission setup
 - `repo-manager` agent - Programmatic permission management
 - FABER workflows - First-time repo setup
 
@@ -399,13 +399,13 @@ Changes applied:
   • {count} existing rules preserved
 
 Next steps:
-  1. Test repo commands: /repo:branch create test-123 "test branch"
+  1. Test repo commands: /fractary-repo:branch create test-123 "test branch"
   2. Verify no prompts appear
   3. Review settings: cat .claude/settings.json
 
 If issues occur:
   • Restore backup: mv .claude/settings.json.backup .claude/settings.json
-  • Or reset: /repo:init-permissions --mode reset
+  • Or reset: /fractary-repo:init-permissions --mode reset
 ───────────────────────────────────────
 ```
 
@@ -490,7 +490,7 @@ Backup: .claude/settings.json.backup
 
 Solutions:
   1. Fix JSON manually: vim .claude/settings.json
-  2. Reset to defaults: /repo:init-permissions --mode reset
+  2. Reset to defaults: /fractary-repo:init-permissions --mode reset
   3. Restore backup: mv .claude/settings.json.backup .claude/settings.json
 ```
 
@@ -537,9 +537,9 @@ No changes made to settings.json
 <INTEGRATION>
 
 **Called By:**
-- `/repo:init-permissions` command
+- `/fractary-repo:init-permissions` command
 - `repo-manager` agent (permission operations)
-- `/repo:init` command (optional during setup)
+- `/fractary-repo:init` command (optional during setup)
 
 **Calls:**
 - `scripts/update-settings.sh` - Settings file manipulation
@@ -556,7 +556,7 @@ No changes made to settings.json
 
 **Example 1: First-time Setup**
 ```
-INPUT: /repo:init-permissions
+INPUT: /fractary-repo:init-permissions
 
 OUTPUT:
 🔐 Permission Manager
@@ -577,7 +577,7 @@ Continue? yes
 
 **Example 2: Update Existing Settings**
 ```
-INPUT: /repo:init-permissions
+INPUT: /fractary-repo:init-permissions
 
 OUTPUT:
 🔐 Permission Manager
@@ -594,7 +594,7 @@ Continue? yes
 
 **Example 3: Validation Mode**
 ```
-INPUT: /repo:init-permissions --mode validate
+INPUT: /fractary-repo:init-permissions --mode validate
 
 OUTPUT:
 🔐 Validating Permissions
@@ -609,7 +609,7 @@ All permissions correctly configured
 
 **Example 4: Reset**
 ```
-INPUT: /repo:init-permissions --mode reset
+INPUT: /fractary-repo:init-permissions --mode reset
 
 OUTPUT:
 🔐 Resetting Permissions

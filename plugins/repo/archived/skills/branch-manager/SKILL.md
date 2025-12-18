@@ -14,7 +14,7 @@ Your responsibility is to create and manage Git branches safely. You handle bran
 
 You are invoked by:
 - The repo-manager agent for programmatic branch operations
-- The /repo:branch command for user-initiated branch management
+- The /fractary-repo:branch command for user-initiated branch management
 - FABER workflow managers during the Frame phase
 
 You delegate to the active source control handler to perform platform-specific Git operations.
@@ -353,7 +353,7 @@ See: `plugins/faber/docs/RESPONSE-FORMAT.md` for complete specification.
   "warning_analysis": "The branch was previously created. Work can continue on existing branch.",
   "suggested_fixes": [
     "Use --force to recreate branch from base if needed",
-    "Use /repo:branch-delete to remove and recreate"
+    "Use /fractary-repo:branch-delete to remove and recreate"
   ]
 }
 ```
@@ -376,7 +376,7 @@ See: `plugins/faber/docs/RESPONSE-FORMAT.md` for complete specification.
   "suggested_fixes": [
     "Add --force flag to overwrite existing branch",
     "Choose a different branch name",
-    "Delete existing branch first: /repo:branch-delete feat/123-add-export"
+    "Delete existing branch first: /fractary-repo:branch-delete feat/123-add-export"
   ]
 }
 ```
@@ -518,7 +518,7 @@ OUTPUT:
 
 **Called By:**
 - `repo-manager` agent - For programmatic branch creation
-- `/repo:branch create` command - For user-initiated branch creation
+- `/fractary-repo:branch create` command - For user-initiated branch creation
 - FABER `frame-manager` - During Frame phase to create work branches
 
 **Calls:**

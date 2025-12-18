@@ -67,11 +67,11 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Label names cannot contain spaces:**
 ```bash
-✅ /work:label-add 123 high-priority
-✅ /work:label-add 123 urgent
-✅ /work:label-add 123 bug --color ff0000
+✅ /fractary-work:label-add 123 high-priority
+✅ /fractary-work:label-add 123 urgent
+✅ /fractary-work:label-add 123 bug --color ff0000
 
-❌ /work:label-add 123 "high priority"  # Spaces not supported in label names
+❌ /fractary-work:label-add 123 "high priority"  # Spaces not supported in label names
 ```
 
 **Use hyphens or underscores instead:**
@@ -81,8 +81,8 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Multi-word descriptions need quotes:**
 ```bash
-✅ /work:label-add 123 urgent --description "Requires immediate attention"
-❌ /work:label-add 123 urgent --description Requires immediate attention
+✅ /fractary-work:label-add 123 urgent --description "Requires immediate attention"
+❌ /fractary-work:label-add 123 urgent --description Requires immediate attention
 ```
 </ARGUMENT_SYNTAX>
 
@@ -105,16 +105,16 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Add a single label
-/work:label-add 123 bug
+/fractary-work:label-add 123 bug
 
 # Add label with color
-/work:label-add 123 urgent --color ff0000
+/fractary-work:label-add 123 urgent --color ff0000
 
 # Add label with description
-/work:label-add 123 high-priority --description "Critical issues requiring immediate attention"
+/fractary-work:label-add 123 high-priority --description "Critical issues requiring immediate attention"
 
 # Add label with both
-/work:label-add 123 security --color ffa500 --description "Security-related issues"
+/fractary-work:label-add 123 security --color ffa500 --description "Security-related issues"
 ```
 </EXAMPLES>
 
@@ -149,13 +149,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:label-add <number> <label>
+Usage: /fractary-work:label-add <number> <label>
 ```
 
 **Missing label name**:
 ```
 Error: label name is required
-Usage: /work:label-add <number> <label>
+Usage: /fractary-work:label-add <number> <label>
 ```
 
 **Label contains spaces**:
@@ -181,16 +181,16 @@ This command works with:
 - Jira Cloud (simple text tags)
 - Linear (labels have colors, team-specific)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-label.md](../../../docs/commands/work-label.md)
 
 Related commands:
-- `/work:label-remove` - Remove label
-- `/work:label-list` - List labels
-- `/work:label-set` - Set all labels
-- `/work:issue-create` - Create issue
-- `/work:init` - Configure work plugin
+- `/fractary-work:label-remove` - Remove label
+- `/fractary-work:label-list` - List labels
+- `/fractary-work:label-set` - Set all labels
+- `/fractary-work:issue-create` - Create issue
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

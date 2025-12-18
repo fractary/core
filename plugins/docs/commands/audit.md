@@ -2,14 +2,14 @@
 model: claude-haiku-4-5
 ---
 
-# /docs:audit
+# /fractary-docs:audit
 
 Audit documentation across the project - identify issues, gaps, and quality problems.
 
 ## Usage
 
 ```bash
-/docs:audit [directory] [--doc-type <type>]
+/fractary-docs:audit [directory] [--doc-type <type>]
 ```
 
 ## Arguments
@@ -21,16 +21,16 @@ Audit documentation across the project - identify issues, gaps, and quality prob
 
 ```bash
 # Audit all documentation
-/docs:audit
+/fractary-docs:audit
 
 # Audit specific directory
-/docs:audit docs/api
+/fractary-docs:audit docs/api
 
 # Audit only API documentation
-/docs:audit --doc-type api
+/fractary-docs:audit --doc-type api
 
 # Audit datasets
-/docs:audit docs/datasets --doc-type dataset
+/fractary-docs:audit docs/datasets --doc-type dataset
 ```
 
 ## What This Does
@@ -99,9 +99,9 @@ Audit documentation across the project - identify issues, gaps, and quality prob
 
 ## Related Commands
 
-- `/docs:write` - Create or update documentation
-- `/docs:validate` - Validate specific documents
-- `/docs:list` - List documentation files
+- `/fractary-docs:write` - Create or update documentation
+- `/fractary-docs:validate` - Validate specific documents
+- `/fractary-docs:list` - List documentation files
 
 ---
 

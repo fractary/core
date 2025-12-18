@@ -70,17 +70,17 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Always use quotes for multi-word values:**
 ```bash
-✅ /work:milestone-create "v2.0 Release" --due 2025-12-31
-✅ /work:milestone-create "Sprint 5" --description "November sprint goals"
+✅ /fractary-work:milestone-create "v2.0 Release" --due 2025-12-31
+✅ /fractary-work:milestone-create "Sprint 5" --description "November sprint goals"
 
-❌ /work:milestone-create v2.0 Release --due 2025-12-31
-❌ /work:milestone-create Sprint 5 --description November sprint goals
+❌ /fractary-work:milestone-create v2.0 Release --due 2025-12-31
+❌ /fractary-work:milestone-create Sprint 5 --description November sprint goals
 ```
 
 **Single-word values don't require quotes:**
 ```bash
-✅ /work:milestone-create v1.0 --due 2025-12-31
-✅ /work:milestone-create v1.0 --state open
+✅ /fractary-work:milestone-create v1.0 --due 2025-12-31
+✅ /fractary-work:milestone-create v1.0 --state open
 ```
 
 **Date format:**
@@ -111,16 +111,16 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Create a milestone
-/work:milestone-create "v1.0 Release" --due 2025-12-31
+/fractary-work:milestone-create "v1.0 Release" --due 2025-12-31
 
 # Create with description
-/work:milestone-create "Sprint 5" --due 2025-11-15 --description "November sprint goals"
+/fractary-work:milestone-create "Sprint 5" --due 2025-11-15 --description "November sprint goals"
 
 # Create simple milestone
-/work:milestone-create "Q4 2025"
+/fractary-work:milestone-create "Q4 2025"
 
 # Create closed milestone
-/work:milestone-create "v0.9 Release" --state closed
+/fractary-work:milestone-create "v0.9 Release" --state closed
 ```
 </EXAMPLES>
 
@@ -155,7 +155,7 @@ Common errors to handle:
 **Missing title**:
 ```
 Error: milestone title is required
-Usage: /work:milestone-create <title>
+Usage: /fractary-work:milestone-create <title>
 ```
 
 **Invalid date format**:
@@ -192,15 +192,15 @@ This command works with:
 - Jira (maps to Versions or Sprints)
 - Linear (maps to Projects or Cycles)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-milestone.md](../../../docs/commands/work-milestone.md)
 
 Related commands:
-- `/work:milestone-list` - List milestones
-- `/work:milestone-set` - Assign milestone to issue
-- `/work:milestone-close` - Close milestone
-- `/work:init` - Configure work plugin
+- `/fractary-work:milestone-list` - List milestones
+- `/fractary-work:milestone-set` - Assign milestone to issue
+- `/fractary-work:milestone-close` - Close milestone
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

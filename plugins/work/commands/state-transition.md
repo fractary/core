@@ -69,25 +69,25 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **State values are exact keywords (no quotes needed):**
 ```bash
-✅ /work:state-transition 123 in_progress
-✅ /work:state-transition 123 in_review
-✅ /work:state-transition 123 done
+✅ /fractary-work:state-transition 123 in_progress
+✅ /fractary-work:state-transition 123 in_review
+✅ /fractary-work:state-transition 123 done
 
-❌ /work:state-transition 123 "in progress"  # Use underscores, not spaces
-❌ /work:state-transition 123 in-progress    # Use underscores, not hyphens
+❌ /fractary-work:state-transition 123 "in progress"  # Use underscores, not spaces
+❌ /fractary-work:state-transition 123 in-progress    # Use underscores, not hyphens
 ```
 
 **Always use quotes for multi-word comments:**
 ```bash
-✅ /work:state-transition 123 in_progress --comment "Starting work on this"
-✅ /work:state-transition 123 in_review --comment "Ready for review"
+✅ /fractary-work:state-transition 123 in_progress --comment "Starting work on this"
+✅ /fractary-work:state-transition 123 in_review --comment "Ready for review"
 
-❌ /work:state-transition 123 in_progress --comment Starting work on this
+❌ /fractary-work:state-transition 123 in_progress --comment Starting work on this
 ```
 
 **Single-word comments don't require quotes:**
 ```bash
-✅ /work:state-transition 123 done --comment Completed
+✅ /fractary-work:state-transition 123 done --comment Completed
 ```
 
 **State values use underscores:**
@@ -113,19 +113,19 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Transition to in_progress
-/work:state-transition 123 in_progress
+/fractary-work:state-transition 123 in_progress
 
 # Transition with comment
-/work:state-transition 123 in_progress --comment "Starting work on this"
+/fractary-work:state-transition 123 in_progress --comment "Starting work on this"
 
 # Transition to in_review
-/work:state-transition 123 in_review --comment "Ready for code review"
+/fractary-work:state-transition 123 in_review --comment "Ready for code review"
 
 # Transition to done
-/work:state-transition 123 done --comment "Implementation complete"
+/fractary-work:state-transition 123 done --comment "Implementation complete"
 
 # Transition to closed
-/work:state-transition 123 closed
+/fractary-work:state-transition 123 closed
 ```
 </EXAMPLES>
 
@@ -159,13 +159,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:state-transition <number> <state>
+Usage: /fractary-work:state-transition <number> <state>
 ```
 
 **Missing state**:
 ```
 Error: state is required
-Usage: /work:state-transition <number> <state>
+Usage: /fractary-work:state-transition <number> <state>
 ```
 
 **Invalid state**:
@@ -198,7 +198,7 @@ This command works with:
 - Jira Cloud (Maps to workflow states)
 - Linear (Maps to Linear workflow states)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## FABER Integration
 
@@ -209,8 +209,8 @@ FABER workflows automatically manage state transitions through the workflow phas
 For detailed documentation, see: [/docs/commands/work-state.md](../../../docs/commands/work-state.md)
 
 Related commands:
-- `/work:state-close` - Close issue
-- `/work:state-reopen` - Reopen issue
-- `/work:comment-create` - Add comment
-- `/work:init` - Configure work plugin
+- `/fractary-work:state-close` - Close issue
+- `/fractary-work:state-reopen` - Reopen issue
+- `/fractary-work:comment-create` - Add comment
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

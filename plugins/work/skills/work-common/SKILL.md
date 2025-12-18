@@ -51,7 +51,7 @@ PLATFORM=$(echo "$CONFIG_JSON" | jq -r '.handlers["work-tracker"].active')
 
 **Common Mistake:** Do NOT look in `~/.claude/plugins/marketplaces/fractary/plugins/work/` - that's the plugin installation directory, not the project config location.
 
-**Special Behavior:** When config doesn't exist, the work plugin uses auto-detection (e.g., gh CLI automatically detects the repository). Skills can check if config exists and recommend running `/work:init` to persist settings.
+**Special Behavior:** When config doesn't exist, the work plugin uses auto-detection (e.g., gh CLI automatically detects the repository). Skills can check if config exists and recommend running `/fractary-work:init` to persist settings.
 
 **Example:**
 ```bash
@@ -78,7 +78,7 @@ GITHUB_REPO=$(echo "$CONFIG_JSON" | jq -r '.handlers["work-tracker"].github.repo
 if [ -f ".fractary/plugins/work/config.json" ]; then
     # Config exists
 else
-    # Show recommendation to run /work:init
+    # Show recommendation to run /fractary-work:init
 fi
 ```
 

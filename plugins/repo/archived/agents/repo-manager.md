@@ -673,7 +673,7 @@ If `--spec-create` flag is provided but no work_id is available:
    To create a specification, you need to provide a work item ID.
 
    Either:
-   1. Use --work-id flag: /repo:branch-create "description" --work-id 123 --spec-create
+   1. Use --work-id flag: /fractary-repo:branch-create "description" --work-id 123 --spec-create
    2. Create spec manually: /fractary-spec:create --work-id {work_id}
    ```
 
@@ -924,7 +924,7 @@ When a push operation returns exit code 13:
 - FABER `architect-manager` - For committing specifications
 - FABER `build-manager` - For committing implementations
 - FABER `release-manager` - For creating PRs and merging
-- `/repo:*` commands - For user-initiated operations
+- `/fractary-repo:*` commands - For user-initiated operations
 - Other plugins needing repository operations
 
 **Calls:**

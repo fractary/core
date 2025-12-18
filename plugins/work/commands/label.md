@@ -1,6 +1,6 @@
 ---
 name: fractary-work:label
-description: "[DEPRECATED] Add, remove, and manage labels on work items - Use /work:label-add, /work:label-remove, /work:label-list, or /work:label-set instead"
+description: "[DEPRECATED] Add, remove, and manage labels on work items - Use /fractary-work:label-add, /fractary-work:label-remove, /fractary-work:label-list, or /fractary-work:label-set instead"
 model: claude-haiku-4-5
 argument-hint: add <number> <label> | remove <number> <label> | list <number> | set <number> <label1> <label2> ...
 ---
@@ -10,10 +10,10 @@ argument-hint: add <number> <label> | remove <number> <label> | list <number> | 
 
 This multi-function command has been split into focused single-purpose commands for better usability:
 
-- `/work:label-add` - Add a label to an issue
-- `/work:label-remove` - Remove a label from an issue
-- `/work:label-list` - List all labels on an issue
-- `/work:label-set` - Set exact labels on issue (replaces all)
+- `/fractary-work:label-add` - Add a label to an issue
+- `/fractary-work:label-remove` - Remove a label from an issue
+- `/fractary-work:label-list` - List all labels on an issue
+- `/fractary-work:label-set` - Set exact labels on issue (replaces all)
 
 **Why this change?**
 - Simpler command structure (no subcommands)
@@ -22,10 +22,10 @@ This multi-function command has been split into focused single-purpose commands 
 - Consistent with Unix philosophy: do one thing well
 
 **Migration:**
-- `/work:label add 123 bug` → `/work:label-add 123 bug`
-- `/work:label remove 123 wontfix` → `/work:label-remove 123 wontfix`
-- `/work:label list 123` → `/work:label-list 123`
-- `/work:label set 123 bug urgent` → `/work:label-set 123 bug urgent`
+- `/fractary-work:label add 123 bug` → `/fractary-work:label-add 123 bug`
+- `/fractary-work:label remove 123 wontfix` → `/fractary-work:label-remove 123 wontfix`
+- `/fractary-work:label list 123` → `/fractary-work:label-list 123`
+- `/fractary-work:label set 123 bug urgent` → `/fractary-work:label-set 123 bug urgent`
 
 This command will be removed in the next major version. Please update your workflows to use the new single-purpose commands.
 </DEPRECATION_NOTICE>
@@ -93,11 +93,11 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Label names cannot contain spaces:**
 ```bash
-✅ /work:label add 123 high-priority
-✅ /work:label add 123 urgent
-✅ /work:label set 123 bug high-priority reviewed
+✅ /fractary-work:label add 123 high-priority
+✅ /fractary-work:label add 123 urgent
+✅ /fractary-work:label set 123 bug high-priority reviewed
 
-❌ /work:label add 123 "high priority"  # Spaces not supported in label names
+❌ /fractary-work:label add 123 "high priority"  # Spaces not supported in label names
 ```
 
 **Use hyphens or underscores instead:**
@@ -107,14 +107,14 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Multi-word descriptions need quotes:**
 ```bash
-✅ /work:label add 123 urgent --description "Requires immediate attention"
-❌ /work:label add 123 urgent --description Requires immediate attention
+✅ /fractary-work:label add 123 urgent --description "Requires immediate attention"
+❌ /fractary-work:label add 123 urgent --description Requires immediate attention
 ```
 
 **The set subcommand takes multiple space-separated labels:**
 ```bash
-✅ /work:label set 123 bug high-priority security
-✅ /work:label set 123 feature enhancement
+✅ /fractary-work:label set 123 bug high-priority security
+✅ /fractary-work:label set 123 feature enhancement
 ```
 </ARGUMENT_SYNTAX>
 
@@ -136,7 +136,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:label add 123 urgent
+/fractary-work:label add 123 urgent
 → Invoke agent with {"operation": "add-label", "parameters": {"issue_number": "123", "label": "urgent"}}
 ```
 
@@ -151,7 +151,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:label remove 123 wontfix
+/fractary-work:label remove 123 wontfix
 → Invoke agent with {"operation": "remove-label", "parameters": {"issue_number": "123", "label": "wontfix"}}
 ```
 
@@ -165,7 +165,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:label list 123
+/fractary-work:label list 123
 → Invoke agent with {"operation": "list-labels", "parameters": {"issue_number": "123"}}
 ```
 
@@ -180,7 +180,7 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 **Example**:
 ```
-/work:label set 123 bug high-priority reviewed
+/fractary-work:label set 123 bug high-priority reviewed
 → Invoke agent with {"operation": "set-labels", "parameters": {"issue_number": "123", "labels": ["bug", "high-priority", "reviewed"]}}
 ```
 </ARGUMENT_PARSING>
@@ -190,20 +190,20 @@ This command follows the **space-separated** argument syntax (consistent with wo
 
 ```bash
 # Add a single label
-/work:label add 123 bug
+/fractary-work:label add 123 bug
 
 # Add multiple labels (one at a time)
-/work:label add 123 urgent
-/work:label add 123 security
+/fractary-work:label add 123 urgent
+/fractary-work:label add 123 security
 
 # Remove a label
-/work:label remove 123 wontfix
+/fractary-work:label remove 123 wontfix
 
 # List all labels on an issue
-/work:label list 123
+/fractary-work:label list 123
 
 # Set exact labels (replaces all existing)
-/work:label set 123 bug high-priority security
+/fractary-work:label set 123 bug high-priority security
 ```
 </EXAMPLES>
 
@@ -243,13 +243,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue_number is required
-Usage: /work:label add <number> <label>
+Usage: /fractary-work:label add <number> <label>
 ```
 
 **Missing label name**:
 ```
 Error: label name is required
-Usage: /work:label add <number> <label>
+Usage: /fractary-work:label add <number> <label>
 ```
 
 **Label not found**:
@@ -283,15 +283,15 @@ This command works with:
 - Jira Cloud (simple text tags)
 - Linear (labels have colors, team-specific)
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-label.md](../../../docs/commands/work-label.md)
 
 Related commands:
-- `/work:issue` - Manage issues
-- `/work:state` - Manage issue states
-- `/work:milestone` - Manage milestones
-- `/work:init` - Configure work plugin
+- `/fractary-work:issue` - Manage issues
+- `/fractary-work:state` - Manage issue states
+- `/fractary-work:milestone` - Manage milestones
+- `/fractary-work:init` - Configure work plugin
 </NOTES>

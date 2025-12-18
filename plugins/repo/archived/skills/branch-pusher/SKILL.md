@@ -14,7 +14,7 @@ Your responsibility is to push Git branches to remote repositories safely. You h
 
 You are invoked by:
 - The repo-manager agent for programmatic push operations
-- The /repo:push command for user-initiated pushes
+- The /fractary-repo:push command for user-initiated pushes
 - FABER workflow managers during Release phase to push completed work
 
 You delegate to the active source control handler to perform platform-specific Git push operations.
@@ -277,7 +277,7 @@ Return structured JSON response:
 
 This context helps the repo-manager agent determine whether to:
 - Report conflicts for manual resolution (if auto-sync failed)
-- Offer to invoke /repo:pull workflow (if strategy was manual/fail)
+- Offer to invoke /fractary-repo:pull workflow (if strategy was manual/fail)
 </OUTPUTS>
 
 <HANDLERS>
@@ -513,7 +513,7 @@ Always pull/fetch before force pushing to ensure you have latest remote state.
 
 **Called By:**
 - `repo-manager` agent - For programmatic push operations
-- `/repo:push` command - For user-initiated pushes
+- `/fractary-repo:push` command - For user-initiated pushes
 - FABER `release-manager` - Before creating PRs
 
 **Calls:**

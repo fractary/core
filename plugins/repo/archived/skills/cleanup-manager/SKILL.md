@@ -14,7 +14,7 @@ Your responsibility is to identify and clean up stale branches in repositories. 
 
 You are invoked by:
 - The repo-manager agent for programmatic cleanup operations
-- The /repo:cleanup command for user-initiated cleanup
+- The /fractary-repo:cleanup command for user-initiated cleanup
 - Maintenance scripts and scheduled cleanup tasks
 - DevOps automation for repository hygiene
 
@@ -597,7 +597,7 @@ OUTPUT:
 
 **Called By:**
 - `repo-manager` agent - For programmatic cleanup operations
-- `/repo:cleanup` command - For user-initiated cleanup
+- `/fractary-repo:cleanup` command - For user-initiated cleanup
 - Scheduled maintenance tasks
 - DevOps automation scripts
 

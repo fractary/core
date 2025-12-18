@@ -71,19 +71,19 @@ Your role is to parse user input and invoke the work-manager agent to assign an 
 ## Command Argument Syntax
 
 This command takes two positional arguments:
-- **Format**: `/work:issue-assign <number> <user>`
+- **Format**: `/fractary-work:issue-assign <number> <user>`
 - **number**: Issue number (e.g., 123, not "#123")
 - **user**: Username (use @me for yourself, @username for specific user)
 
 ### Examples
 
 ```bash
-✅ /work:issue-assign 123 @me
-✅ /work:issue-assign 123 @johndoe
-✅ /work:issue-assign 42 @alice
+✅ /fractary-work:issue-assign 123 @me
+✅ /fractary-work:issue-assign 123 @johndoe
+✅ /fractary-work:issue-assign 42 @alice
 
-❌ /work:issue-assign #123 @me  # Don't include # symbol
-❌ /work:issue-assign 123       # Username required
+❌ /fractary-work:issue-assign #123 @me  # Don't include # symbol
+❌ /fractary-work:issue-assign 123       # Username required
 ```
 </ARGUMENT_SYNTAX>
 
@@ -106,13 +106,13 @@ This command takes two positional arguments:
 
 ```bash
 # Assign issue to yourself
-/work:issue-assign 123 @me
+/fractary-work:issue-assign 123 @me
 
 # Assign issue to specific user
-/work:issue-assign 123 @johndoe
+/fractary-work:issue-assign 123 @johndoe
 
 # Assign issue to another user
-/work:issue-assign 456 @alice
+/fractary-work:issue-assign 456 @alice
 ```
 </EXAMPLES>
 
@@ -145,13 +145,13 @@ Common errors to handle:
 **Missing issue number**:
 ```
 Error: issue number is required
-Usage: /work:issue-assign <number> <user>
+Usage: /fractary-work:issue-assign <number> <user>
 ```
 
 **Missing username**:
 ```
 Error: username is required
-Usage: /work:issue-assign <number> <user>
+Usage: /fractary-work:issue-assign <number> <user>
 ```
 
 **Invalid user**:
@@ -175,15 +175,15 @@ This command works with:
 - Jira Cloud
 - Linear
 
-Platform is configured via `/work:init` and stored in `.fractary/plugins/work/config.json`.
+Platform is configured via `/fractary-work:init` and stored in `.fractary/plugins/work/config.json`.
 
 ## See Also
 
 For detailed documentation, see: [/docs/commands/work-issue.md](../../../docs/commands/work-issue.md)
 
 Related commands:
-- `/work:issue-create` - Create new issue
-- `/work:issue-fetch` - Fetch issue details
-- `/work:issue-update` - Update issue
-- `/work:init` - Configure work plugin
+- `/fractary-work:issue-create` - Create new issue
+- `/fractary-work:issue-fetch` - Fetch issue details
+- `/fractary-work:issue-update` - Update issue
+- `/fractary-work:init` - Configure work plugin
 </NOTES>
