@@ -84,17 +84,165 @@ Benefits:
 
 ## Architecture Principles
 
-### Principle 1: MCP-First Design
+### Principle 1: Extract Determinism from LLM Control
 
-**MCP (Model Context Protocol) tools are the primary interface for deterministic operations.**
+**Strategic Principle: Minimize what the LLM does to things that require free-form intelligence.**
 
-MCP tools:
-- Execute without LLM invocation (no context cost)
-- Provide structured input/output
-- Are fast and reliable
-- Handle all data operations
+The LLM should only handle:
+- ✅ Reasoning and analysis
+- ✅ Natural language interpretation
+- ✅ Creative generation
+- ✅ Pattern recognition
+- ✅ Decision-making with context
 
-**Use MCP whenever possible.** Only fall back to SDK or CLI when MCP isn't available.
+**Everything deterministic and repeatable must be extracted to code.**
+
+### Why Extract Determinism?
+
+**Problems with LLM-controlled deterministic logic:**
+- ❌ Consumes context/tokens unnecessarily
+- ❌ Introduces inconsistency (LLM might do it differently each time)
+- ❌ Creates opportunities for errors
+- ❌ Slower (requires LLM invocation)
+- ❌ More expensive (token costs)
+- ❌ Not reusable outside LLM context
+
+**Benefits of code-based determinism:**
+- ✅ Zero context consumption
+- ✅ Perfect consistency (same input → same output)
+- ✅ Reduced error surface (LLM can't mess it up)
+- ✅ Fast execution (no LLM overhead)
+- ✅ Cheaper (no token costs)
+- ✅ Reusable across systems
+
+### The Extraction Hierarchy
+
+**1. SDK (Preferred - Maximum Reusability)**
+```typescript
+// TypeScript SDK - reusable everywhere
+class RepoManager {
+  async createBranch(name: string, base?: string): Promise<Branch> {
+    // Deterministic logic lives here
+    // Validate, call Git, return structured result
+  }
+}
+```
+
+Benefits:
+- ✅ Reusable in MCP, CLI, web apps, scripts
+- ✅ Strongly typed, well-tested
+- ✅ Platform abstraction built-in
+- ✅ Single source of truth
+
+**2. Local Scripts (Quick Prototyping)**
+```python
+# Python script for one-off operations
+def process_data(input_file):
+    # Deterministic logic
+    return result
+```
+
+Benefits:
+- ✅ Fast to implement
+- ✅ Good for project-specific logic
+- ✅ Easy to test locally
+
+**3. Bash Scripts (Simple Operations)**
+```bash
+# Shell script for basic automation
+git status --porcelain | awk '{print $2}'
+```
+
+Benefits:
+- ✅ Minimal for simple operations
+- ❌ Platform-dependent, harder to test
+
+### Accessing Code: MCP-First Interface
+
+Once deterministic logic is extracted to code, **access it via MCP tools** (preferred interface):
+
+**MCP Tools wrap your code:**
+```typescript
+// MCP tool wraps SDK
+server.tool({
+  name: "fractary_repo_branch_create",
+  description: "Create Git branch",
+  parameters: { /* ... */ }
+}, async ({ name, base }) => {
+  const manager = new RepoManager();  // SDK
+  const result = await manager.createBranch(name, base);
+  return { content: [{ type: "text", text: JSON.stringify(result) }] };
+});
+```
+
+**Why MCP is preferred:**
+- ✅ No LLM invocation required (instant)
+- ✅ Structured input/output
+- ✅ Zero context cost
+- ✅ Cacheable, fast
+- ✅ Easy to test
+
+**Fallback Chain:**
+```
+1. MCP Tool (wraps SDK)     ← Preferred
+2. SDK via Python script     ← If MCP not available
+3. Bash CLI                  ← Last resort
+```
+
+### Strategic Decision Framework
+
+**When deciding where to implement logic:**
+
+```
+Is it deterministic (same input → same output)?
+├─ YES → Extract to CODE
+│   ├─ Reusable across systems? → SDK (preferred)
+│   ├─ Project-specific? → Local script
+│   └─ Very simple? → Bash script
+│
+└─ NO → Keep in LLM (agent)
+    └─ Requires reasoning/creativity/context
+```
+
+**Examples:**
+
+| Operation | Deterministic? | Where? | Why? |
+|-----------|---------------|---------|------|
+| Create Git branch | ✅ Yes | SDK + MCP | Same process every time |
+| Parse JSON response | ✅ Yes | SDK + MCP | Structured transformation |
+| Generate commit message | ❌ No | Agent | Requires analysis of changes |
+| Validate branch name | ✅ Yes | SDK + MCP | Rule-based validation |
+| Suggest architecture | ❌ No | Agent | Requires creative reasoning |
+| Execute git commands | ✅ Yes | SDK + MCP | Deterministic operations |
+
+### Impact on Plugin Architecture
+
+This principle **informs where to build features:**
+
+**DON'T build in plugin (LLM-controlled):**
+- ❌ Data validation logic
+- ❌ API calls with fixed parameters
+- ❌ File transformations
+- ❌ Parsing structured data
+- ❌ Platform detection
+- ❌ Configuration management
+
+**DO build in plugin (requires LLM):**
+- ✅ Analyzing code changes for commit messages
+- ✅ Interpreting user intent from natural language
+- ✅ Suggesting improvements based on context
+- ✅ Orchestrating multiple deterministic operations
+- ✅ Making decisions based on complex criteria
+
+**The agent's job:** Orchestrate deterministic code, provide reasoning layer.
+**The code's job:** Execute deterministic operations reliably.
+
+This separation creates:
+- Faster operations (less LLM invocation)
+- Lower costs (fewer tokens)
+- Better reliability (deterministic code doesn't vary)
+- Easier testing (code can be unit tested)
+- Greater reusability (SDK works everywhere)
 
 ### Principle 2: Dedicated Agents Over Manager Agents
 
