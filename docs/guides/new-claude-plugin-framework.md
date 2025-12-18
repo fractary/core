@@ -887,6 +887,53 @@ Once background execution is available, dedicated agents will excel:
 - Clear completion criteria
 - Manager agents too large/complex for background
 
+**11. Explicit Interfaces Enable Cross-Platform Composition**
+
+Dedicated agents force you to define explicit inputs and outputs, making them composable across different agentic systems.
+
+**Why this matters:**
+
+When working within a single framework (like Claude Code), you might rely on implicit context and assumptions. But when building workflows that span multiple agentic systems, each agent must operate independently.
+
+**Example cross-platform workflow:**
+```
+Step 1: Claude Code agent analyzes codebase
+  ↓ (explicit output: analysis JSON)
+Step 2: OpenAI Codex agent generates implementation
+  ↓ (explicit output: code files)
+Step 3: Google Gemini agent reviews changes
+  ↓ (explicit output: review report)
+```
+
+**Dedicated agents enforce this:**
+- ✅ **Clear inputs**: What does this agent need to start?
+- ✅ **Clear outputs**: What does this agent produce when done?
+- ✅ **No assumptions**: Can't rely on "master agent" context
+- ✅ **Portable**: Works in Claude Code, FABER, n8n, custom orchestrators
+
+**Manager agent (assumes context):**
+```markdown
+# Relies on shared state, implicit context
+# Hard to use outside its original environment
+# Tightly coupled to Claude Code specifics
+```
+
+**Dedicated agent (explicit interface):**
+```markdown
+# Input: work_id, branch_name (explicit)
+# Output: branch_created, branch_url (explicit)
+# No assumptions about environment
+# Works anywhere that can call it
+```
+
+**Benefits:**
+- ✅ Reusable across different agentic frameworks
+- ✅ Composable in multi-platform workflows
+- ✅ Testable in isolation
+- ✅ Clear contracts and expectations
+
+**The isolation isn't a limitation - it's a feature.** It forces good design that makes agents truly portable building blocks.
+
 ### Summary: Why Dedicated Agents Win
 
 | Aspect | Manager Agent | Dedicated Agent |
@@ -901,12 +948,13 @@ Once background execution is available, dedicated agents will excel:
 | **8. Development** | Sequential, bottleneck | Parallel, independent |
 | **9. Parallel Execution** | Single instance only | Multiple instances (2-3 reliable) |
 | **10. Background Ready** | Too large/complex | Small, self-contained (when available) |
+| **11. Cross-Platform** | Assumes shared context | Explicit inputs/outputs, portable |
 
 **The primary benefit is correctness through focus.** Cost, efficiency, and flexibility are secondary bonuses.
 
 **Dedicated agents do their jobs right because they're not distracted by unrelated concerns.**
 
-**10 comprehensive benefits** demonstrate why dedicated agents are superior across every dimension - from correctness to cost to future-readiness.
+**11 comprehensive benefits** demonstrate why dedicated agents are superior across every dimension - from correctness to cost to future-readiness.
 
 ### Principle 3: Skills for Expertise, Not Execution
 
@@ -1014,7 +1062,7 @@ This provides:
 Commands should show the Task invocation explicitly:
 
 ```markdown
-Create semantic commit using Task tool:
+Use **Task** tool with `fractary-repo:commit` subagent to create semantic commit:
 
 Task(
   subagent_type="fractary-repo:commit",
@@ -1025,6 +1073,7 @@ Task(
 
 This teaches Claude:
 - HOW to invoke the agent (Task tool)
+- WHICH agent to use (fractary-repo:commit)
 - WHAT parameters to pass
 - HOW to format the prompt
 
@@ -1114,20 +1163,28 @@ allowed-tools: Skill(fractary-pr-context-preparer), Task(fractary-repo:pr-create
 
 **Important:** Only use when conversation context truly adds value. Most operations work fine with agent-only delegation.
 
-### Principle 8: Auto-Trigger Everything
+### Principle 8: Auto-Trigger Agents and Skills
 
-**Both commands AND agents should be auto-triggerable.**
+**Only agents and skills can be auto-triggered. Commands require manual invocation.**
 
-Commands:
-- Manual trigger via `/command-name`
-- User types it explicitly
+**Commands (Manual Invocation Only):**
+- Require explicit `/command-name` invocation
+- User must type the slash command
+- Cannot be auto-triggered by Claude
 
-Agents:
+**Agents (Auto-Triggerable):**
 - Auto-trigger via description matching
 - Claude invokes when user describes the task
 - More natural, less friction
+- No manual command needed
+- Unlimited description length for detailed examples
 
-**Write detailed agent descriptions with examples** to make auto-triggering reliable.
+**Skills (Auto-Triggerable):**
+- Auto-trigger based on description
+- Limited to ~100 character descriptions
+- Less reliable than agents for auto-triggering
+
+**Write detailed agent descriptions with examples** to make auto-triggering reliable. Agents have no description length limits, unlike skills.
 
 **Agent Description Best Practices:**
 - Include "MUST BE USED for all {operation} operations from {command} command"
@@ -1191,7 +1248,7 @@ model: claude-haiku-4-5
 argument-hint: '["message"] [--type <type>] [--work-id <id>] [--scope <scope>]'
 ---
 
-Create semantic commit using Task tool:
+Use **Task** tool with `fractary-repo:commit` subagent to create semantic commit:
 
 Task(
   subagent_type="fractary-repo:commit",
@@ -1205,18 +1262,18 @@ Task(
 ---
 name: fractary-repo:pr-create
 description: Create pull request with conversation context
-allowed-tools: Skill(fractary-pr-context-preparer), Task(fractary-repo:pr-create)
+allowed-tools: Skill(fractary-pr-context-preparer), Task(fractary-repo:pr-create), TodoWrite
 model: claude-sonnet-4-5
 argument-hint: '["title"] [--body "<text>"] [--base <branch>]'
 ---
 
-Create PR using hybrid pattern:
+**IMPORTANT:** This is a two-step process. Follow in order:
 
-1. Prepare context from conversation:
+1. Use **Skill** tool with `fractary-pr-context-preparer` to extract conversation context:
 
 Skill(skill="fractary-pr-context-preparer")
 
-2. Create PR with prepared content:
+2. Use **Task** tool with `fractary-repo:pr-create` subagent to create pull request:
 
 Task(
   subagent_type="fractary-repo:pr-create",
@@ -1228,8 +1285,33 @@ Task(
 **Note:** This example uses parameter-based restrictions:
 - `Skill(fractary-pr-context-preparer)` - Only this specific skill allowed
 - `Task(fractary-repo:pr-create)` - Only this specific agent allowed
+- `TodoWrite` - For tracking the two-step sequence
 
 This prevents the command from invoking other skills or agents.
+
+**TodoWrite for Two-Step Enforcement:**
+
+For hybrid commands that require skill-then-agent execution, include `TodoWrite` in allowed-tools. Claude can use it to create a clear checklist:
+
+```
+[ ] Step 1: Extract context using fractary-pr-context-preparer skill
+[ ] Step 2: Create PR using fractary-repo:pr-create agent
+```
+
+This ensures:
+- ✅ Steps execute in correct order
+- ✅ No step is skipped
+- ✅ User can see progress
+- ✅ Clear accountability for each phase
+
+**When to use TodoWrite in commands:**
+- Two-step processes (skill → agent)
+- Multi-agent workflows requiring specific order
+- When step sequence is critical to success
+
+**When NOT needed:**
+- Single-step commands (just agent invocation)
+- Order doesn't matter
 
 **What NOT to include:**
 - ❌ Argument parsing logic
