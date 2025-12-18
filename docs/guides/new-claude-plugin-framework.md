@@ -129,10 +129,43 @@ class RepoManager {
 ```
 
 Benefits:
-- ✅ Reusable in MCP, CLI, web apps, scripts
+- ✅ Reusable in MCP, CLI, web apps, scripts, workflows
 - ✅ Strongly typed, well-tested
 - ✅ Platform abstraction built-in
 - ✅ Single source of truth
+- ✅ **Enables cross-framework workflows** (FABER, n8n, custom orchestrators)
+- ✅ **Building blocks** that compose across different agentic systems
+
+**Why SDK over plugin scripts:**
+
+Instead of this (locked to plugin):
+```python
+# plugins/repo/scripts/create-branch.py
+# Only usable within this plugin via Bash tool
+```
+
+Do this (reusable everywhere):
+```typescript
+// sdk/typescript/src/repo/manager.ts
+class RepoManager {
+  async createBranch(name: string): Promise<Branch> { }
+}
+```
+
+Now accessible from:
+- **Plugin** via MCP: `fractary_repo_branch_create` tool
+- **CLI** directly: `fractary repo branch create`
+- **FABER workflows**: Mix repo + work + spec building blocks
+- **n8n workflows**: HTTP calls to SDK endpoints
+- **Custom scripts**: Import and use SDK
+- **Web apps**: Same SDK, different interface
+- **CI/CD pipelines**: SDK as library
+
+This **SDK-as-building-blocks approach** enables workflow systems that:
+- Mix and match across plugins (repo + work + spec)
+- Orchestrate across multiple agentic frameworks
+- Compose deterministic operations reliably
+- Reuse logic without duplicating code
 
 **2. Local Scripts (Quick Prototyping)**
 ```python
@@ -159,9 +192,21 @@ Benefits:
 
 ### Accessing Code: MCP-First Interface
 
-Once deterministic logic is extracted to code, **access it via MCP tools** (preferred interface):
+Once deterministic logic is extracted to code (especially SDK), **access it via MCP tools** (preferred interface).
 
-**MCP Tools wrap your code:**
+**Key Insight:** With SDK as the foundation, you can wrap it in multiple interfaces. MCP is just one wrapper - but it's the preferred one for Claude Code plugins because it provides universal access to any system that supports MCP.
+
+**The Wrapper Pattern:**
+```
+SDK (deterministic logic)
+  ├─ MCP wrapper → Claude Code, any MCP client
+  ├─ CLI wrapper → Terminal, scripts, CI/CD
+  ├─ HTTP wrapper → Web apps, n8n, webhooks
+  ├─ Library import → Custom scripts, applications
+  └─ ... any other interface
+```
+
+**MCP Tools wrap your SDK:**
 ```typescript
 // MCP tool wraps SDK
 server.tool({
