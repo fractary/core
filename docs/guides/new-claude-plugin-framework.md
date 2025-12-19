@@ -1062,12 +1062,12 @@ This provides:
 Commands should show the Task invocation explicitly:
 
 ```markdown
-Use **Task** tool with `fractary-repo:commit` subagent to create semantic commit:
+Create semantic commit using Task tool:
 
 Task(
   subagent_type="fractary-repo:commit",
   description="Create semantic commit",
-  prompt="Create commit: message='{message}', type={type}, work-id={work_id}"
+  prompt="Create semantic commit with arguments: $ARGUMENTS"
 )
 ```
 
@@ -1221,7 +1221,7 @@ Task tool invocation pattern:
 Task(
   subagent_type="fractary-plugin:command-name",
   description="Short description",
-  prompt="Operation: arg1={arg1}, flag={flag}, option={option}"
+  prompt="Operation with arguments: $ARGUMENTS"
 )
 ```
 
@@ -1238,6 +1238,26 @@ Task(
 - Restrict to Task tool only (enforcement)
 - Nothing else
 
+**Passing Arguments to Agents:**
+
+Commands must use `$ARGUMENTS` to pass user-provided arguments to agents:
+
+```markdown
+prompt="Operation with arguments: $ARGUMENTS"
+```
+
+**Why `$ARGUMENTS` is required:**
+- `$ARGUMENTS` is a Claude Code variable that captures all arguments passed by the user
+- Without it, the agent has no access to the user's actual input
+- The agent's workflow handles parsing the arguments (see agent documentation)
+- Alternative: Use `$1`, `$2`, etc. for positional arguments
+
+**Example user invocation:**
+```
+/repo:commit "Fix bug" --type fix --work-id 123
+```
+The `$ARGUMENTS` value becomes: `"Fix bug" --type fix --work-id 123`
+
 **Example (Standard Pattern):**
 ```markdown
 ---
@@ -1248,12 +1268,12 @@ model: claude-haiku-4-5
 argument-hint: '["message"] [--type <type>] [--work-id <id>] [--scope <scope>]'
 ---
 
-Use **Task** tool with `fractary-repo:commit` subagent to create semantic commit:
+Create semantic commit using Task tool:
 
 Task(
   subagent_type="fractary-repo:commit",
   description="Create semantic commit",
-  prompt="Create commit: message='{message}', type={type}, work-id={work_id}"
+  prompt="Create semantic commit with arguments: $ARGUMENTS"
 )
 ```
 
@@ -1278,7 +1298,7 @@ Skill(skill="fractary-pr-context-preparer")
 Task(
   subagent_type="fractary-repo:pr-create",
   description="Create pull request",
-  prompt="Create PR: title='{title}', context={prepared_context}"
+  prompt="Create pull request with arguments: $ARGUMENTS. Use the prepared context from the previous skill call."
 )
 ```
 

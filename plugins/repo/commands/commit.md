@@ -12,6 +12,6 @@ Create semantic commit using Task tool:
 Task(
   subagent_type="fractary-repo:commit",
   description="Create semantic commit",
-  prompt="Create commit: message='{message}', type={type}, work-id={work_id}, scope={scope}"
+  prompt="Create semantic commit with arguments: $ARGUMENTS"
 )
 ```
