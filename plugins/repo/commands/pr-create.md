@@ -1,7 +1,7 @@
 ---
 name: fractary-repo:pr-create
 description: Create pull requests - delegates to fractary-repo:pr-create agent
-allowed-tools: Task
+allowed-tools: Task(fractary-repo:pr-create)
 model: claude-haiku-4-5
 argument-hint: '"<title>" [--body "<text>"] [--prompt "<instructions>"] [--base <branch>] [--head <branch>] [--work-id <id>] [--draft]'
 ---

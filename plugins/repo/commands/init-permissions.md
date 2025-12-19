@@ -1,7 +1,7 @@
 ---
 name: fractary-repo:init-permissions
 description: Configure permissions - delegates to fractary-repo:init-permissions agent
-allowed-tools: Task
+allowed-tools: Task(fractary-repo:init-permissions)
 model: claude-haiku-4-5
 argument-hint: ''
 ---
