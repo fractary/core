@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "2.0.2",
+      "version": "2.1.0",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -15,7 +15,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "2.2.1",
+        "version": "2.3.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -39,13 +39,26 @@
         "category": "development",
         "strict": true,
         "commands": [
-          "./commands/branch.md",
-          "./commands/commit.md",
-          "./commands/push.md",
-          "./commands/pr.md",
-          "./commands/tag.md",
+          "./commands/branch-create.md",
+          "./commands/branch-delete.md",
+          "./commands/branch-list.md",
           "./commands/cleanup.md",
-          "./commands/init.md"
+          "./commands/commit.md",
+          "./commands/commit-and-push.md",
+          "./commands/init.md",
+          "./commands/init-permissions.md",
+          "./commands/pr-comment.md",
+          "./commands/pr-create.md",
+          "./commands/pr-merge.md",
+          "./commands/pr-review.md",
+          "./commands/pull.md",
+          "./commands/push.md",
+          "./commands/tag-create.md",
+          "./commands/tag-list.md",
+          "./commands/tag-push.md",
+          "./commands/worktree-cleanup.md",
+          "./commands/worktree-list.md",
+          "./commands/worktree-remove.md"
         ],
         "agents": [
           "./agents/repo-manager.md"
@@ -56,7 +69,7 @@
         "name": "fractary-work",
         "source": "./plugins/work",
         "description": "Universal work item management across GitHub Issues, Jira Cloud, and Linear with 100% feature parity and handler-based architecture",
-        "version": "2.1.2",
+        "version": "2.2.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -91,7 +104,7 @@
         "name": "fractary-file",
         "source": "./plugins/file",
         "description": "Universal file storage operations across R2, S3, and local filesystem with modular handler architecture",
-        "version": "1.1.1",
+        "version": "1.2.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -119,7 +132,7 @@
         "name": "fractary-logs",
         "source": "./plugins/logs",
         "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
-        "version": "2.0.1",
+        "version": "2.1.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -158,7 +171,7 @@
         "name": "fractary-status",
         "source": "./plugins/status",
         "description": "Custom Claude Code status line showing git status, issue numbers, PR numbers, and last prompt",
-        "version": "1.0.1",
+        "version": "1.1.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -185,7 +198,7 @@
         "name": "fractary-spec",
         "source": "./plugins/spec",
         "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
-        "version": "1.0.1",
+        "version": "1.1.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -219,7 +232,7 @@
         "name": "fractary-docs",
         "source": "./plugins/docs",
         "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-        "version": "2.0.1",
+        "version": "2.1.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"

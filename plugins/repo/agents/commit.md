@@ -1,8 +1,9 @@
 ---
-name: fractary-repo:commit
+name: commit
 description: Create semantic commits with conventional commit format. MUST BE USED for all commit operations from fractary-repo:commit command. Use PROACTIVELY when user requests commits.
 tools: fractary_repo_commit, fractary_repo_stage_all, fractary_repo_is_dirty
 model: claude-haiku-4-5
+color: orange
 ---
 
 # commit Agent
