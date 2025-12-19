@@ -6,7 +6,7 @@ model: claude-haiku-4-5
 argument-hint: '["message"] [--type <type>] [--work-id <id>] [--scope <scope>] [--breaking] [--description "<text>"]'
 ---
 
-Create semantic commit using Task tool:
+Use **Task** tool with `fractary-repo:commit` subagent to create semantic commit:
 
 ```
 Task(
