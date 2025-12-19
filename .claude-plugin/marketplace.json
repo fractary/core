@@ -15,7 +15,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "2.3.0",
+        "version": "2.3.1",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -60,8 +60,27 @@
           "./commands/worktree-list.md",
           "./commands/worktree-remove.md"
         ],
-        "agents": [
-          "./agents/repo-manager.md"
+        "agents":  [
+          "./agents/branch-create.md",
+          "./agents/branch-delete.md",
+          "./agents/branch-list.md",
+          "./agents/cleanup.md",
+          "./agents/commit.md",
+          "./agents/commit-and-push.md",
+          "./agents/init.md",
+          "./agents/init-permissions.md",
+          "./agents/pr-comment.md",
+          "./agents/pr-create.md",
+          "./agents/pr-merge.md",
+          "./agents/pr-review.md",
+          "./agents/pull.md",
+          "./agents/push.md",
+          "./agents/tag-create.md",
+          "./agents/tag-list.md",
+          "./agents/tag-push.md",
+          "./agents/worktree-cleanup.md",
+          "./agents/worktree-list.md",
+          "./agents/worktree-remove.md"
         ],
         "hooks": "./hooks/hooks.json"
       },
