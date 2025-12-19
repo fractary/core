@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-19T15:36:06Z",
-  "prompt": "{\"session_id\":\"bf57b9ae-d0ff-4974-8274-f119ac887f9f\",\"transcript_path\":\"/home/jmcwilliam/.claude/projects/-mnt-c-GitHub-fractary-core/bf57b9ae-d0ff-4974-8274-f119ac887f9f.jsonl\",\"cwd\":\"/mnt/c/GitHub/fractary/core\",\"permission_mode\":\"bypassPermissions\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"/fractary-repo:commit \\\"tiny commit to test new fractary-repo:commit command\\\"\"} ",
-  "prompt_short": "{\"session_id\":\"bf57b9ae-d0ff-4974-827..."
+  "timestamp": "2025-12-19T16:15:46Z",
+  "prompt": "{\"session_id\":\"ff4c8b06-1416-4309-9538-67dbf35fb017\",\"transcript_path\":\"/home/jmcwilliam/.claude/projects/-mnt-c-GitHub-fractary-core/ff4c8b06-1416-4309-9538-67dbf35fb017.jsonl\",\"cwd\":\"/mnt/c/GitHub/fractary/core\",\"permission_mode\":\"bypassPermissions\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"/commit-commands:commit \"} ",
+  "prompt_short": "{\"session_id\":\"ff4c8b06-1416-4309-953..."
 }
