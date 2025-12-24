@@ -1,4 +1,5 @@
 ---
+name: fractary-repo:commit-push
 allowed-tools: Bash(git checkout --branch:*), Bash(git add:*), Bash(git status:*), Bash(git push:*), Bash(git commit:*)
 description: Commit and push
 model: claude-haiku-4-5

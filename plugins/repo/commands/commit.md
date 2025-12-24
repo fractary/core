@@ -1,7 +1,7 @@
 ---
+name: fractary-repo:commit
 allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
-description: Create a git commit
-argument-hint: '["message"]
+description: Commit, push, and open a PR
 model: claude-haiku-4-5
 ---
 
@@ -11,7 +11,6 @@ model: claude-haiku-4-5
 - Current git diff (staged and unstaged changes): !`git diff HEAD`
 - Current branch: !`git branch --show-current`
 - Recent commits: !`git log --oneline -10`
-
 
 ## Your task
 
