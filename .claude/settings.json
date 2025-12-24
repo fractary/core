@@ -119,9 +119,7 @@
     "type": "command",
     "command": "~/.claude/plugins/marketplaces/fractary-core/plugins/status/scripts/status-line.sh"
   },
-  "enabledPlugins": {
-    "fractary-repo@fractary-core": true
-  },
+  "enabledPlugins": {},
   "extraKnownMarketplaces": {
     "fractary-core": {
       "source": {
