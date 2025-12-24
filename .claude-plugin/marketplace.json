@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "2.1.2",
+      "version": "2.1.3",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -52,8 +52,8 @@
       {
         "name": "fractary-work",
         "source": "./plugins/work",
-        "description": "Universal work item management across GitHub Issues, Jira Cloud, and Linear with 100% feature parity and handler-based architecture",
-        "version": "2.2.1",
+        "description": "GitHub Issues management with streamlined commands for creating, listing, searching, and updating issues",
+        "version": "2.2.2",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -84,7 +84,7 @@
           "./commands/issue-update.md"
         ],
         "agents": [
-          "./agents/work-manager.md"
+          "./agents/init.md"
         ]
       },
       {
