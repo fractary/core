@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "2.1.0",
+      "version": "2.1.2",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -15,7 +15,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "2.3.0",
+        "version": "2.3.3",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -26,44 +26,28 @@
         "keywords": [
           "git",
           "github",
-          "gitlab",
-          "bitbucket",
           "source-control",
           "repository",
           "version-control",
           "branches",
           "commits",
-          "pull-requests",
-          "tags"
+          "pull-requests"
         ],
         "category": "development",
         "strict": true,
         "commands": [
-          "./commands/branch-create.md",
-          "./commands/branch-delete.md",
-          "./commands/branch-list.md",
-          "./commands/cleanup.md",
+          "./commands/commit-push-pr.md",
+          "./commands/commit-push.md",
           "./commands/commit.md",
-          "./commands/commit-and-push.md",
           "./commands/init.md",
-          "./commands/init-permissions.md",
-          "./commands/pr-comment.md",
           "./commands/pr-create.md",
           "./commands/pr-merge.md",
           "./commands/pr-review.md",
-          "./commands/pull.md",
-          "./commands/push.md",
-          "./commands/tag-create.md",
-          "./commands/tag-list.md",
-          "./commands/tag-push.md",
-          "./commands/worktree-cleanup.md",
-          "./commands/worktree-list.md",
-          "./commands/worktree-remove.md"
+          "./commands/pull.md"
         ],
-        "agents": [
-          "./agents/repo-manager.md"
-        ],
-        "hooks": "./hooks/hooks.json"
+        "agents":  [
+          "./agents/init.md"
+        ]
       },
       {
         "name": "fractary-work",
