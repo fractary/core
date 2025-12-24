@@ -1,4 +1,0 @@
-{
-  "description": "Fractary Work Plugin Hooks - No automatic hooks. Use /fractary-work:comment-create for manual comments or let FABER skills handle comments at appropriate points.",
-  "hooks": {}
-}
