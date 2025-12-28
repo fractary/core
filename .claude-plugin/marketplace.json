@@ -53,7 +53,7 @@
         "name": "fractary-work",
         "source": "./plugins/work",
         "description": "GitHub Issues management with streamlined commands for creating, listing, searching, and updating issues",
-        "version": "2.2.2",
+        "version": "2.2.4",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -185,7 +185,7 @@
         "name": "fractary-spec",
         "source": "./plugins/spec",
         "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
-        "version": "1.1.1",
+        "version": "1.1.2",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
