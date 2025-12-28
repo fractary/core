@@ -6,4 +6,12 @@ model: claude-opus-4-5
 argument-hint: '[--work-id <id>] [--template <type>] [--prompt "<instructions>"] [--force]'
 ---
 
-Delegates to fractary-spec:spec-create agent for creating specifications from conversation context.
+Use **Task** tool with `fractary-spec:spec-create` agent to create specification from conversational context and provided arguments.
+
+```
+Task(
+  subagent_type="fractary-spec:spec-create",
+  description="Create specification",
+  prompt="Create plan / specification / product requirements document: $ARGUMENTS"
+)
+```
