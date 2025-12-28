@@ -207,9 +207,9 @@
         "commands": [
           "./commands/init.md",
           "./commands/create.md",
+          "./commands/refine.md",
           "./commands/validate.md",
-          "./commands/archive.md",
-          "./commands/read.md"
+          "./commands/archive.md"
         ],
         "agents": [
           "./agents/spec-archive.md",
