@@ -212,11 +212,10 @@
           "./commands/read.md"
         ],
         "agents": [
-          "./agents/spec-archive.md", 
+          "./agents/spec-archive.md",
           "./agents/spec-create.md",
           "./agents/spec-init.md",
           "./agents/spec-refine.md",
-          "./agents/spec-read.md",
           "./agents/spec-validate.md"
         ]
       },
@@ -250,7 +249,11 @@
           "./commands/audit.md"
         ],
         "agents": [
-          "./agents/docs-manager.md"
+          "./agents/docs-audit.md",
+          "./agents/docs-check-consistency.md",
+          "./agents/docs-list.md",
+          "./agents/docs-validate.md",
+          "./agents/docs-write.md"
         ]
       }
     ]
