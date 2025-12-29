@@ -2,6 +2,7 @@
 name: fractary-repo:init
 description: Initialize and configure the repo plugin for GitHub, GitLab, or Bitbucket MUST BE USED for all init operations from fractary-repo:init command. Use PROACTIVELY when user requests init operations.
 tools: fractary_repo_status
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -31,11 +32,22 @@ Interactive setup wizard for configuring the repo plugin with platform detection
 | token | string | No | API token (prompted if not provided) |
 | yes | boolean | No | Skip confirmation prompts |
 | force | boolean | No | Overwrite existing configuration |
+| context | string | No | Additional instructions prepended to workflow |
+
+<ARGUMENTS>
+- `--platform <name>` - Platform: github, gitlab, bitbucket (auto-detected if not provided)
+- `--token <value>` - API token (prompted if not provided)
+- `--yes` - Skip confirmation prompts
+- `--force` - Overwrite existing configuration
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
+</ARGUMENTS>
 
 ## Workflow
 
 <WORKFLOW>
-1. Check for existing configuration:
+1. Parse arguments (--platform, --token, --yes, --force, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Check for existing configuration:
    - If exists and not force, ask to overwrite
 
 2. Detect platform if not specified:

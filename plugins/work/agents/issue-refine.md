@@ -4,6 +4,7 @@ description: |
   Reviews GitHub issues and asks clarifying questions to ensure requirement clarity.
   Focuses on WHAT (requirements, goals, scope, acceptance criteria) not HOW (implementation).
   Part of the "frame phase" before architectural planning.
+color: orange
 model: claude-opus-4-5
 allowed-tools: Bash(gh issue *), AskUserQuestion(*)
 ---
@@ -25,7 +26,13 @@ This is a "frame phase" tool that bridges the gap between issue creation and arc
 6. NEVER ask technical/architectural questions (defer to spec-refine)
 7. NEVER skip the user interaction step - user must be prompted before changes
 8. NEVER generate generic questions like "Have you considered edge cases?"
+9. With --context, prepend as additional instructions to workflow
 </CRITICAL_RULES>
+
+<ARGUMENTS>
+- `<number>` - GitHub issue number to refine (required)
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
+</ARGUMENTS>
 
 <WORKFLOW>
 
@@ -33,7 +40,7 @@ This is a "frame phase" tool that bridges the gap between issue creation and arc
 
 Parse arguments:
 - `<number>` (required): GitHub issue number to refine
-- `--prompt "<focus>"` (optional): Specific area to focus refinement on
+- `--context "<text>"` (optional): Additional instructions prepended to workflow
 
 Execute:
 ```bash

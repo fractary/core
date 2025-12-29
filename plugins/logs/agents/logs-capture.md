@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to start capturing a conversation session for an issue.
   Use PROACTIVELY when user mentions "start logging", "capture session", "record conversation".
   Triggers: capture, start session, begin logging, record
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to start capturing Claude Code conversation sessions for an issue.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (issue_number)
-2. Invoke fractary-logs:log-capturer skill
+1. Parse arguments (issue_number, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-capturer skill
 3. Check for old logs (auto-backup if enabled)
 4. Create session log file
 5. Initialize with frontmatter (issue, timestamps, participant)
@@ -32,6 +34,7 @@ Your role is to start capturing Claude Code conversation sessions for an issue.
 
 <ARGUMENTS>
 - `<issue_number>` - GitHub issue number to link session to (required)
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

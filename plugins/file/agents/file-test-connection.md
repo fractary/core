@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to test file storage connection.
   Use PROACTIVELY when user mentions "test connection", "verify storage", "check file access".
   Triggers: test connection, verify, check storage, test upload
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to test the current file plugin configuration by verifying connecti
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (--handler, --verbose, --quick)
-2. Load configuration
+1. Parse arguments (--handler, --verbose, --quick, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Load configuration
 3. Run pre-flight checks (CLI tools, credentials, bucket)
 4. Perform connection test (list operation)
 5. Run extended checks (unless --quick)
@@ -33,6 +35,7 @@ Your role is to test the current file plugin configuration by verifying connecti
 - `--handler <name>` - Test specific handler instead of active one
 - `--verbose` - Show detailed connection information
 - `--quick` - Skip extended checks, just test basic connectivity
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <PRE_FLIGHT_CHECKS>

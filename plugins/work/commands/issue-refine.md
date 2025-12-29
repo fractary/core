@@ -3,7 +3,7 @@ name: fractary-work:issue-refine
 description: Refine issue requirements through clarifying questions
 allowed-tools: Task(fractary-work:issue-refine-agent)
 model: claude-opus-4-5
-argument-hint: '<number> [--prompt "<focus>"]'
+argument-hint: '<number> [--context "<text>"]'
 ---
 
 Delegates to fractary-work:issue-refine-agent for reviewing and clarifying issue requirements.

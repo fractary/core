@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to initialize or configure the spec plugin.
   Use PROACTIVELY when user mentions "init spec", "setup spec plugin", "configure specs".
   Triggers: init, initialize, setup spec plugin
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,10 @@ Your role is to initialize the fractary-spec plugin configuration in the current
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Copy config.example.json to project config location
-2. Create /specs directory
+1. Parse arguments (--force, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Copy config.example.json to project config location
+4. Create /specs directory
 3. Initialize archive index:
    - Local cache: `.fractary/plugins/spec/archive-index.json`
    - Cloud backup: `archive/specs/.archive-index.json`
@@ -33,6 +36,7 @@ Your role is to initialize the fractary-spec plugin configuration in the current
 
 <ARGUMENTS>
 - `--force` - Overwrite existing configuration
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <DIRECTORIES_CREATED>

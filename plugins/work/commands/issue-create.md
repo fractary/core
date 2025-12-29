@@ -3,7 +3,7 @@ name: fractary-work:issue-create
 allowed-tools: Bash(gh issue create:*), Bash(gh repo view:*), Bash(gh issue list:*)
 description: Create new issue
 model: claude-haiku-4-5
-argument-hint: '[--title "<title>"] [--body "<text>"] [--label <label>] [--assignee <user>]'
+argument-hint: '[--title "<title>"] [--body "<text>"] [--label <label>] [--assignee <user>] [--context "<text>"]'
 ---
 
 ## Context

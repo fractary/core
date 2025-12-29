@@ -3,6 +3,7 @@ name: fractary-repo:commit
 allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
 description: Commit, push, and open a PR
 model: claude-haiku-4-5
+argument-hint: '[--context "<text>"]'
 ---
 
 ## Context

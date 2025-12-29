@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to refresh or sync the status line cache.
   Use PROACTIVELY when user mentions "refresh status", "sync status", "status out of date", or reports status line showing stale information.
   This agent forces a cache refresh and displays comprehensive repository status to trigger statusLine update.
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -40,8 +41,16 @@ This agent solves the "one step behind" problem by:
 - The hash is derived from the repository path
 </CRITICAL_RULES>
 
+<ARGUMENTS>
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
+</ARGUMENTS>
+
 <WORKFLOW>
 ## Sync Workflow
+
+### 0. Parse Arguments
+- Parse any --context argument
+- If --context provided, apply as additional instructions to workflow
 
 ### 1. Pre-Sync Checks
 - Verify current directory is a git repository

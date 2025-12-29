@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to list or find documentation files.
   Use PROACTIVELY when user mentions "list docs", "find documentation", "show docs", "what docs exist".
   Triggers: list, find docs, show documentation, catalog
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to list and filter documentation files with their metadata.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (directory, --doc-type, --status, --format)
-2. Invoke fractary-docs:doc-lister skill
+1. Parse arguments (directory, --doc-type, --status, --format, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-docs:doc-lister skill
 3. Scan target directory for markdown files
 4. Extract frontmatter metadata from each file
 5. Apply filters (doc-type, status)
@@ -35,6 +37,7 @@ Your role is to list and filter documentation files with their metadata.
 - `--doc-type <type>` - Filter by document type
 - `--status <status>` - Filter by status (draft, published, deprecated)
 - `--format <format>` - Output format: table, json, markdown (default: table)
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

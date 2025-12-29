@@ -154,6 +154,31 @@ Streams from cloud without local download.
 | `/fractary-spec:archive <issue>` | Archive to cloud |
 | `/fractary-spec:read <issue>` | Read archived spec |
 
+## Global Arguments
+
+All commands support the `--context` argument for passing additional instructions:
+
+```bash
+--context "<text>"
+```
+
+This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+
+**Examples:**
+
+```bash
+# Guide spec creation
+/fractary-spec:create --work-id 123 --context "Prioritize security requirements"
+
+# Focus validation
+/fractary-spec:validate 123 --context "Emphasize test coverage requirements"
+
+# Customize refinement
+/fractary-spec:refine 123 --context "Focus on API design and error handling"
+```
+
+See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+
 ### Key Features of `create`
 
 - **Auto-Detection**: Automatically detects issue ID from current branch name (via repo plugin)

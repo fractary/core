@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to read log files for an issue.
   Use PROACTIVELY when user mentions "read logs", "show logs", "view log", "get logs".
   Triggers: read, show, view, display logs
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to read specific log files (local or archived) for an issue.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (issue_number, --type)
-2. Invoke fractary-logs:log-lister skill
+1. Parse arguments (issue_number, --type, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-lister skill
 3. Check archive index for location
 4. If local: read directly
 5. If archived: use fractary-file to read from cloud
@@ -33,6 +35,7 @@ Your role is to read specific log files (local or archived) for an issue.
 <ARGUMENTS>
 - `<issue_number>` - GitHub issue number (required)
 - `--type <type>` - Specific log type: session, build, deployment, debug
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

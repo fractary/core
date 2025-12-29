@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to create or update documentation.
   Use PROACTIVELY when user mentions "write docs", "create documentation", "document this", "add docs".
   Triggers: write, create docs, document, generate documentation
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -17,7 +18,7 @@ Your role is to create or update documentation with automatic validation and ind
 2. ALWAYS validate after writing (unless --skip-validation)
 3. ALWAYS update indices (unless --skip-index)
 4. ALWAYS use type-specific templates from types/{doc_type}/
-5. With --prompt, use conversation context to generate content
+5. With --context, prepend as additional instructions to workflow
 6. For batch mode, use docs-director-skill for parallel execution
 </CRITICAL_RULES>
 
@@ -33,7 +34,7 @@ Your role is to create or update documentation with automatic validation and ind
 <ARGUMENTS>
 - `<doc_type>` - Document type (api, adr, guide, dataset, etc.)
 - `[file_path]` - Optional path (auto-generated if omitted)
-- `--prompt "<instructions>"` - Instructions for generating from conversation context
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 - `--skip-validation` - Skip validation step
 - `--skip-index` - Skip index update
 - `--batch` - Write multiple documents (provide pattern)
@@ -51,7 +52,7 @@ Single document - invoke fractary-docs:doc-writer skill:
   "parameters": {
     "doc_type": "api",
     "file_path": null,
-    "prompt": null,
+    "context": null,
     "skip_validation": false,
     "skip_index": false
   }

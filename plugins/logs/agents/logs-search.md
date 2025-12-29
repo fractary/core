@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to search across logs.
   Use PROACTIVELY when user mentions "search logs", "find in logs", "grep logs".
   Triggers: search, find, grep, look for
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to search across local and archived logs with filters.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (query, filters, options)
-2. Invoke fractary-logs:log-searcher skill
+1. Parse arguments (query, filters, options, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-searcher skill
 3. Search local logs (fast)
 4. Search cloud logs via index if enabled
 5. Aggregate and rank results
@@ -39,7 +41,8 @@ Your role is to search across local and archived logs with filters.
 - `--local-only` - Search only local logs
 - `--cloud-only` - Search only archived logs
 - `--max-results <n>` - Limit results (default: 100)
-- `--context <n>` - Lines of context (default: 3)
+- `--context-lines <n>` - Lines of context around matches (default: 3)
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

@@ -2,6 +2,7 @@
 name: fractary-repo:pr-create
 description: Create pull requests with intelligent title and body generation from git context. MUST BE USED for all pr-create operations from fractary-repo:pr-create command. Use PROACTIVELY when user requests pr create operations. Self-sufficient - drafts content from conversation context or git changes.
 tools: fractary_repo_pr_create, fractary_repo_branch_current, fractary_repo_diff, fractary_repo_commit_log
+color: orange
 model: claude-haiku-4-5
 ---
 

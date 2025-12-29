@@ -184,6 +184,31 @@ Archive logs for completed issue to cloud.
 
 - `/fractary-logs:init` - Initialize configuration
 
+## Global Arguments
+
+All commands support the `--context` argument for passing additional instructions:
+
+```bash
+--context "<text>"
+```
+
+This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+
+**Examples:**
+
+```bash
+# Guide log capture focus
+/fractary-logs:capture 123 --context "Focus on API integration decisions"
+
+# Customize search behavior
+/fractary-logs:search "error" --context "Include full stack traces in results"
+
+# Focus analysis on specific areas
+/fractary-logs:analyze errors --context "Prioritize authentication-related errors"
+```
+
+See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+
 ## Features
 
 ### Session Capture

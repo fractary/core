@@ -2,7 +2,7 @@
 allowed-tools: Bash(gh pr merge:*), Bash(gh pr view:*)
 description: Merge pull requests
 model: claude-haiku-4-5
-argument-hint: '<pr_number> [--squash|--merge|--rebase] [--delete-branch]'
+argument-hint: '<pr_number> [--squash|--merge|--rebase] [--delete-branch] [--context "<text>"]'
 ---
 
 ## Context

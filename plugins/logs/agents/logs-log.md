@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to log a specific message or decision to an issue's log.
   Use PROACTIVELY when user mentions "log message", "record decision", "add to log".
   Triggers: log, record, add entry, note
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to log specific messages or decisions to an issue's log.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (issue_number, message)
-2. Invoke fractary-logs:log-writer skill
+1. Parse arguments (issue_number, message, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-writer skill
 3. Check for active session
 4. Append message with timestamp
 5. Link to issue
@@ -32,6 +34,7 @@ Your role is to log specific messages or decisions to an issue's log.
 <ARGUMENTS>
 - `<issue_number>` - GitHub issue number (required)
 - `<message>` - Message to log (required, use quotes for multi-word)
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

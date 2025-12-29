@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to create a specification from conversation context.
   Use PROACTIVELY when user mentions "create spec", "write spec", "document requirements".
   Triggers: create spec, generate spec, write specification
+color: orange
 model: claude-opus-4-5
 ---
 
@@ -21,7 +22,7 @@ Your role is to create specifications from conversation context, optionally enri
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (--work-id, --template, --prompt, --force)
+1. Parse arguments (--work-id, --template, --context, --force)
 2. Auto-detect work-id from branch if not provided
 3. Check for existing specs (skip if exists unless --force)
 4. Invoke fractary-spec:spec-generator skill
@@ -35,7 +36,7 @@ Your role is to create specifications from conversation context, optionally enri
 <ARGUMENTS>
 - `--work-id <id>` - Optional: Link to issue and enrich with issue data
 - `--template <type>` - Optional: Override auto-detection (basic|feature|infrastructure|api|bug)
-- `--prompt "<instructions>"` - Optional: Instructions for generation
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 - `--force` - Force creation even if spec exists
 </ARGUMENTS>
 
@@ -52,7 +53,7 @@ Invoke the fractary-spec:spec-generator skill with:
   "parameters": {
     "work_id": "123",
     "template": null,
-    "prompt": null,
+    "context": null,
     "force": false
   }
 }

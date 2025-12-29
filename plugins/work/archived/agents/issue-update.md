@@ -3,6 +3,7 @@ name: fractary-work:issue-update
 description: |
   MUST BE USED when user wants to update an issue's title or description.
   Use PROACTIVELY when user mentions "update issue", "change issue title", "edit issue description", or wants to modify issue content.
+color: orange
 model: claude-haiku-4-5
 ---
 

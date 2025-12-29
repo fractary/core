@@ -3,7 +3,7 @@ name: fractary-work:issue-search
 allowed-tools: Bash(gh search issues:*), Bash(gh repo view:*)
 description: Search issues
 model: claude-haiku-4-5
-argument-hint: '<query> [--state <state>] [--limit <n>]'
+argument-hint: '<query> [--state <state>] [--limit <n>] [--context "<text>"]'
 ---
 
 ## Context
