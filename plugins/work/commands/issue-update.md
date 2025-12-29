@@ -3,7 +3,7 @@ name: fractary-work:issue-update
 allowed-tools: Bash(gh issue edit:*)
 description: Update issue
 model: claude-haiku-4-5
-argument-hint: '<number> [--title "<title>"] [--body "<text>"]'
+argument-hint: '<number> [--title "<title>"] [--body "<text>"] [--context "<text>"]'
 ---
 
 ## Context

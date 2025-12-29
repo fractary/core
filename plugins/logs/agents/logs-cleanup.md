@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to clean up old logs based on age threshold.
   Use PROACTIVELY when user mentions "cleanup logs", "remove old logs", "free space".
   Triggers: cleanup, clean, remove old, free space
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to archive and clean up old logs based on age thresholds.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (--older-than, --dry-run)
-2. Invoke fractary-logs:log-archiver skill with cleanup operation
+1. Parse arguments (--older-than, --dry-run, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-archiver skill with cleanup operation
 3. Find logs older than threshold
 4. Group by issue number
 5. Archive unarchived logs
@@ -34,6 +36,7 @@ Your role is to archive and clean up old logs based on age thresholds.
 <ARGUMENTS>
 - `--older-than <days>` - Age threshold in days (default: 30)
 - `--dry-run` - Show what would be done without doing it
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

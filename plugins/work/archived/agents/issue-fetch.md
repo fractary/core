@@ -3,6 +3,7 @@ name: fractary-work:issue-fetch
 description: |
   MUST BE USED when user wants to view or fetch details of an issue.
   Use PROACTIVELY when user mentions "show issue", "get issue details", "what's in issue #X", or wants to see issue information.
+color: orange
 model: claude-haiku-4-5
 ---
 

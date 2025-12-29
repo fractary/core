@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to archive specifications for completed work.
   Use PROACTIVELY when user mentions "archive spec", "completed work", "close issue with spec".
   Triggers: archive, complete, close issue, upload spec
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to archive specifications to cloud storage when work is complete.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (issue_number, --force, --skip-warnings)
-2. Invoke fractary-spec:spec-archiver skill
+1. Parse arguments (issue_number, --force, --skip-warnings, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-spec:spec-archiver skill
 3. Find all specs for issue
 4. Check pre-archive conditions
 5. Upload to cloud storage
@@ -36,6 +38,7 @@ Your role is to archive specifications to cloud storage when work is complete.
 - `<issue_number>` - GitHub issue number (required)
 - `--force` - Skip all pre-archive checks
 - `--skip-warnings` - Don't prompt for warnings
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <PRE_ARCHIVE_CHECKS>

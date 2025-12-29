@@ -238,6 +238,31 @@ The work plugin provides user-facing commands for common operations:
 
 **Command Documentation:** See `commands/*.md` for detailed command documentation and examples.
 
+## Global Arguments
+
+All commands support the `--context` argument for passing additional instructions:
+
+```bash
+--context "<text>"
+```
+
+This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+
+**Examples:**
+
+```bash
+# Guide issue creation
+/fractary-work:issue-create "Add feature" --context "Follow team's issue template"
+
+# Focus issue refinement
+/fractary-work:issue-refine 123 --context "Emphasize performance requirements"
+
+# Customize search behavior
+/fractary-work:issue-search "auth" --context "Focus on security-related issues"
+```
+
+See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+
 ## Session Tracking
 
 The work plugin automatically posts progress updates to issues when working on issue-linked branches.

@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to switch the active storage handler.
   Use PROACTIVELY when user mentions "switch handler", "change storage", "use S3", "use local".
   Triggers: switch handler, change storage, use different provider
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to switch the active storage handler to a different configured prov
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (handler, --no-test, --force)
-2. Locate configuration file
+1. Parse arguments (handler, --no-test, --force, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Locate configuration file
 3. Verify target handler is configured
 4. Create backup of current configuration
 5. Update active_handler field
@@ -35,6 +37,7 @@ Your role is to switch the active storage handler to a different configured prov
 - `<handler>` - Handler name to switch to (required): local|r2|s3|gcs|gdrive
 - `--no-test` - Skip connection test after switching
 - `--force` - Switch even if handler appears unconfigured
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <VALID_HANDLERS>

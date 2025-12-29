@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to audit documentation quality, find gaps, or identify issues.
   Use PROACTIVELY when user mentions "audit docs", "check documentation", "find doc issues", "documentation quality".
   Triggers: audit, scan, review docs, doc health, find gaps
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to audit documentation across a project - identifying issues, gaps,
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (directory, --doc-type filter)
-2. Invoke fractary-docs:doc-auditor skill
+1. Parse arguments (directory, --doc-type filter, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-docs:doc-auditor skill
 3. Scan all markdown files in target directory
 4. Classify documents by type
 5. Identify issues (missing fields, broken links, validation errors)
@@ -33,6 +35,7 @@ Your role is to audit documentation across a project - identifying issues, gaps,
 <ARGUMENTS>
 - `[directory]` - Directory to audit (default: docs/)
 - `--doc-type <type>` - Filter to specific document type
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

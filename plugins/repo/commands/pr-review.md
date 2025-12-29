@@ -2,7 +2,7 @@
 allowed-tools: Bash(gh pr review:*), Bash(gh pr view:*), Bash(gh pr diff:*)
 description: Review pull requests
 model: claude-haiku-4-5
-argument-hint: '<pr_number> [--approve|--request-changes|--comment] [--body "<text>"]'
+argument-hint: '<pr_number> [--approve|--request-changes|--comment] [--body "<text>"] [--context "<text>"]'
 ---
 
 ## Context

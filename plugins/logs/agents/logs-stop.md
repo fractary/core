@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to stop active session capture.
   Use PROACTIVELY when user mentions "stop logging", "end session", "finish capture".
   Triggers: stop, end, finish, complete session
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,10 @@ Your role is to stop the active session capture and finalize the log.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Invoke fractary-logs:log-capturer skill with stop operation
-2. Update session file with completion info
+1. Parse arguments (--context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-capturer skill with stop operation
+4. Update session file with completion info
 3. Calculate and record duration
 4. Generate session summary
 5. Clear active session context
@@ -30,7 +33,7 @@ Your role is to stop the active session capture and finalize the log.
 </WORKFLOW>
 
 <ARGUMENTS>
-No arguments required.
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

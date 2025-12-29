@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to validate implementation against specification.
   Use PROACTIVELY when user mentions "validate spec", "check implementation", "verify requirements".
   Triggers: validate, verify, check implementation, acceptance criteria
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to validate that implementation matches specification requirements.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (issue_number, --phase)
-2. Invoke fractary-spec:spec-validator skill
+1. Parse arguments (issue_number, --phase, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-spec:spec-validator skill
 3. Load spec for issue
 4. Check requirements coverage
 5. Check acceptance criteria
@@ -37,6 +39,7 @@ Your role is to validate that implementation matches specification requirements.
 <ARGUMENTS>
 - `<issue_number>` - GitHub issue number (required)
 - `--phase <n>` - Validate specific phase for multi-spec issues
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <VALIDATION_CHECKS>

@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to install or set up the Fractary status line plugin in their project.
   Use PROACTIVELY when user mentions "status line", "install status", "set up status", or wants to see git status in Claude Code's status bar.
   This agent handles the complete installation workflow including verification and configuration.
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -36,8 +37,16 @@ You execute the installation script and verify successful setup.
 - UserPromptSubmit hook is managed in plugin's hooks/hooks.json and uses ${CLAUDE_PLUGIN_ROOT}
 </CRITICAL_RULES>
 
+<ARGUMENTS>
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
+</ARGUMENTS>
+
 <WORKFLOW>
 ## Installation Workflow
+
+### 0. Parse Arguments
+- Parse any --context argument
+- If --context provided, apply as additional instructions to workflow
 
 ### 1. Pre-Installation Checks
 - Verify current directory is a git repository

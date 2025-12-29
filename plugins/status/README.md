@@ -39,6 +39,28 @@ last: update spec accordingly
 last: /fractary-spec:generate 99
 ```
 
+## Global Arguments
+
+All commands support the `--context` argument for passing additional instructions:
+
+```bash
+--context "<text>"
+```
+
+This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+
+**Examples:**
+
+```bash
+# Guide installation with specific preferences
+/fractary-status:install --context "Enable verbose output during installation"
+
+# Customize sync behavior
+/fractary-status:sync --context "Force full refresh of all cached data"
+```
+
+See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+
 ## Installation
 
 ### Quick Install

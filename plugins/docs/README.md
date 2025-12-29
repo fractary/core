@@ -719,8 +719,34 @@ service: AuthService
 - `/fractary-docs:validate [path]` - Validate documentation
 - `/fractary-docs:list [options]` - List and filter documentation
 - `/fractary-docs:audit [directory]` - Audit documentation quality
+- `/fractary-docs:check-consistency` - Check documentation consistency
 
 See individual command files in `commands/` for detailed usage.
+
+## Global Arguments
+
+All commands support the `--context` argument for passing additional instructions:
+
+```bash
+--context "<text>"
+```
+
+This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+
+**Examples:**
+
+```bash
+# Focus validation on specific aspects
+/fractary-docs:validate --context "Be strict about code examples"
+
+# Guide documentation generation
+/fractary-docs:write api --context "Focus on error handling and include rate limiting info"
+
+# Customize audit behavior
+/fractary-docs:audit --context "Focus on structure, ignore minor style issues"
+```
+
+See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
 
 ## Integration
 

@@ -3,7 +3,7 @@ name: fractary-work:issue-list
 allowed-tools: Bash(gh issue list:*)
 description: List issues
 model: claude-haiku-4-5
-argument-hint: '[--state <open|closed|all>] [--label <label>] [--assignee <user>] [--limit <n>]'
+argument-hint: '[--state <open|closed|all>] [--label <label>] [--assignee <user>] [--limit <n>] [--context "<text>"]'
 ---
 
 ## Context

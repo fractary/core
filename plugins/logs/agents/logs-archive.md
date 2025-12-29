@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to archive logs for a completed issue to cloud storage.
   Use PROACTIVELY when user mentions "archive logs", "backup logs", "store logs in cloud".
   Triggers: archive, backup, cloud storage, preserve logs
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to archive all logs for a completed issue to cloud storage.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (issue_number, --force, --retry)
-2. Invoke fractary-logs:log-archiver skill
+1. Parse arguments (issue_number, --force, --retry, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-archiver skill
 3. Collect all logs for issue
 4. Compress large files
 5. Upload to cloud via fractary-file
@@ -35,6 +37,7 @@ Your role is to archive all logs for a completed issue to cloud storage.
 - `<issue_number>` - GitHub issue number (required)
 - `--force` - Skip checks and force re-archive
 - `--retry` - Retry failed uploads from partial archive
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

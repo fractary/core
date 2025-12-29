@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to initialize or configure the logs plugin.
   Use PROACTIVELY when user mentions "init logs", "setup logging", "configure logs".
   Triggers: init, initialize, setup, configure logs
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to initialize the fractary-logs plugin configuration and storage di
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (--force)
-2. Create `.fractary/plugins/logs/` directory
+1. Parse arguments (--force, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Create `.fractary/plugins/logs/` directory
 3. Copy config.json from plugin example
 4. Create log storage directories (/logs/sessions, /logs/builds, etc.)
 5. Initialize archive index
@@ -33,6 +35,7 @@ Your role is to initialize the fractary-logs plugin configuration and storage di
 
 <ARGUMENTS>
 - `--force` - Overwrite existing configuration
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <DIRECTORIES_CREATED>

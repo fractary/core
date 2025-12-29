@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to check if documentation is consistent with code changes.
   Use PROACTIVELY when user mentions "docs out of date", "update docs", "docs consistent", "stale documentation".
   Triggers: check consistency, docs stale, sync docs, documentation drift
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to check if high-level documentation (CLAUDE.md, README.md, etc.) i
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (--fix, --targets, --base, --head, --mode)
-2. Invoke fractary-docs:doc-consistency-checker skill
+1. Parse arguments (--fix, --targets, --base, --head, --mode, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-docs:doc-consistency-checker skill
 3. Analyze git diff between base and head refs
 4. Identify code changes (API, features, architecture, config)
 5. Check target documents for affected sections
@@ -37,6 +39,7 @@ Your role is to check if high-level documentation (CLAUDE.md, README.md, etc.) i
 - `--base` - Base git reference (default: main)
 - `--head` - Head git reference (default: HEAD)
 - `--mode` - Operation mode: confirm, auto, dry-run (default: confirm)
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <SKILL_INVOCATION>

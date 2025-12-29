@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to view file plugin configuration.
   Use PROACTIVELY when user mentions "show config", "view storage config", "file settings".
   Triggers: show config, view config, display settings
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to display the current configuration with sensitive values masked.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (--raw, --path, --verify)
-2. Locate configuration file (project or global)
+1. Parse arguments (--raw, --path, --verify, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Locate configuration file (project or global)
 3. Load and validate configuration
 4. Mask sensitive values
 5. Display formatted output
@@ -32,6 +34,7 @@ Your role is to display the current configuration with sensitive values masked.
 - `--raw` - Show raw JSON (still with masked credentials)
 - `--path` - Only show configuration file path
 - `--verify` - Verify configuration is valid
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <CONFIG_LOCATIONS>

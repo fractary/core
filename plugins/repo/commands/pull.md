@@ -2,7 +2,7 @@
 allowed-tools: Bash(git pull:*), Bash(git status:*)
 description: Pull branches from remote
 model: claude-haiku-4-5
-argument-hint: '[--rebase] [--remote <name>]'
+argument-hint: '[--rebase] [--remote <name>] [--context "<text>"]'
 ---
 
 ## Context

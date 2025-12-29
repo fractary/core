@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to validate documentation against type-specific rules.
   Use PROACTIVELY when user mentions "validate docs", "check doc format", "doc errors", "lint documentation".
   Triggers: validate, check format, lint docs, verify documentation
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to validate documentation against type-specific rules and schemas.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (file_path or pattern, doc_type)
-2. Invoke fractary-docs:doc-validator skill
+1. Parse arguments (file_path or pattern, doc_type, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-docs:doc-validator skill
 3. For single file: validate against type-specific rules
 4. For pattern/directory: batch validate all matching files
 5. Check frontmatter, structure, links, schema
@@ -33,6 +35,7 @@ Your role is to validate documentation against type-specific rules and schemas.
 <ARGUMENTS>
 - `[file_path|pattern]` - File or pattern to validate (default: current directory)
 - `[doc_type]` - Document type (auto-detected if omitted)
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <VALIDATION_CHECKS>

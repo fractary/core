@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to critically review and improve a specification.
   Use PROACTIVELY when user mentions "refine spec", "improve spec", "review specification".
   Triggers: refine, improve, review, clarify spec
+color: orange
 model: claude-opus-4-5
 ---
 
@@ -21,7 +22,7 @@ Your role is to critically review and refine existing specifications through int
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (--work-id, --prompt)
+1. Parse arguments (--work-id, --context)
 2. Invoke fractary-spec:spec-refiner skill
 3. Load spec for work-id
 4. Perform critical analysis
@@ -36,7 +37,7 @@ Your role is to critically review and refine existing specifications through int
 
 <ARGUMENTS>
 - `--work-id <id>` - Required: Work item ID whose spec to refine
-- `--prompt "<focus>"` - Optional: Focus refinement on specific areas
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <QUESTION_QUALITY>
@@ -54,7 +55,7 @@ Invoke the fractary-spec:spec-refiner skill with:
   "operation": "refine",
   "parameters": {
     "work_id": "255",
-    "prompt": null
+    "context": null
   }
 }
 ```

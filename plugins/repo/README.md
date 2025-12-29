@@ -329,6 +329,31 @@ Clean up stale and merged branches.
 
 [Full documentation](commands/cleanup.md)
 
+## Global Arguments
+
+All commands support the `--context` argument for passing additional instructions:
+
+```bash
+--context "<text>"
+```
+
+This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+
+**Examples:**
+
+```bash
+# Guide commit message style
+/fractary-repo:commit "Add feature" --context "Ensure conventional commit format with scope"
+
+# Customize PR creation
+/fractary-repo:pr-create --context "Include performance impact section in PR body"
+
+# Focus branch naming
+/fractary-repo:init --context "Use company-specific branch naming conventions"
+```
+
+See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+
 ## Programmatic Usage
 
 The plugin can be invoked programmatically by other plugins or FABER workflows:

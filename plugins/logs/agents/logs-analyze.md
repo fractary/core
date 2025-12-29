@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to analyze logs for patterns, errors, or time spent.
   Use PROACTIVELY when user mentions "analyze logs", "find errors", "log patterns", "time analysis".
   Triggers: analyze, errors, patterns, time spent, summarize logs
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to analyze logs for patterns, errors, summaries, or time analysis.
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (type, --issue, --since, --until, --verbose)
-2. Invoke fractary-logs:log-analyzer skill
+1. Parse arguments (type, --issue, --since, --until, --verbose, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-analyzer skill
 3. Load logs based on filters
 4. Perform analysis by type
 5. Format and return results
@@ -34,6 +36,7 @@ Your role is to analyze logs for patterns, errors, summaries, or time analysis.
 - `--since <date>` - Start date (YYYY-MM-DD)
 - `--until <date>` - End date (YYYY-MM-DD)
 - `--verbose` - Show detailed breakdown
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <ANALYSIS_TYPES>

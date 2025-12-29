@@ -4,6 +4,7 @@ description: |
   MUST BE USED when user wants to audit logs in project and generate management plan.
   Use PROACTIVELY when user mentions "audit logs", "log health check", "find unmanaged logs", "log compliance".
   Triggers: audit, health check, compliance, log management
+color: orange
 model: claude-haiku-4-5
 ---
 
@@ -21,8 +22,9 @@ Your role is to audit existing logs in a project, identify what should be manage
 </CRITICAL_RULES>
 
 <WORKFLOW>
-1. Parse arguments (--project-root, --execute)
-2. Invoke fractary-logs:log-auditor skill
+1. Parse arguments (--project-root, --execute, --context)
+2. If --context provided, apply as additional instructions to workflow
+3. Invoke fractary-logs:log-auditor skill
 3. Load configuration and .gitignore patterns
 4. Discover all log files and log-like files
 5. Analyze against best practices
@@ -35,6 +37,7 @@ Your role is to audit existing logs in a project, identify what should be manage
 <ARGUMENTS>
 - `--project-root <path>` - Root directory to audit (default: current directory)
 - `--execute` - Execute high-priority remediations immediately
+- `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
 <OUTPUTS>

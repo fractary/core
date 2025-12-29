@@ -316,6 +316,31 @@ Stream file contents without downloading (NEW).
 **Use Cases**: Read archived specs, logs, configs without downloading.
 **Limits**: Default 10MB, max 50MB. Files larger should be downloaded.
 
+## Global Arguments
+
+All commands support the `--context` argument for passing additional instructions:
+
+```bash
+--context "<text>"
+```
+
+This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+
+**Examples:**
+
+```bash
+# Guide initialization
+/fractary-file:init --context "Configure for high-availability production use"
+
+# Customize connection testing
+/fractary-file:test-connection --context "Verify with verbose output"
+
+# Adjust handler selection
+/fractary-file:show-config --context "Focus on S3 configuration details"
+```
+
+See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+
 ## Configuration
 
 Configuration is stored in `.fractary/plugins/file/config.json`.

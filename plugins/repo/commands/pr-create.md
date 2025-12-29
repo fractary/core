@@ -2,7 +2,7 @@
 allowed-tools: Bash(gh pr create:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*)
 description: Create pull requests
 model: claude-haiku-4-5
-argument-hint: '[--title "<title>"] [--body "<body>"] [--draft] [--base <branch>]'
+argument-hint: '[--title "<title>"] [--body "<body>"] [--draft] [--base <branch>] [--context "<text>"]'
 ---
 
 ## Context

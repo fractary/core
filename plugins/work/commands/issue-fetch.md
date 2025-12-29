@@ -3,7 +3,7 @@ name: fractary-work:issue-fetch
 allowed-tools: Bash(gh issue view:*)
 description: Fetch issue details
 model: claude-haiku-4-5
-argument-hint: '<number>'
+argument-hint: '<number> [--context "<text>"]'
 ---
 
 ## Context
