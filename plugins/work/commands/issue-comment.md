@@ -17,6 +17,7 @@ Post a comment on an issue using `gh issue comment`.
 Parse arguments:
 - number (required): Issue number
 - --body (optional): Comment text. If omitted, gh will open an interactive editor
+- --context (optional): Additional instructions or context for the operation
 
 Examples:
 - With body: `gh issue comment 123 --body "This is my comment"`
