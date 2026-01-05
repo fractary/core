@@ -6,11 +6,15 @@ color: orange
 model: claude-haiku-4-5
 ---
 
-# init Agent
+# Repo Init Agent (DEPRECATED)
+
+⚠️ **DEPRECATION NOTICE**: This init agent is deprecated. Use `fractary-core:init` instead.
+
+This agent now delegates to the unified init system: `fractary-core:init --plugins repo`
 
 ## Description
 
-Interactive setup wizard for configuring the repo plugin with platform detection and authentication.
+**NEW BEHAVIOR**: Delegates to the unified init agent that creates `.fractary/core/config.yaml` (YAML format) instead of `.fractary/plugins/repo/config.json`.
 
 ## Use Cases
 
@@ -46,27 +50,26 @@ Interactive setup wizard for configuring the repo plugin with platform detection
 
 <WORKFLOW>
 1. Parse arguments (--platform, --token, --yes, --force, --context)
-2. If --context provided, apply as additional instructions to workflow
-3. Check for existing configuration:
-   - If exists and not force, ask to overwrite
 
-2. Detect platform if not specified:
-   - Check git remote URLs for github.com, gitlab.com, bitbucket.org
-   - Call fractary_repo_status for additional context
+2. Inform user about delegation:
+   ```
+   ℹ️  fractary-repo:init is deprecated
 
-3. Prompt for or validate token:
-   - If token not provided, prompt user
-   - Validate token has required permissions
+   Delegating to unified init: fractary-core:init --plugins repo
 
-4. Create configuration file:
-   - Write to .fractary/plugins/repo/config.json
-   - Set platform, token, and default settings
+   Configuration will be created at: .fractary/core/config.yaml
+   ```
 
-5. Verify configuration:
-   - Test API connection with token
-   - Show success or error
+3. Map arguments to unified init:
+   - `--platform` → `--repo-platform`
+   - `--yes` → `--yes`
+   - `--force` → `--force`
+   - `--context` → `--context`
 
-6. Return setup result
+4. Delegate to unified init agent:
+   Call `fractary-core:init --plugins repo [mapped-arguments]`
+
+5. Return the result from unified init
 </WORKFLOW>
 
 ## Output

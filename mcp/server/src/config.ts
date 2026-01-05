@@ -1,8 +1,9 @@
-import { access, readFile } from 'fs/promises';
+import { access } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
 import { constants } from 'fs';
 import { sanitizeSecrets } from './handlers/security.js';
+import { loadYamlConfig, findProjectRoot } from '@fractary/core/common/yaml-config';
 
 /**
  * Configuration interface for the MCP server
@@ -40,8 +41,8 @@ export interface Config {
  * Load configuration from environment variables and config files
  * Priority:
  * 1. Environment variables
- * 2. Project config: {cwd}/.fractary/config.json
- * 3. User config: ~/.fractary/config.json
+ * 2. Project config: {cwd}/.fractary/core/config.yaml
+ * 3. User config: ~/.fractary/core/config.yaml
  */
 export async function loadConfig(): Promise<Config> {
   const config: Config = {};
@@ -103,20 +104,27 @@ export async function loadConfig(): Promise<Config> {
     };
   }
 
-  // 2. Load from config files (project first, then user)
+  // 2. Load from YAML config files (project first, then user)
+  const projectRoot = findProjectRoot(process.cwd());
   const configPaths = [
-    join(process.cwd(), '.fractary', 'config.json'),
-    join(homedir(), '.fractary', 'config.json'),
+    join(projectRoot, '.fractary', 'core', 'config.yaml'),
+    join(homedir(), '.fractary', 'core', 'config.yaml'),
   ];
 
   for (const configPath of configPaths) {
     try {
-      // Check if file exists using async access
+      // Check if file exists
       await access(configPath, constants.F_OK);
 
-      // Read file asynchronously
-      const fileContent = await readFile(configPath, 'utf-8');
-      const fileConfig = JSON.parse(fileContent) as Config;
+      // Load YAML config using unified loader
+      const fileConfig = loadYamlConfig({
+        projectRoot: configPath.includes(homedir()) ? homedir() : projectRoot,
+        warnMissingEnvVars: false, // Don't warn in MCP server context
+      });
+
+      if (!fileConfig) {
+        continue;
+      }
 
       // Merge file config with existing config (env vars take precedence)
       if (fileConfig.work && !config.work) {

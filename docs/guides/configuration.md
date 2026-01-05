@@ -1,23 +1,39 @@
 # Configuration Guide
 
-Complete guide to configuring Fractary Core SDK, CLI, MCP server, and plugins.
+Complete guide to configuring Fractary Core SDK, CLI, MCP server, and plugins using the unified YAML configuration (v2.0).
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Configuration Files](#configuration-files)
-- [SDK Configuration](#sdk-configuration)
-- [CLI Configuration](#cli-configuration)
-- [MCP Server Configuration](#mcp-server-configuration)
+- [Quick Start](#quick-start)
+- [Configuration Structure](#configuration-structure)
+- [Initialization](#initialization)
 - [Plugin Configuration](#plugin-configuration)
 - [Environment Variables](#environment-variables)
 - [Platform-Specific Configuration](#platform-specific-configuration)
+- [CLI Configuration](#cli-configuration)
+- [SDK Configuration](#sdk-configuration)
+- [MCP Server Configuration](#mcp-server-configuration)
+- [Migration Guide](#migration-guide)
 
 ## Overview
 
+**v2.0 introduces a unified YAML configuration system** that consolidates all plugin configs into a single `.fractary/core/config.yaml` file. This is a **breaking change** requiring projects to re-initialize.
+
+### What's New in v2.0
+
+- ✅ **Unified Configuration**: Single `.fractary/core/config.yaml` file for all plugins
+- ✅ **YAML Format**: Human-readable YAML (JSON no longer supported)
+- ✅ **Environment Variables**: Support for `${VAR_NAME}` and `${VAR_NAME:-default}` syntax
+- ✅ **Multi-Platform Support**: Configure multiple platforms per plugin
+- ✅ **Handler Pattern**: Switch between platforms via `active_handler` setting
+- ⚠️ **Breaking Change**: No backward compatibility with v1.x configs
+
+### Configuration Methods
+
 Fractary Core supports multiple configuration methods:
 
-1. **Configuration Files** - YAML or JSON files in `.fractary/`
+1. **Unified Config File** - `.fractary/core/config.yaml` (primary method)
 2. **Environment Variables** - For credentials and runtime settings
 3. **Programmatic Configuration** - Direct configuration in code
 4. **CLI Flags** - Command-line overrides
@@ -25,14 +41,141 @@ Fractary Core supports multiple configuration methods:
 Configuration is resolved in this order (highest priority first):
 1. CLI flags
 2. Environment variables
-3. Project configuration files
+3. Project configuration file (`.fractary/core/config.yaml`)
 4. Default values
 
-## Configuration Files
+## Quick Start
 
-### Project Configuration
+Initialize your project with the unified configuration:
 
-Create `.fractary/core.yaml` in your project root:
+```bash
+# Initialize all plugins
+fractary-core:init
+
+# Initialize specific plugins only
+fractary-core:init --plugins work,repo
+
+# Force overwrite existing config
+fractary-core:init --force
+
+# Specify platforms
+fractary-core:init \
+  --work-platform github \
+  --repo-platform github \
+  --file-handler local
+```
+
+This creates `.fractary/core/config.yaml` with all necessary sections.
+
+## Configuration Structure
+
+### File Location
+
+**v2.0 Configuration Path**: `.fractary/core/config.yaml`
+
+⚠️ **Important**: The config is located at `.fractary/core/config.yaml` (inside the `core/` directory), NOT `.fractary/core.yaml`.
+
+### Basic Structure
+
+The unified configuration follows this structure:
+
+```yaml
+version: "2.0"
+
+# Each plugin section follows the handler pattern
+<plugin_name>:
+  active_handler: <handler_name>  # Which platform to use
+  handlers:
+    <handler_name>:
+      # Handler-specific configuration
+      token: ${ENV_VAR}  # Environment variable reference
+  defaults:
+    # Plugin-specific defaults
+  # Additional plugin settings
+```
+
+### Complete Example
+
+See `.fractary/core/config.example.yaml` for a comprehensive example with all plugins configured.
+
+Basic example:
+
+```yaml
+version: "2.0"
+
+work:
+  active_handler: github
+  handlers:
+    github:
+      owner: myorg
+      repo: myrepo
+      token: ${GITHUB_TOKEN}
+      api_url: https://api.github.com
+
+repo:
+  active_handler: github
+  handlers:
+    github:
+      token: ${GITHUB_TOKEN}
+      api_url: https://api.github.com
+  defaults:
+    default_branch: main
+
+logs:
+  schema_version: "2.0"
+  storage:
+    local_path: /logs
+  session_logging:
+    enabled: true
+    redact_sensitive: true
+
+file:
+  schema_version: "1.0"
+  active_handler: local
+  handlers:
+    local:
+      base_path: .
+      create_directories: true
+
+spec:
+  schema_version: "1.0"
+  storage:
+    local_path: /specs
+
+docs:
+  schema_version: "1.1"
+  doc_types:
+    adr:
+      enabled: true
+      path: docs/architecture/ADR
+```
+
+## Initialization
+
+### Using the Init Command
+
+The recommended way to create your configuration is using the init command:
+
+```bash
+# Initialize with auto-detection
+fractary-core:init
+
+# Initialize specific plugins
+fractary-core:init --plugins work,repo,logs
+
+# Specify platforms
+fractary-core:init --work-platform github --repo-platform github
+
+# Skip prompts
+fractary-core:init --yes
+
+# Force overwrite
+fractary-core:init --force
+```
+
+### Manual Configuration
+
+You can also manually create `.fractary/core/config.yaml`:
 
 ```yaml
 # Work tracking configuration
@@ -159,7 +302,7 @@ const logsManager = new LogsManager({
 ```typescript
 import { loadConfig } from '@fractary/core';
 
-const config = await loadConfig('.fractary/core.yaml');
+const config = await loadConfig('.fractary/core/config.yaml');
 
 const workManager = new WorkManager(config.work);
 const repoManager = new RepoManager(config.repo);
@@ -169,15 +312,16 @@ const repoManager = new RepoManager(config.repo);
 
 ### Global Configuration
 
-The CLI reads from `.fractary/core.yaml` or environment variables.
+The CLI reads from `.fractary/core/config.yaml` or environment variables.
 
 ### Initialize Configuration
 
 ```bash
-# Initialize work tracking
+# Initialize work tracking (deprecated - use fractary-core:init)
 fractary-core work init --provider github
 
-# This creates/updates .fractary/core.yaml
+# Recommended: Use unified init
+fractary-core:init
 ```
 
 ### Override with Flags
@@ -469,10 +613,11 @@ Use different config files for different environments:
 
 ```bash
 .fractary/
-├── core.yaml           # Default/local
-├── staging.yaml        # Staging environment
-├── production.yaml     # Production environment
-└── core-mcp.yaml      # MCP server config
+└── core/
+    ├── config.yaml           # Default/local (unified config)
+    ├── staging.yaml          # Staging environment
+    ├── production.yaml       # Production environment
+    └── config.example.yaml   # Example template
 ```
 
 **Usage:**
@@ -547,8 +692,8 @@ const workManager = new WorkManager({
 Configuration is merged in this order (later overrides earlier):
 
 1. **Default values** - Built-in defaults
-2. **Configuration file** - `.fractary/core.yaml` or `.fractary/core.json`
-3. **Environment variables** - `FRACTARY_*` variables
+2. **Configuration file** - `.fractary/core/config.yaml`
+3. **Environment variables** - `FRACTARY_*` and platform-specific variables
 4. **CLI flags** - Command-line arguments
 5. **Programmatic overrides** - Direct code configuration
 
@@ -646,7 +791,239 @@ fractary-core work init --provider github
 3. **Document required variables** - List all required environment variables in README
 4. **Validate configuration** - Run `config validate` before deployment
 5. **Use different configs per environment** - Separate staging and production configs
-6. **Version control config templates** - Commit `.fractary/core.yaml.example` with placeholder values
+6. **Version control config templates** - Commit `.fractary/core/config.example.yaml` with placeholder values
+
+## Migration Guide
+
+### Migrating from v1.x to v2.0
+
+v2.0 introduces a **breaking change** with the unified YAML configuration system. All projects must be re-initialized.
+
+#### What Changed
+
+**Before (v1.x):**
+- Multiple config files: `.fractary/plugins/{name}/config.json`
+- JSON format
+- Per-plugin initialization
+
+**After (v2.0):**
+- Single config file: `.fractary/core/config.yaml`
+- YAML format only
+- Unified initialization command
+- Handler pattern for multi-platform support
+- Environment variable substitution: `${VAR_NAME}`
+
+#### Migration Steps
+
+**1. Backup Existing Configuration**
+
+```bash
+# Backup your entire .fractary directory
+tar czf fractary-backup-$(date +%Y%m%d).tar.gz .fractary/
+```
+
+**2. Upgrade to v2.0**
+
+```bash
+# Update CLI
+npm install -g @fractary/core-cli@2.0.0
+
+# Or update in your project
+npm install @fractary/core@2.0.0
+```
+
+**3. Remove Old Config (Optional)**
+
+```bash
+# Move old config out of the way
+mv .fractary .fractary.v1
+```
+
+**4. Initialize with New Config**
+
+```bash
+# Initialize all plugins
+fractary-core:init
+
+# Or specify platforms
+fractary-core:init \
+  --work-platform github \
+  --repo-platform github \
+  --file-handler local
+```
+
+**5. Manually Merge Custom Settings**
+
+Compare your old and new configs:
+
+```bash
+# View old work config
+cat .fractary.v1/plugins/work/config.json | jq .
+
+# View new work config
+yq e '.work' .fractary/core/config.yaml
+
+# Edit new config to add custom settings
+vim .fractary/core/config.yaml
+```
+
+**6. Validate New Configuration**
+
+```bash
+# Validate YAML syntax and required fields
+fractary-core config validate
+
+# View redacted config
+fractary-core config show
+```
+
+**7. Test All Plugins**
+
+```bash
+# Test work plugin
+fractary-work:issue list
+
+# Test repo plugin
+fractary-repo:branch list
+
+# Test other plugins
+fractary-spec:list
+fractary-logs:search --query "test"
+```
+
+**8. Clean Up (Optional)**
+
+Once everything works:
+
+```bash
+# Remove old config backup
+rm -rf .fractary.v1
+```
+
+#### Configuration Mapping
+
+##### Work Plugin
+
+**Old (v1.x):** `.fractary/plugins/work/config.json`
+```json
+{
+  "platform": "github",
+  "owner": "myorg",
+  "repo": "myrepo",
+  "token": "ghp_..."
+}
+```
+
+**New (v2.0):** `.fractary/core/config.yaml`
+```yaml
+work:
+  active_handler: github
+  handlers:
+    github:
+      owner: myorg
+      repo: myrepo
+      token: ${GITHUB_TOKEN}
+      api_url: https://api.github.com
+```
+
+##### Repo Plugin
+
+**Old (v1.x):** `.fractary/plugins/repo/config.json`
+```json
+{
+  "platform": "github",
+  "token": "ghp_..."
+}
+```
+
+**New (v2.0):** `.fractary/core/config.yaml`
+```yaml
+repo:
+  active_handler: github
+  handlers:
+    github:
+      token: ${GITHUB_TOKEN}
+      api_url: https://api.github.com
+  defaults:
+    default_branch: main
+```
+
+##### Spec Plugin
+
+**Old (v1.x):** `.fractary/plugins/spec/config.json`
+```json
+{
+  "local_path": "/specs"
+}
+```
+
+**New (v2.0):** `.fractary/core/config.yaml`
+```yaml
+spec:
+  schema_version: "1.0"
+  storage:
+    local_path: /specs
+```
+
+#### Deprecated Commands
+
+The following init commands are deprecated and delegate to unified init:
+
+- `fractary-work:init` → Use `fractary-core:init --plugins work`
+- `fractary-repo:init` → Use `fractary-core:init --plugins repo`
+- `fractary-logs:init` → Use `fractary-core:init --plugins logs`
+- `fractary-file:init` → Use `fractary-core:init --plugins file`
+- `fractary-spec:init` → Use `fractary-core:init --plugins spec`
+
+#### Common Migration Issues
+
+**Issue**: Config validation fails with "Missing version field"
+
+**Solution**: Add `version: "2.0"` at the top of your config file.
+
+**Issue**: Environment variables not being substituted
+
+**Solution**: Use the correct syntax: `${VAR_NAME}` or `${VAR_NAME:-default}`
+
+**Issue**: Old plugin configs still being read
+
+**Solution**: Remove old config files:
+```bash
+rm -rf .fractary/plugins/*/config.json
+```
+
+**Issue**: "Configuration file not found" error
+
+**Solution**: Ensure config is at `.fractary/core/config.yaml` (not `.fractary/core.yaml`)
+
+#### Breaking Changes Summary
+
+**Removed:**
+- Individual plugin config files (`.fractary/plugins/{name}/config.json`)
+- JSON config support (`.fractary/core.json`)
+- Automatic migration from v1.x
+- Per-plugin init commands (now deprecated wrappers)
+
+**Changed:**
+- Config location: `.fractary/core.yaml` → `.fractary/core/config.yaml`
+- Config format: JSON → YAML
+- Init command: Plugin-specific → Unified `fractary-core:init`
+
+**Added:**
+- Handler pattern for multi-platform support
+- Environment variable substitution (`${VAR_NAME}`)
+- Config validation command (`fractary-core config validate`)
+- Config display command (`fractary-core config show`)
+- Unified initialization for all plugins
+
+#### Getting Help
+
+If you encounter migration issues:
+
+1. Check the example config: `.fractary/core/config.example.yaml`
+2. Run validation: `fractary-core config validate`
+3. Review docs: `docs/guides/configuration.md`
+4. Report issues: https://github.com/fractary/core/issues
 
 ## Next Steps
 

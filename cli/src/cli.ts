@@ -14,6 +14,7 @@ import { createSpecCommand } from './commands/spec';
 import { createLogsCommand } from './commands/logs';
 import { createFileCommand } from './commands/file';
 import { createDocsCommand } from './commands/docs';
+import { registerConfigCommand } from './commands/config';
 
 // Package information
 const packageJson = require('../package.json');
@@ -34,11 +35,15 @@ program.addCommand(createLogsCommand());
 program.addCommand(createFileCommand());
 program.addCommand(createDocsCommand());
 
+// Add config command
+registerConfigCommand(program);
+
 // Custom help text
 program.addHelpText(
   'after',
   `
 ${chalk.bold('Commands:')}
+  config      Manage configuration (validate, show)
   work        Work item tracking (issues, comments, labels, milestones)
   repo        Repository operations (branches, commits, PRs, tags, worktrees)
   spec        Specification management (create, validate, refine)
@@ -47,6 +52,8 @@ ${chalk.bold('Commands:')}
   docs        Documentation management (create, search, export)
 
 ${chalk.bold('Examples:')}
+  $ fractary-core config validate
+  $ fractary-core config show
   $ fractary-core work issue fetch 123
   $ fractary-core repo commit --message "Add feature" --type feat
   $ fractary-core spec validate SPEC-20241216
@@ -79,7 +86,7 @@ async function main() {
     if (error.code === 'commander.unknownCommand') {
       console.error(chalk.red('Unknown command:'), error.message);
       console.log(
-        chalk.gray('\nAvailable commands: work, repo, spec, logs, file, docs')
+        chalk.gray('\nAvailable commands: config, work, repo, spec, logs, file, docs')
       );
       console.log(chalk.gray('Run "fractary-core --help" for more information.'));
       process.exit(1);

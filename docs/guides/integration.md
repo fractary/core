@@ -264,15 +264,21 @@ claude-code plugin install fractary-repo
 
 #### Plugin Configuration
 
-Create `.fractary/plugins/work.yaml`:
+**v2.0+**: Plugins use the unified configuration at `.fractary/core/config.yaml`:
 
 ```yaml
-provider: github
-repository:
-  owner: myorg
-  name: myrepo
-token: ${GITHUB_TOKEN}
+version: "2.0"
+
+work:
+  active_handler: github
+  handlers:
+    github:
+      owner: myorg
+      repo: myrepo
+      token: ${GITHUB_TOKEN}
 ```
+
+Initialize with: `fractary-core:init`
 
 ## CI/CD Integration
 
@@ -613,7 +619,7 @@ expect(issue.number).toBe(123);
 
 ## Best Practices
 
-1. **Use configuration files** - Store settings in `.fractary/core.yaml`
+1. **Use configuration files** - Store settings in `.fractary/core/config.yaml`
 2. **Environment variables for secrets** - Never commit tokens
 3. **Error handling** - Always handle errors from SDK methods
 4. **Logging** - Use the logs module for audit trails

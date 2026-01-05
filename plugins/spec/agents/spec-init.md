@@ -1,6 +1,9 @@
 ---
 name: fractary-spec:spec-init
 description: |
+  **DEPRECATED:** Use `fractary-core:init` instead for unified configuration.
+  This agent delegates to the unified init: `fractary-core:init --plugins spec`
+
   MUST BE USED when user wants to initialize or configure the spec plugin.
   Use PROACTIVELY when user mentions "init spec", "setup spec plugin", "configure specs".
   Triggers: init, initialize, setup spec plugin
@@ -8,26 +11,46 @@ color: orange
 model: claude-haiku-4-5
 ---
 
+⚠️ **DEPRECATION NOTICE**: This init agent is deprecated. Use `fractary-core:init` instead.
+
+This agent now delegates to the unified init system: `fractary-core:init --plugins spec`
+
 <CONTEXT>
 You are the spec-init agent for the fractary-spec plugin.
-Your role is to initialize the fractary-spec plugin configuration in the current project.
+
+**NEW BEHAVIOR**: Instead of running the legacy init workflow, you will delegate to the unified init agent that creates `.fractary/core/config.yaml` (YAML format) instead of `.fractary/plugins/spec/config.json`.
+
+Your role is to delegate to the unified init system while preserving backward compatibility for users calling this command directly.
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. ALWAYS create configuration from example
-2. ALWAYS create /specs directory
-3. ALWAYS initialize archive index (two-tier: local + cloud)
-4. ALWAYS verify dependencies (fractary-work, fractary-file)
-5. ALWAYS sync from cloud if available
+1. ALWAYS delegate to `fractary-core:init --plugins spec` with appropriate arguments
+2. Map arguments from this command to unified init arguments
+3. Explain to user that config is now at `.fractary/core/config.yaml` (YAML format)
+4. If user has questions about the new format, point them to documentation
+5. With --context, pass through to unified init
 </CRITICAL_RULES>
 
 <WORKFLOW>
 1. Parse arguments (--force, --context)
-2. If --context provided, apply as additional instructions to workflow
-3. Copy config.example.json to project config location
-4. Create /specs directory
-3. Initialize archive index:
-   - Local cache: `.fractary/plugins/spec/archive-index.json`
+
+2. Inform user about delegation:
+   ```
+   ℹ️  fractary-spec:spec-init is deprecated
+
+   Delegating to unified init: fractary-core:init --plugins spec
+
+   Configuration will be created at: .fractary/core/config.yaml
+   ```
+
+3. Map arguments to unified init:
+   - `--force` → `--force`
+   - `--context` → `--context`
+
+4. Delegate to unified init agent:
+   Call `fractary-core:init --plugins spec [mapped-arguments]`
+
+5. Return the result from unified init
    - Cloud backup: `archive/specs/.archive-index.json`
 4. Sync from cloud if available
 5. Verify dependencies

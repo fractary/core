@@ -76,23 +76,14 @@ class WorkManager:
         return self._provider
 
     def _load_config(self) -> dict[str, Any]:
-        """Load configuration from .faber/config.yaml or .fractary/plugins/work/config.json."""
-        # Try .faber/config.yaml first
-        faber_config = Path.cwd() / ".faber" / "config.yaml"
-        if faber_config.exists():
-            with open(faber_config) as f:
-                full_config = yaml.safe_load(f) or {}
-                return full_config.get("work", {})
+        """Load configuration from .fractary/core/config.yaml."""
+        from fractary_core.common.yaml_config import load_yaml_config
 
-        # Try .fractary/plugins/work/config.json
-        fractary_config = Path.cwd() / ".fractary" / "plugins" / "work" / "config.json"
-        if fractary_config.exists():
-            import json
+        config = load_yaml_config()
+        if config and "work" in config:
+            return config["work"]
 
-            with open(fractary_config) as f:
-                return json.load(f)
-
-        # Default config
+        # Default config if no config file found
         return {
             "platform": os.getenv("FABER_WORK_PLATFORM", "github"),
             "owner": os.getenv("GITHUB_REPOSITORY_OWNER", ""),
