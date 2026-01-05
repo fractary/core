@@ -66,23 +66,14 @@ class RepoManager:
         self._provider = None
 
     def _load_config(self) -> dict[str, Any]:
-        """Load configuration from .faber/config.yaml or .fractary/plugins/repo/config.json."""
-        # Try .faber/config.yaml first
-        faber_config = Path.cwd() / ".faber" / "config.yaml"
-        if faber_config.exists():
-            with open(faber_config) as f:
-                full_config = yaml.safe_load(f) or {}
-                return full_config.get("repo", {})
+        """Load configuration from .fractary/core/config.yaml."""
+        from fractary_core.common.yaml_config import load_yaml_config
 
-        # Try .fractary/plugins/repo/config.json
-        fractary_config = Path.cwd() / ".fractary" / "plugins" / "repo" / "config.json"
-        if fractary_config.exists():
-            import json
+        config = load_yaml_config()
+        if config and "repo" in config:
+            return config["repo"]
 
-            with open(fractary_config) as f:
-                return json.load(f)
-
-        # Default config
+        # Default config if no config file found
         return {
             "platform": os.getenv("FABER_REPO_PLATFORM", "github"),
             "default_branch": "main",

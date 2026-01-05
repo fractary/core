@@ -1,199 +1,117 @@
 /**
  * Configuration Management Utilities
  *
- * Handles configuration file discovery, loading, and migration from old paths.
+ * Handles unified YAML configuration loading from .fractary/core/config.yaml
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import chalk from 'chalk';
+import {
+  loadYamlConfig as sdkLoadYamlConfig,
+  writeYamlConfig as sdkWriteYamlConfig,
+  configExists as sdkConfigExists,
+  getConfigPath as sdkGetConfigPath,
+  getCoreDir as sdkGetCoreDir,
+  findProjectRoot,
+  CoreYamlConfig,
+} from '@fractary/core/common/yaml-config';
 
 /**
- * Core configuration structure
+ * Core configuration structure (alias for CoreYamlConfig)
  */
-export interface CoreConfig {
-  work?: any;
-  repo?: any;
-  spec?: any;
-  logs?: any;
-  file?: any;
-  docs?: any;
-}
+export type CoreConfig = CoreYamlConfig;
 
 /**
- * Configuration paths
- */
-const CONFIG_DIR = '.fractary/core';
-const CONFIG_FILE = 'config.json';
-const LEGACY_CONFIG_DIR = '.fractary/faber';
-
-/**
- * Find the configuration file path by walking up the directory tree
+ * Load configuration from .fractary/core/config.yaml
  *
- * @param startDir - Directory to start searching from (default: current working directory)
- * @returns Path to config file or null if not found
- */
-export function findConfigPath(startDir: string = process.cwd()): string | null {
-  let currentDir = startDir;
-
-  while (true) {
-    const configPath = path.join(currentDir, CONFIG_DIR, CONFIG_FILE);
-
-    if (fs.existsSync(configPath)) {
-      return configPath;
-    }
-
-    const parentDir = path.dirname(currentDir);
-
-    // Reached filesystem root
-    if (parentDir === currentDir) {
-      break;
-    }
-
-    currentDir = parentDir;
-  }
-
-  return null;
-}
-
-/**
- * Find the legacy configuration file path
- *
- * @param startDir - Directory to start searching from
- * @returns Path to legacy config file or null if not found
- */
-export function findLegacyConfigPath(startDir: string = process.cwd()): string | null {
-  let currentDir = startDir;
-
-  while (true) {
-    const legacyPath = path.join(currentDir, LEGACY_CONFIG_DIR, CONFIG_FILE);
-
-    if (fs.existsSync(legacyPath)) {
-      return legacyPath;
-    }
-
-    const parentDir = path.dirname(currentDir);
-
-    if (parentDir === currentDir) {
-      break;
-    }
-
-    currentDir = parentDir;
-  }
-
-  return null;
-}
-
-/**
- * Load configuration from file
- *
- * @param configPath - Path to config file (optional, will auto-discover if not provided)
+ * @param projectRoot - Project root directory (auto-detected if not provided)
  * @returns Configuration object or null if not found
+ *
+ * @example
+ * ```typescript
+ * const config = loadConfig();
+ * if (config) {
+ *   console.log('Work config:', config.work);
+ * }
+ * ```
  */
-export function loadConfig(configPath?: string): CoreConfig | null {
+export function loadConfig(projectRoot?: string): CoreConfig | null {
   try {
-    const actualPath = configPath || findConfigPath();
-
-    if (!actualPath) {
-      // Try to migrate from legacy path
-      const legacyPath = findLegacyConfigPath();
-      if (legacyPath) {
-        return migrateLegacyConfig(legacyPath);
-      }
-      return null;
-    }
-
-    const content = fs.readFileSync(actualPath, 'utf-8');
-    return JSON.parse(content) as CoreConfig;
+    return sdkLoadYamlConfig({ projectRoot });
   } catch (error) {
-    // Failed to load config
+    // Return null instead of throwing to maintain backward compatibility
+    console.error('Error loading config:', error);
     return null;
   }
 }
 
 /**
- * Migrate legacy configuration from .fractary/faber to .fractary/core
+ * Write configuration to .fractary/core/config.yaml
  *
- * @param legacyPath - Path to legacy config file
- * @returns Migrated configuration
+ * @param config - Configuration object to write
+ * @param projectRoot - Project root directory (auto-detected if not provided)
+ *
+ * @example
+ * ```typescript
+ * writeConfig({
+ *   version: '2.0',
+ *   work: {
+ *     active_handler: 'github',
+ *     handlers: { github: { token: '${GITHUB_TOKEN}' } }
+ *   }
+ * });
+ * ```
  */
-function migrateLegacyConfig(legacyPath: string): CoreConfig | null {
-  try {
-    console.log(chalk.yellow('Notice:'), 'Migrating configuration from', LEGACY_CONFIG_DIR, 'to', CONFIG_DIR);
-
-    const content = fs.readFileSync(legacyPath, 'utf-8');
-    const legacyConfig = JSON.parse(content);
-
-    // Extract relevant configuration sections
-    const coreConfig: CoreConfig = {
-      work: legacyConfig.work,
-      repo: legacyConfig.repo,
-      spec: legacyConfig.spec,
-      logs: legacyConfig.logs,
-      file: legacyConfig.file,
-      docs: legacyConfig.docs,
-    };
-
-    // Write to new location
-    const legacyDir = path.dirname(legacyPath);
-    const projectRoot = path.dirname(path.dirname(legacyDir));
-    const newPath = path.join(projectRoot, CONFIG_DIR, CONFIG_FILE);
-
-    writeConfig(coreConfig, newPath);
-
-    console.log(chalk.green('✓'), 'Configuration migrated successfully');
-
-    return coreConfig;
-  } catch (error) {
-    console.error(chalk.red('Failed to migrate configuration:'), error);
-    return null;
-  }
+export function writeConfig(config: CoreConfig, projectRoot?: string): void {
+  sdkWriteYamlConfig(config, projectRoot);
 }
 
 /**
- * Write configuration to file
+ * Check if configuration file exists
  *
- * @param config - Configuration object
- * @param configPath - Path to write config to (optional, will use default if not provided)
+ * @param projectRoot - Project root directory (auto-detected if not provided)
+ * @returns true if .fractary/core/config.yaml exists
  */
-export function writeConfig(config: CoreConfig, configPath?: string): void {
-  const actualPath = configPath || getDefaultConfigPath();
+export function configExists(projectRoot?: string): boolean {
+  return sdkConfigExists(projectRoot);
+}
 
-  // Ensure directory exists
-  const dir = path.dirname(actualPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+/**
+ * Get the configuration file path
+ *
+ * @param projectRoot - Project root directory (auto-detected if not provided)
+ * @returns Full path to .fractary/core/config.yaml
+ */
+export function getConfigPath(projectRoot?: string): string {
+  return sdkGetConfigPath(projectRoot);
+}
 
-  // Write configuration with pretty formatting
-  fs.writeFileSync(actualPath, JSON.stringify(config, null, 2), 'utf-8');
+/**
+ * Get the .fractary/core directory path
+ *
+ * @param projectRoot - Project root directory (auto-detected if not provided)
+ * @returns Full path to .fractary/core directory
+ */
+export function getCoreDir(projectRoot?: string): string {
+  return sdkGetCoreDir(projectRoot);
 }
 
 /**
  * Get the default configuration file path for the current project
  *
- * @returns Default config path
+ * @returns Default config path (.fractary/core/config.yaml)
+ * @deprecated Use getConfigPath() instead
  */
 export function getDefaultConfigPath(): string {
-  return path.join(process.cwd(), CONFIG_DIR, CONFIG_FILE);
-}
-
-/**
- * Check if configuration exists
- *
- * @returns True if config exists, false otherwise
- */
-export function configExists(): boolean {
-  return findConfigPath() !== null || findLegacyConfigPath() !== null;
+  return getConfigPath();
 }
 
 /**
  * Get configuration directory path
  *
- * @returns Config directory path
+ * @returns Config directory path (.fractary/core)
+ * @deprecated Use getCoreDir() instead
  */
 export function getConfigDir(): string {
-  return path.join(process.cwd(), CONFIG_DIR);
+  return getCoreDir();
 }
 
 /**
@@ -205,6 +123,7 @@ export function getConfigDir(): string {
  */
 export function mergeConfig(base: CoreConfig, override: Partial<CoreConfig>): CoreConfig {
   return {
+    version: override.version || base.version,
     work: override.work !== undefined ? override.work : base.work,
     repo: override.repo !== undefined ? override.repo : base.repo,
     spec: override.spec !== undefined ? override.spec : base.spec,
@@ -213,3 +132,11 @@ export function mergeConfig(base: CoreConfig, override: Partial<CoreConfig>): Co
     docs: override.docs !== undefined ? override.docs : base.docs,
   };
 }
+
+/**
+ * Find project root by looking for .fractary or .git directory
+ *
+ * @param startDir - Directory to start searching from (default: current working directory)
+ * @returns Project root directory path
+ */
+export { findProjectRoot };

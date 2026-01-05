@@ -80,7 +80,7 @@ The MCP server provides 81 tools across 6 modules for AI agents to interact with
 npx @fractary/core-mcp
 
 # Run with custom config
-npx @fractary/core-mcp --config .fractary/core.yaml
+npx @fractary/core-mcp --config .fractary/core/config.yaml
 ```
 
 **Claude Code integration:**

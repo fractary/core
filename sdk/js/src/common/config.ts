@@ -65,26 +65,56 @@ export function ensureDir(dirPath: string): void {
 }
 
 /**
- * Stub config loaders - these return null to indicate no config found
- * Individual SDKs will use sensible defaults
+ * Config loaders - extract plugin sections from unified YAML config
+ * Uses .fractary/core/config.yaml as the single source of truth
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function loadWorkConfig(..._args: unknown[]): null {
-  return null;
+import { loadYamlConfig } from './yaml-config';
+
+/**
+ * Load work plugin configuration from unified YAML
+ */
+export function loadWorkConfig(projectRoot?: string): any | null {
+  const config = loadYamlConfig({ projectRoot });
+  return config?.work || null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function loadRepoConfig(..._args: unknown[]): null {
-  return null;
+/**
+ * Load repository plugin configuration from unified YAML
+ */
+export function loadRepoConfig(projectRoot?: string): any | null {
+  const config = loadYamlConfig({ projectRoot });
+  return config?.repo || null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function loadSpecConfig(..._args: unknown[]): null {
-  return null;
+/**
+ * Load specification plugin configuration from unified YAML
+ */
+export function loadSpecConfig(projectRoot?: string): any | null {
+  const config = loadYamlConfig({ projectRoot });
+  return config?.spec || null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function loadLogConfig(..._args: unknown[]): null {
-  return null;
+/**
+ * Load logging plugin configuration from unified YAML
+ */
+export function loadLogConfig(projectRoot?: string): any | null {
+  const config = loadYamlConfig({ projectRoot });
+  return config?.logs || null;
+}
+
+/**
+ * Load file storage plugin configuration from unified YAML
+ */
+export function loadFileConfig(projectRoot?: string): any | null {
+  const config = loadYamlConfig({ projectRoot });
+  return config?.file || null;
+}
+
+/**
+ * Load documentation plugin configuration from unified YAML
+ */
+export function loadDocsConfig(projectRoot?: string): any | null {
+  const config = loadYamlConfig({ projectRoot });
+  return config?.docs || null;
 }

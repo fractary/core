@@ -1,10 +1,10 @@
 #!/bin/bash
 # Work Common: Configuration Loader
-# Loads and validates work plugin configuration from .fractary/plugins/work/config.json
+# Loads and validates work plugin configuration from .fractary/core/config.yaml
 
 set -euo pipefail
 
-# Find project root by locating .git directory
+# Find project root by locating .git or .fractary directory
 # This ensures we can find config regardless of current working directory
 #
 # CRITICAL FIX: Check for CLAUDE_WORK_CWD environment variable first
@@ -31,46 +31,75 @@ else
     fi
 fi
 
-# Configuration file location (absolute path from project root)
-CONFIG_FILE="$PROJECT_ROOT/.fractary/plugins/work/config.json"
+# Configuration file location (unified YAML config)
+CONFIG_FILE="$PROJECT_ROOT/.fractary/core/config.yaml"
 
 # Check if config file exists
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "Error: Configuration file not found: $CONFIG_FILE" >&2
-    echo "  Create configuration from template:" >&2
-    echo "  cp plugins/work/config/config.example.json $CONFIG_FILE" >&2
+    echo "  Run: fractary-core:init" >&2
     exit 3
 fi
 
-# Validate JSON syntax
-if ! jq empty "$CONFIG_FILE" 2>/dev/null; then
-    echo "Error: Invalid JSON in configuration file: $CONFIG_FILE" >&2
-    exit 3
-fi
+# Extract and validate work configuration using Python
+# This script extracts the 'work' section from the unified YAML config
+# and validates that required fields exist
+python3 <<'PYTHON_SCRIPT'
+import sys
+import yaml
+import json
 
-# Validate required fields exist
-if ! jq -e '.handlers["work-tracker"]' "$CONFIG_FILE" >/dev/null 2>&1; then
-    echo "Error: Missing required field: .handlers[\"work-tracker\"]" >&2
-    exit 3
-fi
+config_file = "$CONFIG_FILE"
 
-if ! jq -e '.handlers["work-tracker"].active' "$CONFIG_FILE" >/dev/null 2>&1; then
-    echo "Error: Missing required field: .handlers[\"work-tracker\"].active" >&2
-    exit 3
-fi
+try:
+    with open(config_file, 'r') as f:
+        config = yaml.safe_load(f)
 
-# Extract active platform
-ACTIVE_PLATFORM=$(jq -r '.handlers["work-tracker"].active' "$CONFIG_FILE" 2>/dev/null)
+    if not isinstance(config, dict):
+        print("Error: Configuration file must contain a YAML mapping", file=sys.stderr)
+        sys.exit(3)
 
-# Validate platform configuration exists
-if ! jq -e ".handlers[\"work-tracker\"].\"$ACTIVE_PLATFORM\"" "$CONFIG_FILE" >/dev/null 2>&1; then
-    echo "Error: Configuration for platform '$ACTIVE_PLATFORM' not found" >&2
-    echo "  Active platform set to: $ACTIVE_PLATFORM" >&2
-    echo "  But .handlers[\"work-tracker\"].$ACTIVE_PLATFORM is missing" >&2
-    exit 3
-fi
+    if 'work' not in config:
+        print("Error: Missing 'work' section in configuration", file=sys.stderr)
+        print(f"  Config file: {config_file}", file=sys.stderr)
+        sys.exit(3)
 
-# Output full configuration JSON to stdout
-cat "$CONFIG_FILE"
+    work_config = config['work']
 
-exit 0
+    if not isinstance(work_config, dict):
+        print("Error: 'work' section must be a mapping", file=sys.stderr)
+        sys.exit(3)
+
+    # Validate required fields
+    if 'active_handler' not in work_config:
+        print("Error: Missing required field: work.active_handler", file=sys.stderr)
+        sys.exit(3)
+
+    if 'handlers' not in work_config:
+        print("Error: Missing required field: work.handlers", file=sys.stderr)
+        sys.exit(3)
+
+    active_handler = work_config['active_handler']
+
+    # Validate that active handler configuration exists
+    if active_handler not in work_config.get('handlers', {}):
+        print(f"Error: Configuration for handler '{active_handler}' not found", file=sys.stderr)
+        print(f"  Active handler set to: {active_handler}", file=sys.stderr)
+        print(f"  But work.handlers.{active_handler} is missing", file=sys.stderr)
+        sys.exit(3)
+
+    # Output work configuration as JSON for shell consumption
+    print(json.dumps(work_config, indent=2))
+
+except FileNotFoundError:
+    print(f"Error: Configuration file not found: {config_file}", file=sys.stderr)
+    sys.exit(3)
+except yaml.YAMLError as e:
+    print(f"Error: Invalid YAML in configuration file: {e}", file=sys.stderr)
+    sys.exit(3)
+except Exception as e:
+    print(f"Error: Failed to load configuration: {e}", file=sys.stderr)
+    sys.exit(3)
+PYTHON_SCRIPT
+
+exit $?
