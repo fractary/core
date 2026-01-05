@@ -112,6 +112,9 @@ def substitute_env_vars(content: str, warn_missing: bool = True) -> str:
     - ${VAR_NAME} - Replace with env var value
     - ${VAR_NAME:-default} - Replace with env var value or default if not set
 
+    Security: Default values are limited to 1000 characters to prevent abuse.
+    Variable names must match pattern: [A-Z_][A-Z0-9_]*
+
     Args:
         content: Content with environment variable placeholders
         warn_missing: Whether to warn about missing environment variables
@@ -119,15 +122,29 @@ def substitute_env_vars(content: str, warn_missing: bool = True) -> str:
     Returns:
         Content with substituted values
 
+    Raises:
+        TypeError: If content is not a string
+
     Example:
         >>> content = 'token: ${GITHUB_TOKEN}'
         >>> result = substitute_env_vars(content)
         # result: 'token: ghp_xxxxx'
     """
+    # Input validation
+    if not isinstance(content, str):
+        raise TypeError('Content must be a string')
+
+    # Maximum length for default values to prevent abuse
+    MAX_DEFAULT_LENGTH = 1000
 
     def replace(match: re.Match) -> str:
         var_name = match.group(1)
         default_value = match.group(3)
+
+        # Validate variable name format
+        if not re.match(r'^[A-Z_][A-Z0-9_]*$', var_name):
+            print(f"Warning: Invalid environment variable name: {var_name}")
+            return match.group(0)
 
         value = os.getenv(var_name)
 
@@ -135,6 +152,14 @@ def substitute_env_vars(content: str, warn_missing: bool = True) -> str:
             return value
 
         if default_value is not None:
+            # Validate default value length
+            if len(default_value) > MAX_DEFAULT_LENGTH:
+                print(
+                    f"Warning: Default value for {var_name} exceeds maximum length "
+                    f"({MAX_DEFAULT_LENGTH} chars). Truncating to prevent abuse."
+                )
+                return default_value[:MAX_DEFAULT_LENGTH]
+
             return default_value
 
         if warn_missing:
@@ -162,28 +187,58 @@ def find_project_root(start_dir: Optional[Path] = None) -> Path:
     - A directory containing `.git/`
     - The filesystem root
 
+    Security: Resolves paths to prevent traversal and limits depth to 100 levels.
+
     Args:
         start_dir: Directory to start searching from (default: current working directory)
 
     Returns:
-        Project root directory
+        Project root directory (resolved absolute path)
+
+    Raises:
+        TypeError: If start_dir is not a Path or None
     """
-    current = start_dir or Path.cwd()
+    # Input validation
+    if start_dir is not None and not isinstance(start_dir, Path):
+        raise TypeError('start_dir must be a Path object or None')
 
-    while current != current.parent:
-        # Check for .fractary directory
-        if (current / ".fractary").exists():
-            return current
+    # Normalize and resolve to absolute path to prevent path traversal
+    current = (start_dir or Path.cwd()).resolve()
 
-        # Check for .git directory
-        if (current / ".git").exists():
-            return current
+    # Safety limit: maximum 100 directory levels to prevent infinite loops
+    MAX_LEVELS = 100
+    levels = 0
 
-        # Move up one directory
-        current = current.parent
+    while current != current.parent and levels < MAX_LEVELS:
+        try:
+            # Check for .fractary directory
+            if (current / ".fractary").exists():
+                return current
 
-    # If no marker found, return the starting directory
-    return start_dir or Path.cwd()
+            # Check for .git directory
+            if (current / ".git").exists():
+                return current
+
+            # Move up one directory
+            parent = current.parent
+
+            # Safety check: ensure we're actually moving up
+            if parent == current:
+                # Reached filesystem root
+                break
+
+            current = parent
+            levels += 1
+        except (PermissionError, OSError) as error:
+            # Handle permission errors or invalid paths gracefully
+            print(f"Warning: Error accessing directory {current}: {error}")
+            break
+
+    if levels >= MAX_LEVELS:
+        print(f"Warning: Exceeded maximum directory depth ({MAX_LEVELS} levels) while searching for project root")
+
+    # If no marker found, return the resolved starting directory
+    return (start_dir or Path.cwd()).resolve()
 
 
 def config_exists(project_root: Optional[Path] = None) -> bool:

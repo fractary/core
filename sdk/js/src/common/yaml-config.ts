@@ -10,16 +10,91 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 
 /**
+ * Work tracking configuration
+ */
+export interface WorkConfig {
+  active_handler: string;
+  handlers: Record<string, any>;
+  defaults?: Record<string, any>;
+  hooks?: Record<string, any>;
+  advanced?: Record<string, any>;
+}
+
+/**
+ * Repository management configuration
+ */
+export interface RepoConfig {
+  active_handler: string;
+  handlers: Record<string, any>;
+  defaults?: Record<string, any>;
+  faber_integration?: Record<string, any>;
+  hooks?: Record<string, any>;
+  platform_specific?: Record<string, any>;
+}
+
+/**
+ * Logs management configuration
+ */
+export interface LogsConfig {
+  schema_version: string;
+  storage?: Record<string, any>;
+  retention?: Record<string, any>;
+  session_logging?: Record<string, any>;
+  auto_backup?: Record<string, any>;
+  summarization?: Record<string, any>;
+  archive?: Record<string, any>;
+  search?: Record<string, any>;
+  integration?: Record<string, any>;
+  docs_integration?: Record<string, any>;
+}
+
+/**
+ * File storage configuration
+ */
+export interface FileConfig {
+  schema_version: string;
+  active_handler: string;
+  handlers: Record<string, any>;
+  global_settings?: Record<string, any>;
+}
+
+/**
+ * Specification management configuration
+ */
+export interface SpecConfig {
+  schema_version: string;
+  storage?: Record<string, any>;
+  naming?: Record<string, any>;
+  archive?: Record<string, any>;
+  integration?: Record<string, any>;
+  templates?: Record<string, any>;
+}
+
+/**
+ * Documentation management configuration
+ */
+export interface DocsConfig {
+  schema_version: string;
+  hooks?: Record<string, any>;
+  doc_types?: Record<string, any>;
+  output_paths?: Record<string, any>;
+  templates?: Record<string, any>;
+  frontmatter?: Record<string, any>;
+  validation?: Record<string, any>;
+  linking?: Record<string, any>;
+}
+
+/**
  * Unified configuration structure for all Fractary Core plugins
  */
 export interface CoreYamlConfig {
   version: string;
-  work?: any;
-  repo?: any;
-  logs?: any;
-  file?: any;
-  spec?: any;
-  docs?: any;
+  work?: WorkConfig;
+  repo?: RepoConfig;
+  logs?: LogsConfig;
+  file?: FileConfig;
+  spec?: SpecConfig;
+  docs?: DocsConfig;
 }
 
 /**
@@ -72,7 +147,7 @@ export function loadYamlConfig(options: ConfigLoadOptions = {}): CoreYamlConfig 
   try {
     const content = fs.readFileSync(configPath, 'utf-8');
     const substituted = substituteEnvVars(content, warnMissingEnvVars);
-    const parsed = yaml.load(substituted) as CoreYamlConfig;
+    const parsed = yaml.safeLoad(substituted) as CoreYamlConfig;
 
     // Validate basic structure
     if (!parsed || typeof parsed !== 'object') {
@@ -140,6 +215,9 @@ export function writeYamlConfig(
  * - ${VAR_NAME} - Replace with env var value
  * - ${VAR_NAME:-default} - Replace with env var value or default if not set
  *
+ * Security: Default values are limited to 1000 characters to prevent abuse.
+ * Variable names must match pattern: [A-Z_][A-Z0-9_]*
+ *
  * @param content Content with environment variable placeholders
  * @param warnMissing Whether to warn about missing environment variables
  * @returns Content with substituted values
@@ -152,9 +230,23 @@ export function writeYamlConfig(
  * ```
  */
 export function substituteEnvVars(content: string, warnMissing = true): string {
+  // Input validation
+  if (typeof content !== 'string') {
+    throw new TypeError('Content must be a string');
+  }
+
+  // Maximum length for default values to prevent abuse
+  const MAX_DEFAULT_LENGTH = 1000;
+
   return content.replace(
     /\$\{([A-Z_][A-Z0-9_]*)(:-([^}]+))?\}/g,
     (match, varName, _, defaultValue) => {
+      // Validate variable name format
+      if (!/^[A-Z_][A-Z0-9_]*$/.test(varName)) {
+        console.warn(`Warning: Invalid environment variable name: ${varName}`);
+        return match;
+      }
+
       const value = process.env[varName];
 
       if (value !== undefined) {
@@ -162,6 +254,15 @@ export function substituteEnvVars(content: string, warnMissing = true): string {
       }
 
       if (defaultValue !== undefined) {
+        // Validate default value length
+        if (defaultValue.length > MAX_DEFAULT_LENGTH) {
+          console.warn(
+            `Warning: Default value for ${varName} exceeds maximum length (${MAX_DEFAULT_LENGTH} chars). ` +
+            `Truncating to prevent abuse.`
+          );
+          return defaultValue.substring(0, MAX_DEFAULT_LENGTH);
+        }
+
         return defaultValue;
       }
 
@@ -186,29 +287,64 @@ export function substituteEnvVars(content: string, warnMissing = true): string {
  * - A directory containing `.git/`
  * - The filesystem root
  *
+ * Security: Normalizes paths and prevents traversal outside filesystem boundaries.
+ * Maximum of 100 directory levels to prevent infinite loops.
+ *
  * @param startDir Directory to start searching from (default: current working directory)
- * @returns Project root directory
+ * @returns Project root directory (normalized absolute path)
  */
 export function findProjectRoot(startDir: string = process.cwd()): string {
-  let currentDir = startDir;
-
-  while (currentDir !== path.parse(currentDir).root) {
-    // Check for .fractary directory
-    if (fs.existsSync(path.join(currentDir, '.fractary'))) {
-      return currentDir;
-    }
-
-    // Check for .git directory
-    if (fs.existsSync(path.join(currentDir, '.git'))) {
-      return currentDir;
-    }
-
-    // Move up one directory
-    currentDir = path.dirname(currentDir);
+  // Input validation and normalization
+  if (typeof startDir !== 'string') {
+    throw new TypeError('startDir must be a string');
   }
 
-  // If no marker found, return the starting directory
-  return startDir;
+  // Normalize and resolve to absolute path to prevent path traversal
+  let currentDir = path.resolve(path.normalize(startDir));
+
+  // Get filesystem root for comparison
+  const fsRoot = path.parse(currentDir).root;
+
+  // Safety limit: maximum 100 directory levels to prevent infinite loops
+  const MAX_LEVELS = 100;
+  let levels = 0;
+
+  while (currentDir !== fsRoot && levels < MAX_LEVELS) {
+    try {
+      // Check for .fractary directory
+      if (fs.existsSync(path.join(currentDir, '.fractary'))) {
+        return currentDir;
+      }
+
+      // Check for .git directory
+      if (fs.existsSync(path.join(currentDir, '.git'))) {
+        return currentDir;
+      }
+
+      // Move up one directory
+      const parentDir = path.dirname(currentDir);
+
+      // Safety check: ensure we're actually moving up
+      if (parentDir === currentDir) {
+        // Reached filesystem root
+        break;
+      }
+
+      currentDir = parentDir;
+      levels++;
+    } catch (error) {
+      // Handle permission errors or invalid paths gracefully
+      console.warn(`Warning: Error accessing directory ${currentDir}: ${error}`);
+      break;
+    }
+  }
+
+  if (levels >= MAX_LEVELS) {
+    console.warn(`Warning: Exceeded maximum directory depth (${MAX_LEVELS} levels) while searching for project root`);
+  }
+
+  // If no marker found, return the normalized starting directory
+  return path.resolve(path.normalize(startDir));
 }
 
 /**
