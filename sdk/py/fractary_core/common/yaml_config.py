@@ -30,7 +30,9 @@ def load_yaml_config(
         Parsed configuration dict or None if not found
 
     Raises:
-        RuntimeError: If config is invalid or throw_if_missing is True and file doesn't exist
+        FileNotFoundError: If throw_if_missing is True and file doesn't exist
+        ValueError: If config structure is invalid
+        RuntimeError: If config loading fails for other reasons
 
     Example:
         >>> config = load_yaml_config()
@@ -42,7 +44,7 @@ def load_yaml_config(
 
     if not config_path.exists():
         if throw_if_missing:
-            raise RuntimeError(
+            raise FileNotFoundError(
                 f"Configuration file not found: {config_path}\n"
                 f"Run 'fractary-core:init' to create it."
             )
@@ -55,12 +57,15 @@ def load_yaml_config(
 
         # Validate basic structure
         if not isinstance(parsed, dict):
-            raise RuntimeError("Invalid configuration: must be a YAML mapping")
+            raise ValueError("Invalid configuration: must be a YAML object")
 
         if "version" not in parsed:
             print(f"Warning: Configuration missing version field in {config_path}")
 
         return parsed
+    except (FileNotFoundError, ValueError, TypeError):
+        # Re-raise these exceptions as-is
+        raise
     except Exception as e:
         raise RuntimeError(f"Failed to load config from {config_path}: {e}")
 
