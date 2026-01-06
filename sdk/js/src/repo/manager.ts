@@ -62,10 +62,12 @@ export class RepoManager {
   private git: Git;
   private provider: RepoProvider;
   private config: RepoConfig;
+  private cwd: string;
 
-  constructor(config?: RepoConfig) {
+  constructor(config?: RepoConfig, cwd?: string) {
+    this.cwd = cwd || process.cwd();
     this.config = config || loadRepoConfig() || { platform: 'github' };
-    this.git = new Git();
+    this.git = new Git(this.cwd);
     this.provider = createProvider(this.config);
   }
 
