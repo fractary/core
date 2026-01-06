@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "2.1.8",
+      "version": "2.1.9",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -15,7 +15,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "2.4.1",
+        "version": "2.4.2",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -43,7 +43,11 @@
           "./commands/pr-create.md",
           "./commands/pr-merge.md",
           "./commands/pr-review.md",
-          "./commands/pull.md"
+          "./commands/pull.md",
+          "./commands/worktree-create.md",
+          "./commands/worktree-list.md",
+          "./commands/worktree-remove.md",
+          "./commands/worktree-prune.md"
         ],
         "agents":  [
           "./agents/init.md",
