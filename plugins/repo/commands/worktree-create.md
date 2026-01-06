@@ -1,9 +1,9 @@
 ---
 name: fractary-repo:worktree-create
-allowed-tools: Bash(git worktree:*), Bash(git rev-parse:*), Bash(git ls-remote:*), Bash(git symbolic-ref:*), Bash(git show-ref:*), Bash(git branch:*), Bash(cd:*), Bash(realpath:*), Bash(basename:*)
+allowed-tools: Bash(git worktree:*), Bash(git rev-parse:*), Bash(git ls-remote:*), Bash(git symbolic-ref:*), Bash(git show-ref:*), Bash(git branch:*), Bash(git remote:*), Bash(cd:*), Bash(realpath:*), Bash(basename:*), Bash(dirname:*), Bash(mkdir:*)
 description: Create a new git worktree for workflow execution
 model: claude-haiku-4-5
-argument-hint: '--work-id <id> --branch <name> [--path <path>] [--base <branch>] [--no-checkout]'
+argument-hint: '--work-id <id> --branch <name> [--path <path>] [--base <branch>] [--no-checkout] [--format json]'
 ---
 
 ## Context
@@ -24,6 +24,7 @@ Parse these arguments from the command line:
 - `--path <path>` (OPTIONAL): Custom worktree path
 - `--base <branch>` (OPTIONAL): Base branch to create from
 - `--no-checkout` (OPTIONAL): Skip checking out files
+- `--format <text|json>` (OPTIONAL): Output format (default: text)
 
 Extract the arguments by parsing the input string. Look for patterns like `--work-id 123` and `--branch feature/name`.
 
@@ -47,16 +48,41 @@ if ! echo "$WORK_ID" | grep -qE '^[a-zA-Z0-9_-]+$'; then
 fi
 ```
 
-3. **Generate worktree path** (if not provided):
+3. **Extract organization from git remote**:
 ```bash
-# Get project name from git root
-PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
+# Get remote URL
+REMOTE_URL=$(git remote get-url origin 2>/dev/null || echo "")
 
-# Generate path: ../{project-name}-{work-id}
-WORKTREE_PATH="../${PROJECT_NAME}-${WORK_ID}"
+# Extract organization from URL
+if echo "$REMOTE_URL" | grep -qE '^git@'; then
+  # SSH format: git@github.com:org/project.git
+  ORGANIZATION=$(echo "$REMOTE_URL" | sed -E 's/^git@[^:]+:([^/]+)\/.*/\1/')
+elif echo "$REMOTE_URL" | grep -qE '^https?://'; then
+  # HTTPS format: https://github.com/org/project.git
+  ORGANIZATION=$(echo "$REMOTE_URL" | sed -E 's|^https?://[^/]+/([^/]+)/.*|\1|')
+else
+  ORGANIZATION="local"
+fi
+
+# Get project name
+PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
 ```
 
-4. **Validate path doesn't exist**:
+4. **Generate worktree path** (if not provided):
+```bash
+if [ -z "$WORKTREE_PATH" ]; then
+  # Use SPEC-00030 pattern: ~/.claude-worktrees/{org}-{project}-{id}
+  BASE_DIR="${HOME}/.claude-worktrees"
+  mkdir -p "$BASE_DIR" 2>/dev/null || {
+    echo "Error: Cannot create worktrees directory: $BASE_DIR" >&2
+    exit 7
+  }
+
+  WORKTREE_PATH="${BASE_DIR}/${ORGANIZATION}-${PROJECT_NAME}-${WORK_ID}"
+fi
+```
+
+5. **Validate path doesn't exist**:
 ```bash
 if [ -e "$WORKTREE_PATH" ]; then
   echo "Error: Path already exists: $WORKTREE_PATH" >&2
@@ -67,7 +93,7 @@ if [ -e "$WORKTREE_PATH" ]; then
 fi
 ```
 
-5. **Validate branch name**:
+6. **Validate branch name**:
 ```bash
 # Check for invalid characters (spaces, special git characters)
 if echo "$BRANCH" | grep -qE '[[:space:]~^:?*\[]'; then
@@ -77,7 +103,7 @@ if echo "$BRANCH" | grep -qE '[[:space:]~^:?*\[]'; then
 fi
 ```
 
-6. **Detect base branch** (if not specified):
+7. **Detect base branch** (if not specified):
 ```bash
 if [ -z "$BASE_BRANCH" ]; then
   # Try to detect main/master from remote HEAD
@@ -90,7 +116,7 @@ if [ -z "$BASE_BRANCH" ]; then
 fi
 ```
 
-7. **Verify base branch exists** (if specified by user):
+8. **Verify base branch exists** (if specified by user):
 ```bash
 if [ -n "$BASE_BRANCH" ]; then
   if ! git rev-parse --verify "$BASE_BRANCH" >/dev/null 2>&1; then
@@ -100,7 +126,7 @@ if [ -n "$BASE_BRANCH" ]; then
 fi
 ```
 
-8. **Create worktree with branch logic**:
+9. **Create worktree with branch logic**:
 ```bash
 # Check if branch exists remotely
 if git ls-remote --heads origin "$BRANCH" 2>/dev/null | grep -qF "refs/heads/$BRANCH"; then
@@ -131,7 +157,7 @@ else
 fi
 ```
 
-9. **Change to worktree directory**:
+10. **Change to worktree directory**:
 ```bash
 cd "$WORKTREE_PATH" || {
   echo "Error: Failed to change directory to worktree" >&2
@@ -139,14 +165,29 @@ cd "$WORKTREE_PATH" || {
 }
 ```
 
-10. **Output success message**:
+11. **Output based on format**:
 ```bash
 ABSOLUTE_PATH=$(realpath "$WORKTREE_PATH")
 
-echo "✓ Worktree created: $WORKTREE_PATH"
-echo "✓ Branch: $BRANCH"
-echo "✓ Based on: $BASE_BRANCH"
-echo "✓ Current directory: $ABSOLUTE_PATH"
+if [ "$FORMAT" = "json" ]; then
+  cat <<EOF
+{
+  "success": true,
+  "path": "$WORKTREE_PATH",
+  "absolute_path": "$ABSOLUTE_PATH",
+  "branch": "$BRANCH",
+  "base_branch": "$BASE_BRANCH",
+  "organization": "$ORGANIZATION",
+  "project": "$PROJECT_NAME",
+  "work_id": "$WORK_ID"
+}
+EOF
+else
+  echo "✓ Worktree created: $WORKTREE_PATH"
+  echo "✓ Branch: $BRANCH"
+  echo "✓ Based on: $BASE_BRANCH"
+  echo "✓ Current directory: $ABSOLUTE_PATH"
+fi
 ```
 
 ### Error Handling
