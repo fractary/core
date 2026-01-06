@@ -50,13 +50,15 @@ For each non-main worktree, check these conditions:
 **Condition 1: Branch deleted on remote AND no uncommitted changes**:
 ```bash
 # Get branch name for worktree
-BRANCH=$(git worktree list --porcelain | awk -v path="$WORKTREE_PATH" '
-  $0 ~ "^worktree " path "$" {found=1}
+BRANCH=$(git worktree list --porcelain | awk -v target="$WORKTREE_PATH" '
+  /^worktree / {
+    if ($2 == target) found=1
+  }
   found && /^branch/ {print $2; exit}
 ' | sed 's@^refs/heads/@@')
 
 # Check if branch exists on remote
-if ! git ls-remote --heads origin "$BRANCH" 2>/dev/null | grep -q "refs/heads/$BRANCH"; then
+if ! git ls-remote --heads origin "$BRANCH" 2>/dev/null | grep -qF "refs/heads/$BRANCH"; then
   # Branch deleted on remote - check for uncommitted changes
   if [ -d "$WORKTREE_PATH" ]; then
     cd "$WORKTREE_PATH" 2>/dev/null || continue

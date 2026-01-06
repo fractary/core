@@ -41,9 +41,9 @@ WORKTREE_PATH=$(realpath "$INPUT_PATH" 2>/dev/null || echo "$INPUT_PATH")
 
 3. **Validate worktree exists**:
 ```bash
-if ! git worktree list | grep -q "$WORKTREE_PATH"; then
+if ! git worktree list | grep -qF "$WORKTREE_PATH"; then
   # Try the original input path too
-  if ! git worktree list | grep -q "$INPUT_PATH"; then
+  if ! git worktree list | grep -qF "$INPUT_PATH"; then
     echo "Error: Not a git worktree: $INPUT_PATH" >&2
     echo "" >&2
     echo "To list all worktrees:" >&2
@@ -101,7 +101,7 @@ if [ "$FORCE" != "true" ]; then
     fi
 
     # Return to original directory
-    cd - > /dev/null
+    cd - > /dev/null 2>&1 || true
   fi
 fi
 ```

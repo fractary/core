@@ -37,7 +37,17 @@ if ! git rev-parse --git-dir >/dev/null 2>&1; then
 fi
 ```
 
-2. **Generate worktree path** (if not provided):
+2. **Validate work-id parameter**:
+```bash
+# Ensure work-id contains only safe characters (alphanumeric, hyphen, underscore)
+if ! echo "$WORK_ID" | grep -qE '^[a-zA-Z0-9_-]+$'; then
+  echo "Error: Invalid work-id '$WORK_ID'" >&2
+  echo "Work-id must contain only letters, numbers, hyphens, and underscores" >&2
+  exit 4
+fi
+```
+
+3. **Generate worktree path** (if not provided):
 ```bash
 # Get project name from git root
 PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
@@ -46,7 +56,7 @@ PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
 WORKTREE_PATH="../${PROJECT_NAME}-${WORK_ID}"
 ```
 
-3. **Validate path doesn't exist**:
+4. **Validate path doesn't exist**:
 ```bash
 if [ -e "$WORKTREE_PATH" ]; then
   echo "Error: Path already exists: $WORKTREE_PATH" >&2
@@ -57,7 +67,7 @@ if [ -e "$WORKTREE_PATH" ]; then
 fi
 ```
 
-4. **Validate branch name**:
+5. **Validate branch name**:
 ```bash
 # Check for invalid characters (spaces, special git characters)
 if echo "$BRANCH" | grep -qE '[[:space:]~^:?*\[]'; then
@@ -67,7 +77,7 @@ if echo "$BRANCH" | grep -qE '[[:space:]~^:?*\[]'; then
 fi
 ```
 
-5. **Detect base branch** (if not specified):
+6. **Detect base branch** (if not specified):
 ```bash
 if [ -z "$BASE_BRANCH" ]; then
   # Try to detect main/master from remote HEAD
@@ -80,7 +90,7 @@ if [ -z "$BASE_BRANCH" ]; then
 fi
 ```
 
-6. **Verify base branch exists** (if specified by user):
+7. **Verify base branch exists** (if specified by user):
 ```bash
 if [ -n "$BASE_BRANCH" ]; then
   if ! git rev-parse --verify "$BASE_BRANCH" >/dev/null 2>&1; then
@@ -90,10 +100,10 @@ if [ -n "$BASE_BRANCH" ]; then
 fi
 ```
 
-7. **Create worktree with branch logic**:
+8. **Create worktree with branch logic**:
 ```bash
 # Check if branch exists remotely
-if git ls-remote --heads origin "$BRANCH" 2>/dev/null | grep -q "refs/heads/$BRANCH"; then
+if git ls-remote --heads origin "$BRANCH" 2>/dev/null | grep -qF "refs/heads/$BRANCH"; then
   # Branch exists remotely - check it out
   echo "Branch '$BRANCH' exists on remote, checking it out..."
 
@@ -121,7 +131,7 @@ else
 fi
 ```
 
-8. **Change to worktree directory**:
+9. **Change to worktree directory**:
 ```bash
 cd "$WORKTREE_PATH" || {
   echo "Error: Failed to change directory to worktree" >&2
@@ -129,7 +139,7 @@ cd "$WORKTREE_PATH" || {
 }
 ```
 
-9. **Output success message**:
+10. **Output success message**:
 ```bash
 ABSOLUTE_PATH=$(realpath "$WORKTREE_PATH")
 
