@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:worktree-list
-allowed-tools: Bash(git worktree:*), Bash(git log:*), Bash(git status:*), Bash(git rev-parse:*), Bash(du:*), Bash(date:*), Bash(cd:*), Bash(wc:*)
+allowed-tools: Bash(git worktree:*), Bash(git log:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git remote:*), Bash(du:*), Bash(date:*), Bash(cd:*), Bash(wc:*), Bash(basename:*)
 description: List all git worktrees with metadata
 model: claude-haiku-4-5
 argument-hint: '[--format table|json|simple]'
@@ -77,6 +77,32 @@ IS_MAIN=true  # for first worktree
 IS_MAIN=false # for others
 ```
 
+**Organization and project** (extract from git remote):
+```bash
+cd "$WORKTREE_PATH"
+REMOTE_URL=$(git remote get-url origin 2>/dev/null || echo "")
+
+if echo "$REMOTE_URL" | grep -qE '^git@'; then
+  # SSH format: git@github.com:org/project.git
+  ORG=$(echo "$REMOTE_URL" | sed -E 's/^git@[^:]+:([^/]+)\/.*/\1/')
+elif echo "$REMOTE_URL" | grep -qE '^https?://'; then
+  # HTTPS format: https://github.com/org/project.git
+  ORG=$(echo "$REMOTE_URL" | sed -E 's|^https?://[^/]+/([^/]+)/.*|\1|')
+else
+  ORG="local"
+fi
+
+PROJECT=$(basename "$WORKTREE_PATH" | sed -E 's/-[0-9]+$//' || basename "$WORKTREE_PATH")
+cd - > /dev/null
+```
+
+**Work ID** (extract from path):
+```bash
+# Extract work ID from path if it matches pattern: {org}-{project}-{id} or {project}-{id}
+BASENAME=$(basename "$WORKTREE_PATH")
+WORK_ID=$(echo "$BASENAME" | grep -oE '[0-9]+$' || echo "")
+```
+
 4. **Format output based on --format flag**:
 
 ### Output Format: Simple
@@ -99,15 +125,21 @@ Build a JSON structure:
       "branch": "main",
       "head_commit": "abc123d",
       "uncommitted_changes": 0,
-      "last_activity": "2026-01-06T10:00:00Z"
+      "last_activity": "2026-01-06T10:00:00Z",
+      "organization": "fractary",
+      "project": "core",
+      "work_id": ""
     },
     {
-      "path": "/path/to/feature-258",
+      "path": "/home/user/.claude-worktrees/fractary-core-258",
       "is_main": false,
       "branch": "feature/258",
       "head_commit": "def456a",
       "uncommitted_changes": 3,
-      "last_activity": "2026-01-06T12:30:00Z"
+      "last_activity": "2026-01-06T12:30:00Z",
+      "organization": "fractary",
+      "project": "core",
+      "work_id": "258"
     }
   ],
   "summary": {

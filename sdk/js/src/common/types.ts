@@ -318,6 +318,10 @@ export interface Worktree {
   sha?: string;
   isMain?: boolean;
   workId?: string;
+  organization?: string;
+  project?: string;
+  uncommittedChanges?: number;
+  lastActivity?: Date;
 }
 
 export interface WorktreeCreateOptions {
@@ -325,6 +329,19 @@ export interface WorktreeCreateOptions {
   branch: string;
   baseBranch?: string;
   workId?: string;
+}
+
+export interface BranchCreateOptions {
+  branch: string;
+  baseBranch?: string;
+}
+
+export interface BranchCreateResult {
+  success: boolean;
+  branch: string;
+  baseBranch: string;
+  commit: string;
+  shortCommit: string;
 }
 
 export interface WorktreeCleanupOptions {

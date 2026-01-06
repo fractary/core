@@ -526,4 +526,39 @@ export class RepoManager {
 
     return `${prefix}/${slug}`;
   }
+
+  /**
+   * Get organization name from git remote
+   *
+   * Extracts the organization name from the git remote URL.
+   * Falls back to 'local' if no remote or extraction fails.
+   *
+   * @returns Organization name or 'local'
+   */
+  async getOrganization(): Promise<string> {
+    const { getRemoteInfo } = await import('./organization.js');
+    const remoteInfo = await getRemoteInfo(this.cwd);
+    return remoteInfo?.organization || 'local';
+  }
+
+  /**
+   * Get project name from git remote or directory
+   *
+   * Extracts the project name from the git remote URL.
+   * Falls back to directory basename if no remote.
+   *
+   * @returns Project name
+   */
+  async getProjectName(): Promise<string> {
+    const { getRemoteInfo } = await import('./organization.js');
+    const path = await import('path');
+    const remoteInfo = await getRemoteInfo(this.cwd);
+
+    if (remoteInfo?.project) {
+      return remoteInfo.project;
+    }
+
+    // Fallback to directory name
+    return path.basename(this.cwd);
+  }
 }
