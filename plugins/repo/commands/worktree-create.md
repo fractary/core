@@ -66,6 +66,17 @@ fi
 
 # Get project name
 PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
+
+# Validate organization and project names don't contain shell metacharacters
+if echo "$ORGANIZATION" | grep -qE '[`$();&|<>]'; then
+  echo "Error: Invalid organization name contains shell metacharacters" >&2
+  exit 8
+fi
+
+if echo "$PROJECT_NAME" | grep -qE '[`$();&|<>]'; then
+  echo "Error: Invalid project name contains shell metacharacters" >&2
+  exit 8
+fi
 ```
 
 4. **Generate worktree path** (if not provided):
@@ -73,6 +84,14 @@ PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
 if [ -z "$WORKTREE_PATH" ]; then
   # Use SPEC-00030 pattern: ~/.claude-worktrees/{org}-{project}-{id}
   BASE_DIR="${HOME}/.claude-worktrees"
+
+  # Validate BASE_DIR doesn't traverse outside HOME
+  RESOLVED_BASE=$(cd "$(dirname "$BASE_DIR")" 2>/dev/null && pwd -P)/$(basename "$BASE_DIR") || RESOLVED_BASE=""
+  if [ -z "$RESOLVED_BASE" ] || ! echo "$RESOLVED_BASE" | grep -q "^${HOME}"; then
+    # If resolution fails or path is outside HOME, use a safe default
+    BASE_DIR="${HOME}/.claude-worktrees"
+  fi
+
   mkdir -p "$BASE_DIR" 2>/dev/null || {
     echo "Error: Cannot create worktrees directory: $BASE_DIR" >&2
     exit 7

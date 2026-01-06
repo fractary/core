@@ -4,7 +4,7 @@
  * Tests for repo configuration management.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { expandTilde, applyPathPattern, getDefaultWorktreeConfig } from './config.js';
 
 describe('expandTilde', () => {

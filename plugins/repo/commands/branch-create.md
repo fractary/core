@@ -69,6 +69,12 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+# Validate format parameter
+if [ "$FORMAT" != "text" ] && [ "$FORMAT" != "json" ]; then
+  echo "Error: Invalid format '$FORMAT'. Must be 'text' or 'json'" >&2
+  exit 6
+fi
+
 # Validate branch name provided
 if [ -z "$BRANCH_NAME" ]; then
   echo "Error: Branch name is required" >&2
