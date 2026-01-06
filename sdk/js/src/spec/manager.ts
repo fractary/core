@@ -156,7 +156,7 @@ export class SpecManager {
 
   constructor(config?: Partial<SpecConfig>) {
     // Try to load config, but allow missing - use defaults if not found
-    const loadedConfig = config ? null : loadSpecConfig(undefined, { allowMissing: true });
+    const loadedConfig = config ? null : loadSpecConfig(undefined);
 
     // Merge provided config, loaded config, or use defaults
     this.config = this.mergeWithDefaults(config, loadedConfig);

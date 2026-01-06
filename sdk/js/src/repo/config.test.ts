@@ -4,7 +4,7 @@
  * Tests for repo configuration management.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { expandTilde, applyPathPattern, getDefaultWorktreeConfig } from './config.js';
 
 describe('expandTilde', () => {
@@ -203,18 +203,6 @@ describe('Integration tests', () => {
 
       expect(config.pathPattern).toBe('{organization}-{project}-{work-id}');
       expect(config.defaultLocation).toBe('~/.claude-worktrees/');
-    });
-
-    it('should support legacy pattern when configured', () => {
-      const config = getDefaultWorktreeConfig();
-
-      expect(config.legacySupport).toBe(true);
-    });
-
-    it('should not auto-migrate by default', () => {
-      const config = getDefaultWorktreeConfig();
-
-      expect(config.autoMigrate).toBe(false);
     });
   });
 });

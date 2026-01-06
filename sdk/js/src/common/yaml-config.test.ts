@@ -675,7 +675,7 @@ test: \${MALICIOUS_VAR}
       const config = loadYamlConfig({ projectRoot: tempDir });
 
       // Value should be literal string, not executed
-      expect(config?.test).toBe('$(echo "malicious command")');
+      expect((config as any)?.test).toBe('$(echo "malicious command")');
     });
 
     it('should handle special characters in default values', () => {

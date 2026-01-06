@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { join } from 'path';
-import { generateWorktreePath, findLegacyWorktree, findAllLegacyWorktrees } from './path-generator.js';
+import { generateWorktreePath } from './path-generator.js';
 import * as organization from './organization.js';
 import * as config from './config.js';
 
@@ -288,38 +288,5 @@ describe('generateWorktreePath', () => {
 
       expect(path).toBe(join(HOME, '.worktrees', 'issue-258-branch'));
     });
-  });
-});
-
-describe('findLegacyWorktree', () => {
-  const CWD = '/home/testuser/projects/repo';
-
-  it('should find legacy worktree at ../{project}-{id}', async () => {
-    // This test would need filesystem mocking or actual test files
-    // Skipping for now as it requires fs module mocking
-  });
-
-  it('should return null if legacy worktree does not exist', async () => {
-    // This test would need filesystem mocking
-    // Skipping for now
-  });
-});
-
-describe('findAllLegacyWorktrees', () => {
-  const CWD = '/home/testuser/projects/repo';
-
-  it('should find all legacy worktrees matching pattern', async () => {
-    // This test would need filesystem mocking and git command mocking
-    // Skipping for now
-  });
-
-  it('should return empty array if no legacy worktrees exist', async () => {
-    // This test would need filesystem mocking
-    // Skipping for now
-  });
-
-  it('should extract work IDs from legacy paths', async () => {
-    // This test would need filesystem mocking
-    // Skipping for now
   });
 });

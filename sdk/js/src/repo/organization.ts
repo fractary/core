@@ -31,7 +31,6 @@ export function parseGitRemote(remoteUrl: string): GitRemote | null {
   // SSH format: git@github.com:org/project.git or git@github.com:org/subgroup/project.git
   const sshMatch = trimmedUrl.match(/^git@([^:]+):(.+?)(?:\.git)?$/);
   if (sshMatch) {
-    const host = sshMatch[1];
     const pathParts = sshMatch[2].split('/');
 
     // For GitLab-style subgroups, join org and subgroups with hyphen
@@ -60,7 +59,6 @@ export function parseGitRemote(remoteUrl: string): GitRemote | null {
   // HTTPS format: https://github.com/org/project.git or https://github.com/org/subgroup/project.git
   const httpsMatch = trimmedUrl.match(/^https?:\/\/([^/]+)\/(.+?)(?:\.git)?$/);
   if (httpsMatch) {
-    const host = httpsMatch[1];
     const pathParts = httpsMatch[2].split('/');
 
     // For GitLab-style subgroups, join org and subgroups with hyphen

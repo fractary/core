@@ -147,7 +147,7 @@ export function loadYamlConfig(options: ConfigLoadOptions = {}): CoreYamlConfig 
   try {
     const content = fs.readFileSync(configPath, 'utf-8');
     const substituted = substituteEnvVars(content, warnMissingEnvVars);
-    const parsed = yaml.safeLoad(substituted) as CoreYamlConfig;
+    const parsed = yaml.load(substituted) as CoreYamlConfig;
 
     // Validate basic structure
     if (!parsed || typeof parsed !== 'object') {
