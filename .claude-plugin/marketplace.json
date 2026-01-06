@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "2.1.7",
+      "version": "2.1.8",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -15,7 +15,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "2.4.0",
+        "version": "2.4.1",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -54,7 +54,7 @@
         "name": "fractary-work",
         "source": "./plugins/work",
         "description": "GitHub Issues management with streamlined commands for creating, listing, searching, and updating issues",
-        "version": "2.2.6",
+        "version": "2.2.7",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -93,7 +93,7 @@
         "name": "fractary-file",
         "source": "./plugins/file",
         "description": "Universal file storage operations across R2, S3, and local filesystem with modular handler architecture",
-        "version": "1.2.1",
+        "version": "1.2.2",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -121,7 +121,7 @@
         "name": "fractary-logs",
         "source": "./plugins/logs",
         "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
-        "version": "2.1.1",
+        "version": "2.1.2",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -160,7 +160,7 @@
         "name": "fractary-status",
         "source": "./plugins/status",
         "description": "Custom Claude Code status line showing git status, issue numbers, PR numbers, and last prompt",
-        "version": "1.1.1",
+        "version": "1.1.2",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -187,7 +187,7 @@
         "name": "fractary-spec",
         "source": "./plugins/spec",
         "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
-        "version": "1.1.4",
+        "version": "1.1.5",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -225,7 +225,7 @@
         "name": "fractary-docs",
         "source": "./plugins/docs",
         "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-        "version": "2.1.1",
+        "version": "2.1.2",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
