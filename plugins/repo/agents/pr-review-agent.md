@@ -110,17 +110,32 @@ Apply decision tree in order - **first match wins**:
 #### P1: Analyze Comments for Blocking Keywords
 
 - **Fields**: `comments` array, `reviews[].body`
-- **Process**:
-  1. Collect all comments from both sources
+- **Process** (Dual-Track Analysis):
+
+  **Track 1 - CI Bot Comments**:
+  1. Collect all comments from `comments` array and `reviews[].body`
+  2. Filter to identify CI bot comments using CI BOT IDENTIFICATION patterns
+  3. Sort CI bot comments by `createdAt` timestamp (newest first)
+  4. Take ONLY the most recent CI bot comment
+  5. Search that comment for BLOCKING KEYWORDS
+  6. Extract structured issues if found
+
+  **Track 2 - Human Comments**:
+  1. Filter to identify non-CI-bot comments (all others)
   2. Sort by timestamp (most recent first)
-  3. Find most recent substantial comment (>50 chars, not bot, not trivial like "LGTM")
-  4. Search content for BLOCKING KEYWORDS (case-insensitive)
+  3. Find most recent substantial comment (>50 chars, not trivial like "LGTM")
+  4. Search content for BLOCKING KEYWORDS
   5. Apply CONTEXT CLUES to determine if truly blocking
   6. Extract structured issues from numbered/bullet lists
-- **Condition**: Blocking keywords found in recent substantial comment
+
+  **Merged Result**:
+  - Blocking keywords found in EITHER track triggers P1
+  - Report CI issues and human issues separately
+
+- **Condition**: Blocking keywords found in latest CI comment OR recent substantial human comment
 - **Result**: DO NOT APPROVE - ADDRESS CRITICAL ISSUES FIRST
-- **Reason**: Code review identified critical issues that must be addressed
-- **Action**: List detected keywords, extract outstanding issues, show comment preview
+- **Reason**: CI review or human review identified critical issues that must be addressed
+- **Action**: List detected keywords per track, extract outstanding issues, show comment previews
 
 **BLOCKING KEYWORDS** (case-insensitive):
 
@@ -154,6 +169,21 @@ Code Issues:
 - If comment contains "nice to have" or "optional" or "future improvement" → Issues are NOT blocking
 - If comment is from PR author → Usually addressing feedback, not raising new issues (NOT blocking)
 - If comment is a reply in resolved thread → Likely NOT blocking
+
+**CI BOT IDENTIFICATION**:
+
+Identify CI bot comments by author username pattern (case-insensitive):
+- `github-actions` - GitHub Actions workflows
+- Names ending in `-bot` - Various CI/automation bots
+- Names ending in `[bot]` - GitHub Apps
+- `dependabot`, `renovate` - Dependency update bots
+- `codecov`, `sonarcloud` - Code quality/coverage bots
+
+**When processing CI bot comments**:
+1. Identify ALL CI bot comments using patterns above
+2. Sort by `createdAt` timestamp (newest first)
+3. Use ONLY the most recent CI comment for blocking keyword analysis
+4. IGNORE all older CI comments - they represent superseded state
 
 #### P2: Check Review Requirements
 
@@ -245,23 +275,47 @@ COMMENT ANALYSIS
 --------------------------------------------------------------------------------
 Total comments: {comments.length}
 
-{If substantial comment found:}
-Most Recent Substantial Comment:
-  From: {author.login}
-  Date: {createdAt}
+CI Review Analysis:
+{If CI bot comments found:}
+  Bot: {ci_author_login}
+  Latest CI comment: {ci_createdAt}
+  {If multiple CI comments:} Previous CI comments: {ignored_count} (ignored - superseded by latest)
 
-{If blocking keywords detected:}
-  🚨 BLOCKING INDICATORS: {list keywords found}
+  {If blocking keywords in latest CI comment:}
+  🚨 Issues Found in Latest CI Review:
+    Keywords: {list keywords found}
 
-  Content Preview:
-  {First 250 chars or key excerpts}
+    Content Preview:
+    {First 250 chars or key excerpts}
 
-{If structured issues extracted:}
-  Outstanding Issues:
-  {List each extracted issue}
+  {If structured issues extracted:}
+    Outstanding CI Issues:
+    {List each extracted issue}
 
-{If no substantial comments:}
-ℹ️  No substantial code review comments
+  {If no blocking keywords in latest CI comment:}
+  ✅ No outstanding CI issues
+
+{If no CI comments:}
+  ℹ️  No CI review comments found
+
+Human Review Analysis:
+{If substantial human comment found:}
+  Most Recent Substantial Comment:
+    From: {author.login}
+    Date: {createdAt}
+
+  {If blocking keywords detected:}
+    🚨 BLOCKING INDICATORS: {list keywords found}
+
+    Content Preview:
+    {First 250 chars or key excerpts}
+
+  {If structured issues extracted:}
+    Issues Raised:
+    {List each extracted issue}
+
+{If no substantial human comments:}
+  ℹ️  No blocking issues from human reviewers
 
 --------------------------------------------------------------------------------
 CRITICAL ISSUES SUMMARY
@@ -395,7 +449,24 @@ No conflicts, CI passing, reviews approved, no blocking comments
 → Recommendation: READY TO APPROVE (P3)
 → Suggested: /fractary-repo:pr-review 456 --approve --body "LGTM!"
 
-### Example 4: Submit Approval
+### Example 4: Multiple CI Comments (Dual-Track Analysis)
+
+```
+/fractary-repo:pr-review 789
+```
+
+PR has:
+- Old CI comment (2 days ago): Lists issues A, B, C
+- New CI comment (1 hour ago): Lists only issue D (A, B, C were fixed)
+- Human comment: Raises issue E
+
+Analysis shows:
+- CI Track: Only issue D from latest CI comment
+- Human Track: Issue E from human reviewer
+→ Recommendation: DO NOT APPROVE - ADDRESS CRITICAL ISSUES (P1)
+→ Issues to fix: D (CI) and E (human)
+
+### Example 5: Submit Approval
 
 ```
 /fractary-repo:pr-review 456 --approve --body "Great work! Tests pass and code looks good."
