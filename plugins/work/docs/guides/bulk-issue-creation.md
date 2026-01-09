@@ -35,10 +35,12 @@ The `issue-bulk-creator` agent follows a 4-step process:
 | Argument | Description | Example |
 |----------|-------------|---------|
 | `--prompt <text>` | Description of what to create (optional, uses conversation context if omitted) | `--prompt "Create issues for IPEDS datasets"` |
-| `--type <type>` | Issue type: feature, bug, chore, patch (default: agent determines) | `--type feature` |
+| `--type <type>` | Issue type label to apply: feature, bug, chore, patch (adds as label, default: no type) | `--type feature` |
 | `--label <label>` | Additional labels to apply (repeatable) | `--label dataset --label etl` |
-| `--template <name>` | GitHub issue template from `.github/ISSUE_TEMPLATE/` | `--template dataset-load.md` |
+| `--template <name>` | GitHub issue template from `.github/ISSUE_TEMPLATE/` (if project has templates) | `--template dataset-load.md` |
 | `--assignee <user>` | Assign all issues to user | `--assignee @username` |
+
+**Note**: The `--type` parameter adds a label (e.g., `--type feature` adds "feature" label). GitHub issues don't have a native type field.
 
 ## Usage Examples
 
@@ -167,51 +169,23 @@ For content/documentation projects:
 
 ## GitHub Issue Templates
 
-Optionally use templates in `.github/ISSUE_TEMPLATE/` for consistency:
+If your project has templates in `.github/ISSUE_TEMPLATE/`, you can use them for consistency:
 
-### Creating a Template
-
-```bash
-# Create a template file
-cat > .github/ISSUE_TEMPLATE/dataset-load.md << 'EOF'
----
-name: Dataset Load
-labels: dataset, etl
----
-
-## Dataset
-{dataset-name}
-
-## Requirements
-- [ ] Download dataset from source
-- [ ] Validate data integrity
-- [ ] Load into database
-- [ ] Verify row counts match source
-
-## Acceptance Criteria
-- [ ] Dataset loads without errors
-- [ ] All columns mapped correctly
-- [ ] Row count matches source data
-- [ ] Data types validated
-
-## Notes
-{notes}
-EOF
-```
-
-### Using the Template
+### Using Templates
 
 ```bash
 /fractary-work:issue-create-bulk \
-  --prompt "Create issues for IPEDS datasets: hd, ic, enrollment" \
+  --prompt "Create issues for datasets: hd, ic, enrollment" \
   --template dataset-load.md
 ```
 
-The agent will:
-1. Load the template structure
-2. Fill in placeholders like `{dataset-name}` with specific values
-3. Apply template labels automatically
-4. Create consistent issues for each dataset
+**How it works**:
+- Agent loads the template content from `.github/ISSUE_TEMPLATE/dataset-load.md`
+- Uses template content as the issue body for all created issues
+- Applies labels from template frontmatter (if present)
+- Falls back to generated descriptions if template not found
+
+**Note**: Currently, template content is used as-is. The agent doesn't automatically substitute placeholders like `{dataset-name}`. You may need to customize the template content based on what you're creating, or use templates that are generic enough to apply to all items
 
 ## Confirmation Step
 

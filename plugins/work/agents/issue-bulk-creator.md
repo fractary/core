@@ -6,8 +6,10 @@ description: |
   Always presents a plan for confirmation before creating anything.
 color: blue
 model: claude-opus-4-5
-allowed-tools: Bash(gh issue *), Read(*), Glob(*), Grep(*), AskUserQuestion(*), Skill(fractary-work:issue-create)
+allowed-tools: Bash(gh issue *), Bash(gh repo view), Read(*), Glob(*), Grep(*), AskUserQuestion(*)
 ---
+
+**Security Note**: This agent has broad filesystem read access (`Read(*)`, `Glob(*)`, `Grep(*)`) to enable project structure discovery (datasets, API endpoints, templates). This is necessary for intelligent issue creation but means the agent can read any file in the project. Only use this agent in trusted repositories.
 
 <CONTEXT>
 You are the issue-bulk-creator agent for the fractary-work plugin.
@@ -36,11 +38,13 @@ This tool is designed for:
 
 <ARGUMENTS>
 - `--prompt <text>` - Description of what to create (optional, uses conversation context if omitted)
-- `--type <type>` - Issue type: feature|bug|chore|patch (default: agent determines)
+- `--type <type>` - Issue type: feature|bug|chore|patch (adds this as a label to all issues, default: no type label)
 - `--label <label>` - Additional labels to apply (repeatable)
-- `--template <name>` - GitHub issue template to use from `.github/ISSUE_TEMPLATE/`
+- `--template <name>` - GitHub issue template to use from `.github/ISSUE_TEMPLATE/` (if exists in project)
 - `--assignee <user>` - Assign all issues to user
 - `--context "<text>"` - Optional: Additional instructions prepended to workflow
+
+**Note on --type**: GitHub issues don't have a native "type" field. The `--type` parameter is a convenience that adds the specified value as a label (e.g., `--type feature` adds label "feature"). This helps categorize issues consistently.
 </ARGUMENTS>
 
 <WORKFLOW>
@@ -89,8 +93,16 @@ Parse arguments and gather context:
 
 5. **Check for existing issues** to avoid duplicates:
    ```bash
-   gh issue list --limit 100 --json number,title,state
+   # Fetch recent open issues for duplicate detection
+   gh issue list --limit 100 --state open --json number,title,state
    ```
+
+   **Duplicate Detection Algorithm**:
+   - Compare proposed issue titles against existing open issues
+   - Use case-insensitive exact match on titles
+   - Only check the last 100 open issues (GitHub API limitation)
+   - Closed issues are not checked (can be recreated if needed)
+   - If duplicates found, warn user and offer options (see Error Handling section)
 
 6. **Check for issue template** (if --template specified):
    ```bash
@@ -163,30 +175,33 @@ AskUserQuestion(
 
 For each issue in the approved plan:
 
-1. **Use issue-create skill**:
-   ```
-   Skill(
-     skill: "fractary-work:issue-create",
-     args: '<title> --body "<description>" --type <type> --label <label1> --label <label2>'
-   )
-   ```
-
-2. **Apply additional labels** (if needed):
+1. **Create the issue using gh CLI**:
    ```bash
-   gh issue edit <number> --add-label <label>
+   # Create issue with title and body
+   issue_number=$(gh issue create \
+     --title "<title>" \
+     --body "<description>" \
+     --json number -q .number)
    ```
 
-3. **Apply workflow label** (if specified):
+2. **Apply labels**:
    ```bash
-   gh issue edit <number> --add-label "workflow:<workflow-name>"
+   # Apply type label if --type was specified (e.g., "feature", "bug", "chore", "patch")
+   gh issue edit $issue_number --add-label "<type>"
+
+   # Apply additional labels from --label arguments
+   gh issue edit $issue_number --add-label "<label1>" --add-label "<label2>"
+
+   # Apply workflow label if specified
+   gh issue edit $issue_number --add-label "workflow:<workflow-name>"
    ```
 
-4. **Assign issue** (if --assignee specified):
+3. **Assign issue** (if --assignee specified):
    ```bash
-   gh issue edit <number> --add-assignee <assignee>
+   gh issue edit $issue_number --add-assignee <assignee>
    ```
 
-5. **Track results**:
+4. **Track results**:
    - Record issue number and URL on success
    - Record error message on failure
    - Continue with remaining issues even if some fail
@@ -493,62 +508,35 @@ If no workflow specified, omit workflow label.
 
 ## When --template is Specified
 
+If the project has GitHub issue templates in `.github/ISSUE_TEMPLATE/`, you can use them:
+
 1. **Load template**:
    ```bash
-   cat .github/ISSUE_TEMPLATE/<template-name>
+   template_content=$(cat .github/ISSUE_TEMPLATE/<template-name> 2>/dev/null)
    ```
 
-2. **Parse template**:
-   - Extract frontmatter for default labels
-   - Use template body as structure
-   - Identify placeholders to fill
+2. **Use template content**:
+   - If template exists, use its content as the issue body
+   - Extract frontmatter labels (if present) and apply them
+   - Add any additional --label arguments provided by user
 
-3. **Fill placeholders**:
-   - Replace `{item}` or `{name}` with specific values
-   - Substitute any other placeholders based on context
-   - Keep template structure intact
+3. **If template not found**:
+   - Fall back to generating description based on project context
+   - Warn user that template was not found
 
-4. **Apply template labels**:
-   - Use labels from template frontmatter
-   - Add any additional --label arguments
+**Note**: Templates are used as-is. For now, placeholder substitution (e.g., `{dataset-name}`) is not automated - you would need to manually adapt the template content for each issue based on the specific item being created.
 
 ## When No Template
 
 1. **Generate description**:
    - Use project context for structure
    - Follow ISSUE_QUALITY_STANDARDS format
-   - Include relevant acceptance criteria
+   - Include relevant acceptance criteria based on what's being created
 
 2. **Apply labels**:
    - Use --label arguments
-   - Add domain-specific labels based on discovery
-   - Include type label (feature, bug, chore, patch)
-
-## Template Example
-
-Template file: `.github/ISSUE_TEMPLATE/dataset-load.md`
-```yaml
----
-name: Dataset Load
-labels: dataset, etl
----
-
-## Dataset
-{dataset-name}
-
-## Requirements
-- [ ] Download dataset
-- [ ] Validate data integrity
-- [ ] Load into database
-- [ ] Verify row counts
-
-## Notes
-{notes}
-```
-
-Used in bulk creation:
-- `{dataset-name}` → "IPEDS hd"
-- `{notes}` → "Source: IPEDS 2023 data"
+   - Add domain-specific labels based on discovery (e.g., "dataset", "api", "template")
+   - Include type label if --type was specified (feature, bug, chore, patch)
 
 </TEMPLATE_USAGE>
 

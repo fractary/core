@@ -38,21 +38,24 @@ This command uses AI to intelligently create multiple related issues (datasets, 
 ## Arguments
 
 - `--prompt <text>`: Description of what to create (optional, uses conversation context if omitted)
-- `--type <type>`: Issue type (feature|bug|chore|patch, default: agent determines)
+- `--type <type>`: Issue type label to apply: feature|bug|chore|patch (default: no type label)
 - `--label <label>`: Additional labels to apply (repeatable)
-- `--template <name>`: GitHub issue template to use from `.github/ISSUE_TEMPLATE/`
+- `--template <name>`: GitHub issue template from `.github/ISSUE_TEMPLATE/` (if project has templates)
 - `--assignee <user>`: Assign all issues to user
+
+**Note**: The `--type` parameter adds a label with that name (e.g., `--type feature` adds the "feature" label). GitHub issues don't have a separate type field.
 
 ## Integration with Templates
 
-If `--template` is specified:
-- Agent loads template from `.github/ISSUE_TEMPLATE/{name}`
-- Uses template structure for all created issues
-- Fills in values based on what's being created
+If `--template` is specified and the project has GitHub issue templates:
+- Agent loads template from `.github/ISSUE_TEMPLATE/{name}` (if it exists)
+- Uses template content as issue body
+- Applies labels from template frontmatter
+- Falls back to generated descriptions if template not found
 
-If no template:
-- Agent generates appropriate titles and descriptions
-- Uses project context for structure
+If no template specified:
+- Agent generates appropriate titles and descriptions based on project context
+- Uses discovered information (datasets, endpoints, etc.) for structure
 
 Use **Task** tool with `fractary-work:issue-bulk-creator` agent to create bulk issues:
 
