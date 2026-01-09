@@ -15,7 +15,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "2.4.2",
+        "version": "2.5.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -36,6 +36,7 @@
         "category": "development",
         "strict": true,
         "commands": [
+          "./commands/commit-push-pr-merge.md",
           "./commands/commit-push-pr.md",
           "./commands/commit-push.md",
           "./commands/commit.md",
