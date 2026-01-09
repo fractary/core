@@ -20,28 +20,37 @@ argument-hint: '[--squash|--merge|--rebase] [--wait-for-checks] [--context "<tex
 - Documentation/trivial changes
 - Repositories WITHOUT branch protection requiring reviews
 
+⚠️ **NOT ATOMIC**: This operation is NOT atomic. If the merge step fails (due to CI, reviews, or branch protection), the PR will remain open and the branch will still exist. See "Recovery from failures" section for manual cleanup steps.
+
 DO NOT use if:
 - Repository requires code reviews
 - CI checks must pass before merge
 - Working in a team environment
 - Changes affect production code
 
-Parse arguments:
-- Merge strategy: --merge (default), --squash, or --rebase
-- --wait-for-checks: Wait for CI checks to complete before merging
-- --context "<text>": Additional instructions (prepend to workflow)
-
 Steps to execute:
 
-1. **Prepend context if provided**: If --context argument present, use it as additional instructions
+1. **Parse arguments** (extract from user input):
+   - Set `STRATEGY="merge"` (default)
+   - If `--squash` in args: `STRATEGY="squash"`
+   - If `--rebase` in args: `STRATEGY="rebase"`
+   - Set `WAIT_FOR_CHECKS=false` (default)
+   - If `--wait-for-checks` in args: `WAIT_FOR_CHECKS=true`
+   - Extract `CONTEXT=""` from `--context "<text>"` if present
+   - If CONTEXT is non-empty, prepend it as additional instructions
 
-2. **Validate base branch**:
-   - Check current branch with `CURRENT_BRANCH=$(git branch --show-current)`
-   - Verify it's main, master, or develop
-   - If on feature branch, STOP with error: "Cannot create PR from feature branch. Switch to main/master first: git checkout main"
+2. **Validate starting point** (you must be on a base branch):
+   - Get current branch: `CURRENT_BRANCH=$(git branch --show-current)`
+   - Check if CURRENT_BRANCH is one of: main, master, develop
+   - If YES: proceed to step 3 (will create feature branch from this base)
+   - If NO (on a feature branch): STOP with error:
+     "You're on branch '$CURRENT_BRANCH'. This command must start from main/master/develop.
+      To use this command: git checkout main && /fractary-repo:commit-push-pr-merge
+      Or to create PR from current branch: /fractary-repo:commit-push-pr"
 
-3. **Create branch**: Create a new branch if currently on main/master/develop
-   - Use semantic naming: `git checkout -b feat/description` or similar
+3. **Create feature branch** (always, since step 2 ensured we're on base branch):
+   - Generate branch name from changes (e.g., feat/add-feature-description)
+   - Create and switch: `git checkout -b "$BRANCH_NAME"`
 
 4. **Commit changes**: Stage all changes and create a single commit with appropriate message
    - Use: `git add <files>` (specify files, don't use wildcards in examples)
@@ -73,8 +82,12 @@ Steps to execute:
    - If timeout, report: "CI checks still running after 5 minutes. Check status: gh pr view \"$PR_NUMBER\" --json statusCheckRollup"
 
 10. **Verify merge safety**:
-    - Check CI status: `FAILED_CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup --jq '.statusCheckRollup[] | select(.state=="FAILURE") | .name' | tr '\n' ', ')`
+    - Check for failed checks: `FAILED_CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup --jq '.statusCheckRollup[] | select(.state=="FAILURE") | .name' | tr '\n' ', ')`
     - If FAILED_CHECKS not empty, STOP and report: "CI checks failed: $FAILED_CHECKS. View details: gh pr view \"$PR_NUMBER\""
+    - Check for pending required checks (when not using --wait-for-checks):
+      `PENDING_CHECKS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup --jq '.statusCheckRollup[] | select(.state=="PENDING") | .name' | tr '\n' ', ')`
+    - If PENDING_CHECKS not empty AND WAIT_FOR_CHECKS is false, STOP and report:
+      "Required checks still pending: $PENDING_CHECKS. Use --wait-for-checks to wait, or check manually: gh pr view \"$PR_NUMBER\" --json statusCheckRollup"
     - Check review decision: `REVIEW_DECISION=$(gh pr view "$PR_NUMBER" --json reviewDecision --jq .reviewDecision)`
     - If reviewDecision is "REVIEW_REQUIRED", STOP and report: "Reviews required. Request review: gh pr review \"$PR_NUMBER\" --comment --body '@reviewer please review'"
     - If reviewDecision is "CHANGES_REQUESTED", STOP and report: "Changes requested in review. View comments: gh pr view \"$PR_NUMBER\" --comments"
@@ -110,11 +123,11 @@ CRITICAL SECURITY NOTES:
 - Provide escape hatches for every failure scenario
 
 Implementation notes:
-- **Polling details**: 10-second intervals, 30 max iterations (5 minutes), exponential backoff optional
-- **Variable quoting**: ALL shell variables must be quoted: "$PR_NUMBER", "$STRATEGY", "$CURRENT_BRANCH"
+- **Polling details**: 10-second intervals, 30 max iterations (5 minutes). Optional: exponential backoff (5s, 10s, 20s, 30s)
+- **Variable quoting**: ALL shell variables must be quoted: "$PR_NUMBER", "$STRATEGY", "$CURRENT_BRANCH", "$BRANCH_NAME"
 - **Error codes**: Exit with non-zero on any failure, capture stderr for diagnostics
-- **Validation**: Check PR number is numeric, branch names are valid, before executing commands
-- **Atomicity disclaimer**: This is NOT atomic - PR may be created but merge fail. Document this clearly.
+- **Validation**: Check PR number is numeric, branch names are valid, STRATEGY is one of merge/squash/rebase
+- **Pending checks**: Always check for PENDING state; if found and not using --wait-for-checks, stop with clear message
 
 Recovery from failures (with actionable commands):
 - **PR created, merge failed**:
