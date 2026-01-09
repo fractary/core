@@ -5,6 +5,50 @@ All notable changes to Fractary Core will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-01-08
+
+### Added
+
+#### fractary-work Plugin (v2.3.0)
+
+- **Bulk Issue Creation**: New `issue-create-bulk` command for creating multiple related issues at once
+  - AI-powered discovery of datasets, API endpoints, templates from project structure
+  - Intelligent issue creation based on conversation context
+  - Mandatory confirmation before creating any issues
+  - Support for GitHub issue templates (if project has them)
+  - Automatic duplicate detection (last 100 open issues)
+  - Project intelligence for ETL, API, and content projects
+  - Safety-first design with AskUserQuestion confirmation
+
+- **New Agent**: `issue-bulk-creator`
+  - 4-step workflow: Analyze → Plan → Confirm → Create
+  - Pattern recognition for datasets, API endpoints, templates
+  - Direct GitHub CLI integration (gh issue create/edit)
+  - Comprehensive error handling with recovery guidance
+
+- **New Command**: `issue-create-bulk`
+  - Arguments: `--prompt`, `--type`, `--label`, `--template`, `--assignee`
+  - Type parameter adds labels (e.g., `--type feature` → "feature" label)
+  - Template support for projects with `.github/ISSUE_TEMPLATE/`
+
+- **Documentation**:
+  - User guide with examples and troubleshooting
+  - Test plan with 14 comprehensive scenarios
+  - Specification: `SPEC-20260108-bulk-issue-creation.md`
+
+### Changed
+
+#### fractary-work Plugin
+
+- Updated marketplace description to mention bulk creation and refinement capabilities
+- Added keywords: `bulk-creation`, `automation`
+
+### Security
+
+- Added security note about filesystem access requirements for project discovery
+- Agent requires `Read(*)`, `Glob(*)`, `Grep(*)` for intelligent issue creation
+- Users should only use in trusted repositories
+
 ## [2.0.0] - 2026-01-05
 
 ### 🚨 BREAKING CHANGES
