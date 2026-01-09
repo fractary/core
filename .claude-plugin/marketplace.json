@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "2.1.9",
+      "version": "2.2.0",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -57,8 +57,8 @@
       {
         "name": "fractary-work",
         "source": "./plugins/work",
-        "description": "GitHub Issues management with streamlined commands for creating, listing, searching, and updating issues",
-        "version": "2.2.7",
+        "description": "GitHub Issues management with bulk creation, refinement, and streamlined commands for creating, listing, searching, and updating issues",
+        "version": "2.3.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -76,7 +76,9 @@
           "bug-tracking",
           "agile",
           "workflow",
-          "issue-management"
+          "issue-management",
+          "bulk-creation",
+          "automation"
         ],
         "category": "development",
         "strict": true,
@@ -84,13 +86,17 @@
           "./commands/init.md",
           "./commands/issue-comment.md",
           "./commands/issue-create.md",
+          "./commands/issue-create-bulk.md",
           "./commands/issue-fetch.md",
           "./commands/issue-list.md",
+          "./commands/issue-refine.md",
           "./commands/issue-search.md",
           "./commands/issue-update.md"
         ],
         "agents": [
-          "./agents/init.md"
+          "./agents/init.md",
+          "./agents/issue-refine.md",
+          "./agents/issue-bulk-creator.md"
         ]
       },
       {
