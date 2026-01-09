@@ -156,7 +156,7 @@
     "hierarchical": false,
     "group_by": "project",
     "sort_by": "project",
-    "index_filename": "README.md",
+    "index_filename": "docs/CHANGELOG-INDEX.md",
     "update_on_create": true
   },
 

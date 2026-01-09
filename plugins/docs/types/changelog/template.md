@@ -7,7 +7,7 @@ date_created: {{date_created}}
 {{#date_updated}}date_updated: {{date_updated}}{{/date_updated}}
 {{#maintained_by}}maintained_by: {{maintained_by}}{{/maintained_by}}
 {{#repository_url}}repository_url: {{repository_url}}{{/repository_url}}
-{{#tags}}tags: [{{#tags}}{{.}}, {{/tags}}]{{/tags}}
+tags: [{{#tags}}{{.}}, {{/tags}}]
 codex_sync: true
 generated: true
 ---
