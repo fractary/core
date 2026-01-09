@@ -1,0 +1,197 @@
+{
+  "type": "changelog",
+  "display_name": "Changelog Documentation",
+  "description": "Project changelog documenting versions, releases, and changes following Keep a Changelog format",
+
+  "file_naming": {
+    "pattern": "CHANGELOG.md",
+    "auto_number": false,
+    "location": "project_root_or_plugin_root"
+  },
+
+  "storage": {
+    "default_path": ".",
+    "config_key": "doc_types.changelog.path",
+    "hierarchical": false
+  },
+
+  "frontmatter": {
+    "required_fields": ["title", "fractary_doc_type", "project", "status", "date_created"],
+    "optional_fields": [
+      "maintained_by",
+      "date_updated",
+      "repository_url",
+      "tags",
+      "related",
+      "codex_sync",
+      "generated"
+    ],
+    "type_value": "changelog",
+    "defaults": {
+      "fractary_doc_type": "changelog",
+      "status": "active",
+      "codex_sync": true,
+      "generated": true
+    }
+  },
+
+  "structure": {
+    "required_sections": [
+      "Header",
+      "Versions"
+    ],
+    "optional_sections": [
+      "Unreleased",
+      "Footer",
+      "Legend",
+      "Links"
+    ],
+    "section_order": [
+      "Header",
+      "Unreleased",
+      "Versions",
+      "Footer",
+      "Legend",
+      "Links"
+    ]
+  },
+
+  "versioning": {
+    "scheme": "semver",
+    "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+    "format": "MAJOR.MINOR.PATCH"
+  },
+
+  "date_format": {
+    "standard": "ISO 8601",
+    "pattern": "YYYY-MM-DD",
+    "example": "2026-01-09"
+  },
+
+  "categories": {
+    "standard": ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"],
+    "optional": ["Breaking Changes", "Migration Guide", "Known Issues", "Performance", "Dependencies"],
+    "custom_allowed": true
+  },
+
+  "status": {
+    "allowed_values": ["active", "archived", "deprecated"],
+    "default": "active",
+    "description": {
+      "active": "Actively maintained changelog",
+      "archived": "Historical changelog, no longer updated",
+      "deprecated": "Deprecated project, changelog preserved for reference"
+    }
+  },
+
+  "dual_format": {
+    "enabled": true,
+    "formats": ["markdown", "json"],
+    "json_filename": "changelog.json",
+    "validate_both": true,
+    "consistency_check": true
+  },
+
+  "operations": {
+    "create": {
+      "enabled": true,
+      "description": "Create a new changelog with initial version",
+      "required_params": ["project", "title"],
+      "optional_params": ["versions", "unreleased_changes", "repository_url", "tags"],
+      "generates": ["CHANGELOG.md", "changelog.json"]
+    },
+    "add_version": {
+      "enabled": true,
+      "description": "Add a new version entry to existing changelog",
+      "required_params": ["version", "release_date", "changes"],
+      "optional_params": ["breaking_changes", "migration_notes", "compare_url"]
+    },
+    "update": {
+      "enabled": true,
+      "description": "Update existing changelog (add/modify versions)",
+      "allowed_updates": ["versions", "unreleased", "metadata"]
+    },
+    "validate": {
+      "enabled": true,
+      "description": "Validate changelog structure and format"
+    }
+  },
+
+  "validation": {
+    "require_versions": true,
+    "require_dates": true,
+    "require_categories": true,
+    "version_order": "descending",
+    "custom_rules": [
+      {
+        "rule": "semver_format",
+        "description": "Version numbers must follow semantic versioning",
+        "severity": "error"
+      },
+      {
+        "rule": "date_format",
+        "description": "Release dates must follow ISO 8601 (YYYY-MM-DD)",
+        "severity": "error"
+      },
+      {
+        "rule": "version_order",
+        "description": "Versions should be listed in descending order (newest first)",
+        "severity": "warning"
+      },
+      {
+        "rule": "breaking_changes_major_version",
+        "description": "Breaking changes should trigger MAJOR version increment",
+        "severity": "warning"
+      },
+      {
+        "rule": "category_names",
+        "description": "Use standard Keep a Changelog category names",
+        "severity": "info"
+      }
+    ]
+  },
+
+  "auto_index": {
+    "enabled": true,
+    "hierarchical": false,
+    "group_by": "project",
+    "sort_by": "project",
+    "index_filename": "README.md",
+    "update_on_create": true
+  },
+
+  "examples": {
+    "create_new": {
+      "project": "fractary-core",
+      "title": "Changelog",
+      "repository_url": "https://github.com/fractary/core",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "release_date": "2026-01-09",
+          "changes": {
+            "Added": [
+              "Initial release",
+              "Core functionality"
+            ]
+          }
+        }
+      ]
+    },
+    "add_version": {
+      "version": "1.1.0",
+      "release_date": "2026-01-15",
+      "breaking_changes": false,
+      "changes": {
+        "Added": [
+          "New feature X",
+          "New feature Y"
+        ],
+        "Fixed": [
+          "Bug in module Z"
+        ]
+      },
+      "compare_url": "https://github.com/fractary/core/compare/v1.0.0...v1.1.0"
+    }
+  }
+}
