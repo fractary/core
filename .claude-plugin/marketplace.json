@@ -236,7 +236,7 @@
         "name": "fractary-docs",
         "source": "./plugins/docs",
         "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-        "version": "2.1.2",
+        "version": "2.2.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"

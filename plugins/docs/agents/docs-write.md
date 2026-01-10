@@ -41,7 +41,7 @@ Your role is to create or update documentation with automatic validation and ind
 </ARGUMENTS>
 
 <DOC_TYPES>
-Supported types: api, adr, guide, dataset, etl, testing, infrastructure, audit, architecture, standards, _untyped
+Supported types: api, adr, guide, dataset, etl, testing, infrastructure, audit, architecture, standards, changelog, _untyped
 </DOC_TYPES>
 
 <SKILL_INVOCATION>
