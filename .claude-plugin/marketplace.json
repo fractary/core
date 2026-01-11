@@ -15,7 +15,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "2.5.0",
+        "version": "2.5.1",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -36,6 +36,7 @@
         "category": "development",
         "strict": true,
         "commands": [
+          "./commands/branch-create.md",
           "./commands/commit-push-pr-merge.md",
           "./commands/commit-push-pr.md",
           "./commands/commit-push.md",
@@ -104,7 +105,7 @@
         "name": "fractary-file",
         "source": "./plugins/file",
         "description": "Universal file storage operations across R2, S3, and local filesystem with modular handler architecture",
-        "version": "1.2.2",
+        "version": "1.2.3",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -124,15 +125,24 @@
         ],
         "category": "development",
         "strict": true,
+        "commands": [
+          "./commands/init.md",
+          "./commands/show-config.md",
+          "./commands/switch-handler.md",
+          "./commands/test-connection.md"
+        ],
         "agents": [
-          "./agents/file-manager.md"
+          "./agents/file-init.md",
+          "./agents/file-show-config.md",
+          "./agents/file-switch-handler.md",
+          "./agents/file-test-connection.md"
         ]
       },
       {
         "name": "fractary-logs",
         "source": "./plugins/logs",
         "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
-        "version": "2.1.2",
+        "version": "2.1.3",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -164,14 +174,23 @@
           "./commands/read.md"
         ],
         "agents": [
-          "./agents/log-manager.md"
+          "./agents/logs-analyze.md",
+          "./agents/logs-archive.md",
+          "./agents/logs-audit.md",
+          "./agents/logs-capture.md",
+          "./agents/logs-cleanup.md",
+          "./agents/logs-init.md",
+          "./agents/logs-log.md",
+          "./agents/logs-read.md",
+          "./agents/logs-search.md",
+          "./agents/logs-stop.md"
         ]
       },
       {
         "name": "fractary-status",
         "source": "./plugins/status",
         "description": "Custom Claude Code status line showing git status, issue numbers, PR numbers, and last prompt",
-        "version": "1.1.2",
+        "version": "1.1.3",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -190,7 +209,12 @@
         "category": "productivity",
         "strict": true,
         "commands": [
-          "./commands/install.md"
+          "./commands/install.md",
+          "./commands/sync.md"
+        ],
+        "agents": [
+          "./agents/status-install.md",
+          "./agents/status-sync.md"
         ],
         "hooks": "./hooks/hooks.json"
       },
