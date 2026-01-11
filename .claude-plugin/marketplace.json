@@ -105,7 +105,7 @@
         "name": "fractary-file",
         "source": "./plugins/file",
         "description": "Universal file storage operations across R2, S3, and local filesystem with modular handler architecture",
-        "version": "1.2.3",
+        "version": "1.2.4",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -142,7 +142,7 @@
         "name": "fractary-logs",
         "source": "./plugins/logs",
         "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
-        "version": "2.1.3",
+        "version": "2.1.4",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -168,6 +168,7 @@
           "./commands/stop.md",
           "./commands/log.md",
           "./commands/archive.md",
+          "./commands/audit.md",
           "./commands/cleanup.md",
           "./commands/search.md",
           "./commands/analyze.md",
@@ -190,7 +191,7 @@
         "name": "fractary-status",
         "source": "./plugins/status",
         "description": "Custom Claude Code status line showing git status, issue numbers, PR numbers, and last prompt",
-        "version": "1.1.3",
+        "version": "1.1.4",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -283,7 +284,8 @@
           "./commands/write.md",
           "./commands/validate.md",
           "./commands/list.md",
-          "./commands/audit.md"
+          "./commands/audit.md",
+          "./commands/check-consistency.md"
         ],
         "agents": [
           "./agents/docs-audit.md",
