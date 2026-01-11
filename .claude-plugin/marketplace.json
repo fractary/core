@@ -216,8 +216,7 @@
         "agents": [
           "./agents/status-install.md",
           "./agents/status-sync.md"
-        ],
-        "hooks": "./hooks/hooks.json"
+        ]
       },
       {
         "name": "fractary-spec",
