@@ -2,11 +2,11 @@
   "name": "fractary-work",
   "version": "2.3.0",
   "description": "Work item management across GitHub, Jira, Linear, etc.",
-  "commands": "./commands/",
+  "commands": "../commands/",
   "agents": [
-    "./agents/init.md",
-    "./agents/issue-refine.md",
-    "./agents/issue-bulk-creator.md"
+    "../agents/init.md",
+    "../agents/issue-refine.md",
+    "../agents/issue-bulk-creator.md"
   ],
-  "skills": "./skills/"
+  "skills": "../skills/"
 }
