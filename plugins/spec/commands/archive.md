@@ -6,4 +6,12 @@ model: claude-haiku-4-5
 argument-hint: '<issue_number> [--force] [--skip-warnings] [--context "<text>"]'
 ---
 
-Delegates to fractary-spec:spec-archive agent for archiving completed specifications to cloud storage.
+Use **Task** tool with `fractary-spec:spec-archive` agent to archive completed specifications to cloud storage.
+
+```
+Task(
+  subagent_type="fractary-spec:spec-archive",
+  description="Archive specifications",
+  prompt="Archive specifications for issue: $ARGUMENTS"
+)
+```
