@@ -1,14 +1,8 @@
 {
   "name": "fractary-docs",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-  "agents": [
-    "../agents/docs-audit.md",
-    "../agents/docs-check-consistency.md",
-    "../agents/docs-list.md",
-    "../agents/docs-validate.md",
-    "../agents/docs-write.md"
-  ],
-  "skills": "../skills/",
-  "commands": "../commands/"
+  "commands": "../commands/",
+  "agents": "../agents/",
+  "skills": "../skills/"
 }
