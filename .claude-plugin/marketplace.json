@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "2.3.0",
+      "version": "2.3.1",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -105,7 +105,7 @@
         "name": "fractary-file",
         "source": "./plugins/file",
         "description": "Universal file storage operations across R2, S3, and local filesystem with modular handler architecture",
-        "version": "1.2.4",
+        "version": "1.2.5",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
