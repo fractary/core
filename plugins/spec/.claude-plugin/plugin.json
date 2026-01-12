@@ -1,19 +1,19 @@
 {
   "name": "fractary-spec",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
   "commands": [
-    "../commands/init.md",
-    "../commands/create.md",
-    "../commands/refine.md",
-    "../commands/validate.md",
-    "../commands/archive.md"
+    "commands/init.md",
+    "commands/create.md",
+    "commands/refine.md",
+    "commands/validate.md",
+    "commands/archive.md"
   ],
   "agents": [
-    "../agents/spec-archive.md",
-    "../agents/spec-create.md",
-    "../agents/spec-init.md",
-    "../agents/spec-refine.md",
-    "../agents/spec-validate.md"
+    "agents/spec-archive.md",
+    "agents/spec-create.md",
+    "agents/spec-init.md",
+    "agents/spec-refine.md",
+    "agents/spec-validate.md"
   ]
 }
