@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "2.3.3",
+      "version": "2.3.2",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -15,7 +15,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "2.5.2",
+        "version": "2.5.1",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -60,7 +60,7 @@
         "name": "fractary-work",
         "source": "./plugins/work",
         "description": "GitHub Issues management with bulk creation, refinement, and streamlined commands for creating, listing, searching, and updating issues",
-        "version": "2.3.1",
+        "version": "2.3.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -222,7 +222,7 @@
         "name": "fractary-spec",
         "source": "./plugins/spec",
         "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
-        "version": "1.2.1",
+        "version": "1.2.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -260,7 +260,7 @@
         "name": "fractary-docs",
         "source": "./plugins/docs",
         "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-        "version": "2.2.1",
+        "version": "2.2.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
