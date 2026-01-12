@@ -1,11 +1,25 @@
 {
   "name": "fractary-repo",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
-  "commands": "../commands/",
+  "commands": [
+    "../commands/branch-create.md",
+    "../commands/commit-push-pr-merge.md",
+    "../commands/commit-push-pr.md",
+    "../commands/commit-push.md",
+    "../commands/commit.md",
+    "../commands/init.md",
+    "../commands/pr-create.md",
+    "../commands/pr-merge.md",
+    "../commands/pr-review.md",
+    "../commands/pull.md",
+    "../commands/worktree-create.md",
+    "../commands/worktree-list.md",
+    "../commands/worktree-prune.md",
+    "../commands/worktree-remove.md"
+  ],
   "agents": [
     "../agents/init.md",
     "../agents/pr-review-agent.md"
-  ],
-  "skills": "../skills/"
+  ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "fractary-spec",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
   "commands": [
     "../commands/init.md",
@@ -15,6 +15,5 @@
     "../agents/spec-init.md",
     "../agents/spec-refine.md",
     "../agents/spec-validate.md"
-  ],
-  "skills": "../skills/"
+  ]
 }
