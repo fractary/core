@@ -1,8 +1,18 @@
 {
   "name": "fractary-file",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "Multi-provider file storage with unified interface (Local, R2, S3, GCS, Google Drive)",
-  "commands": "../commands/",
-  "agents": "../agents/",
+  "commands": [
+    "../commands/init.md",
+    "../commands/show-config.md",
+    "../commands/switch-handler.md",
+    "../commands/test-connection.md"
+  ],
+  "agents": [
+    "../agents/file-init.md",
+    "../agents/file-show-config.md",
+    "../agents/file-switch-handler.md",
+    "../agents/file-test-connection.md"
+  ],
   "skills": "../skills/"
 }
