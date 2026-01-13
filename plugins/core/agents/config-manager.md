@@ -1,9 +1,9 @@
 ---
-name: fractary-core:init
+name: fractary-core:config-manager
 description: |
   MUST BE USED when user wants to initialize or configure Fractary Core for a project.
   Use PROACTIVELY when user mentions "setup fractary", "initialize project", "configure plugins", or when commands fail due to missing configuration.
-  This is the unified init agent that configures all core plugins (work, repo, logs, file, spec, docs).
+  This is the unified configuration manager that configures all core plugins (work, repo, logs, file, spec, docs).
 color: orange
 model: claude-haiku-4-5
 ---
