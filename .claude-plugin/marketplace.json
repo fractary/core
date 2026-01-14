@@ -12,6 +12,33 @@
     },
     "plugins": [
       {
+        "name": "fractary-core",
+        "source": "./plugins/core",
+        "description": "Core initialization and configuration for Fractary plugins",
+        "version": "3.0.0",
+        "author": {
+          "name": "The Fractary",
+          "url": "https://github.com/fractary"
+        },
+        "homepage": "https://github.com/fractary/core/tree/main/plugins/core",
+        "repository": "https://github.com/fractary/core/tree/main/plugins/core",
+        "license": "MIT",
+        "keywords": [
+          "configuration",
+          "initialization",
+          "setup",
+          "core"
+        ],
+        "category": "development",
+        "strict": true,
+        "commands": [
+          "./commands/init.md"
+        ],
+        "agents": [
+          "./agents/config-manager.md"
+        ]
+      },
+      {
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
