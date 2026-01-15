@@ -646,7 +646,7 @@ fractary_doc_type: api
 
 ## Configuration
 
-Configuration is stored in `.fractary/plugins/docs/config.json` (project) or `~/.config/fractary/docs/config.json` (global).
+Configuration is stored in `.fractary/config.yaml` (project) or `~/.config/fractary/docs/config.json` (global).
 
 ### Example Configuration
 

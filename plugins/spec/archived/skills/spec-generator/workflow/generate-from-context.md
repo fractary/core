@@ -81,7 +81,7 @@ Validation is minimal - work_id and template are both optional.
 
 **CRITICAL**: Load plugin configuration from the **project working directory**, NOT the plugin installation directory.
 
-**Config Location**: `.fractary/plugins/spec/config.json` (relative to project root / current working directory)
+**Config Location**: `.fractary/specs/config.json` (relative to project root / current working directory)
 
 **Common Mistake**: Do NOT look in `~/.claude/plugins/marketplaces/fractary/plugins/spec/` - that's the plugin installation directory, not the project config location.
 

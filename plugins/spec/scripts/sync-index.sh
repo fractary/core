@@ -10,7 +10,7 @@
 #   check: Check if cloud index exists
 #
 # Two-tier storage prevents index loss:
-#   - Local cache: .fractary/plugins/spec/archive-index.json (fast, git-ignored)
+#   - Local cache: .fractary/specs/archive-index.json (fast, git-ignored)
 #   - Cloud backup: archive/specs/.archive-index.json (durable, recoverable)
 
 set -euo pipefail
@@ -21,7 +21,7 @@ CLOUD_INDEX="${3:-}"
 
 # Load file plugin configuration and S3 settings
 load_s3_config() {
-    FILE_CONFIG=".fractary/plugins/file/config.json"
+    FILE_CONFIG=".fractary/config.yaml"
 
     if [[ ! -f "$FILE_CONFIG" ]]; then
         return 1

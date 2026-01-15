@@ -10,7 +10,7 @@ if ! [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Load configuration
 if [[ ! -f "$CONFIG_FILE" ]]; then

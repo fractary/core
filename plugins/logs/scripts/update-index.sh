@@ -4,7 +4,6 @@ set -euo pipefail
 
 ISSUE_NUMBER="${1:?Issue number required}"
 METADATA_JSON="${2:?Metadata JSON required}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
 
 # Input validation: Issue number should be numeric
 if ! [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
@@ -18,13 +17,14 @@ if ! echo "$METADATA_JSON" | jq empty 2>/dev/null; then
     exit 1
 fi
 
-# Load configuration
-if [[ ! -f "$CONFIG_FILE" ]]; then
-    echo "Error: Configuration not found at $CONFIG_FILE" >&2
-    exit 1
+# Load configuration from unified config
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if ! CONFIG_JSON=$("$SCRIPT_DIR/config-loader.sh" 2>&1); then
+    echo "$CONFIG_JSON" >&2
+    exit 3
 fi
 
-LOG_DIR=$(jq -r '.storage.local_path // "/logs"' "$CONFIG_FILE")
+LOG_DIR=$(echo "$CONFIG_JSON" | jq -r '.storage.local_path // ".fractary/logs"')
 INDEX_FILE="$LOG_DIR/.archive-index.json"
 LOCK_FILE="$INDEX_FILE.lock"
 

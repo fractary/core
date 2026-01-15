@@ -98,7 +98,7 @@ The branch-manager will:
 **Benefits**:
 - Prevents workflow interference (multiple workflows can run concurrently)
 - Enables workflow resume (restarting same work_id reuses same worktree)
-- Isolates state (each worktree has own `.fractary/plugins/faber/state.json`)
+- Isolates state (each worktree has own `.fractary/faber/state.json`)
 - Stays in Claude's scope (`.worktrees/` is subfolder, not parallel directory)
 </INPUTS>
 

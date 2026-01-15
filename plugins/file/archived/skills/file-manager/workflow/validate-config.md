@@ -12,7 +12,7 @@ Ensure configuration is valid and complete before attempting file operations. Ca
 
 ```bash
 # Try project config first
-CONFIG_FILE=".fractary/plugins/file/config.json"
+CONFIG_FILE=".fractary/config.yaml"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
     # Try global config
@@ -259,7 +259,7 @@ export R2_SECRET_ACCESS_KEY="your-secret-key"
 **Fix**:
 ```bash
 # Check syntax
-jq . .fractary/plugins/file/config.json
+jq . .fractary/config.yaml
 
 # Common issues:
 # - Missing commas between fields
@@ -284,5 +284,5 @@ jq . .fractary/plugins/file/config.json
 
 **Fix**:
 ```bash
-chmod 0600 .fractary/plugins/file/config.json
+chmod 0600 .fractary/config.yaml
 ```

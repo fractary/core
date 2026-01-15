@@ -49,7 +49,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 # Load state mappings from config
-CONFIG_FILE=".fractary/plugins/work/config.json"
+CONFIG_FILE=".fractary/config.yaml"
 if [ -f "$CONFIG_FILE" ]; then
     case "$TARGET_STATE" in
         open)

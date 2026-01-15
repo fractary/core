@@ -3,13 +3,17 @@
 set -euo pipefail
 
 LOG_FILE="${1:?Log file path required}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
 
-# Load configuration
-THRESHOLD_MB=1
-if [[ -f "$CONFIG_FILE" ]]; then
-    COMPRESSION_ENABLED=$(jq -r '.archive.compression.enabled // true' "$CONFIG_FILE")
-    THRESHOLD_MB=$(jq -r '.archive.compression.threshold_mb // 1' "$CONFIG_FILE")
+# Load configuration from unified config
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if ! CONFIG_JSON=$("$SCRIPT_DIR/config-loader.sh" 2>&1); then
+    # Config not required for compression, use defaults
+    COMPRESSION_ENABLED=true
+    THRESHOLD_MB=1
+else
+    # Config exists, load compression settings
+    COMPRESSION_ENABLED=$(echo "$CONFIG_JSON" | jq -r '.archive.compression.enabled // true')
+    THRESHOLD_MB=$(echo "$CONFIG_JSON" | jq -r '.archive.compression.threshold_mb // 1')
 
     if [[ "$COMPRESSION_ENABLED" != "true" ]]; then
         echo "$LOG_FILE"

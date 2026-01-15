@@ -167,7 +167,7 @@ URL: https://storage.example.com/specs/2025/123-phase2.md
 ### Location
 
 ```
-.fractary/plugins/spec/archive-index.json
+.fractary/specs/archive-index.json
 ```
 
 ### Format
@@ -263,7 +263,7 @@ After successful upload and index update:
 
 3. **Git add index**:
    ```bash
-   git add .fractary/plugins/spec/archive-index.json
+   git add .fractary/specs/archive-index.json
    ```
 
 4. **Git commit**:
@@ -412,13 +412,13 @@ This ensures atomicity: either all specs archived or none.
 
 ### Problem: Index Loss Risk
 
-The archive index stored in `.fractary/plugins/spec/archive-index.json` is git-ignored. If you lose your local environment, you lose the index - and without the index, you can't look up where your archived specs are stored in the cloud.
+The archive index stored in `.fractary/specs/archive-index.json` is git-ignored. If you lose your local environment, you lose the index - and without the index, you can't look up where your archived specs are stored in the cloud.
 
 ### Solution: Two-Tier Storage
 
 The plugin uses a dual-storage approach for the archive index:
 
-**Tier 1: Local Cache** (`.fractary/plugins/spec/archive-index.json`)
+**Tier 1: Local Cache** (`.fractary/specs/archive-index.json`)
 - Purpose: Fast lookups during normal operations
 - Performance: Instant access, no network calls
 - Risk: Lost if local environment lost
@@ -465,7 +465,7 @@ Check for local index
     ↓
 Sync from Cloud (Tier 2)
     ├─ Download: archive/specs/.archive-index.json
-    ├─ Save to: .fractary/plugins/spec/archive-index.json
+    ├─ Save to: .fractary/specs/archive-index.json
     └─ ✓ Index recovered!
     ↓
 Plugin ready
@@ -577,7 +577,7 @@ ls .fractary/
 # ✅ Recovered 15 archived specs!
 
 # Index now available
-cat .fractary/plugins/spec/archive-index.json
+cat .fractary/specs/archive-index.json
 # → Contains all archives
 ```
 
@@ -585,12 +585,12 @@ cat .fractary/plugins/spec/archive-index.json
 
 ```bash
 # Local index corrupted
-cat .fractary/plugins/spec/archive-index.json
+cat .fractary/specs/archive-index.json
 # → Invalid JSON
 
 # Re-sync from cloud
 sync-index.sh download \
-  .fractary/plugins/spec/archive-index.json \
+  .fractary/specs/archive-index.json \
   archive/specs/.archive-index.json
 
 # ✓ Index recovered from cloud backup
@@ -647,7 +647,7 @@ Enable two-tier storage in `config.json`:
 {
   "storage": {
     "archive_index": {
-      "local_cache": ".fractary/plugins/spec/archive-index.json",
+      "local_cache": ".fractary/specs/archive-index.json",
       "cloud_backup": "archive/specs/.archive-index.json"
     }
   }
@@ -668,7 +668,7 @@ A: Delete local index, then run `/fractary-spec:init` or `/fractary-spec:read`
 **Q: Can I see sync status?**
 A: Check `last_synced` field in local index:
 ```bash
-jq '.last_synced' .fractary/plugins/spec/archive-index.json
+jq '.last_synced' .fractary/specs/archive-index.json
 ```
 
 **Q: What if both local and cloud lost?**

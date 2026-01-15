@@ -2,7 +2,7 @@
 # Stop the active session capture
 set -euo pipefail
 
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Find active session file in secure temp directory
 ACTIVE_SESSION_FILE=""

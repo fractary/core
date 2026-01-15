@@ -25,7 +25,7 @@ Store list of spec file paths for processing.
 
 ## Step 2: Load Configuration
 
-Load plugin configuration from `.fractary/plugins/spec/config.json`:
+Load plugin configuration from `.fractary/specs/config.json`:
 - Get `storage.cloud_archive_path` pattern
 - Get `storage.archive_index_file` location
 - Get `archive.auto_archive_on` settings
@@ -175,10 +175,10 @@ If upload fails:
 
 ## Step 7: Update Archive Index
 
-Load archive index from `.fractary/plugins/spec/archive-index.json`:
+Load archive index from `.fractary/specs/archive-index.json`:
 
 ```bash
-INDEX_FILE=".fractary/plugins/spec/archive-index.json"
+INDEX_FILE=".fractary/specs/archive-index.json"
 
 # Create if doesn't exist
 if [[ ! -f "$INDEX_FILE" ]]; then
@@ -311,7 +311,7 @@ done
 Commit both index update and spec removals:
 
 ```bash
-git add .fractary/plugins/spec/archive-index.json
+git add .fractary/specs/archive-index.json
 
 git commit -m "Archive specs for issue #${ISSUE_NUMBER}
 

@@ -408,55 +408,56 @@ Add to `.claude/settings.json`:
 
 ## Plugin Configuration
 
-### Claude Code Plugin Configuration
+### Fractary Core Plugin Configuration
 
-Each plugin can have its own configuration in `.fractary/plugins/`:
+**v2.0+:** All plugin configurations are now unified in a single `.fractary/config.yaml` file.
 
-#### Work Plugin
-
-`.fractary/plugins/work.yaml`:
-
-```yaml
-provider: github
-repository:
-  owner: myorg
-  name: myrepo
-token: ${GITHUB_TOKEN}
-
-defaultLabels:
-  - fractary
-defaultIssueTemplate: feature
+Initialize the unified configuration:
+```bash
+fractary-core:init
 ```
 
-#### Repo Plugin
-
-`.fractary/plugins/repo.yaml`:
+This creates `.fractary/config.yaml` with sections for all plugins:
 
 ```yaml
-provider: github
-repository:
-  owner: myorg
-  name: myrepo
-token: ${GITHUB_TOKEN}
+version: "2.0"
 
-branchNaming:
-  format: "{type}/{work-id}-{description}"
-  maxLength: 50
+work:
+  active_handler: github
+  handlers:
+    github:
+      owner: myorg
+      repo: myrepo
+      token: ${GITHUB_TOKEN}
 
-commitConvention: conventional
-defaultBase: main
+repo:
+  active_handler: github
+  handlers:
+    github:
+      token: ${GITHUB_TOKEN}
+  defaults:
+    default_branch: main
+    branch_naming:
+      pattern: "{prefix}/{issue_id}-{slug}"
+
+logs:
+  storage:
+    local_path: .fractary/logs
+
+spec:
+  storage:
+    local_path: .fractary/specs
+
+file:
+  schema_version: "2.0"
+  sources:
+    specs:
+      type: s3
+      bucket: myproject-files
+      prefix: specs/
 ```
 
-#### Spec Plugin
-
-`.fractary/plugins/spec.yaml`:
-
-```yaml
-directory: ./specs
-template: feature
-autoValidate: true
-refinementQuestions: true
-```
+For detailed configuration options, see the config-manager agent documentation.
 
 ## Environment Variables
 
@@ -802,12 +803,12 @@ v2.0 introduces a **breaking change** with the unified YAML configuration system
 #### What Changed
 
 **Before (v1.x):**
-- Multiple config files: `.fractary/plugins/{name}/config.json`
+- Multiple config files per plugin
 - JSON format
 - Per-plugin initialization
 
 **After (v2.0):**
-- Single config file: `.fractary/core/config.yaml`
+- Single config file: `.fractary/config.yaml`
 - YAML format only
 - Unified initialization command
 - Handler pattern for multi-platform support
@@ -904,7 +905,7 @@ rm -rf .fractary.v1
 
 ##### Work Plugin
 
-**Old (v1.x):** `.fractary/plugins/work/config.json`
+**Old (v1.x):**
 ```json
 {
   "platform": "github",
@@ -914,7 +915,7 @@ rm -rf .fractary.v1
 }
 ```
 
-**New (v2.0):** `.fractary/core/config.yaml`
+**New (v2.0):** `.fractary/config.yaml`
 ```yaml
 work:
   active_handler: github
@@ -928,7 +929,7 @@ work:
 
 ##### Repo Plugin
 
-**Old (v1.x):** `.fractary/plugins/repo/config.json`
+**Old (v1.x):**
 ```json
 {
   "platform": "github",
@@ -936,7 +937,7 @@ work:
 }
 ```
 
-**New (v2.0):** `.fractary/core/config.yaml`
+**New (v2.0):** `.fractary/config.yaml`
 ```yaml
 repo:
   active_handler: github
@@ -950,14 +951,14 @@ repo:
 
 ##### Spec Plugin
 
-**Old (v1.x):** `.fractary/plugins/spec/config.json`
+**Old (v1.x):**
 ```json
 {
   "local_path": "/specs"
 }
 ```
 
-**New (v2.0):** `.fractary/core/config.yaml`
+**New (v2.0):** `.fractary/config.yaml`
 ```yaml
 spec:
   schema_version: "1.0"
@@ -987,25 +988,22 @@ The following init commands are deprecated and delegate to unified init:
 
 **Issue**: Old plugin configs still being read
 
-**Solution**: Remove old config files:
-```bash
-rm -rf .fractary/plugins/*/config.json
-```
+**Solution**: Old plugin-specific config files are no longer used in v2.0. All configuration is in `.fractary/config.yaml`.
 
 **Issue**: "Configuration file not found" error
 
-**Solution**: Ensure config is at `.fractary/core/config.yaml` (not `.fractary/core.yaml`)
+**Solution**: Ensure config is at `.fractary/config.yaml`. Run `fractary-core:init` if missing.
 
 #### Breaking Changes Summary
 
 **Removed:**
-- Individual plugin config files (`.fractary/plugins/{name}/config.json`)
-- JSON config support (`.fractary/core.json`)
+- Individual plugin config files
+- JSON config support
 - Automatic migration from v1.x
 - Per-plugin init commands (now deprecated wrappers)
 
 **Changed:**
-- Config location: `.fractary/core.yaml` → `.fractary/core/config.yaml`
+- Config location: Now at `.fractary/config.yaml` (unified)
 - Config format: JSON → YAML
 - Init command: Plugin-specific → Unified `fractary-core:init`
 

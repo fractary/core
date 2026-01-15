@@ -8,7 +8,7 @@
 #
 # CRITICAL: This script requires fractary-file plugin integration.
 # Cloud upload is NOT implemented yet. This is a safe placeholder that:
-# 1. Creates a local backup in .fractary/plugins/spec/backups/
+# 1. Creates a local backup in .fractary/specs/backups/
 # 2. Fails with clear error if SPEC_ALLOW_MOCK_UPLOAD not set
 # 3. Prevents data loss by blocking archival without real upload
 
@@ -66,7 +66,7 @@ Option 2 - Testing/Development Only (DATA LOSS RISK):
   WARNING: You will lose your specifications!
 
 Option 3 - Use local backup mode:
-  Specs will be copied to .fractary/plugins/spec/backups/ instead
+  Specs will be copied to .fractary/specs/backups/ instead
   No cloud upload, but no data loss
   Set SPEC_USE_LOCAL_BACKUP=true
 
@@ -80,7 +80,7 @@ echo "⚠️  WARNING: Mock upload mode - specs will NOT be uploaded to cloud!" 
 echo "⚠️  WARNING: This is for TESTING ONLY - data loss will occur!" >&2
 
 # Create local backup as safety net
-BACKUP_DIR=".fractary/plugins/spec/backups"
+BACKUP_DIR=".fractary/specs/backups"
 mkdir -p "$BACKUP_DIR"
 BACKUP_PATH="$BACKUP_DIR/$(date +%Y%m%d-%H%M%S)-$FILENAME"
 cp "$SPEC_PATH" "$BACKUP_PATH"

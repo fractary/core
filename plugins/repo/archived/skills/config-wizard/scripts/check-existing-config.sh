@@ -7,7 +7,7 @@
 # Outputs (JSON):
 # {
 #   "project_config_exists": true|false,
-#   "project_config_path": ".fractary/plugins/repo/config.json",
+#   "project_config_path": ".fractary/config.yaml",
 #   "global_config_exists": true|false,
 #   "global_config_path": "~/.fractary/repo/config.json"
 # }
@@ -18,7 +18,7 @@
 set -euo pipefail
 
 # Check project-specific config
-PROJECT_CONFIG=".fractary/plugins/repo/config.json"
+PROJECT_CONFIG=".fractary/config.yaml"
 PROJECT_EXISTS=false
 if [ -f "$PROJECT_CONFIG" ]; then
     PROJECT_EXISTS=true

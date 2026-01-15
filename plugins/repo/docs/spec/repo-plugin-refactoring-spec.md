@@ -862,7 +862,7 @@ Legend: ✅ Complete | ⏳ In Progress | 🚧 Not Implemented
 
 Configuration files are searched in the following order:
 
-1. `.fractary/plugins/repo/config.json` (project-specific)
+1. `.fractary/config.yaml` (project-specific)
 2. `~/.fractary/repo/config.json` (user-global)
 3. Plugin defaults (built-in)
 

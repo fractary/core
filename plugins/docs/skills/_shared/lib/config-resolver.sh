@@ -18,7 +18,7 @@ DEFAULT_CONFIG="${PLUGIN_ROOT}/config/config.example.json"
 # Function to load project config
 load_project_config() {
     local project_root="${1:-.}"
-    local project_config="${project_root}/.fractary/plugins/docs/config.json"
+    local project_config="${project_root}/.fractary/config.yaml"
 
     if [[ -f "$project_config" ]]; then
         cat "$project_config"

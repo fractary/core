@@ -138,7 +138,7 @@ By default, schema documentation is generated in:
 - **Path**: `docs/api/schemas/`
 - **Filename**: Derived from title (e.g., "User API Schema" → `user-api-schema.md`)
 
-Configure in `.fractary/plugins/docs/config.json`:
+Configure in `.fractary/config.yaml`:
 
 ```json
 {
@@ -636,7 +636,7 @@ See `examples/schema-standards/` for a complete reference implementation includi
 ```json
 {
   "validation": {
-    "custom_rules_script": "./.fractary/plugins/docs/scripts/validate-schema-docs.sh",
+    "custom_rules_script": "./.fractary/docs/scripts/validate-schema-docs.sh",
     "project_standards_doc": "./docs/standards/PROJECT-SCHEMA-STANDARDS.md",
     "required_sections": {
       "schema": [
@@ -652,8 +652,8 @@ See `examples/schema-standards/` for a complete reference implementation includi
     }
   },
   "hooks": {
-    "pre_validate": "./.fractary/plugins/docs/hooks/pre-validate.sh",
-    "post_generate": "./.fractary/plugins/docs/hooks/post-generate.sh"
+    "pre_validate": "./.fractary/docs/hooks/pre-validate.sh",
+    "post_generate": "./.fractary/docs/hooks/post-generate.sh"
   }
 }
 ```

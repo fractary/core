@@ -264,32 +264,37 @@ When work completes:
 
 ```
 Cloud: archive/specs/{year}/{issue_number}.md
-Index: .fractary/plugins/spec/archive-index.json
+Index: .fractary/specs/archive-index.json
 ```
 
 ## Configuration
 
-Edit `.fractary/plugins/spec/config.json`:
+**v2.0+:** Configuration is in the unified **`.fractary/config.yaml`** file under the `spec` section.
 
-```json
-{
-  "storage": {
-    "local_path": "/specs",
-    "cloud_archive_path": "archive/specs/{year}/{issue_number}.md"
-  },
-  "archive": {
-    "auto_archive_on": {
-      "issue_close": true,
-      "pr_merge": true,
-      "faber_release": true
-    },
-    "pre_archive": {
-      "check_docs_updated": "warn",
-      "prompt_user": true
-    }
-  }
-}
+Initialize the unified configuration:
+```bash
+fractary-core:init
 ```
+
+This creates `.fractary/config.yaml` with all plugin configurations including:
+```yaml
+spec:
+  schema_version: "1.0"
+  storage:
+    local_path: .fractary/specs
+    cloud_archive_path: archive/specs/{year}/{spec_id}.md
+    archive_index:
+      local_cache: .fractary/specs/archive-index.json
+      cloud_backup: archive/specs/.archive-index.json
+  archive:
+    strategy: lifecycle
+    auto_archive_on:
+      issue_close: true
+      pr_merge: true
+      faber_release: true
+```
+
+For configuration details, see the [Configuration Guide](../../docs/guides/configuration.md).
 
 ## FABER Integration
 
@@ -657,7 +662,7 @@ The `.fractary` directory is git-ignored. If you lose your local environment (ne
 ### How It Works
 
 **Tier 1: Local Cache**
-- Location: `.fractary/plugins/spec/archive-index.json`
+- Location: `.fractary/specs/archive-index.json`
 - Purpose: Fast lookups during normal operations
 - Status: Git-ignored, not backed up
 - Risk: Lost if local environment lost
@@ -716,7 +721,7 @@ If fractary-file plugin not available:
 {
   "storage": {
     "archive_index": {
-      "local_cache": ".fractary/plugins/spec/archive-index.json",
+      "local_cache": ".fractary/specs/archive-index.json",
       "cloud_backup": "archive/specs/.archive-index.json"
     }
   }

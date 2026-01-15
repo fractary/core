@@ -149,7 +149,7 @@ Already have a config with one handler? You can add more without reconfiguring:
 **Option 2: Manually Edit Config**
 ```bash
 # Edit your existing config
-vim .fractary/plugins/file/config.json
+vim .fractary/config.yaml
 
 # Add new handlers to the "handlers" object:
 {
@@ -343,13 +343,13 @@ See [Context Argument Standard](../../docs/plugin-development/context-argument-s
 
 ## Configuration
 
-Configuration is stored in `.fractary/plugins/file/config.json`.
+Configuration is stored in `.fractary/config.yaml`.
 
 **Multi-Handler Support**: You can configure multiple storage providers in a single configuration file. Set `active_handler` to your default, and override per-operation as needed.
 
 ### Configuration File Location (Priority Order)
 
-1. **Project config**: `.fractary/plugins/file/config.json` (highest priority)
+1. **Project config**: `.fractary/config.yaml` (highest priority)
 2. **Global config**: `~/.config/fractary/file/config.json` (fallback)
 3. **Default**: Local handler with `.` (project root) base path
 
@@ -662,7 +662,7 @@ Use a specific handler for one operation:
 
 ```bash
 # Automatically set by plugin
-chmod 0600 .fractary/plugins/file/config.json
+chmod 0600 .fractary/config.yaml
 chmod 0600 ~/.config/fractary/file/config.json
 ```
 
@@ -779,7 +779,7 @@ See existing handlers for reference.
 
 **Solution**: Configuration is optional! Local handler works with defaults. To configure:
 ```bash
-cp plugins/file/config/config.example.json .fractary/plugins/file/config.json
+cp plugins/file/config/config.example.json .fractary/config.yaml
 ```
 
 ### Handler Not Configured
@@ -808,7 +808,7 @@ export R2_ACCESS_KEY_ID="your-access-key"
 
 **Solution**: Set secure permissions:
 ```bash
-chmod 0600 .fractary/plugins/file/config.json
+chmod 0600 .fractary/config.yaml
 ```
 
 ### rclone Not Found (Google Drive)

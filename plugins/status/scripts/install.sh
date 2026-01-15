@@ -30,14 +30,14 @@ cd "$PROJECT_ROOT"
 
 # Create plugin configuration directory
 echo -e "${CYAN}Creating plugin configuration...${NC}"
-mkdir -p .fractary/plugins/status
+mkdir -p .fractary/status
 
 # Create plugin configuration
-cat > .fractary/plugins/status/config.json <<EOF
+cat > .fractary/config.yaml <<EOF
 {
   "version": "1.0.0",
   "installed": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-  "cache_path": ".fractary/plugins/status"
+  "cache_path": ".fractary/status"
 }
 EOF
 
@@ -78,7 +78,7 @@ EOF
 fi
 
 # Create .gitignore in plugin directory for cache
-cat > .fractary/plugins/status/.gitignore <<EOF
+cat > .fractary/status/.gitignore <<EOF
 # Fractary status plugin - runtime cache
 last-prompt.json
 EOF
@@ -91,8 +91,8 @@ echo -e "${GREEN}✓ Installation Complete!${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "Plugin configuration:"
-echo -e "  ${CYAN}•${NC} Configuration: .fractary/plugins/status/config.json"
-echo -e "  ${CYAN}•${NC} Cache location: .fractary/plugins/status/"
+echo -e "  ${CYAN}•${NC} Configuration: .fractary/config.yaml"
+echo -e "  ${CYAN}•${NC} Cache location: .fractary/status/"
 echo -e "  ${CYAN}•${NC} StatusLine: .claude/settings.json"
 echo -e "  ${CYAN}•${NC} Script path: $STATUS_LINE_SCRIPT"
 echo ""

@@ -108,7 +108,7 @@ After polling completes (or exits), continue with the standard PR analysis workf
 
 ## Configuration
 
-CI polling settings can be configured in `.fractary/plugins/repo/config.json`:
+CI polling settings can be configured in `.fractary/config.yaml`:
 
 ```json
 {

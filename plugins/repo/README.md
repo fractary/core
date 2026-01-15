@@ -449,7 +449,7 @@ See [Bitbucket Setup Guide](docs/setup/bitbucket-setup.md) (coming soon)
 ## Configuration
 
 Configuration is loaded from:
-1. `.fractary/plugins/repo/config.json` (project-specific)
+1. `.fractary/config.yaml` (project-specific)
 2. `~/.fractary/repo/config.json` (user-global)
 3. Built-in defaults
 

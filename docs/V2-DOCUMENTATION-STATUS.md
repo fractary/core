@@ -24,7 +24,7 @@ The following plugin README files still contain v1.x configuration examples and 
 
 ### plugins/work/README.md
 **Lines needing updates:**
-- Line 136-173: Configuration section shows old `.fractary/plugins/work/config.json` format
+- Line 136-173: Configuration section shows old `.fractary/config.yaml` format
 - Line 175: References `config/config.example.json`
 - Line 183-187: `/fractary-work:init` command examples
 - Line 579: References old config location
@@ -95,30 +95,26 @@ See [Configuration Guide](../../docs/guides/configuration.md) for details.
 
 ### plugins/docs/README.md
 **Lines needing updates:**
-- Line 649: References `.fractary/plugins/docs/config.json`
+- Line 649: References `.fractary/config.yaml`
 
 **Recommended update:**
 Replace with: "Configuration is in `.fractary/core/config.yaml` under the `docs` section."
 
 ### plugins/file/README.md
 **Lines needing updates:**
-- Line 152: `vim .fractary/plugins/file/config.json`
+- Line 152: `vim .fractary/config.yaml`
 - Line 346-353: Configuration location section
 - Line 665-666: File permissions for old config
 - Line 782: Copy example config command
 - Line 789: Handler configuration reference
 
 **Recommended updates:**
-- Replace all `.fractary/plugins/file/config.json` with `.fractary/core/config.yaml`
+- Replace all `.fractary/config.yaml` with `.fractary/core/config.yaml`
 - Update configuration section to show unified config format
 - Update init instructions to use `fractary-core:init --plugins file`
 
 ### plugins/logs/README.md
-**Lines needing updates:**
-- Line 316: References `.fractary/plugins/logs/config.json`
-
-**Recommended update:**
-Replace with: "Runtime configuration is in `.fractary/core/config.yaml` under the `logs` section."
+**Status:** ✅ Updated to reference unified `.fractary/config.yaml` configuration.
 
 ## 📋 Additional Documentation to Consider
 

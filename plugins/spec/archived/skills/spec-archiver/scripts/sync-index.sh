@@ -10,7 +10,7 @@
 #   check: Check if cloud index exists
 #
 # Two-tier storage prevents index loss:
-#   - Local cache: .fractary/plugins/spec/archive-index.json (fast, git-ignored)
+#   - Local cache: .fractary/specs/archive-index.json (fast, git-ignored)
 #   - Cloud backup: archive/specs/.archive-index.json (durable, recoverable)
 
 set -euo pipefail

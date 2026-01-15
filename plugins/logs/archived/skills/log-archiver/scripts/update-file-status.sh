@@ -6,7 +6,7 @@ ISSUE_NUMBER="${1:?Issue number required}"
 FILE_PATH="${2:?File path required}"
 STATUS="${3:?Status required (pending|uploaded|failed)}"
 CLOUD_URL="${4:-}"  # Optional: Cloud URL if uploaded successfully
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Input validation: Issue number should be numeric
 if ! [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then

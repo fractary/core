@@ -5,7 +5,7 @@ set -euo pipefail
 QUERY="${1:?Query required}"
 LOG_TYPE="${2:-all}"
 MAX_RESULTS="${3:-100}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Input validation: MAX_RESULTS must be numeric and positive
 if ! [[ "$MAX_RESULTS" =~ ^[0-9]+$ ]] || [[ "$MAX_RESULTS" -lt 1 ]]; then

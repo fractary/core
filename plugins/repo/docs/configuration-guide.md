@@ -21,7 +21,7 @@ The plugin loads configuration from multiple locations in order of precedence:
 
 ### 1. Project-Specific Configuration (Highest Priority)
 ```
-.fractary/plugins/repo/config.json
+.fractary/config.yaml
 ```
 
 **Use when**:
@@ -32,8 +32,8 @@ The plugin loads configuration from multiple locations in order of precedence:
 **Example**:
 ```bash
 # Create project config
-mkdir -p .fractary/plugins/repo
-cp plugins/repo/config/repo.example.json .fractary/plugins/repo/config.json
+mkdir -p .fractary/repo
+cp plugins/repo/config/repo.example.json .fractary/config.yaml
 ```
 
 ### 2. User-Global Configuration (Fallback)
@@ -557,7 +557,7 @@ Platform-specific overrides and settings.
 
 When multiple config files exist, they're loaded in this order:
 
-1. **Project-specific** (`.fractary/plugins/repo/config.json`)
+1. **Project-specific** (`.fractary/config.yaml`)
 2. **User-global** (`~/.fractary/repo/config.json`)
 3. **Built-in defaults**
 
@@ -662,7 +662,7 @@ Use SSH for git operations, token only for API.
 }
 ```
 
-**Project A** (`.fractary/plugins/repo/config.json`):
+**Project A** (`.fractary/config.yaml`):
 ```json
 {
   "handlers": {
@@ -734,7 +734,7 @@ export GITLAB_TOKEN="glpat_..."
 ```bash
 # Verify file exists
 ls -la ~/.fractary/repo/config.json
-ls -la .fractary/plugins/repo/config.json
+ls -la .fractary/config.yaml
 
 # Verify JSON syntax
 cat config.json | jq .

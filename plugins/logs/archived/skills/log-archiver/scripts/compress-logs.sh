@@ -3,7 +3,7 @@
 set -euo pipefail
 
 LOG_FILE="${1:?Log file path required}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Load configuration
 THRESHOLD_MB=1
