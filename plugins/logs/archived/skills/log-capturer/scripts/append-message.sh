@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROLE="${1:?Role required (user|claude|system)}"
 MESSAGE="${2:?Message required}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Input validation: Role must be user, claude, or system
 if ! [[ "$ROLE" =~ ^(user|claude|system)$ ]]; then

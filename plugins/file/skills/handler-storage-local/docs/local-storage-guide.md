@@ -30,7 +30,7 @@ Default settings:
 
 ### Custom Configuration
 
-Customize the local handler in `.fractary/plugins/file/config.json`:
+Customize the local handler in `.fractary/config.yaml`:
 
 ```json
 {

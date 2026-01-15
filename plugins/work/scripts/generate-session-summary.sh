@@ -17,7 +17,7 @@ fi
 # Configuration
 CACHE_DIR="${HOME}/.fractary/work"
 LAST_STOP_FILE="${CACHE_DIR}/last_stop_ref"
-CONFIG_FILE="${HOME}/.fractary/plugins/work/config.json"
+CONFIG_FILE="${HOME}/.fractary/config.yaml"
 mkdir -p "${CACHE_DIR}"
 
 # =============================================================================

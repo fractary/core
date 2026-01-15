@@ -29,7 +29,7 @@ Supported operations:
 </OPERATIONS>
 
 <CONFIGURATION>
-Required configuration in .fractary/plugins/file/config.json:
+Required configuration in .fractary/config.yaml:
 
 ```json
 {

@@ -46,7 +46,7 @@ if [[ -n "$PROVIDED_CONFIG" ]] && [[ "$PROVIDED_CONFIG" != "null" ]]; then
     GLOBAL_SETTINGS=$(echo "$PROVIDED_CONFIG" | jq -r '.global_settings')
 else
     # Load from filesystem
-    CONFIG_FILE=".fractary/plugins/file/config.json"
+    CONFIG_FILE=".fractary/config.yaml"
 
     # Get active handler (with fallback to local)
     ACTIVE_HANDLER=$(get_active_handler "$CONFIG_FILE")

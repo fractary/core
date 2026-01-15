@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # Configuration
-PLUGIN_DIR="${FRACTARY_PLUGINS_DIR:-.fractary/plugins}/status"
+PLUGIN_DIR="${FRACTARY_STATUS_DIR:-.fractary/status}"
 PROMPT_CACHE="$PLUGIN_DIR/last-prompt.json"
 METRICS_CACHE="$PLUGIN_DIR/session-metrics.json"
 MAX_PROMPT_LENGTH=40

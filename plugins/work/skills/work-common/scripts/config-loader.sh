@@ -32,11 +32,17 @@ else
 fi
 
 # Configuration file location (unified YAML config)
-CONFIG_FILE="$PROJECT_ROOT/.fractary/core/config.yaml"
+# Try new location first, fallback to legacy location
+CONFIG_FILE="$PROJECT_ROOT/.fractary/config.yaml"
+if [ ! -f "$CONFIG_FILE" ]; then
+    CONFIG_FILE="$PROJECT_ROOT/.fractary/core/config.yaml"
+fi
 
 # Check if config file exists
 if [ ! -f "$CONFIG_FILE" ]; then
-    echo "Error: Configuration file not found: $CONFIG_FILE" >&2
+    echo "Error: Configuration file not found" >&2
+    echo "  Tried: $PROJECT_ROOT/.fractary/config.yaml" >&2
+    echo "  Tried: $PROJECT_ROOT/.fractary/core/config.yaml" >&2
     echo "  Run: fractary-core:init" >&2
     exit 3
 fi

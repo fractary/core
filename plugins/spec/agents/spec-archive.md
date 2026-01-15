@@ -32,7 +32,7 @@ Your role is to archive specifications to cloud storage when work is complete.
    c. Parse JSON response to get cloud_url
    d. Add to archive metadata
 6. Sync archive index to cloud:
-   a. Update local .fractary/plugins/spec/archive-index.json
+   a. Update local .fractary/specs/archive-index.json
    b. Call plugins/spec/scripts/sync-index.sh upload <local_index> archive/specs/.archive-index.json
 7. Comment on GitHub issue with archive URLs
 8. Remove local spec files (only after successful upload)
@@ -60,7 +60,7 @@ Warnings (prompt unless --skip-warnings):
 **Upload Script**: plugins/spec/scripts/upload-to-cloud.sh
 - Usage: `upload-to-cloud.sh <local_path> <cloud_path>`
 - Returns JSON: `{"cloud_url": "...", "size_bytes": ..., "checksum": "..."}`
-- Requires: File plugin configured (.fractary/plugins/file/config.json)
+- Requires: File plugin configured (.fractary/config.yaml)
 
 **Index Sync Script**: plugins/spec/scripts/sync-index.sh
 - Usage: `sync-index.sh <operation> <local_index> [cloud_index]`

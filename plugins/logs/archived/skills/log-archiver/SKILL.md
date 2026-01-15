@@ -9,15 +9,15 @@ model: claude-haiku-4-5
 <CONTEXT>
 You are the log-archiver skill for the fractary-logs plugin. You implement **path-based hybrid retention**: each log path pattern has its own retention policy defined in the user's `config.json`, with both lifecycle-based archival (when work completes) + time-based safety net.
 
-**v2.0 Update**: Now **centralized configuration** - retention policies are defined in `.fractary/plugins/logs/config.json` with path-based rules. Session logs kept 7 days local/forever cloud, test logs only 3 days/7 days, audit logs 90 days/forever. You load retention policies from the user's config file, not from plugin source files.
+**v2.0 Update**: Now **centralized configuration** - retention policies are defined in `.fractary/config.yaml (logs section)` with path-based rules. Session logs kept 7 days local/forever cloud, test logs only 3 days/7 days, audit logs 90 days/forever. You load retention policies from the user's config file, not from plugin source files.
 
-**CRITICAL**: Load config from the **project working directory** (`.fractary/plugins/logs/config.json`), NOT the plugin installation directory (`~/.claude/plugins/marketplaces/...`).
+**CRITICAL**: Load config from the **project working directory** (`.fractary/config.yaml (logs section)`), NOT the plugin installation directory (`~/.claude/plugins/marketplaces/...`).
 
 You collect logs based on retention rules, match them against path patterns in config, compress large files, upload to cloud storage via fractary-file, maintain a type-aware archive index, and clean up local storage.
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. **ALWAYS load retention policies** from `.fractary/plugins/logs/config.json` **(in project working directory, NOT plugin installation directory)**
+1. **ALWAYS load retention policies** from `.fractary/config.yaml (logs section)` **(in project working directory, NOT plugin installation directory)**
 2. **MATCH log paths against patterns** to find applicable retention policy (or use retention.default)
 3. **NEVER delete logs without archiving first** (unless retention exceptions apply)
 4. **ALWAYS compress logs** based on per-path compression settings (respects threshold_mb)
@@ -50,7 +50,7 @@ Invoke log-lister skill:
 - Get all logs with metadata
 
 ### Step 2: Load Retention Policies from Config
-Read user's config file: `.fractary/plugins/logs/config.json`
+Read user's config file: `.fractary/config.yaml (logs section)`
 - Load `retention.default` - fallback policy for unmatched paths
 - Load `retention.paths` array - path-specific retention rules
 - For each log, match against path patterns to find applicable policy
@@ -302,7 +302,7 @@ Recommendation: Re-upload missing build log
 **Purpose**: Calculate retention status per log path
 **Usage**: `check-retention-status.sh <log_path> <config_file>`
 **Outputs**: JSON with retention status (active/expiring/expired/protected)
-**v2.0 CHANGE**: Reads retention policies from `.fractary/plugins/logs/config.json` (retention.paths array), matches log path against patterns
+**v2.0 CHANGE**: Reads retention policies from `.fractary/config.yaml (logs section)` (retention.paths array), matches log path against patterns
 
 ## scripts/collect-issue-logs.sh
 **Purpose**: Find all logs for an issue, grouped by type
@@ -437,7 +437,7 @@ audit (90d local, forever cloud):
 <DOCUMENTATION>
 Archive operations documented in **type-aware archive index** at `.fractary/logs/.archive-index.json`. Each log type has its retention policy specified.
 
-**Retention policies centralized in user config**: `.fractary/plugins/logs/config.json`
+**Retention policies centralized in user config**: `.fractary/config.yaml (logs section)`
 - Path-based matching via `retention.paths` array
 - Default fallback via `retention.default`
 - Per-path settings for compression, validation, retention exceptions
@@ -486,7 +486,7 @@ Retry: /fractary-logs:archive --type audit --retry
 ## v2.0 Migration Notes
 
 **What changed:**
-- **Centralized configuration**: Retention policies now in `.fractary/plugins/logs/config.json` (not plugin source)
+- **Centralized configuration**: Retention policies now in `.fractary/config.yaml (logs section)` (not plugin source)
 - **Path-based matching**: Use glob patterns (e.g., `sessions/*`) to match logs to retention policies
 - **User-customizable**: All retention settings configurable per project
 - **Sensible defaults**: Init command creates comprehensive config with 9 log types pre-configured
@@ -502,7 +502,7 @@ Retry: /fractary-logs:archive --type audit --retry
 - Issue-based archival
 
 **Benefits:**
-- **One config file** - all retention settings in `.fractary/plugins/logs/config.json`
+- **One config file** - all retention settings in `.fractary/config.yaml (logs section)`
 - **Project-specific policies** - customize retention per project, not globally
 - **Version control friendly** - config committed with project
 - Audit logs protected for 90 days (compliance)

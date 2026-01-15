@@ -5,7 +5,7 @@
 Version 2.0 introduces **centralized, path-based retention configuration** in `config.json`. This replaces the old plugin-level retention configs in `plugins/logs/types/{type}/retention-config.json`.
 
 **Key changes:**
-- ✅ All retention settings in **one file**: `.fractary/plugins/logs/config.json`
+- ✅ All retention settings in **one file**: `.fractary/config.yaml`
 - ✅ **Path-based matching**: Use glob patterns to match logs to retention policies
 - ✅ **User-customizable**: Configure retention per project, not globally
 - ✅ **Sensible defaults**: Init generates comprehensive config with 9 log types
@@ -90,13 +90,13 @@ The easiest way to migrate is to re-initialize:
 
 ```bash
 # Backup your current config (optional)
-cp .fractary/plugins/logs/config.json .fractary/plugins/logs/config.json.v1.backup
+cp .fractary/config.yaml .fractary/config.yaml.v1.backup
 
 # Re-initialize with v2.0 config
 /fractary-logs:init --force
 
 # Review and customize the new config
-vim .fractary/plugins/logs/config.json
+vim .fractary/config.yaml
 ```
 
 This generates a comprehensive v2.0 config with sensible defaults for all log types.
@@ -188,7 +188,7 @@ npm install -g ajv-cli
 # Validate against schema
 ajv validate \
   -s plugins/logs/config/config.schema.json \
-  -d .fractary/plugins/logs/config.json
+  -d .fractary/config.yaml
 ```
 
 ## Configuration Reference
@@ -409,12 +409,12 @@ Logs are matched against patterns in order:
 
 ```bash
 # Check JSON syntax
-jq . .fractary/plugins/logs/config.json
+jq . .fractary/config.yaml
 
 # Validate against schema
 ajv validate \
   -s plugins/logs/config/config.schema.json \
-  -d .fractary/plugins/logs/config.json
+  -d .fractary/config.yaml
 ```
 
 ### Logs Not Matching Expected Policy
@@ -424,7 +424,7 @@ Test path matching:
 # Test a specific log path
 /home/user/claude-plugins/plugins/logs/skills/log-archiver/scripts/load-retention-policy.sh \
   "/logs/sessions/session-123.md" \
-  ".fractary/plugins/logs/config.json"
+  ".fractary/config.yaml"
 ```
 
 This shows which policy matched (or if it fell back to default).
@@ -439,7 +439,7 @@ If you need to rollback to v1.x:
 
 ```bash
 # Restore backup
-cp .fractary/plugins/logs/config.json.v1.backup .fractary/plugins/logs/config.json
+cp .fractary/config.yaml.v1.backup .fractary/config.yaml
 
 # Or regenerate v1.x config
 # (requires v1.x plugin version)

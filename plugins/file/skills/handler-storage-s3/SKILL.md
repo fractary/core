@@ -28,7 +28,7 @@ Supported operations:
 </OPERATIONS>
 
 <CONFIGURATION>
-Required configuration in .fractary/plugins/file/config.json:
+Required configuration in .fractary/config.yaml:
 
 **With AWS Profile** (Recommended - uses ~/.aws/config):
 ```json

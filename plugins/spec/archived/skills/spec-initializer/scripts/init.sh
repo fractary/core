@@ -38,9 +38,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-CONFIG_PATH=".fractary/plugins/spec/config.json"
+CONFIG_PATH=".fractary/specs/config.json"
 SPECS_DIR="specs"
-ARCHIVE_INDEX=".fractary/plugins/spec/archive-index.json"
+ARCHIVE_INDEX=".fractary/specs/archive-index.json"
 
 # Check if config already exists
 if [ -f "$CONFIG_PATH" ] && [ "$FORCE" = false ]; then
@@ -64,7 +64,7 @@ cat > "$CONFIG_PATH" << 'EOF'
     "local_path": "/specs",
     "cloud_archive_path": "archive/specs/{year}/{spec_id}.md",
     "archive_index": {
-      "local_cache": ".fractary/plugins/spec/archive-index.json",
+      "local_cache": ".fractary/specs/archive-index.json",
       "cloud_backup": "archive/specs/.archive-index.json"
     }
   },

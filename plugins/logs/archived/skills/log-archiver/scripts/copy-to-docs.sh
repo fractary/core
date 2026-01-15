@@ -21,7 +21,7 @@ SUMMARY_PATH=""
 DOCS_PATH="docs/conversations"
 ISSUE_NUMBER=""
 UPDATE_INDEX="true"
-CONFIG_FILE=".fractary/plugins/logs/config.json"
+CONFIG_FILE=".fractary/config.yaml (logs section)"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do

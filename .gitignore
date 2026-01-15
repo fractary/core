@@ -20,17 +20,14 @@ env/
 Thumbs.db
 
 # Fractary-specific directories
-# New structure (.fractary/)
 .fractary/logs/*.log
 .fractary/logs/*.log.gz
 .fractary/specs/*.md
 .fractary/codex/cache/
 
-# Old structure (backward compat)
+# Old structure (backward compat for pre-v2.0)
 /logs/
 /specs/
-.fractary/plugins/logs/*.log
-.fractary/plugins/spec/*.md
 
 # Build artifacts
 dist/

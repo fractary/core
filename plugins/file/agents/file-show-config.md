@@ -38,7 +38,7 @@ Your role is to display the current configuration with sensitive values masked.
 </ARGUMENTS>
 
 <CONFIG_LOCATIONS>
-1. Project: `.fractary/plugins/file/config.json`
+1. Project: `.fractary/config.yaml`
 2. Global: `~/.config/fractary/file/config.json`
 3. Default: Use local handler (no file)
 </CONFIG_LOCATIONS>

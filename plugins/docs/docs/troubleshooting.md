@@ -64,14 +64,14 @@ ls -la commands/ agents/ skills/
 **Solution**:
 ```bash
 # Create plugin directory
-mkdir -p .fractary/plugins/docs
+mkdir -p .fractary/docs
 
 # Copy example config
 cp plugins/docs/config/config.example.json \
-   .fractary/plugins/docs/config.json
+   .fractary/config.yaml
 
 # Verify
-cat .fractary/plugins/docs/config.json
+cat .fractary/config.yaml
 ```
 
 ### Issue: Permission denied on scripts
@@ -167,8 +167,8 @@ date:  # Empty date
 
 # Or set defaults in config
 jq '.frontmatter.default_author = "Engineering Team"' \
-  .fractary/plugins/docs/config.json > tmp.$$ && \
-  mv tmp.$$ .fractary/plugins/docs/config.json
+  .fractary/config.yaml > tmp.$$ && \
+  mv tmp.$$ .fractary/config.yaml
 ```
 
 ## Validation Issues
@@ -264,7 +264,7 @@ vim docs/adrs/ADR-001.md
 **Diagnosis**:
 ```bash
 # Check if validation disabled in config
-jq '.validation.enabled' .fractary/plugins/docs/config.json
+jq '.validation.enabled' .fractary/config.yaml
 
 # Check validation mode
 /fractary-docs:validate doc.md --format json | jq '.total_issues'
@@ -274,8 +274,8 @@ jq '.validation.enabled' .fractary/plugins/docs/config.json
 ```bash
 # Enable strict mode
 jq '.validation.strict_mode = true' \
-  .fractary/plugins/docs/config.json > tmp.$$ && \
-  mv tmp.$$ .fractary/plugins/docs/config.json
+  .fractary/config.yaml > tmp.$$ && \
+  mv tmp.$$ .fractary/config.yaml
 
 # Run with strict validation
 /fractary-docs:validate docs/ --strict
@@ -327,15 +327,15 @@ grep "related:" source.md
 grep "related:" target.md  # Empty or missing
 
 # Check configuration
-jq '.linking.bidirectional_links' .fractary/plugins/docs/config.json
+jq '.linking.bidirectional_links' .fractary/config.yaml
 ```
 
 **Solution**:
 ```bash
 # Ensure bidirectional linking enabled
 jq '.linking.bidirectional_links = true' \
-  .fractary/plugins/docs/config.json > tmp.$$ && \
-  mv tmp.$$ .fractary/plugins/docs/config.json
+  .fractary/config.yaml > tmp.$$ && \
+  mv tmp.$$ .fractary/config.yaml
 
 # Re-create link
 /fractary-docs:link source.md target.md
@@ -464,8 +464,8 @@ find docs -name "*.backup.*" -type f | \
 
 # Or disable backups in config
 jq '.updates.create_backup = false' \
-  .fractary/plugins/docs/config.json > tmp.$$ && \
-  mv tmp.$$ .fractary/plugins/docs/config.json
+  .fractary/config.yaml > tmp.$$ && \
+  mv tmp.$$ .fractary/config.yaml
 ```
 
 ## Performance Issues
@@ -481,7 +481,7 @@ time /fractary-docs:validate docs/
 **Diagnosis**:
 ```bash
 # Check if external link checking enabled
-jq '.validation.check_external_links' .fractary/plugins/docs/config.json
+jq '.validation.check_external_links' .fractary/config.yaml
 
 # Check document count
 find docs -name "*.md" | wc -l
@@ -491,8 +491,8 @@ find docs -name "*.md" | wc -l
 ```bash
 # Disable external link checking
 jq '.validation.check_external_links = false' \
-  .fractary/plugins/docs/config.json > tmp.$$ && \
-  mv tmp.$$ .fractary/plugins/docs/config.json
+  .fractary/config.yaml > tmp.$$ && \
+  mv tmp.$$ .fractary/config.yaml
 
 # Or validate in batches
 find docs -name "*.md" | head -50 | while read f; do
@@ -561,24 +561,24 @@ find docs -type l -delete
 **Diagnosis**:
 ```bash
 # Verify config file location
-ls -la .fractary/plugins/docs/config.json
+ls -la .fractary/config.yaml
 
 # Check JSON syntax
-jq '.' .fractary/plugins/docs/config.json
+jq '.' .fractary/config.yaml
 ```
 
 **Solution**:
 ```bash
 # Ensure config in correct location
-mkdir -p .fractary/plugins/docs
-mv config.json .fractary/plugins/docs/
+mkdir -p .fractary/docs
+mv config.json .fractary/docs/
 
 # Validate JSON syntax
-cat .fractary/plugins/docs/config.json | jq '.'
+cat .fractary/config.yaml | jq '.'
 
 # If syntax error, fix or restore from example
 cp plugins/docs/config/config.example.json \
-   .fractary/plugins/docs/config.json
+   .fractary/config.yaml
 ```
 
 ### Issue: Invalid JSON in config
@@ -592,7 +592,7 @@ cp plugins/docs/config/config.example.json \
 **Diagnosis**:
 ```bash
 # Validate JSON
-jq '.' .fractary/plugins/docs/config.json
+jq '.' .fractary/config.yaml
 # Shows line with error
 ```
 
@@ -609,7 +609,7 @@ jq '.' .fractary/plugins/docs/config.json
 
 # Or restore from example
 cp plugins/docs/config/config.example.json \
-   .fractary/plugins/docs/config.json
+   .fractary/config.yaml
 ```
 
 ## Advanced Debugging
@@ -618,8 +618,8 @@ cp plugins/docs/config/config.example.json \
 
 ```bash
 # Add debug flag to config
-jq '.debug = true' .fractary/plugins/docs/config.json > tmp.$$ && \
-  mv tmp.$$ .fractary/plugins/docs/config.json
+jq '.debug = true' .fractary/config.yaml > tmp.$$ && \
+  mv tmp.$$ .fractary/config.yaml
 
 # Run command with verbose output
 /fractary-docs:validate docs/ 2>&1 | tee debug.log
@@ -707,7 +707,7 @@ cat > debug-report.md << EOF
 
 ## Config
 \`\`\`json
-$(cat .fractary/plugins/docs/config.json)
+$(cat .fractary/config.yaml)
 \`\`\`
 
 ## Error

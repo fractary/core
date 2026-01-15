@@ -297,7 +297,7 @@ If not specified in parameters, prompt:
 ```
 Where should the configuration be stored?
 
-  1. Project-specific (.fractary/plugins/repo/config.json)
+  1. Project-specific (.fractary/config.yaml)
      - Only for this repository
      - Can be committed to version control (see .gitignore guidance below)
      - Overrides user-global config
@@ -324,7 +324,7 @@ Recommended .gitignore patterns:
     .fractary/
 
   Option 2: Ignore only sensitive data
-    .fractary/plugins/repo/config.json
+    .fractary/config.yaml
     .fractary/**/*.backup
 
   Option 3: Commit config template (team projects)
@@ -715,7 +715,7 @@ All scripts are in `plugins/repo/skills/config-wizard/scripts/`:
 - Write tool - For updating .gitignore (optional)
 
 **Creates:**
-- `.fractary/plugins/repo/config.json` (project scope)
+- `.fractary/config.yaml` (project scope)
 - `~/.fractary/repo/config.json` (global scope)
 - `*.backup` files (when updating existing config)
 - `.gitignore` entry (if user confirms)

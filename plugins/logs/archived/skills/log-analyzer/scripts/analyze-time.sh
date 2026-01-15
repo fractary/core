@@ -4,7 +4,7 @@ set -euo pipefail
 
 SINCE_DATE="${1:?Since date required (YYYY-MM-DD)}"
 UNTIL_DATE="${2:-$(date +%Y-%m-%d)}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Load configuration
 if [[ ! -f "$CONFIG_FILE" ]]; then

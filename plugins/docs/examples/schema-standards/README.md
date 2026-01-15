@@ -73,7 +73,7 @@ The `validate-schema-docs.sh` script enforces project-specific standards:
 
 if [[ "$DOC_TYPE" == "schema" ]]; then
   echo "Running project-specific schema validation..."
-  ./.fractary/plugins/docs/scripts/validate-schema-docs.sh "$FILE_PATH"
+  ./.fractary/docs/scripts/validate-schema-docs.sh "$FILE_PATH"
 fi
 ```
 
@@ -91,17 +91,17 @@ fi
 
 ### 4. Plugin Configuration
 
-Configure the docs plugin in `.fractary/plugins/docs/config.json`:
+Configure the docs plugin in `.fractary/config.yaml`:
 
 ```json
 {
   "validation": {
-    "custom_rules_script": "./.fractary/plugins/docs/scripts/validate-schema-docs.sh",
+    "custom_rules_script": "./.fractary/docs/scripts/validate-schema-docs.sh",
     "project_standards_doc": "./docs/standards/PROJECT-SCHEMA-STANDARDS.md"
   },
   "hooks": {
-    "pre_validate": "./.fractary/plugins/docs/hooks/pre-validate.sh",
-    "post_generate": "./.fractary/plugins/docs/hooks/post-generate.sh"
+    "pre_validate": "./.fractary/docs/hooks/pre-validate.sh",
+    "post_generate": "./.fractary/docs/hooks/post-generate.sh"
   }
 }
 ```
@@ -116,26 +116,26 @@ cp examples/schema-standards/PROJECT-SCHEMA-STANDARDS.md \
    docs/standards/
 
 # Copy custom validation script
-mkdir -p .fractary/plugins/docs/scripts
+mkdir -p .fractary/docs/scripts
 cp examples/schema-standards/validate-schema-docs.sh \
-   .fractary/plugins/docs/scripts/
-chmod +x .fractary/plugins/docs/scripts/validate-schema-docs.sh
+   .fractary/docs/scripts/
+chmod +x .fractary/docs/scripts/validate-schema-docs.sh
 
 # Copy hooks
-mkdir -p .fractary/plugins/docs/hooks
+mkdir -p .fractary/docs/hooks
 cp examples/schema-standards/hooks/*.sh \
-   .fractary/plugins/docs/hooks/
-chmod +x .fractary/plugins/docs/hooks/*.sh
+   .fractary/docs/hooks/
+chmod +x .fractary/docs/hooks/*.sh
 ```
 
 ### Step 2: Update Plugin Configuration
 
-Edit `.fractary/plugins/docs/config.json`:
+Edit `.fractary/config.yaml`:
 
 ```json
 {
   "validation": {
-    "custom_rules_script": "./.fractary/plugins/docs/scripts/validate-schema-docs.sh",
+    "custom_rules_script": "./.fractary/docs/scripts/validate-schema-docs.sh",
     "project_standards_doc": "./docs/standards/PROJECT-SCHEMA-STANDARDS.md",
     "required_sections": {
       "schema": [
@@ -150,8 +150,8 @@ Edit `.fractary/plugins/docs/config.json`:
     }
   },
   "hooks": {
-    "pre_validate": "./.fractary/plugins/docs/hooks/pre-validate.sh",
-    "post_generate": "./.fractary/plugins/docs/hooks/post-generate.sh"
+    "pre_validate": "./.fractary/docs/hooks/pre-validate.sh",
+    "post_generate": "./.fractary/docs/hooks/post-generate.sh"
   }
 }
 ```
@@ -166,12 +166,12 @@ Edit the files to match your project's needs:
    - Define your schema formats
    - Set your versioning policy
 
-2. **Modify validation script** (`.fractary/plugins/docs/scripts/validate-schema-docs.sh`):
+2. **Modify validation script** (`.fractary/docs/scripts/validate-schema-docs.sh`):
    - Add checks for your specific requirements
    - Adjust severity levels (error vs warning)
    - Add validation for your schema format specifics
 
-3. **Customize hooks** (`.fractary/plugins/docs/hooks/*.sh`):
+3. **Customize hooks** (`.fractary/docs/hooks/*.sh`):
    - Add code generation integration
    - Add automated testing of schemas
    - Add automatic index updates

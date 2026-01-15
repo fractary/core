@@ -4,12 +4,19 @@ set -euo pipefail
 
 ISSUE_NUMBER="${1:?Issue number required}"
 LOG_FILE="${2:?Log file path required}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
 
 # Input validation: Issue number should be numeric
 if ! [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
     echo "Error: Issue number must be numeric" >&2
     exit 1
+fi
+
+# Load configuration from unified config
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_JSON=$("$SCRIPT_DIR/config-loader.sh" 2>&1)
+if [ $? -ne 0 ]; then
+    echo "$CONFIG_JSON" >&2
+    exit 3
 fi
 
 # Input validation: Log file path should not contain path traversal

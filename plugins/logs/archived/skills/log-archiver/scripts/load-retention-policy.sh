@@ -7,13 +7,13 @@
 # and returns the first matching policy, or the default policy if no match.
 #
 # Example:
-#   load-retention-policy.sh "/logs/sessions/session-123.md" ".fractary/plugins/logs/config.json"
+#   load-retention-policy.sh "/logs/sessions/session-123.md" ".fractary/config.yaml (logs section)"
 #   Returns the retention policy for "sessions/*" pattern
 
 set -euo pipefail
 
 LOG_PATH="${1:-}"
-CONFIG_FILE="${2:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${2:-.fractary/config.yaml (logs section)}"
 
 # Validate inputs
 if [[ -z "$LOG_PATH" ]]; then

@@ -47,7 +47,7 @@ PLATFORM=$(echo "$CONFIG_JSON" | jq -r '.handlers["work-tracker"].active')
 
 **CRITICAL**: Configuration must be loaded from the **project working directory**, NOT the plugin installation directory.
 
-**Configuration Location:** `.fractary/plugins/work/config.json` (relative to project root / current working directory)
+**Configuration Location:** `.fractary/config.yaml` (relative to project root / current working directory)
 
 **Common Mistake:** Do NOT look in `~/.claude/plugins/marketplaces/fractary/plugins/work/` - that's the plugin installation directory, not the project config location.
 
@@ -75,7 +75,7 @@ GITHUB_REPO=$(echo "$CONFIG_JSON" | jq -r '.handlers["work-tracker"].github.repo
 
 **Usage:**
 ```bash
-if [ -f ".fractary/plugins/work/config.json" ]; then
+if [ -f ".fractary/config.yaml" ]; then
     # Config exists
 else
     # Show recommendation to run /fractary-work:init
@@ -149,7 +149,7 @@ Standard error codes used across all work plugin utilities:
 
 **CRITICAL**: Configuration must be loaded from the **project working directory**, NOT the plugin installation directory.
 
-Expected configuration file at `.fractary/plugins/work/config.json` (relative to project root / current working directory):
+Expected configuration file at `.fractary/config.yaml` (relative to project root / current working directory):
 
 ```json
 {
@@ -184,12 +184,12 @@ cd /mnt/c/GitHub/fractary/claude-plugins
 # Expected: Outputs valid JSON configuration
 
 # Test missing config
-mv .fractary/plugins/work/config.json .fractary/plugins/work/config.json.bak
+mv .fractary/config.yaml .fractary/config.yaml.bak
 ./plugins/work/skills/work-common/scripts/config-loader.sh
 # Expected: Exit code 3, error message "Configuration file not found"
 
 # Test invalid JSON
-echo "{ invalid json" > .fractary/plugins/work/config.json
+echo "{ invalid json" > .fractary/config.yaml
 ./plugins/work/skills/work-common/scripts/config-loader.sh
 # Expected: Exit code 3, error message "Invalid JSON"
 ```

@@ -65,7 +65,7 @@ fi
 
 # Determine issue type (default to Task)
 # Can be enhanced to auto-detect from labels or config
-CONFIG_FILE=".fractary/plugins/work/config.json"
+CONFIG_FILE=".fractary/config.yaml"
 ISSUE_TYPE="Task"
 
 if [ -f "$CONFIG_FILE" ]; then

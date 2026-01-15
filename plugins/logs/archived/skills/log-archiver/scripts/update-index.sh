@@ -4,7 +4,7 @@ set -euo pipefail
 
 ISSUE_NUMBER="${1:?Issue number required}"
 METADATA_JSON="${2:?Metadata JSON required}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Input validation: Issue number should be numeric
 if ! [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then

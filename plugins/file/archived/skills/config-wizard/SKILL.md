@@ -45,7 +45,7 @@ Context:
 ### 1.1 Determine Configuration Path
 
 Based on `config_scope`:
-- **project**: `.fractary/plugins/file/config.json`
+- **project**: `.fractary/config.yaml`
 - **global**: `~/.config/fractary/file/config.json`
 
 Check if configuration already exists:
@@ -1067,7 +1067,7 @@ Make sure these are set in your environment before using the plugin.
 ```json
 {
   "success": true,
-  "config_path": ".fractary/plugins/file/config.json",
+  "config_path": ".fractary/config.yaml",
   "configured_handlers": ["local", "s3", "r2"],
   "active_handler": "local",
   "tested": "partial",

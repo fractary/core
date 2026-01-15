@@ -134,7 +134,7 @@ AI summaries incur API costs and are **disabled by default**. Enable only if you
 4. Configure fractary-file plugin with your preferred cloud provider
 
 **For Teams**:
-1. Share configuration in repository (`.fractary/plugins/logs/config.json`)
+1. Share configuration in repository (`.fractary/config.yaml` with logs section)
 2. Use environment variables for cloud credentials
 3. Set up centralized S3/R2 bucket for all team logs
 4. Enable GitHub comments: `"integration.github.comment_on_archive": true`

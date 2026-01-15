@@ -157,7 +157,7 @@ Sessions stored by default:
 /logs/sessions/session-{issue}-{date}.md
 ```
 
-Configurable via `.fractary/plugins/logs/config.json`:
+Configurable via `.fractary/config.yaml (logs section)`:
 ```json
 {
   "storage": {
