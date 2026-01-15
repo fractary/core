@@ -20,6 +20,12 @@ if [[ -z "$FILE_PATH" ]]; then
     exit 1
 fi
 
+# Validate path to prevent directory traversal attacks
+if ! validate_path "$FILE_PATH"; then
+    echo "Error: Invalid or unsafe file path" >&2
+    exit 1
+fi
+
 # Check if file exists
 if [[ ! -f "$FILE_PATH" ]]; then
     echo "Error: File not found: $FILE_PATH" >&2
@@ -61,22 +67,19 @@ COMPRESSED=false
 # Compress if configured
 if [[ "$COMPRESS" == "true" ]]; then
     echo "Compressing file..." >&2
-    if ! gzip -c "$FILE_PATH" > "${FILE_PATH}.gz"; then
-        echo "Error: Compression failed (disk full or permission denied)" >&2
-        rm -f "${FILE_PATH}.gz"  # Clean up partial file
+
+    # Atomic operation: compress and verify in single step to prevent TOCTOU
+    COMPRESSED_FILE="${FILE_PATH}.gz"
+    if gzip -c "$FILE_PATH" > "$COMPRESSED_FILE" && [[ -s "$COMPRESSED_FILE" ]]; then
+        LOCAL_PATH="$COMPRESSED_FILE"
+        FILENAME="${FILENAME}.gz"
+        COMPRESSED=true
+    else
+        # Compression or verification failed
+        echo "Error: Compression failed or resulted in empty file" >&2
+        rm -f "$COMPRESSED_FILE"  # Clean up partial file
         exit 1
     fi
-
-    # Verify compressed file was created and has content
-    if [[ ! -s "${FILE_PATH}.gz" ]]; then
-        echo "Error: Compressed file is empty or missing" >&2
-        rm -f "${FILE_PATH}.gz"
-        exit 1
-    fi
-
-    LOCAL_PATH="${FILE_PATH}.gz"
-    FILENAME="${FILENAME}.gz"
-    COMPRESSED=true
 fi
 
 # Determine remote path

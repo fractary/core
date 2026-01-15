@@ -2,6 +2,67 @@
 # Common Functions Library for File Plugin
 # Provides shared utilities for all storage handlers
 
+# ============================================================================
+# Security Functions
+# ============================================================================
+
+# Validate and sanitize file paths to prevent directory traversal attacks
+# Usage: validate_path <path>
+# Returns: 0 if path is safe, 1 if path is dangerous
+validate_path() {
+    local path="$1"
+
+    if [[ -z "$path" ]]; then
+        echo "Error: Path cannot be empty" >&2
+        return 1
+    fi
+
+    # Reject paths with directory traversal attempts
+    if [[ "$path" =~ \.\. ]]; then
+        echo "Error: Path traversal detected (..): $path" >&2
+        return 1
+    fi
+
+    # Reject absolute paths (should be relative to project/config)
+    if [[ "$path" =~ ^/ ]]; then
+        echo "Error: Absolute paths not allowed: $path" >&2
+        return 1
+    fi
+
+    # Reject paths with null bytes (shell injection attempt)
+    if [[ "$path" =~ $'\0' ]]; then
+        echo "Error: Null byte in path: $path" >&2
+        return 1
+    fi
+
+    # Reject paths starting with dash (command injection)
+    if [[ "$path" =~ ^- ]]; then
+        echo "Error: Path cannot start with dash: $path" >&2
+        return 1
+    fi
+
+    # Canonicalize the path and verify it doesn't escape base directory
+    local canonical_path
+    canonical_path=$(realpath -m "$path" 2>/dev/null) || {
+        echo "Error: Invalid path: $path" >&2
+        return 1
+    }
+
+    # Ensure path stays within current directory tree
+    local pwd_canonical
+    pwd_canonical=$(realpath -m "." 2>/dev/null)
+    if [[ ! "$canonical_path" =~ ^"$pwd_canonical" ]]; then
+        echo "Error: Path escapes base directory: $path" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# ============================================================================
+# Configuration Functions
+# ============================================================================
+
 # Load handler-specific configuration
 # Usage: load_handler_config <config_file> <handler>
 # Returns: JSON object with handler configuration

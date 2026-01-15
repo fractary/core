@@ -21,6 +21,12 @@ if [[ -z "$FILE_PATH" ]]; then
     exit 1
 fi
 
+# Validate path to prevent directory traversal attacks
+if ! validate_path "$FILE_PATH"; then
+    echo "Error: Invalid or unsafe file path" >&2
+    exit 1
+fi
+
 # Check for --force flag in any position
 if [[ "$SOURCE_NAME" == "--force" ]] || [[ "$FORCE_FLAG" == "--force" ]]; then
     FORCE=true
