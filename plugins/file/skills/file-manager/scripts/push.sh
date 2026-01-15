@@ -61,7 +61,19 @@ COMPRESSED=false
 # Compress if configured
 if [[ "$COMPRESS" == "true" ]]; then
     echo "Compressing file..." >&2
-    gzip -c "$FILE_PATH" > "${FILE_PATH}.gz"
+    if ! gzip -c "$FILE_PATH" > "${FILE_PATH}.gz"; then
+        echo "Error: Compression failed (disk full or permission denied)" >&2
+        rm -f "${FILE_PATH}.gz"  # Clean up partial file
+        exit 1
+    fi
+
+    # Verify compressed file was created and has content
+    if [[ ! -s "${FILE_PATH}.gz" ]]; then
+        echo "Error: Compressed file is empty or missing" >&2
+        rm -f "${FILE_PATH}.gz"
+        exit 1
+    fi
+
     LOCAL_PATH="${FILE_PATH}.gz"
     FILENAME="${FILENAME}.gz"
     COMPRESSED=true

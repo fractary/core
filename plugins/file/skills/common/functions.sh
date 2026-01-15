@@ -357,10 +357,46 @@ export -f log_operation
 # YAML Helper - Parse YAML using Python
 # Usage: yaml_get <file> <path>
 # Returns: Value at path (JSON for objects/arrays, string for scalars)
+
+# Cache for Python dependency check (only check once per execution)
+_PYTHON_DEPS_CHECKED=false
+
+# Check Python dependencies for YAML helper
+# Usage: check_python_dependencies
+# Returns: 0 if dependencies are available, 1 otherwise
+check_python_dependencies() {
+    # Return cached result if already checked
+    if [[ "$_PYTHON_DEPS_CHECKED" == "true" ]]; then
+        return 0
+    fi
+
+    # Check if python3 is available
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "Error: python3 is required but not installed" >&2
+        echo "Please install Python 3.6 or later" >&2
+        return 1
+    fi
+
+    # Check if PyYAML is available
+    if ! python3 -c "import yaml" 2>/dev/null; then
+        echo "Error: PyYAML is required but not installed" >&2
+        echo "Please install with: pip3 install pyyaml" >&2
+        return 1
+    fi
+
+    _PYTHON_DEPS_CHECKED=true
+    return 0
+}
+
 yaml_get() {
     local file="$1"
     local path="$2"
-    
+
+    # Ensure dependencies are available (cached after first check)
+    if ! check_python_dependencies; then
+        return 1
+    fi
+
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     python3 "$script_dir/yaml_helper.py" "$file" "$path" 2>/dev/null
 }

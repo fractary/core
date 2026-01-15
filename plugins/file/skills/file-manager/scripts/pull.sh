@@ -92,6 +92,13 @@ COMPRESSED_REMOTE="${PREFIX}${FILENAME}.gz"
 # Create local directory if needed
 mkdir -p "$(dirname "$LOCAL_PATH")"
 
+# Create secure temporary file and ensure cleanup
+TEMP_FILE=$(mktemp) || {
+    echo "Error: Failed to create temporary file" >&2
+    exit 1
+}
+trap 'rm -f "$TEMP_FILE"' EXIT
+
 # Route to appropriate handler based on type
 case "$TYPE" in
     s3)
@@ -105,7 +112,6 @@ case "$TYPE" in
 
         # Try downloading (first without .gz, then with .gz if that fails)
         echo "Downloading from S3..." >&2
-        TEMP_FILE="/tmp/pull_${FILENAME}_$$"
 
         if "$DOWNLOAD_SCRIPT" "$REGION" "$BUCKET" "" "" "" "$REMOTE_PATH" "$TEMP_FILE" 2>/dev/null; then
             mv "$TEMP_FILE" "$LOCAL_PATH"
@@ -113,15 +119,17 @@ case "$TYPE" in
             WAS_COMPRESSED=false
         elif "$DOWNLOAD_SCRIPT" "$REGION" "$BUCKET" "" "" "" "$COMPRESSED_REMOTE" "$TEMP_FILE" 2>/dev/null; then
             # File was compressed, decompress it
-            gunzip -c "$TEMP_FILE" > "$LOCAL_PATH"
-            rm -f "$TEMP_FILE"
+            if ! gunzip -c "$TEMP_FILE" > "$LOCAL_PATH"; then
+                echo "Error: Decompression failed" >&2
+                rm -f "$LOCAL_PATH"  # Clean up partial file
+                exit 1
+            fi
             DOWNLOADED=true
             WAS_COMPRESSED=true
         else
             echo "Error: Failed to download file from S3" >&2
             echo "Tried: s3://${BUCKET}/${REMOTE_PATH}" >&2
             echo "Tried: s3://${BUCKET}/${COMPRESSED_REMOTE}" >&2
-            rm -f "$TEMP_FILE"
             exit 1
         fi
         ;;
@@ -137,20 +145,21 @@ case "$TYPE" in
 
         # Try downloading
         echo "Downloading from R2..." >&2
-        TEMP_FILE="/tmp/pull_${FILENAME}_$$"
 
         if "$DOWNLOAD_SCRIPT" "$REGION" "$BUCKET" "" "" "" "$REMOTE_PATH" "$TEMP_FILE" 2>/dev/null; then
             mv "$TEMP_FILE" "$LOCAL_PATH"
             DOWNLOADED=true
             WAS_COMPRESSED=false
         elif "$DOWNLOAD_SCRIPT" "$REGION" "$BUCKET" "" "" "" "$COMPRESSED_REMOTE" "$TEMP_FILE" 2>/dev/null; then
-            gunzip -c "$TEMP_FILE" > "$LOCAL_PATH"
-            rm -f "$TEMP_FILE"
+            if ! gunzip -c "$TEMP_FILE" > "$LOCAL_PATH"; then
+                echo "Error: Decompression failed" >&2
+                rm -f "$LOCAL_PATH"  # Clean up partial file
+                exit 1
+            fi
             DOWNLOADED=true
             WAS_COMPRESSED=true
         else
             echo "Error: Failed to download file from R2" >&2
-            rm -f "$TEMP_FILE"
             exit 1
         fi
         ;;
@@ -167,20 +176,21 @@ case "$TYPE" in
         # Try downloading
         echo "Downloading from GCS..." >&2
         PROJECT_ID=$(echo "$SOURCE_CONFIG" | jq -r '.project_id // ""')
-        TEMP_FILE="/tmp/pull_${FILENAME}_$$"
 
         if "$DOWNLOAD_SCRIPT" "$PROJECT_ID" "$BUCKET" "$REMOTE_PATH" "$TEMP_FILE" 2>/dev/null; then
             mv "$TEMP_FILE" "$LOCAL_PATH"
             DOWNLOADED=true
             WAS_COMPRESSED=false
         elif "$DOWNLOAD_SCRIPT" "$PROJECT_ID" "$BUCKET" "$COMPRESSED_REMOTE" "$TEMP_FILE" 2>/dev/null; then
-            gunzip -c "$TEMP_FILE" > "$LOCAL_PATH"
-            rm -f "$TEMP_FILE"
+            if ! gunzip -c "$TEMP_FILE" > "$LOCAL_PATH"; then
+                echo "Error: Decompression failed" >&2
+                rm -f "$LOCAL_PATH"  # Clean up partial file
+                exit 1
+            fi
             DOWNLOADED=true
             WAS_COMPRESSED=true
         else
             echo "Error: Failed to download file from GCS" >&2
-            rm -f "$TEMP_FILE"
             exit 1
         fi
         ;;
