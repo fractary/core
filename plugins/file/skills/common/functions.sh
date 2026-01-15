@@ -281,27 +281,6 @@ check_required_tools() {
     return 0
 }
 
-# Validate file path for safety (prevent path traversal)
-# Usage: validate_path <path>
-# Returns: 0 if safe, 1 if potentially dangerous
-validate_path() {
-    local path="$1"
-
-    # Check for path traversal attempts
-    if [[ "$path" =~ \.\. ]]; then
-        echo "Error: Path contains '..' (path traversal attempt)" >&2
-        return 1
-    fi
-
-    # Check for absolute paths in remote paths (should be relative)
-    if [[ "$path" =~ ^/ ]] && [[ "${2:-}" != "allow_absolute" ]]; then
-        echo "Error: Absolute paths not allowed: $path" >&2
-        return 1
-    fi
-
-    return 0
-}
-
 # Mask sensitive value for logging
 # Usage: mask_credential <value>
 # Returns: Masked value (shows first 4 and last 4 characters)
