@@ -1,7 +1,7 @@
 # Recommendation: Skills vs Types Architecture for Document Formatting
 
 **Date**: 2025-01-15
-**Status**: Recommendation
+**Status**: Recommendation (Revised)
 **Author**: Claude (Analysis Request)
 **Context**: Evaluating whether to convert the docs plugin's "types" system to use the skills architecture
 
@@ -9,440 +9,463 @@
 
 ## Executive Summary
 
-**Recommendation: Hybrid Approach** - Keep the types system for structured configuration (templates, schemas, validation) while adding a **skill layer** for discoverability and organizational knowledge.
+**Recommendation: One Skill Per Document Type** - Migrate the current `types/` directory structure into `skills/doc-type-{name}/` directories, with each skill containing all supporting files (schema.json, template.md, etc.).
 
-The current types system is well-architected for its purpose. Converting it entirely to skills would lose significant functionality (JSON schemas, template rendering, index configuration). However, adding a skill layer on top provides the discoverability and Claude-native interaction benefits you're seeking.
-
----
-
-## Background
-
-### What We Have Today
-
-**Types System** (`plugins/docs/types/`)
-- 11 document types: ADR, API, architecture, audit, changelog, dataset, ETL, guides, infrastructure, standards, testing
-- Each type has 5 configuration files:
-  - `schema.json` - JSON Schema (Draft 7) for frontmatter validation
-  - `template.md` - Mustache template for document structure
-  - `standards.md` - Writing guidelines and best practices
-  - `validation-rules.md` - Type-specific quality checks
-  - `index-config.json` - Index organization configuration
-- Achieved **93% code reduction** from v1.x type-specific skills (documented in ADR-001)
-
-**Skills Architecture** (`plugins/*/skills/`)
-- Skills provide **organizational knowledge and expertise** (v3.0 purpose)
-- Markdown files with YAML frontmatter + sections (CONTEXT, CRITICAL_RULES, WORKFLOW)
-- Agents READ skills to gain expertise, then execute operations following standards
-- Examples: `fractary-commit-format`, `fractary-pr-template`, `fractary-code-review-checklist`
-
-### Why This Question Arose
-
-The concern is that:
-1. **Discoverability**: Skills are more discoverable by Claude (registered in marketplace, loaded as context)
-2. **Extensibility**: Users familiar with adding skills might find it easier to add new document types
-3. **Claude Leverage**: Claude might more naturally leverage skills vs custom type directories
-4. **Consistency**: Other knowledge (commit format, PR template) uses skills; docs uses types
+This approach leverages the key insight that **skill directories can contain any file types** - not just SKILL.md. Combined with the **~100 character description limit** for skill auto-discovery, having separate skills per document type enables Claude to naturally discover and leverage the right type based on user intent.
 
 ---
 
-## Analysis
+## Key Insight: Skills Are Containers
 
-### What Skills Provide That Types Don't
+Skills are not just a single markdown file. A skill directory can contain:
+- `SKILL.md` - The skill definition with description for auto-discovery
+- `schema.json` - JSON Schema validation
+- `template.md` - Mustache templates
+- `standards.md` - Writing guidelines
+- `validation-rules.md` - Quality checks
+- `index-config.json` - Index organization
+- `scripts/` - Any helper scripts
+- `docs/` - Additional documentation
+- Any other supporting files
 
-| Capability | Skills | Types |
-|------------|--------|-------|
-| Claude-native discovery | ✅ Via marketplace registration | ❌ Requires agent knowledge |
-| Single-file simplicity | ✅ One markdown file | ❌ 5 files per type |
-| Organizational standards | ✅ Primary purpose | ⚠️ standards.md only |
-| Auto-invocation hints | ✅ Description field | ❌ None |
-| Framework familiarity | ✅ Common pattern | ⚠️ Docs-specific pattern |
-
-### What Types Provide That Skills Don't
-
-| Capability | Types | Skills |
-|------------|-------|--------|
-| JSON Schema validation | ✅ schema.json | ❌ Not supported |
-| Template rendering (Mustache) | ✅ template.md with {{variables}} | ❌ No template system |
-| Index configuration | ✅ index-config.json | ❌ No equivalent |
-| Structured validation rules | ✅ validation-rules.md | ⚠️ Would be prose only |
-| Frontmatter field specs | ✅ Typed, validated | ❌ Unstructured |
-| Dual-format documents | ✅ README + schema.json | ❌ No support |
-
-### Why Types Were Designed This Way
-
-The docs plugin underwent a deliberate architectural evolution (documented in ADR-001):
-
-**v1.x Architecture** (Type-Specific Skills):
-```
-11 type-specific skills
-├─ docs-manage-api (500 lines)
-├─ docs-manage-adr (500 lines)
-├─ docs-manage-architecture (500 lines)
-└─ ... (8 more)
-```
-- **93% code duplication**
-- Adding new type = 500+ lines
-- 7,000+ lines total
-
-**v2.0 Architecture** (Operation-Specific + Type Context):
-```
-4 operation-specific agents (universal)
-├─ docs-write (handles ANY doc_type)
-├─ docs-validate (handles ANY doc_type)
-├─ docs-list (handles ANY doc_type)
-└─ docs-audit (handles ANY doc_type)
-
-+ Type context in types/{doc_type}/
-├─ schema.json
-├─ template.md
-├─ standards.md
-├─ validation-rules.md
-└─ index-config.json
-```
-- **<7% code duplication**
-- Adding new type = 5 data files (~200 lines)
-- 2,500 lines total
-
-**Key Insight**: The types system is essentially a **data-driven configuration system**, not an execution system. Skills in v3.0 are for expertise/knowledge, not configuration.
+This means the current `types/{doc_type}/` structure can live **inside** skill directories without losing any functionality.
 
 ---
 
-## Options Evaluated
+## The Description Limit Problem
 
-### Option A: Convert Types to Skills (One Skill Per Type)
+Skill descriptions are limited to approximately **100 characters** and are the primary mechanism for Claude's auto-discovery. This creates a critical architectural decision:
+
+### Single Skill Approach (NOT Recommended)
+
+```markdown
+# doc-formatter/SKILL.md
+---
+name: fractary-doc-formatter
+description: Document formatting for ADR, API, architecture, audit, changelog, dataset, ETL, guides...
+---
+```
+
+**Problems**:
+- ❌ Can't list all 11 types in ~100 characters
+- ❌ Claude can't auto-trigger on specific type mentions
+- ❌ "Create an ADR" won't match well
+- ❌ Synonyms for each type can't be included
+
+### One Skill Per Type (RECOMMENDED)
+
+```markdown
+# doc-type-adr/SKILL.md
+---
+name: fractary-doc-adr
+description: Architecture Decision Record. Use for technical decisions, design choices, decision logs.
+---
+
+# doc-type-api/SKILL.md
+---
+name: fractary-doc-api
+description: API documentation with OpenAPI. Use for REST endpoints, service APIs, endpoint docs.
+---
+
+# doc-type-architecture/SKILL.md
+---
+name: fractary-doc-architecture
+description: System architecture docs. Use for component diagrams, system design, infrastructure.
+---
+```
+
+**Benefits**:
+- ✅ Each type has focused description with synonyms
+- ✅ "Create an ADR" → matches doc-type-adr
+- ✅ "Document this API endpoint" → matches doc-type-api
+- ✅ "Record why we chose PostgreSQL" → matches doc-type-adr (decision-related)
+- ✅ Claude naturally discovers the right type
+
+---
+
+## Recommended Architecture
+
+### Directory Structure
 
 ```
 plugins/docs/skills/
-├── doc-type-adr/SKILL.md
-├── doc-type-api/SKILL.md
-├── doc-type-architecture/SKILL.md
-└── ... (11+ skills)
+├── doc-type-adr/
+│   ├── SKILL.md              # Description + expertise for ADRs
+│   ├── schema.json           # ADR frontmatter schema
+│   ├── template.md           # ADR document template
+│   ├── standards.md          # ADR writing guidelines
+│   ├── validation-rules.md   # ADR quality checks
+│   └── index-config.json     # ADR index organization
+│
+├── doc-type-api/
+│   ├── SKILL.md              # Description for API docs
+│   ├── schema.json
+│   ├── template.md
+│   ├── standards.md
+│   ├── validation-rules.md
+│   └── index-config.json
+│
+├── doc-type-architecture/
+│   ├── SKILL.md
+│   ├── schema.json
+│   ├── template.md
+│   ├── standards.md
+│   ├── validation-rules.md
+│   └── index-config.json
+│
+├── doc-type-audit/
+│   └── ... (same pattern)
+│
+├── doc-type-changelog/
+│   └── ...
+│
+├── doc-type-dataset/
+│   └── ...
+│
+├── doc-type-etl/
+│   └── ...
+│
+├── doc-type-guides/
+│   └── ...
+│
+├── doc-type-infrastructure/
+│   └── ...
+│
+├── doc-type-standards/
+│   └── ...
+│
+├── doc-type-testing/
+│   └── ...
+│
+└── doc-type-selector/
+    └── SKILL.md              # Fallback for type selection
 ```
 
-**Pros**:
-- More discoverable via skill registration
-- Familiar pattern for users
-- Single file per type
+### Skill Definitions
 
-**Cons**:
-- ❌ **Goes back to type-specific components** (what they migrated AWAY from)
-- ❌ **Loses JSON Schema validation** - Can't express validation rules as effectively
-- ❌ **Loses Mustache templating** - Would need prose descriptions instead
-- ❌ **Loses index configuration** - No structured way to specify index behavior
-- ❌ **Undoes 93% code reduction** - Would increase duplication again
-- ❌ **Skills aren't meant for this** - v3.0 skills are for expertise, not configuration
+Each type skill should have a rich description with synonyms:
 
-**Recommendation**: ❌ **Not recommended** - Loses too much functionality
-
-### Option B: Single Document Formatter Skill
-
-```
-plugins/docs/skills/
-└── doc-formatter/SKILL.md  (references types/)
-```
-
-A single skill that:
-- Provides document formatting expertise
-- Explains how the types system works
-- Guides Claude on selecting and using types
-
-**Pros**:
-- Adds discoverability layer
-- Keeps types system intact
-- Low implementation effort
-
-**Cons**:
-- ⚠️ Doesn't help users extend with new types
-- ⚠️ Still requires understanding types/ directory structure
-
-**Recommendation**: ⚠️ **Partial solution** - Helps discoverability but not extensibility
-
-### Option C: Hybrid Approach with Skill Layer (Recommended)
-
-```
-plugins/docs/skills/
-├── documentation-knowledge/SKILL.md    # Organizational doc standards
-├── doc-type-guide/SKILL.md             # How to choose types
-├── doc-authoring-standards/SKILL.md    # Writing best practices
-└── extending-doc-types/SKILL.md        # How to add new types
-
-plugins/docs/types/  # Unchanged
-├── adr/
-├── api/
-└── ...
-```
-
-Skills provide:
-- **Organizational knowledge** about documentation strategy
-- **Guidance on type selection** (when to use ADR vs architecture doc)
-- **Writing standards** that apply across all types
-- **Extension guide** for adding new types
-
-Types continue to provide:
-- Templates, schemas, validation rules
-- Type-specific configuration
-- Machine-parseable definitions
-
-**Pros**:
-- ✅ **Adds discoverability** via skill registration
-- ✅ **Preserves functionality** of types system
-- ✅ **Enables Claude leverage** - Skills guide Claude to use types correctly
-- ✅ **Improves extensibility** - Extension skill teaches how to add types
-- ✅ **Follows v3.0 patterns** - Skills for expertise, not execution
-- ✅ **No migration needed** - Additive change only
-
-**Cons**:
-- ⚠️ Two systems to understand (skills + types)
-- ⚠️ More files overall
-
-**Recommendation**: ✅ **Recommended** - Best of both worlds
-
-### Option D: Wait for MCP-Based Type Registry
-
-An alternative future architecture where types are registered via MCP:
-
-```typescript
-// MCP tool for type discovery
-server.tool({
-  name: "fractary_docs_types_list",
-  description: "List available document types"
-}, async () => {
-  return types.map(t => ({
-    name: t.name,
-    description: t.description,
-    schema: t.schema
-  }));
-});
-```
-
-**Pros**:
-- Native integration with Claude's tool system
-- Structured type information
-- Future-proof architecture
-
-**Cons**:
-- ⚠️ Requires MCP development work
-- ⚠️ Doesn't address immediate needs
-- ⚠️ May not improve user extensibility
-
-**Recommendation**: ⚠️ **Good future enhancement** - Consider alongside Option C
-
----
-
-## Recommended Implementation: Hybrid Approach
-
-### Phase 1: Add Documentation Knowledge Skills
-
-Create skills that make the types system more discoverable and provide organizational guidance.
-
-**Skill 1: `documentation-strategy/SKILL.md`**
+**doc-type-adr/SKILL.md**
 ```markdown
 ---
-name: fractary-documentation-strategy
-description: Organizational documentation standards and strategy for Fractary projects
+name: fractary-doc-adr
+description: Architecture Decision Record (ADR). Use for technical decisions, design choices, architectural patterns, decision logs.
+model: claude-haiku-4-5
 ---
 
-# Documentation Strategy
+<CONTEXT>
+You are an expert in creating Architecture Decision Records (ADRs).
+ADRs document significant technical decisions with their context, alternatives considered, and rationale.
+</CONTEXT>
 
-## When to Create Documentation
+<WHEN_TO_USE>
+Use this skill when the user wants to:
+- Record a technical or architectural decision
+- Document why a technology was chosen
+- Create a decision log entry
+- Capture design rationale
+- Record trade-offs considered
 
-1. **ADRs**: For architectural decisions with lasting impact
-2. **API Docs**: For any service endpoint (internal or external)
-3. **Architecture**: For system design and component relationships
-...
+Common triggers:
+- "Create an ADR for..."
+- "Document this decision..."
+- "Record why we chose..."
+- "Capture the rationale for..."
+</WHEN_TO_USE>
 
-## Documentation Principles
+<SUPPORTING_FILES>
+This skill includes:
+- schema.json: Frontmatter validation (status, decision-makers, date)
+- template.md: Standard ADR structure (Context, Decision, Consequences)
+- standards.md: Writing guidelines (immutability rules, status transitions)
+- validation-rules.md: Quality checks (required sections, formatting)
+- index-config.json: How ADRs are organized in indices
+</SUPPORTING_FILES>
 
-- Living documentation (keep updated)
-- Single source of truth
-- Link extensively
+<WORKFLOW>
+1. Load schema.json for frontmatter requirements
+2. Load template.md for document structure
+3. Apply standards.md guidelines during writing
+4. Validate against validation-rules.md
+5. Update index per index-config.json
+</WORKFLOW>
+```
+
+**doc-type-api/SKILL.md**
+```markdown
+---
+name: fractary-doc-api
+description: API documentation with OpenAPI support. Use for REST endpoints, service APIs, GraphQL, endpoint docs.
+model: claude-haiku-4-5
+---
+
+<CONTEXT>
+You are an expert in creating API documentation.
+API docs can be dual-format: README.md for humans + OpenAPI spec for tooling.
+</CONTEXT>
+
+<WHEN_TO_USE>
+Use this skill when the user wants to:
+- Document an API endpoint
+- Create OpenAPI/Swagger specs
+- Write service documentation
+- Document REST or GraphQL APIs
+
+Common triggers:
+- "Create API docs for..."
+- "Document this endpoint..."
+- "Write API documentation..."
+- "Generate OpenAPI spec..."
+</WHEN_TO_USE>
+
 ...
 ```
 
-**Skill 2: `doc-type-selection/SKILL.md`**
+**doc-type-selector/SKILL.md** (Fallback)
 ```markdown
 ---
-name: fractary-doc-type-selection
-description: Guide for selecting the right document type
+name: fractary-doc-type-selector
+description: Helps select the right document type when unclear. Use when creating docs without a specific type.
+model: claude-haiku-4-5
 ---
 
-# Choosing the Right Document Type
+<CONTEXT>
+You help users select the appropriate document type when they want to create documentation but haven't specified which type.
+</CONTEXT>
 
-## Decision Tree
+<DECISION_TREE>
+Ask clarifying questions or infer from context:
 
 **Is it recording a decision?**
-→ Use ADR (Architecture Decision Record)
+→ Use doc-type-adr (Architecture Decision Record)
 
-**Is it documenting an API endpoint?**
-→ Use API documentation (supports OpenAPI dual-format)
+**Is it documenting an API or endpoint?**
+→ Use doc-type-api (API documentation)
 
-**Is it explaining system architecture?**
-→ Use Architecture documentation
-...
+**Is it explaining system design or components?**
+→ Use doc-type-architecture (Architecture documentation)
 
-## Type Comparison Matrix
+**Is it a security or compliance audit?**
+→ Use doc-type-audit (Audit documentation)
 
-| Need | Type | Why |
-|------|------|-----|
-| Record a decision | ADR | Immutable, auditable |
-| Document API | API | Dual-format with OpenAPI |
-| Explain system | Architecture | Component diagrams |
-...
+**Is it tracking changes over time?**
+→ Use doc-type-changelog (Changelog)
+
+**Is it about data sources or schemas?**
+→ Use doc-type-dataset (Dataset documentation)
+
+**Is it about data pipelines or transformations?**
+→ Use doc-type-etl (ETL documentation)
+
+**Is it a how-to or tutorial?**
+→ Use doc-type-guides (Guide documentation)
+
+**Is it about infrastructure or deployment?**
+→ Use doc-type-infrastructure (Infrastructure documentation)
+
+**Is it defining rules or conventions?**
+→ Use doc-type-standards (Standards documentation)
+
+**Is it about testing strategies or test plans?**
+→ Use doc-type-testing (Testing documentation)
+</DECISION_TREE>
+
+<WORKFLOW>
+1. Analyze user request for type indicators
+2. If clear → invoke appropriate doc-type-* skill
+3. If unclear → ask clarifying question
+4. Once type selected → delegate to that skill
+</WORKFLOW>
 ```
 
-**Skill 3: `extending-doc-types/SKILL.md`**
-```markdown
 ---
-name: fractary-extending-doc-types
-description: Guide for adding new document types to the docs plugin
----
 
-# Adding New Document Types
+## Migration Plan
 
-## Required Files
+### Phase 1: Create Skill Directories
 
-Create `plugins/docs/types/{new_type}/` with 5 files:
+```bash
+# Create new skill directories
+mkdir -p plugins/docs/skills/doc-type-{adr,api,architecture,audit,changelog,dataset,etl,guides,infrastructure,standards,testing,selector}
 
-1. **schema.json** - Define frontmatter fields
-2. **template.md** - Mustache template for structure
-3. **standards.md** - Writing guidelines
-4. **validation-rules.md** - Quality checks
-5. **index-config.json** - Index organization
-
-## Step-by-Step
-
-### 1. Create schema.json
-```json
-{
-  "type": "my-type",
-  "display_name": "My Document Type",
-  "frontmatter": {
-    "required_fields": ["title", "type", "date"],
-    ...
-  }
-}
-```
-...
-
-## Examples
-
-See existing types for reference:
-- `types/adr/` - Simple type with immutability rules
-- `types/api/` - Dual-format with OpenAPI support
-- `types/architecture/` - Subtypes pattern
+# Move existing type files into skill directories
+for type in adr api architecture audit changelog dataset etl guides infrastructure standards testing; do
+  mv plugins/docs/types/$type/* plugins/docs/skills/doc-type-$type/
+done
 ```
 
-### Phase 2: Register Skills in Plugin Manifest
+### Phase 2: Create SKILL.md for Each Type
 
-Update `plugins/docs/.claude-plugin/plugin.json`:
+Create a SKILL.md file in each directory with:
+- Focused description (~100 chars) with synonyms
+- WHEN_TO_USE section with triggers
+- SUPPORTING_FILES reference
+- WORKFLOW for how to use the files
+
+### Phase 3: Update Agents
+
+Update `docs-write.md` and other agents to:
+1. Look for skills in `skills/doc-type-*/`
+2. Load skill's supporting files (schema.json, template.md, etc.)
+3. Follow skill's workflow
+
+### Phase 4: Archive Old Types Directory
+
+```bash
+# Archive for reference
+mv plugins/docs/types plugins/docs/archived/types-v2
+
+# Document the migration
+echo "Migrated to skills/doc-type-* pattern for better Claude discoverability" > plugins/docs/archived/types-v2/README.md
+```
+
+### Phase 5: Update Plugin Manifest
 
 ```json
 {
   "name": "fractary-docs",
-  "version": "2.3.0",
-  "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context",
+  "version": "3.0.0",
+  "description": "Documentation system with per-type skills for automatic Claude discovery",
   "commands": "./commands/",
   "agents": [...],
   "skills": "./skills/"
 }
 ```
 
-### Phase 3: Update Agents to Reference Skills
+---
 
-Update agents like `docs-write.md` to reference the new skills:
+## How Claude Discovery Works
 
-```markdown
-<WORKFLOW>
-1. Read fractary-doc-type-selection skill to understand type choice
-2. Read fractary-documentation-strategy for organizational standards
-3. Load type context from types/{doc_type}/
-4. Execute write operation
-...
-</WORKFLOW>
+### Before (Types System)
+
+```
+User: "Create an ADR for our database choice"
+
+Claude: [Needs to know about types/ directory]
+        [Must be told about ADR type]
+        [No automatic discovery]
 ```
 
-### Phase 4: Update Documentation
+### After (Skills Per Type)
 
-- Update README.md with skill references
-- Document the dual system (skills for knowledge, types for config)
-- Add examples of extending the system
+```
+User: "Create an ADR for our database choice"
 
----
+Claude: [Scans skill descriptions]
+        [Matches "ADR" and "decision" in doc-type-adr description]
+        [Auto-invokes fractary-doc-adr skill]
+        [Loads schema.json, template.md, etc. from skill directory]
+        [Creates properly formatted ADR]
+```
 
-## Impact Assessment
+### Synonym Matching Examples
 
-### For Claude Discoverability
-
-**Before**: Claude needs to know about the `types/` directory structure
-**After**: Claude discovers skills that explain and guide to types
-
-### For User Extensibility
-
-**Before**: Users must understand 5-file structure in types/
-**After**: Users read `extending-doc-types` skill for guidance, follow pattern
-
-### For Organizational Standards
-
-**Before**: Standards scattered across 11 type directories
-**After**: Cross-cutting standards in skills, type-specific in types/
-
-### For Existing Functionality
-
-**Impact**: None - This is purely additive
+| User Says | Matches Skill | Why |
+|-----------|---------------|-----|
+| "Create an ADR" | doc-type-adr | "ADR" in description |
+| "Document this decision" | doc-type-adr | "decision" in description |
+| "Record why we chose X" | doc-type-adr | "decision", "chose" patterns |
+| "Write API docs" | doc-type-api | "API" in description |
+| "Document this endpoint" | doc-type-api | "endpoint" in description |
+| "Create architecture overview" | doc-type-architecture | "architecture" in description |
+| "Explain the system design" | doc-type-architecture | "system design" pattern |
+| "Write a how-to guide" | doc-type-guides | "guide", "how-to" patterns |
+| "Document the ETL pipeline" | doc-type-etl | "ETL", "pipeline" in description |
 
 ---
 
-## Success Metrics
+## Extensibility Benefits
 
-1. **Discoverability**: Claude proactively suggests document types when user mentions documentation
-2. **Extensibility**: Users can add new types by following skill guidance
-3. **Adoption**: New document types follow the standard pattern
-4. **Quality**: Documents pass validation more consistently
+### For Users Adding New Types
+
+With skills, adding a new document type is:
+
+1. Create `skills/doc-type-{newtype}/`
+2. Add SKILL.md with description and synonyms
+3. Add schema.json, template.md, etc.
+4. Done - Claude automatically discovers it
+
+The skill's description makes it discoverable. No need to modify agents or update documentation indices manually.
+
+### Example: Adding a "runbook" Type
+
+```
+plugins/docs/skills/doc-type-runbook/
+├── SKILL.md
+├── schema.json
+├── template.md
+├── standards.md
+├── validation-rules.md
+└── index-config.json
+```
+
+**SKILL.md**
+```markdown
+---
+name: fractary-doc-runbook
+description: Operational runbook. Use for incident response, on-call procedures, operational playbooks.
+model: claude-haiku-4-5
+---
+
+<CONTEXT>
+You are an expert in creating operational runbooks.
+Runbooks document step-by-step procedures for operations tasks.
+</CONTEXT>
+
+<WHEN_TO_USE>
+- "Create a runbook for..."
+- "Document the incident response..."
+- "Write an on-call playbook..."
+- "Create operational procedures..."
+</WHEN_TO_USE>
+```
+
+Now "Create a runbook for database failover" automatically triggers this skill.
+
+---
+
+## Comparison with Previous Analysis
+
+### What Changed
+
+| Aspect | Previous Analysis | Corrected Understanding |
+|--------|-------------------|------------------------|
+| Skill structure | Single markdown file | Directory with any files |
+| JSON Schema support | ❌ Lost in skills | ✅ Kept in skill directory |
+| Template support | ❌ Lost in skills | ✅ Kept in skill directory |
+| Architecture recommendation | Hybrid (skills + types) | Full migration to skills |
+
+### Why This Is Better
+
+1. **Single location** - All type info in one skill directory
+2. **Better discoverability** - Description per type with synonyms
+3. **Simpler mental model** - Just skills, no types/ separate system
+4. **Consistent with file plugin** - Same pattern as handler-storage-* skills
+5. **User extensibility** - Add new type = add new skill directory
 
 ---
 
 ## Conclusion
 
-The types system is well-designed for its technical purpose (templates, schemas, validation, indexing). Converting it to skills would lose significant functionality.
+The **one skill per document type** architecture provides:
 
-However, the discoverability and organizational knowledge concerns are valid. The **hybrid approach** addresses these by:
+1. **Automatic Claude discovery** via focused descriptions with synonyms
+2. **Full functionality** by keeping all supporting files in skill directories
+3. **Easy extensibility** - new types are just new skill directories
+4. **Consistency** with how other plugins (file, work) structure their skills
+5. **Better user experience** - Claude naturally picks the right type
 
-1. **Adding skills** for organizational knowledge and guidance
-2. **Keeping types** for technical configuration
-3. **Connecting them** via agent workflows
-
-This gives you the best of both worlds: the structured power of the types system, plus the discoverability and Claude-native interaction of skills.
+The doc-type-selector skill serves as a fallback when the user's intent doesn't clearly match a specific type, helping guide them to the right choice.
 
 ---
 
 ## Next Steps
 
-1. [ ] Review and approve this recommendation
-2. [ ] Create the three initial skills (strategy, type selection, extending)
-3. [ ] Update plugin.json to register skills
-4. [ ] Update agent workflows to reference skills
-5. [ ] Test Claude's improved discoverability
-6. [ ] Document the dual system in README
-
----
-
-## Appendix: Comparison with Other Systems
-
-### How Other Plugins Handle Similar Problems
-
-**file plugin (storage handlers)**:
-- Uses `skills/handler-storage-*/SKILL.md` pattern
-- Each handler is a skill with configuration docs
-- Works because handlers are expertise-based (how to use S3, GCS, etc.)
-
-**repo plugin (commit format)**:
-- Uses `skills/commit-format.md` single skill
-- Pure knowledge/standards (no configuration needed)
-- Works because it's expertise, not templates
-
-**docs plugin (document types)**:
-- Uses `types/*/` with 5-file structure
-- Requires templates, schemas, validation
-- Skills pattern would lose functionality
-
-**Conclusion**: The docs plugin's types are more like the file plugin's handler configurations than the repo plugin's standards. The hybrid approach acknowledges this distinction.
+1. [ ] Review and approve this revised recommendation
+2. [ ] Migrate types/ directories to skills/doc-type-*/
+3. [ ] Create SKILL.md for each type with synonyms
+4. [ ] Create doc-type-selector fallback skill
+5. [ ] Update agents to load from skills
+6. [ ] Test Claude's automatic type discovery
+7. [ ] Archive old types/ directory
+8. [ ] Update documentation
