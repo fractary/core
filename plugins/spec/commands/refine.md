@@ -6,9 +6,6 @@ model: claude-opus-4-5
 argument-hint: '--work-id <id> [--context "<text>"]'
 ---
 
-Delegates to fractary-spec:spec-refine agent for critically reviewing and refining specifications.
-
-
 Use **Task** tool with `fractary-spec:spec-refine` agent for critically reviewing and refining current or specified specification document.
 
 ```
