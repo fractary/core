@@ -6,8 +6,7 @@ LOG_FILE="${1:?Log file path required}"
 
 # Load configuration from unified config
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_JSON=$("$SCRIPT_DIR/config-loader.sh" 2>&1)
-if [ $? -ne 0 ]; then
+if ! CONFIG_JSON=$("$SCRIPT_DIR/config-loader.sh" 2>&1); then
     # Config not required for compression, use defaults
     COMPRESSION_ENABLED=true
     THRESHOLD_MB=1

@@ -50,12 +50,12 @@ fi
 # Extract and validate spec configuration using Python
 # This script extracts the 'spec' section from the unified YAML config
 # and validates that required fields exist
-python3 <<PYTHON_SCRIPT
+python3 - "$CONFIG_FILE" <<'PYTHON_SCRIPT'
 import sys
 import yaml
 import json
 
-config_file = "$CONFIG_FILE"
+config_file = sys.argv[1]
 
 try:
     with open(config_file, 'r') as f:

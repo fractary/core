@@ -19,8 +19,7 @@ fi
 
 # Load configuration from unified config
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_JSON=$("$SCRIPT_DIR/config-loader.sh" 2>&1)
-if [ $? -ne 0 ]; then
+if ! CONFIG_JSON=$("$SCRIPT_DIR/config-loader.sh" 2>&1); then
     echo "$CONFIG_JSON" >&2
     exit 3
 fi
