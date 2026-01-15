@@ -49,13 +49,35 @@ export interface LogsConfig {
 }
 
 /**
- * File storage configuration
+ * File storage source configuration (v2.0)
+ */
+export interface FileSource {
+  type: string;
+  bucket?: string;
+  prefix?: string;
+  region?: string;
+  project_id?: string;
+  local: {
+    base_path: string;
+  };
+  push?: {
+    compress?: boolean;
+    keep_local?: boolean;
+  };
+  auth?: Record<string, any>;
+}
+
+/**
+ * File storage configuration (supports both v1.0 and v2.0)
  */
 export interface FileConfig {
   schema_version: string;
-  active_handler: string;
-  handlers: Record<string, any>;
+  // v2.0 sources-based config
+  sources?: Record<string, FileSource>;
   global_settings?: Record<string, any>;
+  // v1.0 handler-based config (deprecated)
+  active_handler?: string;
+  handlers?: Record<string, any>;
 }
 
 /**
@@ -85,6 +107,16 @@ export interface DocsConfig {
 }
 
 /**
+ * Codex configuration for cross-project context
+ */
+export interface CodexConfig {
+  schema_version: string;
+  organization: string;
+  project: string;
+  dependencies?: Record<string, any>;
+}
+
+/**
  * Unified configuration structure for all Fractary Core plugins
  */
 export interface CoreYamlConfig {
@@ -95,6 +127,7 @@ export interface CoreYamlConfig {
   file?: FileConfig;
   spec?: SpecConfig;
   docs?: DocsConfig;
+  codex?: CodexConfig;
 }
 
 /**
@@ -132,12 +165,26 @@ export function loadYamlConfig(options: ConfigLoadOptions = {}): CoreYamlConfig 
   } = options;
 
   const root = projectRoot || findProjectRoot();
-  const configPath = path.join(root, '.fractary', 'core', 'config.yaml');
 
-  if (!fs.existsSync(configPath)) {
+  // Try new location first (.fractary/config.yaml)
+  const newConfigPath = path.join(root, '.fractary', 'config.yaml');
+  const oldConfigPath = path.join(root, '.fractary', 'core', 'config.yaml');
+
+  let configPath: string;
+  if (fs.existsSync(newConfigPath)) {
+    configPath = newConfigPath;
+  } else if (fs.existsSync(oldConfigPath)) {
+    configPath = oldConfigPath;
+    console.warn(
+      `Warning: Using deprecated config location: ${oldConfigPath}\n` +
+      `Please move to: ${newConfigPath}`
+    );
+  } else {
     if (throwIfMissing) {
       throw new Error(
-        `Configuration file not found: ${configPath}\n` +
+        `Configuration file not found at:\n` +
+        `  - ${newConfigPath} (preferred)\n` +
+        `  - ${oldConfigPath} (deprecated)\n` +
         `Run 'fractary-core:init' to create it.`
       );
     }
@@ -189,7 +236,7 @@ export function writeYamlConfig(
   projectRoot?: string
 ): void {
   const root = projectRoot || findProjectRoot();
-  const fractaryDir = path.join(root, '.fractary', 'core');
+  const fractaryDir = path.join(root, '.fractary');
   const configPath = path.join(fractaryDir, 'config.yaml');
 
   // Ensure directory exists
@@ -351,23 +398,34 @@ export function findProjectRoot(startDir: string = process.cwd()): string {
  * Check if a valid configuration file exists
  *
  * @param projectRoot Project root directory (auto-detected if not provided)
- * @returns true if `.fractary/core/config.yaml` exists
+ * @returns true if config exists at either new or old location
  */
 export function configExists(projectRoot?: string): boolean {
   const root = projectRoot || findProjectRoot();
-  const configPath = path.join(root, '.fractary', 'core', 'config.yaml');
-  return fs.existsSync(configPath);
+  const newConfigPath = path.join(root, '.fractary', 'config.yaml');
+  const oldConfigPath = path.join(root, '.fractary', 'core', 'config.yaml');
+  return fs.existsSync(newConfigPath) || fs.existsSync(oldConfigPath);
 }
 
 /**
  * Get the configuration file path
  *
  * @param projectRoot Project root directory (auto-detected if not provided)
- * @returns Full path to configuration file
+ * @returns Full path to configuration file (prefers new location)
  */
 export function getConfigPath(projectRoot?: string): string {
   const root = projectRoot || findProjectRoot();
-  return path.join(root, '.fractary', 'core', 'config.yaml');
+  const newConfigPath = path.join(root, '.fractary', 'config.yaml');
+  const oldConfigPath = path.join(root, '.fractary', 'core', 'config.yaml');
+
+  if (fs.existsSync(newConfigPath)) {
+    return newConfigPath;
+  } else if (fs.existsSync(oldConfigPath)) {
+    return oldConfigPath;
+  }
+
+  // Return new path if neither exists (for creation)
+  return newConfigPath;
 }
 
 /**

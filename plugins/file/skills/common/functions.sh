@@ -350,3 +350,200 @@ export -f mask_credential
 export -f enforce_config_permissions
 export -f create_safe_directory
 export -f log_operation
+# ============================================================================
+# V2.0 Functions - Sources-based configuration
+# ============================================================================
+
+# YAML Helper - Parse YAML using Python
+# Usage: yaml_get <file> <path>
+# Returns: Value at path (JSON for objects/arrays, string for scalars)
+yaml_get() {
+    local file="$1"
+    local path="$2"
+    
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    python3 "$script_dir/yaml_helper.py" "$file" "$path" 2>/dev/null
+}
+
+# Get unified config file path
+# Usage: get_config_path
+# Returns: Path to .fractary/config.yaml
+get_config_path() {
+    local config_path=".fractary/config.yaml"
+    
+    # Check if config exists
+    if [[ -f "$config_path" ]]; then
+        echo "$config_path"
+        return 0
+    fi
+    
+    # Fallback to old location (backward compat)
+    if [[ -f ".fractary/core/config.yaml" ]]; then
+        echo ".fractary/core/config.yaml"
+        return 0
+    fi
+    
+    # Config not found
+    echo "Error: Config file not found at .fractary/config.yaml" >&2
+    return 1
+}
+
+# Get config schema version
+# Usage: get_config_schema_version
+# Returns: "1.0" or "2.0"
+get_config_schema_version() {
+    local config_path
+    config_path=$(get_config_path) || return 1
+    
+    local version
+    version=$(yaml_get "$config_path" "file.schema_version")
+    
+    if [[ -z "$version" ]] || [[ "$version" == "null" ]]; then
+        echo "1.0"  # Default to v1.0 if not found
+        return 0
+    fi
+    
+    echo "$version"
+}
+
+# Load source configuration (v2.0)
+# Usage: load_source_config <source_name>
+# Returns: JSON object with source configuration
+load_source_config() {
+    local source_name="$1"
+    
+    if [[ -z "$source_name" ]]; then
+        echo "Error: Source name required" >&2
+        return 1
+    fi
+    
+    local config_path
+    config_path=$(get_config_path) || return 1
+    
+    # Check schema version
+    local version
+    version=$(get_config_schema_version)
+    
+    if [[ "$version" != "2.0" ]]; then
+        echo "Error: Config schema version $version not supported. Expected 2.0" >&2
+        return 1
+    fi
+    
+    # Extract source config (already in JSON format from yaml_helper.py)
+    local source_config
+    source_config=$(yaml_get "$config_path" "file.sources.$source_name")
+    
+    if [[ -z "$source_config" ]] || [[ "$source_config" == "null" ]]; then
+        echo "Error: Source '$source_name' not found in config" >&2
+        return 1
+    fi
+    
+    echo "$source_config"
+}
+
+# List all available sources
+# Usage: list_sources
+# Returns: Newline-separated list of source names
+list_sources() {
+    local config_path
+    config_path=$(get_config_path) || return 1
+    
+    local sources
+    sources=$(yaml_get "$config_path" "file.sources")
+    
+    if [[ -z "$sources" ]] || [[ "$sources" == "null" ]]; then
+        return 0
+    fi
+    
+    # Extract keys from JSON object
+    echo "$sources" | jq -r 'keys[]' 2>/dev/null
+}
+
+# Resolve source from path or name
+# Usage: resolve_source <path_or_name>
+# Returns: Source name (e.g., "specs", "logs")
+resolve_source() {
+    local input="$1"
+    
+    if [[ -z "$input" ]]; then
+        echo "Error: Path or source name required" >&2
+        return 1
+    fi
+    
+    local config_path
+    config_path=$(get_config_path) || return 1
+    
+    # Check if input is a direct source name
+    local source_config
+    source_config=$(yaml_get "$config_path" "file.sources.$input")
+    
+    if [[ "$source_config" != "null" ]] && [[ -n "$source_config" ]]; then
+        # Direct source name found
+        echo "$input"
+        return 0
+    fi
+    
+    # Try to match path against source base_paths
+    local sources
+    sources=$(list_sources)
+    
+    if [[ -z "$sources" ]]; then
+        echo "Error: No sources configured" >&2
+        return 1
+    fi
+    
+    while IFS= read -r source; do
+        local base_path
+        base_path=$(yaml_get "$config_path" "file.sources.$source.local.base_path")
+        
+        if [[ -z "$base_path" ]] || [[ "$base_path" == "null" ]]; then
+            continue
+        fi
+        
+        # Normalize paths for comparison
+        local normalized_base_path="${base_path%/}"  # Remove trailing slash
+        local normalized_input="${input%/}"
+        
+        # Check if input path starts with or contains base_path
+        if [[ "$normalized_input" == "$normalized_base_path"* ]] || \
+           [[ "$normalized_input" == *"$normalized_base_path"* ]]; then
+            echo "$source"
+            return 0
+        fi
+    done <<< "$sources"
+    
+    # No match found
+    echo "Error: Could not resolve source for: $input" >&2
+    echo "Error: Available sources: $(echo "$sources" | tr '\n' ' ')" >&2
+    return 1
+}
+
+# Get local path for a file in a source
+# Usage: get_local_path <relative_path> <source_name>
+# Returns: Full local path
+get_local_path() {
+    local relative_path="$1"
+    local source_name="$2"
+    
+    local source_config
+    source_config=$(load_source_config "$source_name") || return 1
+    
+    local base_path
+    base_path=$(echo "$source_config" | jq -r '.local.base_path')
+    
+    # Remove leading ./ or / from relative path
+    relative_path="${relative_path#./}"
+    relative_path="${relative_path#/}"
+    
+    # Combine base_path and relative_path
+    echo "${base_path}/${relative_path}"
+}
+
+# Export v2.0 functions
+export -f yaml_get
+export -f get_config_path
+export -f get_config_schema_version
+export -f load_source_config
+export -f list_sources
+export -f resolve_source
+export -f get_local_path

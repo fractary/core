@@ -1,0 +1,13 @@
+{
+  "version": "2.0",
+  "generated_at": "2026-01-14T00:00:00Z",
+  "total_archived": 0,
+  "entries": [],
+  "metadata": {
+    "schema_version": "2.0",
+    "project": "fractary-core",
+    "description": "Log archive index with retention policies",
+    "last_updated": "2026-01-14T00:00:00Z",
+    "retention_strategy": "lifecycle"
+  }
+}
