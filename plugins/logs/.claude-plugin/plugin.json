@@ -1,7 +1,7 @@
 {
   "name": "fractary-logs",
-  "version": "3.0.2",
-  "description": "Type-aware operational log management - 8 log types with per-type retention, schema validation, and intelligent classification",
+  "version": "4.0.0",
+  "description": "Log management with per-type skills for Claude auto-discovery. Each log type (session, build, deployment, etc.) has its own skill with synonyms for natural language matching.",
   "commands": "./commands/",
   "agents": [
     "./agents/logs-analyze.md",
