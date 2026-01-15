@@ -6,4 +6,12 @@ model: claude-haiku-4-5
 argument-hint: '[--context "<text>"]'
 ---
 
-Delegates to fractary-logs:logs-stop agent for stopping active session capture.
+Use **Task** tool with `fractary-logs:logs-stop` agent to stop active session capture.
+
+```
+Task(
+  subagent_type="fractary-logs:logs-stop",
+  description="Stop session",
+  prompt="Stop active session capture: $ARGUMENTS"
+)
+```

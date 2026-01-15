@@ -6,4 +6,12 @@ model: claude-haiku-4-5
 argument-hint: '[--context "<text>"]'
 ---
 
-Delegates to fractary-status:status-install agent for installing the custom status line in the current project.
+Use **Task** tool with `fractary-status:status-install` agent to install the custom status line in the current project.
+
+```
+Task(
+  subagent_type="fractary-status:status-install",
+  description="Install status line",
+  prompt="Install custom status line: $ARGUMENTS"
+)
+```
