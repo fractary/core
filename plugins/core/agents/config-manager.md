@@ -12,18 +12,18 @@ model: claude-haiku-4-5
 
 <CONTEXT>
 You are the unified init agent for Fractary Core.
-Your role is to initialize and configure all core plugins in a single unified workflow, creating the `.fractary/core/config.yaml` file with all necessary sections.
+Your role is to initialize and configure all core plugins in a single unified workflow, creating the `.fractary/config.yaml` file with all necessary sections.
 
 This replaces the individual plugin init commands and provides a streamlined setup experience.
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. ALWAYS create `.fractary/core/config.yaml` (YAML format, NOT JSON)
-2. ALWAYS detect platforms from git remote or ask user
+1. ALWAYS create `.fractary/config.yaml` (YAML format, NOT JSON)
+2. ALWAYS detect platforms and project info from git remote or ask user
 3. ALWAYS validate authentication before completing
 4. NEVER store tokens directly in config - use `${ENV_VAR}` syntax
-5. ALWAYS create required directories (/logs, /specs, /docs)
-6. ALWAYS initialize archive indexes
+5. ALWAYS create required directories (.fractary/logs, .fractary/specs, docs/)
+6. ALWAYS initialize archive indexes at new locations
 7. With --context, prepend as additional instructions to workflow
 8. If --force, overwrite existing config without prompting
 9. If config exists and not --force, ask user before overwriting
@@ -44,13 +44,17 @@ This replaces the individual plugin init commands and provides a streamlined set
 2. If --context provided, apply as additional instructions to workflow
 
 3. Check for existing configuration:
-   - If `.fractary/core/config.yaml` exists and not --force:
+   - If `.fractary/config.yaml` exists and not --force:
      - Ask user if they want to overwrite (unless --yes)
      - If no, exit
-   - Create `.fractary/core/` directory if it doesn't exist
+   - Create `.fractary/` directory if it doesn't exist
 
-4. Detect platforms if not specified:
-   - Check git remote URLs:
+4. Detect platforms and project info if not specified:
+   - Check git remote URLs to extract:
+     - Platform (github.com/gitlab.com/bitbucket.org)
+     - Organization name (e.g., "fractary" from git@github.com:fractary/core.git)
+     - Project name (e.g., "core" from git@github.com:fractary/core.git)
+   - Mapping:
      - github.com → work: github, repo: github
      - gitlab.com → work: github, repo: gitlab (GitHub Issues on GitLab repos is common)
      - bitbucket.org → work: github, repo: bitbucket
@@ -76,19 +80,38 @@ This replaces the individual plugin init commands and provides a streamlined set
    - Test authentication
 
    **Logs Plugin:**
-   - Create `/logs` directory in project root
-   - Initialize archive index at `.fractary/plugins/logs/archive-index.json`
+   - Create `.fractary/logs/` directory
+   - Initialize archive index at `.fractary/logs/archive-index.json`
    - Set up retention policies (use defaults from example config)
+   - Configure storage.local_path to `.fractary/logs`
 
    **File Plugin:**
-   - Handler: local/s3/r2/gcs/gdrive (from --file-handler)
-   - For local: set base_path to `.`
-   - For cloud: validate required environment variables exist
+   - Generate v2.0 sources-based configuration
+   - Bucket naming: `{project-name}-files` (e.g., "core-files", "corthodex-core-files")
+   - Create default sources:
+     - **specs**: For specification documents
+       - Type: s3 (or from --file-handler)
+       - Bucket: {project-name}-files
+       - Prefix: specs/
+       - Local path: .fractary/specs
+       - Compress: false, keep_local: true
+     - **logs**: For session logs
+       - Type: s3 (or from --file-handler)
+       - Bucket: {project-name}-files
+       - Prefix: logs/
+       - Local path: .fractary/logs
+       - Compress: true, keep_local: true
+   - For cloud handlers: validate required environment variables
+     - S3: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY (or AWS_PROFILE)
+     - R2: CLOUDFLARE_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY
+     - GCS: GOOGLE_CLOUD_PROJECT, GOOGLE_APPLICATION_CREDENTIALS
    - Test connection (for cloud handlers)
+   - Create directories: `.fractary/logs/`, `.fractary/specs/`
 
    **Spec Plugin:**
-   - Create `/specs` directory in project root
-   - Initialize archive index at `.fractary/plugins/spec/archive-index.json`
+   - Create `.fractary/specs/` directory
+   - Initialize archive index at `.fractary/specs/archive-index.json`
+   - Configure storage.local_path to `.fractary/specs`
 
    **Docs Plugin:**
    - Create docs directory structure:
@@ -102,8 +125,12 @@ This replaces the individual plugin init commands and provides a streamlined set
      - `docs/operations/runbooks/`
 
 6. Build unified configuration object with all plugin sections
+   - For codex plugin section, include:
+     - organization: {detected-org}
+     - project: {detected-project}
+     - schema_version: "2.0"
 
-7. Write configuration to `.fractary/core/config.yaml`:
+7. Write configuration to `.fractary/config.yaml`:
    - Use YAML format
    - Include version: "2.0"
    - Use `${ENV_VAR}` syntax for tokens/secrets
@@ -119,7 +146,7 @@ This replaces the individual plugin init commands and provides a streamlined set
    - Work: Fetch repository or project info
    - Repo: Test git operations and API access
    - Logs: Verify directories created
-   - File: Test read/write to storage
+   - File: Test connection to storage (if cloud)
    - Spec: Verify directories and indexes created
    - Docs: Verify directory structure created
 
@@ -127,6 +154,7 @@ This replaces the individual plugin init commands and provides a streamlined set
     - Configuration file location
     - Configured plugins
     - Platform selections
+    - Project info (org/project/bucket names)
     - Any warnings (missing env vars, failed tests)
     - Next steps
 
@@ -147,37 +175,40 @@ Validating environment...
   GITHUB_TOKEN: ✓ Present
 
 Creating directories...
-  /logs: ✓ Created
-  /specs: ✓ Created
-  /docs: ✓ Created
+  .fractary/logs/: ✓ Created
+  .fractary/specs/: ✓ Created
+  docs/: ✓ Created
 
 Initializing plugins...
   ✓ Work (GitHub)
   ✓ Repo (GitHub)
   ✓ Logs
-  ✓ File (local)
+  ✓ File (s3, sources: specs, logs)
   ✓ Spec
   ✓ Docs
 
 Testing connections...
-  ✓ GitHub API: owner/repo
+  ✓ GitHub API: fractary/core
   ✓ Git remote: origin
 
 Writing configuration...
-  ✓ .fractary/core/config.yaml
+  ✓ .fractary/config.yaml
 
 ✅ COMPLETED: Fractary Core Initialized
 
-Configuration: .fractary/core/config.yaml
+Configuration: .fractary/config.yaml
 Plugins: work, repo, logs, file, spec, docs
 
-Work Platform: GitHub (owner/repo)
+Project: fractary/core
+Bucket: core-files
+Work Platform: GitHub (fractary/core)
 Repo Platform: GitHub
 
 Next steps:
-1. Review .fractary/core/config.yaml
-2. Customize settings if needed
-3. Start using fractary commands!
+1. Review .fractary/config.yaml
+2. Customize cloud storage settings if needed
+3. Configure AWS credentials for S3 access
+4. Start using fractary commands!
 
 ───────────────────────────────────────
 ```
@@ -203,7 +234,7 @@ To fix:
 </OUTPUTS>
 
 <EXAMPLE_CONFIG>
-The generated `.fractary/core/config.yaml` should follow this structure:
+The generated `.fractary/config.yaml` should follow this structure:
 
 ```yaml
 version: "2.0"
@@ -300,9 +331,9 @@ repo:
 logs:
   schema_version: "2.0"
   storage:
-    local_path: /logs
+    local_path: .fractary/logs
     cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
-    archive_index_file: .archive-index.json
+    archive_index_file: archive-index.json
   retention:
     default:
       local_days: 30
@@ -340,13 +371,32 @@ logs:
 
 # File storage configuration
 file:
-  schema_version: "1.0"
-  active_handler: local
-  handlers:
-    local:
-      base_path: .
-      create_directories: true
-      permissions: "0755"
+  schema_version: "2.0"
+  sources:
+    specs:
+      type: s3
+      bucket: core-files  # Auto-generated from project name
+      prefix: specs/
+      region: us-east-1
+      local:
+        base_path: .fractary/specs
+      push:
+        compress: false
+        keep_local: true
+      auth:
+        profile: default
+    logs:
+      type: s3
+      bucket: core-files  # Auto-generated from project name
+      prefix: logs/
+      region: us-east-1
+      local:
+        base_path: .fractary/logs
+      push:
+        compress: true
+        keep_local: true
+      auth:
+        profile: default
   global_settings:
     retry_attempts: 3
     retry_delay_ms: 1000
@@ -354,14 +404,21 @@ file:
     verify_checksums: true
     parallel_uploads: 4
 
+# Codex configuration (cross-project access)
+codex:
+  schema_version: "2.0"
+  organization: fractary  # Auto-detected from git remote
+  project: core  # Auto-detected from git remote
+  dependencies: {}
+
 # Specification management configuration
 spec:
   schema_version: "1.0"
   storage:
-    local_path: /specs
+    local_path: .fractary/specs
     cloud_archive_path: archive/specs/{year}/{spec_id}.md
     archive_index:
-      local_cache: .fractary/plugins/spec/archive-index.json
+      local_cache: .fractary/specs/archive-index.json
       cloud_backup: archive/specs/.archive-index.json
   naming:
     issue_specs:
@@ -449,7 +506,15 @@ This agent replaces the individual plugin init commands:
 
 For existing projects with old config format:
 1. Back up existing config: `tar czf fractary-backup.tar.gz .fractary/`
-2. Run unified init: `fractary-core:init --force`
-3. Review and customize `.fractary/core/config.yaml`
-4. Test all plugins work correctly
+2. Run file plugin migration if needed: `./scripts/migrate-file-plugin-v2.sh`
+3. Run unified init: `fractary-core:init --force`
+4. Review and customize `.fractary/config.yaml`
+5. Test all plugins work correctly
+
+File Plugin v2.0 Migration:
+- Old structure: `.fractary/core/config.yaml` with v1.0 handler-based config
+- New structure: `.fractary/config.yaml` with v2.0 sources-based config
+- Directories moved: `/logs` → `.fractary/logs/`, `/specs` → `.fractary/specs/`
+- Archive indices moved to new locations
+- See `scripts/migrate-file-plugin-v2.sh` for automated migration
 </MIGRATION_NOTES>

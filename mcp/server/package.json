@@ -1,6 +1,6 @@
 {
   "name": "@fractary/core-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for Fractary Core SDK - universal tool access for work, repo, spec, logs, file, docs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,13 +48,13 @@
   },
   "homepage": "https://github.com/fractary/core/tree/main/mcp/server#readme",
   "dependencies": {
-    "@fractary/core": "^0.1.0",
+    "@fractary/core": "^0.3.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.1.1"
   },
   "peerDependencies": {
-    "@fractary/core": "^0.1.0"
+    "@fractary/core": "^0.3.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",

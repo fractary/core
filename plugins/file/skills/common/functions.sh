@@ -2,6 +2,67 @@
 # Common Functions Library for File Plugin
 # Provides shared utilities for all storage handlers
 
+# ============================================================================
+# Security Functions
+# ============================================================================
+
+# Validate and sanitize file paths to prevent directory traversal attacks
+# Usage: validate_path <path>
+# Returns: 0 if path is safe, 1 if path is dangerous
+validate_path() {
+    local path="$1"
+
+    if [[ -z "$path" ]]; then
+        echo "Error: Path cannot be empty" >&2
+        return 1
+    fi
+
+    # Reject paths with directory traversal attempts
+    if [[ "$path" =~ \.\. ]]; then
+        echo "Error: Path traversal detected (..): $path" >&2
+        return 1
+    fi
+
+    # Reject absolute paths (should be relative to project/config)
+    if [[ "$path" =~ ^/ ]]; then
+        echo "Error: Absolute paths not allowed: $path" >&2
+        return 1
+    fi
+
+    # Reject paths with null bytes (shell injection attempt)
+    if [[ "$path" =~ $'\0' ]]; then
+        echo "Error: Null byte in path: $path" >&2
+        return 1
+    fi
+
+    # Reject paths starting with dash (command injection)
+    if [[ "$path" =~ ^- ]]; then
+        echo "Error: Path cannot start with dash: $path" >&2
+        return 1
+    fi
+
+    # Canonicalize the path and verify it doesn't escape base directory
+    local canonical_path
+    canonical_path=$(realpath -m "$path" 2>/dev/null) || {
+        echo "Error: Invalid path: $path" >&2
+        return 1
+    }
+
+    # Ensure path stays within current directory tree
+    local pwd_canonical
+    pwd_canonical=$(realpath -m "." 2>/dev/null)
+    if [[ ! "$canonical_path" =~ ^"$pwd_canonical" ]]; then
+        echo "Error: Path escapes base directory: $path" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# ============================================================================
+# Configuration Functions
+# ============================================================================
+
 # Load handler-specific configuration
 # Usage: load_handler_config <config_file> <handler>
 # Returns: JSON object with handler configuration
@@ -220,27 +281,6 @@ check_required_tools() {
     return 0
 }
 
-# Validate file path for safety (prevent path traversal)
-# Usage: validate_path <path>
-# Returns: 0 if safe, 1 if potentially dangerous
-validate_path() {
-    local path="$1"
-
-    # Check for path traversal attempts
-    if [[ "$path" =~ \.\. ]]; then
-        echo "Error: Path contains '..' (path traversal attempt)" >&2
-        return 1
-    fi
-
-    # Check for absolute paths in remote paths (should be relative)
-    if [[ "$path" =~ ^/ ]] && [[ "${2:-}" != "allow_absolute" ]]; then
-        echo "Error: Absolute paths not allowed: $path" >&2
-        return 1
-    fi
-
-    return 0
-}
-
 # Mask sensitive value for logging
 # Usage: mask_credential <value>
 # Returns: Masked value (shows first 4 and last 4 characters)
@@ -350,3 +390,236 @@ export -f mask_credential
 export -f enforce_config_permissions
 export -f create_safe_directory
 export -f log_operation
+# ============================================================================
+# V2.0 Functions - Sources-based configuration
+# ============================================================================
+
+# YAML Helper - Parse YAML using Python
+# Usage: yaml_get <file> <path>
+# Returns: Value at path (JSON for objects/arrays, string for scalars)
+
+# Cache for Python dependency check (only check once per execution)
+_PYTHON_DEPS_CHECKED=false
+
+# Check Python dependencies for YAML helper
+# Usage: check_python_dependencies
+# Returns: 0 if dependencies are available, 1 otherwise
+check_python_dependencies() {
+    # Return cached result if already checked
+    if [[ "$_PYTHON_DEPS_CHECKED" == "true" ]]; then
+        return 0
+    fi
+
+    # Check if python3 is available
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "Error: python3 is required but not installed" >&2
+        echo "Please install Python 3.6 or later" >&2
+        return 1
+    fi
+
+    # Check if PyYAML is available
+    if ! python3 -c "import yaml" 2>/dev/null; then
+        echo "Error: PyYAML is required but not installed" >&2
+        echo "Please install with: pip3 install pyyaml" >&2
+        return 1
+    fi
+
+    _PYTHON_DEPS_CHECKED=true
+    return 0
+}
+
+yaml_get() {
+    local file="$1"
+    local path="$2"
+
+    # Ensure dependencies are available (cached after first check)
+    if ! check_python_dependencies; then
+        return 1
+    fi
+
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    python3 "$script_dir/yaml_helper.py" "$file" "$path" 2>/dev/null
+}
+
+# Get unified config file path
+# Usage: get_config_path
+# Returns: Path to .fractary/config.yaml
+get_config_path() {
+    local config_path=".fractary/config.yaml"
+    
+    # Check if config exists
+    if [[ -f "$config_path" ]]; then
+        echo "$config_path"
+        return 0
+    fi
+    
+    # Fallback to old location (backward compat)
+    if [[ -f ".fractary/core/config.yaml" ]]; then
+        echo ".fractary/core/config.yaml"
+        return 0
+    fi
+    
+    # Config not found
+    echo "Error: Config file not found at .fractary/config.yaml" >&2
+    return 1
+}
+
+# Get config schema version
+# Usage: get_config_schema_version
+# Returns: "1.0" or "2.0"
+get_config_schema_version() {
+    local config_path
+    config_path=$(get_config_path) || return 1
+    
+    local version
+    version=$(yaml_get "$config_path" "file.schema_version")
+    
+    if [[ -z "$version" ]] || [[ "$version" == "null" ]]; then
+        echo "1.0"  # Default to v1.0 if not found
+        return 0
+    fi
+    
+    echo "$version"
+}
+
+# Load source configuration (v2.0)
+# Usage: load_source_config <source_name>
+# Returns: JSON object with source configuration
+load_source_config() {
+    local source_name="$1"
+    
+    if [[ -z "$source_name" ]]; then
+        echo "Error: Source name required" >&2
+        return 1
+    fi
+    
+    local config_path
+    config_path=$(get_config_path) || return 1
+    
+    # Check schema version
+    local version
+    version=$(get_config_schema_version)
+    
+    if [[ "$version" != "2.0" ]]; then
+        echo "Error: Config schema version $version not supported. Expected 2.0" >&2
+        return 1
+    fi
+    
+    # Extract source config (already in JSON format from yaml_helper.py)
+    local source_config
+    source_config=$(yaml_get "$config_path" "file.sources.$source_name")
+    
+    if [[ -z "$source_config" ]] || [[ "$source_config" == "null" ]]; then
+        echo "Error: Source '$source_name' not found in config" >&2
+        return 1
+    fi
+    
+    echo "$source_config"
+}
+
+# List all available sources
+# Usage: list_sources
+# Returns: Newline-separated list of source names
+list_sources() {
+    local config_path
+    config_path=$(get_config_path) || return 1
+    
+    local sources
+    sources=$(yaml_get "$config_path" "file.sources")
+    
+    if [[ -z "$sources" ]] || [[ "$sources" == "null" ]]; then
+        return 0
+    fi
+    
+    # Extract keys from JSON object
+    echo "$sources" | jq -r 'keys[]' 2>/dev/null
+}
+
+# Resolve source from path or name
+# Usage: resolve_source <path_or_name>
+# Returns: Source name (e.g., "specs", "logs")
+resolve_source() {
+    local input="$1"
+    
+    if [[ -z "$input" ]]; then
+        echo "Error: Path or source name required" >&2
+        return 1
+    fi
+    
+    local config_path
+    config_path=$(get_config_path) || return 1
+    
+    # Check if input is a direct source name
+    local source_config
+    source_config=$(yaml_get "$config_path" "file.sources.$input")
+    
+    if [[ "$source_config" != "null" ]] && [[ -n "$source_config" ]]; then
+        # Direct source name found
+        echo "$input"
+        return 0
+    fi
+    
+    # Try to match path against source base_paths
+    local sources
+    sources=$(list_sources)
+    
+    if [[ -z "$sources" ]]; then
+        echo "Error: No sources configured" >&2
+        return 1
+    fi
+    
+    while IFS= read -r source; do
+        local base_path
+        base_path=$(yaml_get "$config_path" "file.sources.$source.local.base_path")
+        
+        if [[ -z "$base_path" ]] || [[ "$base_path" == "null" ]]; then
+            continue
+        fi
+        
+        # Normalize paths for comparison
+        local normalized_base_path="${base_path%/}"  # Remove trailing slash
+        local normalized_input="${input%/}"
+        
+        # Check if input path starts with or contains base_path
+        if [[ "$normalized_input" == "$normalized_base_path"* ]] || \
+           [[ "$normalized_input" == *"$normalized_base_path"* ]]; then
+            echo "$source"
+            return 0
+        fi
+    done <<< "$sources"
+    
+    # No match found
+    echo "Error: Could not resolve source for: $input" >&2
+    echo "Error: Available sources: $(echo "$sources" | tr '\n' ' ')" >&2
+    return 1
+}
+
+# Get local path for a file in a source
+# Usage: get_local_path <relative_path> <source_name>
+# Returns: Full local path
+get_local_path() {
+    local relative_path="$1"
+    local source_name="$2"
+    
+    local source_config
+    source_config=$(load_source_config "$source_name") || return 1
+    
+    local base_path
+    base_path=$(echo "$source_config" | jq -r '.local.base_path')
+    
+    # Remove leading ./ or / from relative path
+    relative_path="${relative_path#./}"
+    relative_path="${relative_path#/}"
+    
+    # Combine base_path and relative_path
+    echo "${base_path}/${relative_path}"
+}
+
+# Export v2.0 functions
+export -f yaml_get
+export -f get_config_path
+export -f get_config_schema_version
+export -f load_source_config
+export -f list_sources
+export -f resolve_source
+export -f get_local_path

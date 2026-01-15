@@ -1,0 +1,54 @@
+# Fractary Core - Git Ignore
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# Logs and temporary files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Fractary-specific directories
+# New structure (.fractary/)
+.fractary/logs/*.log
+.fractary/logs/*.log.gz
+.fractary/specs/*.md
+.fractary/codex/cache/
+
+# Old structure (backward compat)
+/logs/
+/specs/
+.fractary/plugins/logs/*.log
+.fractary/plugins/spec/*.md
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage/
+.coverage
+*.cover
+
+# Environment
+.env
+.env.local
