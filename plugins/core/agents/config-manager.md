@@ -1,5 +1,5 @@
 ---
-name: fractary-core:config-manager
+name: config-manager
 description: |
   MUST BE USED when user wants to initialize or configure Fractary Core for a project.
   Use PROACTIVELY when user mentions "setup fractary", "initialize project", "configure plugins", or when commands fail due to missing configuration.

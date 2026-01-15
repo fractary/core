@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:logs-analyze
+name: logs-analyze
 description: |
   MUST BE USED when user wants to analyze logs for patterns, errors, or time spent.
   Use PROACTIVELY when user mentions "analyze logs", "find errors", "log patterns", "time analysis".

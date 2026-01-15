@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:logs-search
+name: logs-search
 description: |
   MUST BE USED when user wants to search across logs.
   Use PROACTIVELY when user mentions "search logs", "find in logs", "grep logs".

@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-bulk-creator
+name: issue-bulk-creator
 description: |
   Autonomous agent for creating multiple related issues at once.
   Analyzes project structure and conversation context to intelligently determine what issues to create.

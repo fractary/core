@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:logs-capture
+name: logs-capture
 description: |
   MUST BE USED when user wants to start capturing a conversation session for an issue.
   Use PROACTIVELY when user mentions "start logging", "capture session", "record conversation".

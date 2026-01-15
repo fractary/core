@@ -1,5 +1,5 @@
 ---
-name: fractary-spec:spec-archive
+name: spec-archive
 description: |
   MUST BE USED when user wants to archive specifications for completed work.
   Use PROACTIVELY when user mentions "archive spec", "completed work", "close issue with spec".

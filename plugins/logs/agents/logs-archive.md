@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:logs-archive
+name: logs-archive
 description: |
   MUST BE USED when user wants to archive logs for a completed issue to cloud storage.
   Use PROACTIVELY when user mentions "archive logs", "backup logs", "store logs in cloud".

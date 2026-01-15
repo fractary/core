@@ -1,5 +1,5 @@
 ---
-name: fractary-file:file-switch-handler
+name: file-switch-handler
 description: |
   MUST BE USED when user wants to switch the active storage handler.
   Use PROACTIVELY when user mentions "switch handler", "change storage", "use S3", "use local".

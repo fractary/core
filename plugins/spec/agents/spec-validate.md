@@ -1,5 +1,5 @@
 ---
-name: fractary-spec:spec-validate
+name: spec-validate
 description: |
   MUST BE USED when user wants to validate implementation against specification.
   Use PROACTIVELY when user mentions "validate spec", "check implementation", "verify requirements".

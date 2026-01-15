@@ -1,5 +1,5 @@
 ---
-name: fractary-spec:spec-create
+name: spec-create
 description: |
   MUST BE USED when user wants to create a specification from conversation context.
   Use PROACTIVELY when user mentions "create spec", "write spec", "document requirements".
