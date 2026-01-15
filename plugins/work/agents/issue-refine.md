@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-refine-agent
+name: issue-refine-agent
 description: |
   Reviews GitHub issues and asks clarifying questions to ensure requirement clarity.
   Focuses on WHAT (requirements, goals, scope, acceptance criteria) not HOW (implementation).

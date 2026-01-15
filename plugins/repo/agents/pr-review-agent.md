@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:pr-review-agent
+name: pr-review-agent
 description: |
   Analyzes pull requests comprehensively including comments, reviews, CI status, and merge conflicts.
   Provides intelligent recommendations on whether to approve based on blocking conditions.

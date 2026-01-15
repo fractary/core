@@ -1,5 +1,5 @@
 ---
-name: fractary-status:status-install
+name: status-install
 description: |
   MUST BE USED when user wants to install or set up the Fractary status line plugin in their project.
   Use PROACTIVELY when user mentions "status line", "install status", "set up status", or wants to see git status in Claude Code's status bar.

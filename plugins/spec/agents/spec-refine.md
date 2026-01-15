@@ -1,5 +1,5 @@
 ---
-name: fractary-spec:spec-refine
+name: spec-refine
 description: |
   MUST BE USED when user wants to critically review and improve a specification.
   Use PROACTIVELY when user mentions "refine spec", "improve spec", "review specification".

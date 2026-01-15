@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:docs-check-consistency
+name: docs-check-consistency
 description: |
   MUST BE USED when user wants to check if documentation is consistent with code changes.
   Use PROACTIVELY when user mentions "docs out of date", "update docs", "docs consistent", "stale documentation".

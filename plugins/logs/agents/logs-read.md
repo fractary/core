@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:logs-read
+name: logs-read
 description: |
   MUST BE USED when user wants to read log files for an issue.
   Use PROACTIVELY when user mentions "read logs", "show logs", "view log", "get logs".

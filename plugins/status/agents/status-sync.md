@@ -1,5 +1,5 @@
 ---
-name: fractary-status:status-sync
+name: status-sync
 description: |
   MUST BE USED when user wants to refresh or sync the status line cache.
   Use PROACTIVELY when user mentions "refresh status", "sync status", "status out of date", or reports status line showing stale information.

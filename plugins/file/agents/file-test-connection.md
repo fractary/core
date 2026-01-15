@@ -1,5 +1,5 @@
 ---
-name: fractary-file:file-test-connection
+name: file-test-connection
 description: |
   MUST BE USED when user wants to test file storage connection.
   Use PROACTIVELY when user mentions "test connection", "verify storage", "check file access".

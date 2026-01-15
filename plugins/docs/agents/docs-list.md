@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:docs-list
+name: docs-list
 description: |
   MUST BE USED when user wants to list or find documentation files.
   Use PROACTIVELY when user mentions "list docs", "find documentation", "show docs", "what docs exist".

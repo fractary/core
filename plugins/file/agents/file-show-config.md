@@ -1,5 +1,5 @@
 ---
-name: fractary-file:file-show-config
+name: file-show-config
 description: |
   MUST BE USED when user wants to view file plugin configuration.
   Use PROACTIVELY when user mentions "show config", "view storage config", "file settings".

@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:logs-stop
+name: logs-stop
 description: |
   MUST BE USED when user wants to stop active session capture.
   Use PROACTIVELY when user mentions "stop logging", "end session", "finish capture".

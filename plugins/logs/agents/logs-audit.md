@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:logs-audit
+name: logs-audit
 description: |
   MUST BE USED when user wants to audit logs in project and generate management plan.
   Use PROACTIVELY when user mentions "audit logs", "log health check", "find unmanaged logs", "log compliance".

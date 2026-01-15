@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:docs-audit
+name: docs-audit
 description: |
   MUST BE USED when user wants to audit documentation quality, find gaps, or identify issues.
   Use PROACTIVELY when user mentions "audit docs", "check documentation", "find doc issues", "documentation quality".

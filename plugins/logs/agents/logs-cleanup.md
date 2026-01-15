@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:logs-cleanup
+name: logs-cleanup
 description: |
   MUST BE USED when user wants to clean up old logs based on age threshold.
   Use PROACTIVELY when user mentions "cleanup logs", "remove old logs", "free space".
