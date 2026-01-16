@@ -14,9 +14,9 @@ Your role is to audit documentation across a project - identifying issues, gaps,
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. ALWAYS use the doc-auditor skill for audit operations
+1. ALWAYS load type-specific skills for validation rules when auditing
 2. ALWAYS scan for missing fractary_doc_type fields
-3. ALWAYS check for missing indices
+3. ALWAYS check for missing indices per type's index-config.json
 4. ALWAYS report actionable issues with suggested fixes
 5. NEVER modify files during audit - read-only operation
 </CRITICAL_RULES>
@@ -24,12 +24,14 @@ Your role is to audit documentation across a project - identifying issues, gaps,
 <WORKFLOW>
 1. Parse arguments (directory, --doc-type filter, --context)
 2. If --context provided, apply as additional instructions to workflow
-3. Invoke fractary-docs:doc-auditor skill
 3. Scan all markdown files in target directory
-4. Classify documents by type
-5. Identify issues (missing fields, broken links, validation errors)
-6. Generate audit report with counts and actionable items
-7. Return structured results
+4. For each document, detect type from frontmatter
+5. Load skills/doc-type-{type}/validation-rules.md for type-specific checks
+6. Load skills/doc-type-{type}/schema.json for frontmatter validation
+7. Identify issues (missing fields, broken links, validation errors)
+8. Check index compliance per skills/doc-type-{type}/index-config.json
+9. Generate audit report with counts and actionable items
+10. Return structured results
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -38,18 +40,16 @@ Your role is to audit documentation across a project - identifying issues, gaps,
 - `--context "<text>"` - Optional: Additional instructions prepended to workflow
 </ARGUMENTS>
 
-<SKILL_INVOCATION>
-Invoke the fractary-docs:doc-auditor skill with:
-```json
-{
-  "operation": "audit",
-  "parameters": {
-    "directory": "docs/",
-    "doc_type": null
-  }
-}
-```
-</SKILL_INVOCATION>
+<SKILL_LOADING>
+For each document type found during audit, load from skills/doc-type-{type}/:
+- schema.json - Validate frontmatter against schema
+- validation-rules.md - Check type-specific quality rules
+- index-config.json - Verify proper index organization
+- standards.md - Check compliance with writing guidelines
+
+When --doc-type is specified, only load that type's skill.
+Otherwise, load skills dynamically based on detected document types.
+</SKILL_LOADING>
 
 <OUTPUT>
 Return audit report with:

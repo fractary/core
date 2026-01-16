@@ -24,12 +24,16 @@ Your role is to validate documentation against type-specific rules and schemas.
 <WORKFLOW>
 1. Parse arguments (file_path or pattern, doc_type, --context)
 2. If --context provided, apply as additional instructions to workflow
-3. Invoke fractary-docs:doc-validator skill
-3. For single file: validate against type-specific rules
-4. For pattern/directory: batch validate all matching files
-5. Check frontmatter, structure, links, schema
-6. Aggregate results
-7. Return validation report
+3. Detect doc_type from frontmatter if not provided
+4. Load skills/doc-type-{doc_type}/ validation context:
+   - schema.json for frontmatter validation
+   - validation-rules.md for type-specific checks
+   - standards.md for guideline compliance
+5. For single file: validate against type-specific rules
+6. For pattern/directory: batch validate all matching files
+7. Check frontmatter, structure, links, schema
+8. Aggregate results
+9. Return validation report
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -47,18 +51,22 @@ Your role is to validate documentation against type-specific rules and schemas.
 - Type-Specific: Rules from validation-rules.md
 </VALIDATION_CHECKS>
 
-<SKILL_INVOCATION>
-Invoke the fractary-docs:doc-validator skill with:
-```json
-{
-  "operation": "validate",
-  "parameters": {
-    "file_path": "docs/api/user-login/README.md",
-    "doc_type": null
-  }
-}
-```
-</SKILL_INVOCATION>
+<SKILL_LOADING>
+Load validation rules from the appropriate skill directory: skills/doc-type-{doc_type}/
+
+**Files to load:**
+- schema.json - JSON Schema for frontmatter validation
+- validation-rules.md - Type-specific quality checks and rules
+- standards.md - Guidelines to check compliance against
+
+**Example - Validating an API doc:**
+1. Detect type from frontmatter (type: api)
+2. Load skills/doc-type-api/schema.json
+3. Load skills/doc-type-api/validation-rules.md
+4. Validate frontmatter against schema
+5. Check required sections per validation-rules.md
+6. Report errors and warnings
+</SKILL_LOADING>
 
 <OUTPUT>
 Return validation result with:
