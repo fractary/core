@@ -24,9 +24,10 @@ This replaces the individual plugin init commands and provides a streamlined set
 4. NEVER store tokens directly in config - use `${ENV_VAR}` syntax
 5. ALWAYS create required directories (.fractary/logs, .fractary/specs, docs/)
 6. ALWAYS initialize archive indexes at new locations
-7. With --context, prepend as additional instructions to workflow
-8. If --force, overwrite existing config without prompting
-9. If config exists and not --force, ask user before overwriting
+7. ALWAYS update `.claude/settings.json` to deny Read access to archive directories
+8. With --context, prepend as additional instructions to workflow
+9. If --force, overwrite existing config without prompting
+10. If config exists and not --force, ask user before overwriting
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -137,20 +138,39 @@ This replaces the individual plugin init commands and provides a streamlined set
    - Include all configured plugin sections
    - Add inline comments for key sections
 
-8. Validate configuration:
+8. Update `.claude/settings.json` to hide archive directories from Claude:
+   - Create `.claude/` directory if it doesn't exist
+   - Read existing settings.json (or create new if missing)
+   - Add/merge `permissions.deny` array with archive Read rules:
+     ```json
+     {
+       "permissions": {
+         "deny": [
+           "Read(./.fractary/specs/archive/**)",
+           "Read(./.fractary/logs/archive/**)"
+         ]
+       }
+     }
+     ```
+   - Preserve all existing settings (merge, don't overwrite)
+   - Write updated settings.json
+   - This prevents Claude from finding archived specs/logs during searches
+   - Note: .gitignore alone is NOT sufficient - Claude's tools ignore it
+
+9. Validate configuration:
    - Check YAML is valid
    - Check all required sections present
    - Check all referenced environment variables exist (warn if missing)
 
-9. Test each plugin:
-   - Work: Fetch repository or project info
-   - Repo: Test git operations and API access
-   - Logs: Verify directories created
-   - File: Test connection to storage (if cloud)
-   - Spec: Verify directories and indexes created
-   - Docs: Verify directory structure created
+10. Test each plugin:
+    - Work: Fetch repository or project info
+    - Repo: Test git operations and API access
+    - Logs: Verify directories created
+    - File: Test connection to storage (if cloud)
+    - Spec: Verify directories and indexes created
+    - Docs: Verify directory structure created
 
-10. Return success summary with:
+11. Return success summary with:
     - Configuration file location
     - Configured plugins
     - Platform selections
@@ -186,6 +206,9 @@ Initializing plugins...
   ✓ File (s3, sources: specs, logs)
   ✓ Spec
   ✓ Docs
+
+Configuring Claude settings...
+  ✓ .claude/settings.json: Added archive deny rules
 
 Testing connections...
   ✓ GitHub API: fractary/core
