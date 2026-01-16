@@ -127,11 +127,28 @@ export async function loadConfig(): Promise<Config> {
       }
 
       // Merge file config with existing config (env vars take precedence)
+      // Convert SDK's handler-based config to MCP's flat config format
       if (fileConfig.work && !config.work) {
-        config.work = fileConfig.work;
+        const activeHandler = fileConfig.work.active_handler as 'github' | 'jira' | 'linear';
+        const handlerConfig = fileConfig.work.handlers?.[activeHandler] || {};
+        config.work = {
+          platform: activeHandler,
+          owner: handlerConfig.owner,
+          repo: handlerConfig.repo,
+          token: handlerConfig.token,
+          project: handlerConfig.project,
+        };
       }
       if (fileConfig.repo && !config.repo) {
-        config.repo = fileConfig.repo;
+        const activeHandler = fileConfig.repo.active_handler as 'github' | 'gitlab' | 'bitbucket';
+        const handlerConfig = fileConfig.repo.handlers?.[activeHandler] || {};
+        config.repo = {
+          platform: activeHandler,
+          owner: handlerConfig.owner,
+          repo: handlerConfig.repo,
+          token: handlerConfig.token,
+          defaultBranch: fileConfig.repo.defaults?.default_branch,
+        };
       }
       if (fileConfig.spec) {
         config.spec = { ...fileConfig.spec, ...config.spec };

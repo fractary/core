@@ -48,13 +48,10 @@
   },
   "homepage": "https://github.com/fractary/core/tree/main/mcp/server#readme",
   "dependencies": {
-    "@fractary/core": "^0.3.0",
+    "@fractary/core": "^0.3.2",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.1.1"
-  },
-  "peerDependencies": {
-    "@fractary/core": "^0.3.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
