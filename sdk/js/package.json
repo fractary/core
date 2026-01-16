@@ -4,6 +4,17 @@
   "description": "Fractary Core SDK - Primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "common/yaml-config": ["dist/common/yaml-config.d.ts"],
+      "work": ["dist/work/index.d.ts"],
+      "repo": ["dist/repo/index.d.ts"],
+      "spec": ["dist/spec/index.d.ts"],
+      "logs": ["dist/logs/index.d.ts"],
+      "file": ["dist/file/index.d.ts"],
+      "docs": ["dist/docs/index.d.ts"]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -32,6 +43,10 @@
     "./docs": {
       "types": "./dist/docs/index.d.ts",
       "default": "./dist/docs/index.js"
+    },
+    "./common/yaml-config": {
+      "types": "./dist/common/yaml-config.d.ts",
+      "default": "./dist/common/yaml-config.js"
     }
   },
   "files": [

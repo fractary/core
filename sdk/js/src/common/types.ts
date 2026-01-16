@@ -331,11 +331,6 @@ export interface WorktreeCreateOptions {
   workId?: string;
 }
 
-export interface BranchCreateOptions {
-  branch: string;
-  baseBranch?: string;
-}
-
 export interface BranchCreateResult {
   success: boolean;
   branch: string;
