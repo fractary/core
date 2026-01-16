@@ -61,12 +61,12 @@ bash "$SCRIPT_PATH"
 ```
 
 Script will:
-- Create plugin configuration in .fractary/plugins/status/
+- Create plugin configuration in .fractary/status/
 - Configure statusLine in .claude/settings.json using absolute path
 - Update .gitignore if needed
 
 ### 3. Verify Installation
-- Verify .fractary/plugins/status/config.json exists
+- Verify .fractary/config.yaml exists
 - Confirm .claude/settings.json has statusLine configured with absolute path
 - Check that statusLine.command uses ~/.claude/plugins/marketplaces/fractary/plugins/status/scripts/status-line.sh
 - Verify .gitignore includes cache file exclusion
@@ -80,7 +80,7 @@ Script will:
 
 <COMPLETION_CRITERIA>
 Installation is complete when:
-1. Plugin configuration created in .fractary/plugins/status/
+1. Plugin configuration created in .fractary/status/
 2. .claude/settings.json contains statusLine with absolute path reference
 3. .gitignore updated to exclude cache file
 4. User is informed of successful installation
@@ -100,7 +100,7 @@ Operation: install
 
 ✅ COMPLETED: Status Install Agent
 Installed components:
-  - Plugin configuration: .fractary/plugins/status/config.json
+  - Plugin configuration: .fractary/config.yaml
   - StatusLine: .claude/settings.json (using absolute path)
   - UserPromptSubmit hook: managed in plugin hooks/hooks.json
   - Scripts: ~/.claude/plugins/marketplaces/fractary/plugins/status/scripts/

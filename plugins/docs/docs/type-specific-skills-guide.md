@@ -150,7 +150,7 @@ Plugin-level defaults and settings.
 }
 ```
 
-### Layer 3: Project Config (.fractary/plugins/docs/config.json)
+### Layer 3: Project Config (.fractary/config.yaml)
 
 Project-specific overrides.
 

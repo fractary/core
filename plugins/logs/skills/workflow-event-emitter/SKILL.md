@@ -141,7 +141,7 @@ The emit-event.sh script writes events to local storage only. S3 push is handled
 
 3. **Via CI/CD**: Push logs to S3 as part of workflow completion in CI pipeline.
 
-**Configuration for S3 push** (in `.fractary/plugins/logs/config.json`):
+**Configuration for S3 push** (in `.fractary/config.yaml` under `logs` section):
 ```json
 {
   "types": {
@@ -296,7 +296,7 @@ For 80% of the value with minimal effort, emit just 3 events:
 
 ### S3 Configuration
 
-Configure in `.fractary/plugins/logs/config.json`:
+Configure in `.fractary/config.yaml` under `logs` section:
 
 ```json
 {

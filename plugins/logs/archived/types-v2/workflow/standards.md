@@ -361,7 +361,7 @@ Workflow logs can be pushed to S3 for cross-project access and downstream consum
 
 ### Configuration
 
-Configure S3 push in your project's `.fractary/plugins/logs/config.json`:
+Configure S3 push in your project's `.fractary/config.yaml` under `logs` section:
 
 ```json
 {

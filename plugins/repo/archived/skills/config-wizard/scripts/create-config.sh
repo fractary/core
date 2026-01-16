@@ -104,8 +104,8 @@ fi
 
 # Determine config path based on scope
 if [ "$SCOPE" = "project" ]; then
-    CONFIG_PATH=".fractary/plugins/repo/config.json"
-    mkdir -p .fractary/plugins/repo
+    CONFIG_PATH=".fractary/config.yaml"
+    mkdir -p .fractary/repo
 else
     CONFIG_PATH="$HOME/.fractary/repo/config.json"
     mkdir -p "$HOME/.fractary/repo"

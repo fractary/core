@@ -384,7 +384,7 @@ If operation is `create-branch` AND `parameters.spec_create` is true:
 
 2. **Check preconditions for spec creation**:
    - Verify `work_id` is provided (required for spec creation)
-   - Check if spec plugin is configured: `.fractary/plugins/spec/config.json` exists
+   - Check if spec plugin is configured: `.fractary/config.yaml` exists
    - If either precondition fails, show appropriate warning (see SPEC_INTEGRATION section) but do NOT fail the operation
 
 3. **If all preconditions met**:
@@ -606,7 +606,7 @@ Handle spec creation if:
 2. Worktree creation completed successfully (if `create_worktree` was true)
 3. The `spec_create` parameter is true
 4. A `work_id` is available (provided via --work-id parameter)
-5. The fractary-spec plugin is configured (`.fractary/plugins/spec/config.json` exists)
+5. The fractary-spec plugin is configured (`.fractary/config.yaml` exists)
 
 **Important**: Exit code 10 (branch already exists) is NOT a failure for spec creation purposes. When `--spec-create` is provided, the user's intent is to create a spec for the work item, regardless of whether the branch is new or existing. Simply checkout the existing branch and proceed with spec creation.
 
@@ -633,7 +633,7 @@ if [ "$spec_create" = "true" ]; then
     fi
 
     # Check if spec plugin is configured (not just installed)
-    if [ ! -f ".fractary/plugins/spec/config.json" ]; then
+    if [ ! -f ".fractary/config.yaml" ]; then
         # Plugin not configured - show error and skip
         SHOULD_CREATE_SPEC=false
     elif [ -z "$WORK_ID" ]; then

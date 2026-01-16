@@ -313,25 +313,30 @@ Understand time spent by issue, type, day of week.
 
 ### Location
 
-Runtime configuration: **`.fractary/plugins/logs/config.json`** (flat structure, no subdirectory)
-
-**⚠️ IMPORTANT:**
-- **Correct**: `.fractary/plugins/logs/config.json` ✅
-- **Wrong**: `.fractary/plugins/logs/config/config.json` ❌ (nested - do not create a config/ subdirectory)
-
-Only `config.json` should exist in `.fractary/plugins/logs/`. Do not copy any other files (scripts, schemas, documentation) from the plugin source.
+**v2.0+:** Configuration is in the unified **`.fractary/config.yaml`** file under the `logs` section.
 
 ### Setup
 
-Copy from example:
+Initialize the unified configuration:
 ```bash
-cp plugins/logs/config/config.example.json .fractary/plugins/logs/config.json
+fractary-core:init
 ```
 
-Or use the init command:
-```bash
-/fractary-logs:init
+This creates `.fractary/config.yaml` with all plugin configurations including:
+```yaml
+logs:
+  schema_version: "2.0"
+  storage:
+    local_path: .fractary/logs
+    cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
+    archive_index_file: archive-index.json
+  retention:
+    # ... retention policies
+  session_logging:
+    # ... session logging settings
 ```
+
+For configuration details, see the [Configuration Guide](../../docs/guides/configuration.md).
 
 ### Key Settings
 

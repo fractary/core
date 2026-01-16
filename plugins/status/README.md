@@ -74,8 +74,8 @@ Then restart Claude Code to activate.
 ### What Gets Installed
 
 The installation process:
-1. Creates `.fractary/plugins/status/` directory for plugin configuration
-2. Creates `.fractary/plugins/status/config.json` with plugin settings
+1. Creates `.fractary/status/` directory for plugin configuration
+2. Creates `.fractary/config.yaml` with plugin settings
 3. Updates `.claude/settings.json` with statusLine configuration (using absolute path)
 4. Updates `.gitignore` to exclude cache file
 
@@ -107,8 +107,8 @@ If you prefer manual installation or need to troubleshoot:
 
 3. Create plugin configuration:
    ```bash
-   mkdir -p .fractary/plugins/status
-   echo '{"version": "1.0.0", "cache_path": ".fractary/plugins/status"}' > .fractary/plugins/status/config.json
+   mkdir -p .fractary/status
+   echo '{"version": "1.0.0", "cache_path": ".fractary/status"}' > .fractary/config.yaml
    ```
 
 4. Restart Claude Code
@@ -128,7 +128,7 @@ If you prefer manual installation or need to troubleshoot:
 
 1. **UserPromptSubmit Hook**: Captures your prompt each time you submit
    - Runs `capture-prompt.sh` on every prompt
-   - Stores prompt in `.fractary/plugins/status/last-prompt.json`
+   - Stores prompt in `.fractary/status/last-prompt.json`
    - Truncates to 120 characters for display
    - Non-blocking (<10ms execution time)
 
@@ -216,28 +216,28 @@ The `statusLine` property is configured at the project level (in `.claude/settin
 - Hooks definition: `~/.claude/plugins/marketplaces/fractary/plugins/status/hooks/hooks.json`
 
 **Project-specific files**:
-- Configuration: `.fractary/plugins/status/config.json`
-- Cache: `.fractary/plugins/status/last-prompt.json` (gitignored)
+- Configuration: `.fractary/config.yaml`
+- Cache: `.fractary/status/last-prompt.json` (gitignored)
 - Settings: `.claude/settings.json` (statusLine configuration)
 
 ## Configuration
 
 ### Plugin Configuration
 
-Located at `.fractary/plugins/status/config.json`:
+Located at `.fractary/config.yaml`:
 
 ```json
 {
   "version": "1.0.0",
   "installed": "2025-11-12T18:00:00Z",
   "scripts_path": ".claude/status/scripts",
-  "cache_path": ".fractary/plugins/status"
+  "cache_path": ".fractary/status"
 }
 ```
 
 ### Runtime Cache
 
-Prompt cache at `.fractary/plugins/status/last-prompt.json`:
+Prompt cache at `.fractary/status/last-prompt.json`:
 
 ```json
 {
@@ -270,13 +270,13 @@ This file is automatically managed and should be added to `.gitignore`.
 1. Submit a prompt to trigger UserPromptSubmit hook
 2. Check cache file exists:
    ```bash
-   cat .fractary/plugins/status/last-prompt.json
+   cat .fractary/status/last-prompt.json
    ```
 
 3. Verify hook is running:
    ```bash
    # Should update after each prompt
-   ls -lt .fractary/plugins/status/last-prompt.json
+   ls -lt .fractary/status/last-prompt.json
    ```
 
 ### Missing issue or PR numbers
@@ -332,7 +332,7 @@ To remove the status line plugin:
 2. Remove scripts (optional):
    ```bash
    rm -rf .claude/status/
-   rm -rf .fractary/plugins/status/
+   rm -rf .fractary/status/
    ```
 
 3. Restart Claude Code
@@ -370,7 +370,7 @@ bash .claude/status/scripts/status-line.sh
 
 # Test prompt capture
 echo "test prompt" | bash .claude/status/scripts/capture-prompt.sh
-cat .fractary/plugins/status/last-prompt.json
+cat .fractary/status/last-prompt.json
 
 # Test installation
 /status:install

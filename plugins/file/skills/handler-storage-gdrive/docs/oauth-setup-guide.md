@@ -293,7 +293,7 @@ source ~/.bashrc  # or ~/.zshrc
 
 ### 5.2: Create Plugin Configuration
 
-Create `.fractary/plugins/file/config.json`:
+Create `.fractary/config.yaml`:
 
 ```json
 {
@@ -319,7 +319,7 @@ Create `.fractary/plugins/file/config.json`:
 ### 5.3: Set Secure Permissions
 
 ```bash
-chmod 0600 .fractary/plugins/file/config.json
+chmod 0600 .fractary/config.yaml
 ```
 
 ## Step 6: Test fractary-file Integration

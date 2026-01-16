@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # Configuration
-PLUGIN_DIR="${FRACTARY_PLUGINS_DIR:-.fractary/plugins}/status"
+PLUGIN_DIR="${FRACTARY_STATUS_DIR:-.fractary/status}"
 PROMPT_CACHE="$PLUGIN_DIR/last-prompt.json"
 METRICS_CACHE="$PLUGIN_DIR/session-metrics.json"
 
@@ -195,9 +195,9 @@ fi
 # Fallback 2: FABER state (legacy support)
 if [ -z "$CONTEXT_FREE" ] || [ -z "$TOKEN_COST" ]; then
   LATEST_FABER_STATE=""
-  if [ -d ".fractary/plugins/faber/runs" ]; then
+  if [ -d ".fractary/faber/runs" ]; then
     # Use -printf with cut to safely handle paths with spaces/special chars
-    LATEST_FABER_STATE=$(find .fractary/plugins/faber/runs -name "state.json" -type f \
+    LATEST_FABER_STATE=$(find .fractary/faber/runs -name "state.json" -type f \
       -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
   fi
 

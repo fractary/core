@@ -26,7 +26,7 @@ fi
 echo "Running project-specific schema validation..."
 
 # Run custom validation script
-SCRIPT_PATH="./.fractary/plugins/docs/scripts/validate-schema-docs.sh"
+SCRIPT_PATH="./.fractary/docs/scripts/validate-schema-docs.sh"
 
 if [[ ! -f "$SCRIPT_PATH" ]]; then
   echo "Warning: Custom validation script not found: $SCRIPT_PATH"

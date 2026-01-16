@@ -32,7 +32,7 @@ bash plugins/spec/skills/spec-initializer/scripts/init.sh [--force]
 ```json
 {
   "status": "success|failure|exists",
-  "config_path": ".fractary/plugins/spec/config.json",
+  "config_path": ".fractary/specs/config.json",
   "message": "Human-readable message"
 }
 ```

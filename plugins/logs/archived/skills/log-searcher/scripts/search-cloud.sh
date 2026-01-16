@@ -4,7 +4,7 @@ set -euo pipefail
 
 QUERY="${1:?Query required}"
 ISSUE_FILTER="${2:-}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
+CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Load configuration
 if [[ ! -f "$CONFIG_FILE" ]]; then

@@ -78,8 +78,8 @@ See `specs/WORK-00356-1-missing-cli-work-commands.md` for implementation trackin
   "workaround": {
     "description": "Create configuration manually",
     "steps": [
-      "Create directory: mkdir -p .fractary/plugins/work",
-      "Copy template: cp plugins/work/config/config.example.json .fractary/plugins/work/config.json",
+      "Create directory: mkdir -p .fractary/work",
+      "Copy template: cp plugins/work/config/config.example.json .fractary/config.yaml",
       "Edit config with your platform settings"
     ]
   }
@@ -92,7 +92,7 @@ See `specs/WORK-00356-1-missing-cli-work-commands.md` for implementation trackin
   "status": "success",
   "operation": "initialize-configuration",
   "result": {
-    "config_path": ".fractary/plugins/work/config.json",
+    "config_path": ".fractary/config.yaml",
     "platform": "github",
     "validated": true,
     "summary": {
@@ -124,12 +124,12 @@ Until CLI is available, users can configure manually:
 
 1. Create configuration directory:
    ```bash
-   mkdir -p .fractary/plugins/work
+   mkdir -p .fractary/work
    ```
 
 2. Copy configuration template:
    ```bash
-   cp plugins/work/config/config.example.json .fractary/plugins/work/config.json
+   cp plugins/work/config/config.example.json .fractary/config.yaml
    ```
 
 3. Edit configuration with platform settings:
@@ -166,8 +166,8 @@ Force: false
 CLI command 'work init' not yet available
 
 Manual Configuration Workaround:
-  1. mkdir -p .fractary/plugins/work
-  2. cp plugins/work/config/config.example.json .fractary/plugins/work/config.json
+  1. mkdir -p .fractary/work
+  2. cp plugins/work/config/config.example.json .fractary/config.yaml
   3. Edit config.json with your platform settings
   4. Set GITHUB_TOKEN environment variable
 
@@ -190,5 +190,5 @@ See: WORK-00356-1-missing-cli-work-commands.md
 - Required CLI command: `fractary work init [options]`
 
 ### Configuration Path
-- Config location: `.fractary/plugins/work/config.json`
+- Config location: `.fractary/config.yaml`
 - Template: `plugins/work/config/config.example.json`

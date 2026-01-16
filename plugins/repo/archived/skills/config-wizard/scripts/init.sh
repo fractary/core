@@ -47,7 +47,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-CONFIG_PATH=".fractary/plugins/repo/config.json"
+CONFIG_PATH=".fractary/config.yaml"
 
 # Check if config already exists
 if [ -f "$CONFIG_PATH" ] && [ "$FORCE" = false ]; then

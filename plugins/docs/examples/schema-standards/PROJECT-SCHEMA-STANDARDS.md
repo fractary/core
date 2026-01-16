@@ -116,7 +116,7 @@ Schemas must document:
 This project uses a custom validation script to enforce these standards:
 
 ```bash
-./.fractary/plugins/docs/scripts/validate-schema-docs.sh <schema-doc.md>
+./.fractary/docs/scripts/validate-schema-docs.sh <schema-doc.md>
 ```
 
 The script checks:
@@ -129,12 +129,12 @@ The script checks:
 
 ## Configuration
 
-Enable custom validation in `.fractary/plugins/docs/config.json`:
+Enable custom validation in `.fractary/config.yaml`:
 
 ```json
 {
   "validation": {
-    "custom_rules_script": "./.fractary/plugins/docs/scripts/validate-schema-docs.sh",
+    "custom_rules_script": "./.fractary/docs/scripts/validate-schema-docs.sh",
     "project_standards_doc": "./docs/standards/PROJECT-SCHEMA-STANDARDS.md"
   }
 }
@@ -144,16 +144,16 @@ Enable custom validation in `.fractary/plugins/docs/config.json`:
 
 This project uses validation hooks:
 
-**Pre-validate hook** (`.fractary/plugins/docs/hooks/pre-validate.sh`):
+**Pre-validate hook** (`.fractary/docs/hooks/pre-validate.sh`):
 ```bash
 #!/usr/bin/env bash
 # Run custom schema validation before standard validation
 if [[ "$DOC_TYPE" == "schema" ]]; then
-  ./.fractary/plugins/docs/scripts/validate-schema-docs.sh "$FILE_PATH"
+  ./.fractary/docs/scripts/validate-schema-docs.sh "$FILE_PATH"
 fi
 ```
 
-**Post-generate hook** (`.fractary/plugins/docs/hooks/post-generate.sh`):
+**Post-generate hook** (`.fractary/docs/hooks/post-generate.sh`):
 ```bash
 #!/usr/bin/env bash
 # Auto-generate code from schema after generating schema docs

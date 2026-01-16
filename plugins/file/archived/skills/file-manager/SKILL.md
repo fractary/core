@@ -116,7 +116,7 @@ Use the handler-storage-{provider} skill to perform {operation}:
 Configuration is loaded in this priority order:
 
 1. **Provided Config**: Use config from request if present
-2. **Project Config**: `.fractary/plugins/file/config.json` (relative to project root / current working directory)
+2. **Project Config**: `.fractary/config.yaml` (relative to project root / current working directory)
 3. **Global Config**: `~/.config/fractary/file/config.json`
 4. **Default Config**: Local handler with `./storage` base path
 
@@ -366,7 +366,7 @@ Handle errors at routing level:
 - **Common functions**: `../common/functions.sh`
 - **Handler skills**: `handler-storage-{local,r2,s3,gcs,gdrive}`
 - **System tools**: bash, jq, envsubst
-- **Configuration**: `.fractary/plugins/file/config.json`
+- **Configuration**: `.fractary/config.yaml`
 </DEPENDENCIES>
 
 <DOCUMENTATION>

@@ -72,7 +72,7 @@ load_handler_config() {
 
     # Try project config first
     if [[ -z "$config_file" ]]; then
-        config_file=".fractary/plugins/file/config.json"
+        config_file=".fractary/config.yaml"
     fi
 
     if [[ ! -f "$config_file" ]]; then
@@ -95,7 +95,7 @@ load_handler_config() {
 # Usage: load_global_settings [config_file]
 # Returns: JSON object with global settings
 load_global_settings() {
-    local config_file="${1:-.fractary/plugins/file/config.json}"
+    local config_file="${1:-.fractary/config.yaml}"
 
     if [[ ! -f "$config_file" ]]; then
         config_file="$HOME/.config/fractary/file/config.json"
@@ -116,7 +116,7 @@ load_global_settings() {
 # Usage: get_active_handler [config_file]
 # Returns: Handler name (e.g., "local", "r2", "s3")
 get_active_handler() {
-    local config_file="${1:-.fractary/plugins/file/config.json}"
+    local config_file="${1:-.fractary/config.yaml}"
 
     if [[ ! -f "$config_file" ]]; then
         config_file="$HOME/.config/fractary/file/config.json"

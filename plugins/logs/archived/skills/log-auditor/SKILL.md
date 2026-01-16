@@ -52,7 +52,7 @@ You generate specifications that can be followed to bring log management into al
 
 Check if fractary-spec plugin is available:
 ```bash
-if [ -f ".fractary/plugins/spec/config.json" ] || [ -d "plugins/spec" ]; then
+if [ -f ".fractary/specs/config.json" ] || [ -d "plugins/spec" ]; then
   USE_SPEC_PLUGIN=true
 else
   USE_SPEC_PLUGIN=false
@@ -62,7 +62,7 @@ fi
 ## Step 2: Load Configuration
 
 Load fractary-logs configuration (if exists):
-- Project config: `.fractary/plugins/logs/config.json`
+- Project config: `.fractary/config.yaml (logs section)`
 - Plugin defaults: `plugins/logs/config/config.example.json`
 - Load .gitignore patterns
 
@@ -115,7 +115,7 @@ bash plugins/logs/skills/log-auditor/scripts/analyze-storage.sh {output_dir}/dis
 Define what proper fractary-logs management looks like (the target state):
 
 **Standard Configuration:**
-- fractary-logs initialized with config at `.fractary/plugins/logs/config.json`
+- fractary-logs initialized with config at `.fractary/config.yaml (logs section)`
 - fractary-file configured for cloud storage (S3/R2)
 - Hybrid retention strategy enabled (30 days local, archived to cloud)
 
@@ -152,7 +152,7 @@ Load discovery results and explicitly compare against the standard:
 
 ### Configuration Gaps
 - **Current**: Check if config exists and is valid
-- **Standard**: Config at `.fractary/plugins/logs/config.json` with hybrid retention
+- **Standard**: Config at `.fractary/config.yaml (logs section)` with hybrid retention
 - **Gap**: Missing config? Invalid settings? No cloud storage configured?
 
 ### Directory Structure Gaps
@@ -425,7 +425,7 @@ Use the @agent-fractary-spec:spec-manager agent to generate a remediation specif
             {
               "task_id": "1.2",
               "title": "Configure S3/R2 bucket",
-              "commands": ["# Configure in .fractary/plugins/file/config.json"],
+              "commands": ["# Configure in .fractary/config.yaml"],
               "verification": ["# Test upload"]
             }
           ]
@@ -716,7 +716,7 @@ Use the log-auditor skill to audit logs:
   "parameters": {
     "project_root": "/path/to/project",
     "output_dir": "/logs/audits/tmp",
-    "config_path": ".fractary/plugins/logs/config.json",
+    "config_path": ".fractary/config.yaml (logs section)",
     "execute": false
   }
 }
@@ -726,7 +726,7 @@ Use the log-auditor skill to audit logs:
 <DEPENDENCIES>
 - **Discovery scripts**: plugins/logs/skills/log-auditor/scripts/
 - **Spec plugin** (optional): fractary-spec for standardized spec generation
-- **Configuration** (optional): .fractary/plugins/logs/config.json
+- **Configuration** (optional): .fractary/config.yaml (logs section)
 - **fractary-file** (optional): For cloud storage operations
 </DEPENDENCIES>
 

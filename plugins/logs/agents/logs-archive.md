@@ -67,7 +67,7 @@ Your role is to archive all logs for a completed issue to cloud storage.
 **Upload to Cloud**: plugins/logs/scripts/upload-to-cloud.sh
 - Usage: `upload-to-cloud.sh <local_path> <cloud_path>`
 - Returns JSON: `{"cloud_url": "...", "size_bytes": ..., "checksum": "..."}`
-- Requires: File plugin configured (.fractary/plugins/file/config.json)
+- Requires: File plugin configured (.fractary/config.yaml with file section)
 
 **Update Index**: plugins/logs/scripts/update-index.sh
 - Usage: `update-index.sh <issue_number> <metadata_json>`

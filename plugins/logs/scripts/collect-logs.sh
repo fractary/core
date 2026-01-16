@@ -3,15 +3,15 @@
 set -euo pipefail
 
 ISSUE_NUMBER="${1:?Issue number required}"
-CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/plugins/logs/config.json}"
 
-# Load configuration
-if [[ ! -f "$CONFIG_FILE" ]]; then
-    echo "Error: Configuration not found at $CONFIG_FILE"
-    exit 1
+# Load configuration from unified config
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if ! CONFIG_JSON=$("$SCRIPT_DIR/config-loader.sh" 2>&1); then
+    echo "$CONFIG_JSON" >&2
+    exit 3
 fi
 
-LOG_DIR=$(jq -r '.storage.local_path // "/logs"' "$CONFIG_FILE")
+LOG_DIR=$(echo "$CONFIG_JSON" | jq -r '.storage.local_path // ".fractary/logs"')
 
 # Find all logs for issue across different directories
 LOGS=()

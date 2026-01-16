@@ -18,8 +18,8 @@ The integration tests validate:
 cd plugins/docs
 
 # Ensure config exists
-mkdir -p .fractary/plugins/docs
-cp config/config.example.json .fractary/plugins/docs/config.json
+mkdir -p .fractary/docs
+cp config/config.example.json .fractary/config.yaml
 
 # Verify samples directory
 ls -la samples/
@@ -554,7 +554,7 @@ touch samples/empty.md  # Empty file
 Enable verbose output:
 ```bash
 # Set debug flag in config
-jq '.debug = true' .fractary/plugins/docs/config.json
+jq '.debug = true' .fractary/config.yaml
 
 # Run with verbose logging
 /fractary-docs:validate samples/ --verbose
