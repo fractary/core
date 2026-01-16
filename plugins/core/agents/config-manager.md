@@ -63,11 +63,76 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 ## Input Validation
 
 ### --context Sanitization
-- Maximum length: 2000 characters
-- Strip potentially dangerous patterns:
-  - Shell injection: `$()`, backticks, `&&`, `||`, `;`, `|`, `>`, `<`
-  - Command substitution: `$(...)`, `` `...` ``
-- If dangerous patterns detected, warn user and sanitize before proceeding
+
+**Maximum length**: 2000 characters
+
+**Blocked patterns** (shell injection prevention):
+- Command substitution: `$(`, `` ` ``
+- Command chaining: `&&`, `||`, `;`
+- Pipes and redirects: `|`, `>`, `<`, `>>`
+- Newlines: `\n`, `\r`
+
+**Concrete implementation**:
+```bash
+sanitize_context() {
+    local input="$1"
+    local max_length=2000
+
+    # Check length
+    if [ ${#input} -gt $max_length ]; then
+        echo "ERROR: --context exceeds maximum length of $max_length characters" >&2
+        return 1
+    fi
+
+    # Define blocked patterns (regex)
+    local blocked_patterns='(\$\(|`|&&|\|\||;|\||>|<|>>|\n|\r)'
+
+    # Check for dangerous patterns
+    if echo "$input" | grep -qE "$blocked_patterns"; then
+        echo "WARNING: Potentially unsafe characters detected in --context" >&2
+        echo "Blocked patterns: \$( \` && || ; | > < >> newlines" >&2
+
+        # Sanitize by removing dangerous patterns
+        local sanitized
+        sanitized=$(echo "$input" | sed -E 's/\$\([^)]*\)//g' | \
+                    sed 's/`[^`]*`//g' | \
+                    sed 's/&&//g' | \
+                    sed 's/||//g' | \
+                    sed 's/;//g' | \
+                    sed 's/|//g' | \
+                    sed 's/>//g' | \
+                    sed 's/<//g' | \
+                    tr -d '\n\r')
+
+        echo "Sanitized input: $sanitized" >&2
+        echo "$sanitized"
+        return 0
+    fi
+
+    # Input is safe
+    echo "$input"
+    return 0
+}
+
+# Usage example:
+# SAFE_CONTEXT=$(sanitize_context "$USER_INPUT") || exit 1
+```
+
+**Allowed characters** (allowlist approach for extra safety):
+- Letters: a-z, A-Z
+- Numbers: 0-9
+- Spaces and common punctuation: space, `-`, `_`, `.`, `,`, `'`, `"`, `(`, `)`, `/`
+- Special for config: `=`, `:`
+
+**Example safe inputs**:
+- "switch to jira for work tracking" ✓
+- "enable S3 storage with bucket my-bucket" ✓
+- "change logs path to .fractary/session-logs" ✓
+
+**Example blocked inputs**:
+- "switch to jira; rm -rf /" ✗ (contains `;`)
+- "enable $(cat /etc/passwd)" ✗ (contains `$(`)
+- "change && echo pwned" ✗ (contains `&&`)
 
 ### Plugin Name Validation
 Valid plugin names (case-insensitive):
@@ -77,6 +142,46 @@ Valid plugin names (case-insensitive):
 - file
 - spec
 - docs
+
+**Concrete implementation**:
+```bash
+validate_plugin_name() {
+    local plugin="$1"
+    local valid_plugins="work repo logs file spec docs"
+
+    # Convert to lowercase for comparison
+    plugin=$(echo "$plugin" | tr '[:upper:]' '[:lower:]')
+
+    # Check if plugin is in valid list
+    if echo "$valid_plugins" | grep -qw "$plugin"; then
+        echo "$plugin"
+        return 0
+    else
+        echo "ERROR: Unknown plugin name '$plugin'" >&2
+        echo "Valid plugins: $valid_plugins" >&2
+        return 1
+    fi
+}
+
+# Usage for comma-separated list:
+validate_plugins_list() {
+    local input="$1"
+    local validated=""
+
+    # Split by comma and validate each
+    IFS=',' read -ra plugins <<< "$input"
+    for plugin in "${plugins[@]}"; do
+        plugin=$(echo "$plugin" | tr -d ' ')  # Remove spaces
+        if ! validated_plugin=$(validate_plugin_name "$plugin"); then
+            return 1
+        fi
+        validated="${validated:+$validated,}$validated_plugin"
+    done
+
+    echo "$validated"
+    return 0
+}
+```
 
 If invalid plugin name provided, show error with valid options.
 
@@ -100,6 +205,45 @@ Platform-specific allowed handlers:
 - gcs
 - gdrive
 
+**Concrete implementation**:
+```bash
+validate_handler() {
+    local handler_type="$1"  # work, repo, or file
+    local handler_name="$2"
+
+    # Convert to lowercase
+    handler_name=$(echo "$handler_name" | tr '[:upper:]' '[:lower:]')
+
+    case "$handler_type" in
+        work)
+            local valid="github jira linear"
+            ;;
+        repo)
+            local valid="github gitlab bitbucket"
+            ;;
+        file)
+            local valid="local s3 r2 gcs gdrive"
+            ;;
+        *)
+            echo "ERROR: Unknown handler type '$handler_type'" >&2
+            return 1
+            ;;
+    esac
+
+    if echo "$valid" | grep -qw "$handler_name"; then
+        echo "$handler_name"
+        return 0
+    else
+        echo "ERROR: Unknown $handler_type handler '$handler_name'" >&2
+        echo "Valid $handler_type handlers: $valid" >&2
+        return 1
+    fi
+}
+
+# Usage:
+# WORK_HANDLER=$(validate_handler "work" "$USER_INPUT") || exit 1
+```
+
 If invalid handler name provided, show error with valid options for that plugin.
 
 ### YAML Validation
@@ -111,6 +255,62 @@ After writing config, validate:
 3. All handler references are valid
 4. No duplicate keys
 5. Environment variable syntax is correct: `${VAR_NAME}`
+
+**Concrete YAML validation** (using Python for reliable YAML parsing):
+```bash
+validate_yaml_config() {
+    local config_file="$1"
+
+    # Check file exists
+    if [ ! -f "$config_file" ]; then
+        echo "ERROR: Config file not found: $config_file" >&2
+        return 1
+    fi
+
+    # Validate YAML syntax and required fields using Python
+    python3 -c "
+import yaml
+import sys
+
+try:
+    with open('$config_file', 'r') as f:
+        config = yaml.safe_load(f)
+
+    # Check required fields
+    if not isinstance(config, dict):
+        print('ERROR: Config must be a YAML dictionary', file=sys.stderr)
+        sys.exit(1)
+
+    if config.get('version') != '2.0':
+        print('ERROR: Missing or invalid version field (expected \"2.0\")', file=sys.stderr)
+        sys.exit(1)
+
+    # Check at least one plugin section exists
+    plugin_sections = ['work', 'repo', 'logs', 'file', 'spec', 'docs', 'codex']
+    found_plugins = [p for p in plugin_sections if p in config]
+    if not found_plugins:
+        print('ERROR: No plugin sections found', file=sys.stderr)
+        sys.exit(1)
+
+    # Validate handler references
+    for plugin in ['work', 'repo']:
+        if plugin in config:
+            active = config[plugin].get('active_handler')
+            handlers = config[plugin].get('handlers', {})
+            if active and active not in handlers:
+                print(f'ERROR: {plugin}.active_handler \"{active}\" not in handlers', file=sys.stderr)
+                sys.exit(1)
+
+    print('YAML validation passed')
+    sys.exit(0)
+
+except yaml.YAMLError as e:
+    print(f'ERROR: YAML syntax error: {e}', file=sys.stderr)
+    sys.exit(1)
+"
+    return $?
+}
+```
 
 </VALIDATION_FUNCTIONS>
 
@@ -127,15 +327,20 @@ mkdir -p .fractary/backups
 
 # Generate timestamp (cross-platform: Linux + macOS)
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+BACKUP_FILE=".fractary/backups/config-${TIMESTAMP}.yaml"
 
 # Create backup
-cp .fractary/config.yaml ".fractary/backups/config-${TIMESTAMP}.yaml"
+cp .fractary/config.yaml "$BACKUP_FILE"
+
+# Store backup path for rollback (agents are stateless - can't rely on variables)
+echo "$BACKUP_FILE" > .fractary/backups/.last-backup
 ```
 
 ### Backup Directory Structure
 ```
 .fractary/
   backups/
+    .last-backup              # Contains path to most recent backup for rollback
     config-20260116-143022.yaml
     config-20260115-092311.yaml
     ...
@@ -145,19 +350,42 @@ cp .fractary/config.yaml ".fractary/backups/config-${TIMESTAMP}.yaml"
 - Keep last 10 backups
 - After creating new backup, remove oldest if more than 10 exist:
 ```bash
-ls -1t .fractary/backups/config-*.yaml | tail -n +11 | xargs -r rm
+# Portable version (works on macOS and Linux - xargs -r is GNU-specific)
+ls -1t .fractary/backups/config-*.yaml 2>/dev/null | tail -n +11 | while read -r file; do
+    rm -f "$file"
+done
 ```
 
 ### Rollback Procedure
 If configuration write or validation fails:
 
-1. Check if backup exists for this session
-2. If backup exists, restore it:
+1. Check if backup tracking file exists: `.fractary/backups/.last-backup`
+2. If exists, read the backup path and restore:
    ```bash
-   cp ".fractary/backups/config-${BACKUP_TIMESTAMP}.yaml" .fractary/config.yaml
+   # Read the backup path from tracking file
+   BACKUP_FILE=$(cat .fractary/backups/.last-backup 2>/dev/null)
+
+   # Restore from backup if file exists
+   if [ -n "$BACKUP_FILE" ] && [ -f "$BACKUP_FILE" ]; then
+       cp "$BACKUP_FILE" .fractary/config.yaml
+       echo "Restored from backup: $BACKUP_FILE"
+   else
+       # Fallback: use most recent backup
+       LATEST_BACKUP=$(ls -1t .fractary/backups/config-*.yaml 2>/dev/null | head -1)
+       if [ -n "$LATEST_BACKUP" ]; then
+           cp "$LATEST_BACKUP" .fractary/config.yaml
+           echo "Restored from latest backup: $LATEST_BACKUP"
+       else
+           echo "ERROR: No backup available for rollback"
+       fi
+   fi
    ```
 3. Report rollback action to user
 4. Provide clear error message with recovery steps
+5. Clean up tracking file after successful rollback:
+   ```bash
+   rm -f .fractary/backups/.last-backup
+   ```
 
 </BACKUP_OPERATIONS>
 
@@ -721,16 +949,22 @@ For incremental mode:
 mkdir -p .fractary/backups
 
 # Generate timestamp
-BACKUP_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+BACKUP_FILE=".fractary/backups/config-${TIMESTAMP}.yaml"
 
 # Create backup
-cp .fractary/config.yaml ".fractary/backups/config-${BACKUP_TIMESTAMP}.yaml"
+cp .fractary/config.yaml "$BACKUP_FILE"
 
-# Clean old backups (keep last 10)
-ls -1t .fractary/backups/config-*.yaml | tail -n +11 | xargs -r rm
+# Store backup path for rollback (agents are stateless - variables don't persist)
+echo "$BACKUP_FILE" > .fractary/backups/.last-backup
+
+# Clean old backups (keep last 10) - portable version for macOS/Linux
+ls -1t .fractary/backups/config-*.yaml 2>/dev/null | tail -n +11 | while read -r file; do
+    rm -f "$file"
+done
 ```
 
-Store BACKUP_TIMESTAMP for potential rollback.
+The backup path is stored in `.fractary/backups/.last-backup` for rollback since agent variables don't persist between tool calls.
 
 ### Step 11: Apply Configuration Changes
 
@@ -916,10 +1150,27 @@ Next steps:
 If any error occurs during Steps 10-13:
 
 1. **Identify error type** (see ERROR_HANDLING section)
-2. **Check for backup**: If backup was created in Step 10
+2. **Check for backup**: Read from `.fractary/backups/.last-backup`
 3. **Restore backup**:
    ```bash
-   cp ".fractary/backups/config-${BACKUP_TIMESTAMP}.yaml" .fractary/config.yaml
+   # Read backup path from tracking file (agents are stateless)
+   BACKUP_FILE=$(cat .fractary/backups/.last-backup 2>/dev/null)
+
+   # Restore from backup
+   if [ -n "$BACKUP_FILE" ] && [ -f "$BACKUP_FILE" ]; then
+       cp "$BACKUP_FILE" .fractary/config.yaml
+       echo "Restored from backup: $BACKUP_FILE"
+   else
+       # Fallback: use most recent backup
+       LATEST_BACKUP=$(ls -1t .fractary/backups/config-*.yaml 2>/dev/null | head -1)
+       if [ -n "$LATEST_BACKUP" ]; then
+           cp "$LATEST_BACKUP" .fractary/config.yaml
+           BACKUP_FILE="$LATEST_BACKUP"
+       fi
+   fi
+
+   # Clean up tracking file
+   rm -f .fractary/backups/.last-backup
    ```
 4. **Report rollback**:
    ```
@@ -929,7 +1180,7 @@ If any error occurs during Steps 10-13:
 
    Action taken:
      - Configuration restored from backup
-     - Backup file: .fractary/backups/config-YYYYMMDD-HHMMSS.yaml
+     - Backup file: [path from $BACKUP_FILE]
 
    Recovery steps:
      1. [Specific steps based on error type]
