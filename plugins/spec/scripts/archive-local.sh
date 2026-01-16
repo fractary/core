@@ -16,6 +16,15 @@ set -euo pipefail
 SPEC_PATH="${1:?Spec path required}"
 ARCHIVE_PATH="${2:?Archive path required}"
 
+# Path traversal protection: ensure archive path is within expected directory
+EXPECTED_ARCHIVE_ROOT=".fractary/specs/archive"
+RESOLVED_ARCHIVE_PATH=$(realpath -m "$ARCHIVE_PATH" 2>/dev/null || echo "$ARCHIVE_PATH")
+RESOLVED_ARCHIVE_ROOT=$(realpath -m "$EXPECTED_ARCHIVE_ROOT" 2>/dev/null || echo "$EXPECTED_ARCHIVE_ROOT")
+if [[ "$RESOLVED_ARCHIVE_PATH" != "$RESOLVED_ARCHIVE_ROOT"* ]]; then
+    echo '{"error": "Path traversal detected: archive path must be within '"$EXPECTED_ARCHIVE_ROOT"'", "path": "'"$ARCHIVE_PATH"'"}' >&2
+    exit 1
+fi
+
 # Validate spec exists
 if [[ ! -f "$SPEC_PATH" ]]; then
     echo '{"error": "Spec file not found", "path": "'"$SPEC_PATH"'"}' >&2
@@ -25,7 +34,16 @@ fi
 # Get file info for metadata
 FILENAME=$(basename "$SPEC_PATH")
 FILE_SIZE=$(stat -c%s "$SPEC_PATH" 2>/dev/null || stat -f%z "$SPEC_PATH" 2>/dev/null || echo "0")
-CHECKSUM=$(sha256sum "$SPEC_PATH" 2>/dev/null | cut -d' ' -f1 || shasum -a 256 "$SPEC_PATH" 2>/dev/null | cut -d' ' -f1 || echo "unknown")
+
+# Compute checksum - fail explicitly if neither tool is available
+if command -v sha256sum >/dev/null 2>&1; then
+    CHECKSUM=$(sha256sum "$SPEC_PATH" | cut -d' ' -f1)
+elif command -v shasum >/dev/null 2>&1; then
+    CHECKSUM=$(shasum -a 256 "$SPEC_PATH" | cut -d' ' -f1)
+else
+    echo '{"error": "No checksum tool available (need sha256sum or shasum)"}' >&2
+    exit 1
+fi
 
 # Create archive directory if it doesn't exist
 ARCHIVE_DIR=$(dirname "$ARCHIVE_PATH")
@@ -52,17 +70,28 @@ if [[ ! -f "$ARCHIVE_PATH" ]]; then
     exit 1
 fi
 
-# Verify checksums match
-ARCHIVE_CHECKSUM=$(sha256sum "$ARCHIVE_PATH" 2>/dev/null | cut -d' ' -f1 || shasum -a 256 "$ARCHIVE_PATH" 2>/dev/null | cut -d' ' -f1 || echo "unknown")
-if [[ "$CHECKSUM" != "unknown" && "$ARCHIVE_CHECKSUM" != "unknown" && "$CHECKSUM" != "$ARCHIVE_CHECKSUM" ]]; then
+# Verify checksums match (using same tool as original)
+if command -v sha256sum >/dev/null 2>&1; then
+    ARCHIVE_CHECKSUM=$(sha256sum "$ARCHIVE_PATH" | cut -d' ' -f1)
+else
+    ARCHIVE_CHECKSUM=$(shasum -a 256 "$ARCHIVE_PATH" | cut -d' ' -f1)
+fi
+
+if [[ "$CHECKSUM" != "$ARCHIVE_CHECKSUM" ]]; then
     echo '{"error": "Checksum mismatch after copy", "original": "'"$CHECKSUM"'", "archived": "'"$ARCHIVE_CHECKSUM"'"}' >&2
     rm -f "$ARCHIVE_PATH"
     exit 1
 fi
 
+# Delete original file after successful copy and verification
+if ! rm -f "$SPEC_PATH"; then
+    echo "Warning: Failed to remove original file: $SPEC_PATH" >&2
+    # Continue anyway - the archive was successful
+fi
+
 ARCHIVED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-echo "✓ Local archive successful: $ARCHIVE_PATH" >&2
+echo "✓ Local archive successful: $ARCHIVE_PATH (original removed)" >&2
 
 # Output result in expected format (matches spec plugin expectations)
 cat <<EOF
