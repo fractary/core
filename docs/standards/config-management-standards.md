@@ -1,0 +1,214 @@
+# Fractary Configuration Management Standards
+
+This document defines the unified standards for configuration management across all Fractary plugins (`fractary-core`, `fractary-faber`, `fractary-codex`).
+
+## Overview
+
+All plugins share a common configuration approach to ensure:
+- Consistent user experience across plugins
+- Safe backup and rollback capabilities
+- Non-conflicting gitignore management
+- Predictable behavior when plugins work together
+
+## Agent Naming Convention
+
+All configuration agents are named `configurator`:
+- `fractary-core:configurator` - Core plugin configuration
+- `fractary-faber:configurator` - FABER workflow configuration
+- `fractary-codex:configurator` - Codex plugin configuration
+
+### Migration from config-manager
+
+The agents were renamed from `config-manager` to `configurator` for consistency. If you have scripts or documentation referencing the old names:
+
+| Old Name | New Name |
+|----------|----------|
+| `fractary-core:config-manager` | `fractary-core:configurator` |
+| `fractary-faber:config-manager` | `fractary-faber:configurator` |
+| `fractary-codex:config-manager` | `fractary-codex:configurator` |
+
+The commands remain unchanged:
+- `/fractary-core:configure`
+- `/fractary-faber:configure`
+- `/fractary-codex:configure`
+
+## Gitignore Section Markers
+
+### Standard Format
+
+All plugins use consistent section markers (5 equals signs, start AND end markers):
+
+```gitignore
+# ===== fractary-{plugin} (managed) =====
+{entries}
+# ===== end fractary-{plugin} =====
+```
+
+### Example
+
+```gitignore
+# .fractary/.gitignore
+# This file is managed by multiple plugins - each plugin manages its own section
+
+# ===== fractary-core (managed) =====
+backups/
+# ===== end fractary-core =====
+
+# ===== fractary-logs (managed) =====
+logs/
+# ===== end fractary-logs =====
+
+# ===== fractary-codex (managed) =====
+codex/cache/
+# ===== end fractary-codex =====
+
+# ===== fractary-faber (managed) =====
+runs/
+faber/state/
+faber/*.backup.*
+# ===== end fractary-faber =====
+```
+
+### Migration
+
+When encountering old formats (e.g., `# === fractary-core ===` without end marker), plugins should automatically migrate to the new format.
+
+## Backup Strategy
+
+### Centralized Location
+
+All configuration backups are stored in `.fractary/backups/`.
+
+### Naming Convention
+
+`{plugin}-config-YYYYMMDD-HHMMSS.yaml`
+
+Examples:
+- `config-20260116-143022.yaml` (core shared config)
+- `faber-config-20260116-143022.yaml`
+- `codex-config-20260116-143022.yaml`
+
+### Tracking File
+
+`.fractary/backups/.last-backup` contains the path to the most recent backup for rollback purposes. This is necessary because agent contexts are stateless between tool calls.
+
+### Retention
+
+Keep the last 10 backups per plugin. Older backups are automatically removed.
+
+### Rollback Procedure
+
+1. Read backup path from `.fractary/backups/.last-backup`
+2. If tracking file exists and backup is valid, restore from it
+3. Fallback: use most recent backup matching `{plugin}-config-*.yaml` pattern
+4. Clean up tracking file after rollback
+
+## Context Parameter
+
+### Maximum Length
+
+**2000 characters** for all plugins.
+
+### Validation
+
+All `--context` parameters must be validated:
+- Check for empty values
+- Check for length (max 2000 characters)
+- Check for shell metacharacters (`$`, `` ` ``, `|`, `;`, `&`, `>`, `<`)
+- Check for path traversal patterns (`../`)
+- Check for newlines and null bytes
+
+### Safe Patterns
+
+Context should be plain descriptive text only:
+- "switch to jira for work tracking" ✓
+- "enable S3 storage with bucket my-bucket" ✓
+- "change logs path to .fractary/session-logs" ✓
+
+## Agent Model
+
+### Standard Model
+
+**`claude-haiku-4-5`** for all configurator agents.
+
+Configuration operations are primarily file I/O and validation, which don't require more powerful models.
+
+## Version Field
+
+### Standard Version
+
+**`version: "2.0"`** for all plugin configurations.
+
+### Migration
+
+When encountering older version numbers (e.g., `version: "4.0"` from codex), show a deprecation notice and offer migration. The underlying format is compatible - only the version number changes.
+
+## Configuration Files
+
+### Locations
+
+| Plugin | Config Location |
+|--------|-----------------|
+| Core | `.fractary/config.yaml` |
+| Faber | `.fractary/faber/config.yaml` |
+| Codex | `.fractary/codex/config.yaml` |
+
+### Format
+
+All configurations use YAML format (not JSON).
+
+## Section Preservation
+
+When updating configuration:
+
+1. **Read before write**: Always read existing config first
+2. **Section-level merge**: Only modify sections for the plugin being configured
+3. **Preserve unknown sections**: If a section exists that the agent doesn't manage, preserve it
+4. **Version field**: Always preserve or set `version: "2.0"`
+
+## User Confirmation
+
+1. **Preview before apply**: Always show proposed changes before applying
+2. **Explicit confirmation**: Use `AskUserQuestion` for confirmation (unless `--yes` flag)
+3. **Backup notification**: Inform user about backup creation before modifying existing config
+
+## Commands
+
+| Plugin | Command |
+|--------|---------|
+| Core | `/fractary-core:configure` |
+| Faber | `/fractary-faber:configure` |
+| Codex | `/fractary-codex:configure` |
+
+All commands support:
+- `--context "<text>"` - Natural language description of changes
+- `--force` - Skip confirmation prompts
+- `--dry-run` - Preview changes without applying (core only)
+- `--validate-only` - Validate current config (core only)
+
+## Error Handling
+
+### Standard Error Format
+
+```
+❌ [Error Type]
+
+[Error details]
+
+[Recovery steps]
+```
+
+### Rollback on Failure
+
+If configuration write or validation fails:
+1. Report specific validation error
+2. Restore from backup (if backup exists)
+3. Report rollback action
+4. Provide clear recovery steps
+
+## Cross-Reference
+
+- Core configurator: `core/plugins/core/agents/configurator.md`
+- Faber configurator: `faber/plugins/faber/agents/configurator.md`
+- Codex configurator: `codex/plugins/codex/agents/configurator.md`
+- Codex gitignore utils: `codex/cli/src/config/gitignore-utils.ts`
