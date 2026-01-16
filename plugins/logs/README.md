@@ -261,6 +261,122 @@ Yes, let me break down the requirements...
 - Time-based: Archive logs older than 30 days
 - Safety net: Never lose logs
 
+## Archiving
+
+### Why Archive Logs?
+
+Archived logs are **out of sight, out of mind** for Claude. Without archiving:
+- Old logs clutter the workspace
+- Claude may find and reference outdated session information
+- Local storage fills up over time
+
+Archiving ensures Claude stays focused on current work while preserving history.
+
+### Archive Modes
+
+The archive command supports two modes:
+
+| Mode | Description | When Used |
+|------|-------------|-----------|
+| **Cloud Storage** (Preferred) | Uploads to S3/R2/GCS | When `fractary-file` is configured |
+| **Local Archive** (Fallback) | Moves to `.fractary/logs/archive/` | When cloud storage not configured |
+
+**Automatic Mode Detection**: The archive command automatically detects which mode to use.
+
+**Force Local Archive**: Use `--local` flag:
+```bash
+/fractary-logs:archive 123 --local
+```
+
+### Local Archive (Default Fallback)
+
+When cloud storage is not configured, logs are archived locally:
+
+```
+.fractary/logs/archive/
+└── 2026/
+    └── 01/
+        └── 123/
+            ├── session-abc123-2026-01-15.md
+            └── session-def456-2026-01-16.md
+```
+
+**Key Points**:
+- The archive directory is **gitignored** (won't be committed)
+- The archive directory is **hidden from Claude** (via `.claude/settings.json` deny rules)
+- Logs are preserved locally but won't pollute Claude's context
+
+### Cloud Archive (Preferred)
+
+When `fractary-file` plugin is configured with cloud storage:
+
+```
+Cloud: archive/logs/{year}/{month}/{issue}/filename.md.gz
+Local: Log files are removed after successful upload
+```
+
+**Benefits over local archive**:
+- Logs completely removed from local machine
+- Compressed storage (60-70% smaller)
+- Accessible from any machine
+- Permanent, searchable record
+
+### Configuring Cloud Storage
+
+To enable cloud archiving, configure the `file` section in `.fractary/config.yaml`:
+
+```yaml
+file:
+  schema_version: "2.0"
+  sources:
+    logs:
+      type: s3           # Options: s3, r2, gcs, gdrive, local
+      bucket: my-project-files
+      prefix: logs/
+      region: us-east-1
+      local:
+        base_path: .fractary/logs
+      push:
+        compress: true     # Compress logs (recommended)
+        keep_local: false  # Remove local after upload
+      auth:
+        profile: default   # AWS profile or use env vars
+```
+
+**For Cloudflare R2:**
+```yaml
+file:
+  sources:
+    logs:
+      type: r2
+      bucket: my-project-files
+      prefix: logs/
+      account_id: ${CLOUDFLARE_ACCOUNT_ID}
+      auth:
+        access_key_id: ${R2_ACCESS_KEY_ID}
+        secret_access_key: ${R2_SECRET_ACCESS_KEY}
+```
+
+After configuring, the archive command will automatically use cloud storage.
+
+### How Claude is Protected from Archived Logs
+
+Both archive modes ensure Claude cannot accidentally find archived logs:
+
+1. **Gitignore**: `.fractary/logs/archive/` is gitignored
+2. **Claude Settings**: `.claude/settings.json` contains deny rules:
+   ```json
+   {
+     "permissions": {
+       "deny": [
+         "Read(./.fractary/logs/archive/**)"
+       ]
+     }
+   }
+   ```
+
+This prevents Claude's search tools (Glob/Grep/Read) from accessing archived content.
+
 ### Search
 
 **Hybrid Search**:
