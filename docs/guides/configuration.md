@@ -46,26 +46,35 @@ Configuration is resolved in this order (highest priority first):
 
 ## Quick Start
 
-Initialize your project with the unified configuration:
+Configure your project with the unified configuration command:
 
 ```bash
-# Initialize all plugins
-fractary-core:init
+# Configure all plugins (fresh setup)
+fractary-core:config
 
-# Initialize specific plugins only
-fractary-core:init --plugins work,repo
+# Configure specific plugins only
+fractary-core:config --plugins work,repo
 
 # Force overwrite existing config
-fractary-core:init --force
+fractary-core:config --force
 
 # Specify platforms
-fractary-core:init \
+fractary-core:config \
   --work-platform github \
   --repo-platform github \
   --file-handler local
+
+# Preview changes without applying (dry run)
+fractary-core:config --dry-run
+
+# Validate existing configuration
+fractary-core:config --validate-only
+
+# Incremental update with natural language
+fractary-core:config --context "switch to jira for work tracking"
 ```
 
-This creates `.fractary/core/config.yaml` with all necessary sections.
+This creates `.fractary/config.yaml` with all necessary sections.
 
 ## Configuration Structure
 
@@ -152,26 +161,55 @@ docs:
 
 ## Initialization
 
-### Using the Init Command
+### Using the Config Command
 
-The recommended way to create your configuration is using the init command:
+The recommended way to create your configuration is using the config command:
 
 ```bash
-# Initialize with auto-detection
-fractary-core:init
+# Configure with auto-detection
+fractary-core:config
 
-# Initialize specific plugins
-fractary-core:init --plugins work,repo,logs
+# Configure specific plugins
+fractary-core:config --plugins work,repo,logs
 
 # Specify platforms
-fractary-core:init --work-platform github --repo-platform github
+fractary-core:config --work-platform github --repo-platform github
 
 # Skip prompts
-fractary-core:init --yes
+fractary-core:config --yes
 
 # Force overwrite
-fractary-core:init --force
+fractary-core:config --force
+
+# Preview changes without applying
+fractary-core:config --dry-run
+
+# Validate existing config
+fractary-core:config --validate-only
 ```
+
+### Incremental Updates
+
+Update existing configuration with natural language descriptions:
+
+```bash
+# Switch work tracking platform
+fractary-core:config --context "switch to jira for work tracking"
+
+# Enable cloud storage
+fractary-core:config --context "enable S3 storage for file plugin"
+
+# Add a new platform
+fractary-core:config --context "add gitlab as repo platform"
+```
+
+### Backup and Rollback
+
+The config command automatically:
+- Creates timestamped backups before modifying existing config
+- Stores backups in `.fractary/backups/`
+- Keeps the last 10 backups
+- Automatically rolls back on failure
 
 ### Manual Configuration
 
@@ -317,11 +355,11 @@ The CLI reads from `.fractary/core/config.yaml` or environment variables.
 ### Initialize Configuration
 
 ```bash
-# Initialize work tracking (deprecated - use fractary-core:init)
-fractary-core work init --provider github
+# Recommended: Use unified config
+fractary-core:config
 
-# Recommended: Use unified init
-fractary-core:init
+# Or with specific options
+fractary-core:config --plugins work,repo --work-platform github
 ```
 
 ### Override with Flags
@@ -412,9 +450,9 @@ Add to `.claude/settings.json`:
 
 **v2.0+:** All plugin configurations are now unified in a single `.fractary/config.yaml` file.
 
-Initialize the unified configuration:
+Initialize or update the unified configuration:
 ```bash
-fractary-core:init
+fractary-core:config
 ```
 
 This creates `.fractary/config.yaml` with sections for all plugins:
@@ -843,11 +881,11 @@ mv .fractary .fractary.v1
 **4. Initialize with New Config**
 
 ```bash
-# Initialize all plugins
-fractary-core:init
+# Configure all plugins
+fractary-core:config
 
 # Or specify platforms
-fractary-core:init \
+fractary-core:config \
   --work-platform github \
   --repo-platform github \
   --file-handler local
@@ -968,13 +1006,14 @@ spec:
 
 #### Deprecated Commands
 
-The following init commands are deprecated and delegate to unified init:
+The following init commands are deprecated. Use the unified config command instead:
 
-- `fractary-work:init` → Use `fractary-core:init --plugins work`
-- `fractary-repo:init` → Use `fractary-core:init --plugins repo`
-- `fractary-logs:init` → Use `fractary-core:init --plugins logs`
-- `fractary-file:init` → Use `fractary-core:init --plugins file`
-- `fractary-spec:init` → Use `fractary-core:init --plugins spec`
+- `fractary-work:init` → Use `fractary-core:config --plugins work`
+- `fractary-repo:init` → Use `fractary-core:config --plugins repo`
+- `fractary-logs:init` → Use `fractary-core:config --plugins logs`
+- `fractary-file:init` → Use `fractary-core:config --plugins file`
+- `fractary-spec:init` → Use `fractary-core:config --plugins spec`
+- `fractary-core:init` → **REMOVED** - Use `fractary-core:config` instead
 
 #### Common Migration Issues
 
@@ -992,7 +1031,7 @@ The following init commands are deprecated and delegate to unified init:
 
 **Issue**: "Configuration file not found" error
 
-**Solution**: Ensure config is at `.fractary/config.yaml`. Run `fractary-core:init` if missing.
+**Solution**: Ensure config is at `.fractary/config.yaml`. Run `fractary-core:config` if missing.
 
 #### Breaking Changes Summary
 
@@ -1001,18 +1040,24 @@ The following init commands are deprecated and delegate to unified init:
 - JSON config support
 - Automatic migration from v1.x
 - Per-plugin init commands (now deprecated wrappers)
+- `fractary-core:init` command (use `fractary-core:config` instead)
 
 **Changed:**
 - Config location: Now at `.fractary/config.yaml` (unified)
 - Config format: JSON → YAML
-- Init command: Plugin-specific → Unified `fractary-core:init`
+- Config command: Plugin-specific → Unified `fractary-core:config`
 
 **Added:**
 - Handler pattern for multi-platform support
 - Environment variable substitution (`${VAR_NAME}`)
+- Incremental configuration updates with `--context`
+- Preview mode with `--dry-run`
+- Validation mode with `--validate-only`
+- Automatic backup and rollback
+- User confirmation before applying changes
 - Config validation command (`fractary-core config validate`)
 - Config display command (`fractary-core config show`)
-- Unified initialization for all plugins
+- Unified configuration for all plugins
 
 #### Getting Help
 
