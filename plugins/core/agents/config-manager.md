@@ -1644,6 +1644,9 @@ repo:
         interval_seconds: 60
         timeout_seconds: 900
         initial_delay_seconds: 10
+      merge:
+        strategy: squash
+        delete_branch: true
   faber_integration:
     enabled: true
     branch_creation:

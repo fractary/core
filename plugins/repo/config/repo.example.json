@@ -111,6 +111,13 @@
         "$comment_timeout": "Maximum seconds to wait for CI (default: 900 = 15 minutes)",
         "initial_delay_seconds": 10,
         "$comment_initial_delay": "Initial delay before first check (allows CI to start)"
+      },
+
+      "merge": {
+        "strategy": "squash",
+        "$comment_strategy": "Default merge strategy for PRs: squash|merge|rebase",
+        "delete_branch": true,
+        "$comment_delete": "Delete branch after merge by default"
       }
     },
 

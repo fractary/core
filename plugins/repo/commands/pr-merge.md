@@ -8,6 +8,7 @@ argument-hint: '<pr_number> [--squash|--merge|--rebase] [--delete-branch] [--con
 ## Context
 
 - Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
+- Config defaults: !`cat .fractary/config.yaml 2>/dev/null | grep -A5 'pr:' | grep -A2 'merge:' | grep -E '(strategy|delete_branch):' | tr '\n' ' ' || echo "strategy: squash delete_branch: true"`
 
 ## Your task
 
@@ -15,8 +16,14 @@ Merge pull request using `gh pr merge`.
 
 Parse arguments:
 - pr_number (required)
-- strategy: --squash, --merge, or --rebase (default: merge)
-- --delete-branch if requested
+- strategy: --squash, --merge, or --rebase
+- --delete-branch flag
+
+**Default behavior**: If no strategy flag (--squash, --merge, --rebase) is provided, use the configured default from `.fractary/config.yaml` at `repo.defaults.pr.merge.strategy`. If no --delete-branch flag is provided, check the configured default at `repo.defaults.pr.merge.delete_branch`.
+
+The config defaults shown above indicate the configured values. If the config could not be read, the fallback defaults are: strategy=squash, delete_branch=true.
+
+**Priority**: Explicit command-line flags always override config defaults.
 
 Example: `gh pr merge 42 --squash --delete-branch`
 
