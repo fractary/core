@@ -21,12 +21,56 @@ export interface WorkConfig {
 }
 
 /**
+ * PR merge default options
+ */
+export interface PRMergeDefaults {
+  /** Default merge strategy: 'squash', 'merge', or 'rebase' */
+  strategy?: 'squash' | 'merge' | 'rebase';
+  /** Whether to delete the branch after merge by default */
+  delete_branch?: boolean;
+}
+
+/**
+ * PR configuration defaults
+ */
+export interface PRDefaults {
+  template?: string;
+  require_work_id?: boolean;
+  auto_link_issues?: boolean;
+  ci_polling?: {
+    enabled?: boolean;
+    interval_seconds?: number;
+    timeout_seconds?: number;
+    initial_delay_seconds?: number;
+  };
+  /** Default options for PR merge operations */
+  merge?: PRMergeDefaults;
+}
+
+/**
+ * Repository defaults configuration
+ */
+export interface RepoDefaults {
+  default_branch?: string;
+  protected_branches?: string[];
+  branch_naming?: Record<string, any>;
+  commit_format?: string;
+  require_signed_commits?: boolean;
+  merge_strategy?: string;
+  auto_delete_merged_branches?: boolean;
+  remote?: Record<string, any>;
+  push_sync_strategy?: string;
+  pull_sync_strategy?: string;
+  pr?: PRDefaults;
+}
+
+/**
  * Repository management configuration
  */
 export interface RepoConfig {
   active_handler: string;
   handlers: Record<string, any>;
-  defaults?: Record<string, any>;
+  defaults?: RepoDefaults;
   faber_integration?: Record<string, any>;
   hooks?: Record<string, any>;
   platform_specific?: Record<string, any>;
