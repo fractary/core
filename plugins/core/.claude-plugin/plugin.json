@@ -1,9 +1,11 @@
 {
   "name": "fractary-core",
-  "version": "3.1.3",
+  "version": "3.1.4",
   "description": "Core initialization and configuration for Fractary plugins",
-  "commands": "./commands/",
+  "commands": [
+    "./commands/configure.md"
+  ],
   "agents": [
-    "./agents/config-manager.md"
+    "./agents/configurator.md"
   ]
 }
