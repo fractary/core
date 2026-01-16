@@ -113,29 +113,6 @@ title: "My session"
 
 **Migration**: Logs will be moved to type directories on first `/fractary-logs:list` or classification.
 
-### 3. Archive Index Format
-
-**v1.x**: Simple array
-```json
-{
-  "archives": [...]
-}
-```
-
-**v2.0**: Type-aware with retention metadata
-```json
-{
-  "version": "2.0",
-  "type_aware": true,
-  "archives": [...],
-  "by_type": {
-    "session": {"count": 12, "total_size_mb": 15.2}
-  }
-}
-```
-
-**Migration**: Index auto-upgrades on next archive operation.
-
 ## New Commands
 
 v2.0 adds type-aware commands:
@@ -217,13 +194,6 @@ This:
 
 # Review validation errors
 /fractary-logs:validate-all --report
-```
-
-### Step 5: Update Archive Index
-
-```bash
-# Rebuild index with type awareness
-/fractary-logs:rebuild-index --type-aware
 ```
 
 ## What You Get

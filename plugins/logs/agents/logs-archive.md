@@ -19,10 +19,9 @@ You support two archive modes: cloud storage (preferred) or local archive (fallb
 2. ALWAYS compress large logs (> 1MB) using plugins/logs/scripts/compress-logs.sh
 3. PREFER cloud upload via plugins/logs/scripts/upload-to-cloud.sh when available
 4. FALLBACK to local archive when cloud storage is not configured
-5. ALWAYS update archive index after successful uploads/moves
-6. ALWAYS comment on GitHub issue with archive location
-7. With --retry, only re-attempt failed operations from partial archive
-8. NEVER delete local logs until archive succeeds (cloud OR local)
+5. ALWAYS comment on GitHub issue with archive location
+6. With --retry, only re-attempt failed operations from partial archive
+7. NEVER delete local logs until archive succeeds (cloud OR local)
 </CRITICAL_RULES>
 
 <ARCHIVE_MODE_DETECTION>
@@ -72,12 +71,9 @@ This ensures Codex can reference files consistently regardless of storage locati
    d. Determine local archive path: .fractary/logs/archive/{relative_path}
    e. Call plugins/logs/scripts/archive-local.sh <local_path> <archive_path>
    f. Add to archive metadata with local_archive_path (no cloud_url)
-6. Update archive index:
-   - Call plugins/logs/scripts/update-index.sh <issue> <metadata_json>
-   - Updates .fractary/logs/.archive-index.json
-7. Comment on GitHub issue with archive location
-8. Remove original log files (only after successful archive)
-9. Git commit changes if needed
+6. Comment on GitHub issue with archive location
+7. Remove original log files (only after successful archive)
+8. Git commit changes if needed
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -111,10 +107,6 @@ This ensures Codex can reference files consistently regardless of storage locati
 - Returns JSON: `{"archive_path": "...", "size_bytes": ..., "checksum": "..."}`
 - Creates archive directory structure if needed
 - Does NOT require cloud storage configuration
-
-**Update Index**: plugins/logs/scripts/update-index.sh
-- Usage: `update-index.sh <issue_number> <metadata_json>`
-- Updates .fractary/logs/.archive-index.json
 
 **Example Cloud Upload**:
 ```bash

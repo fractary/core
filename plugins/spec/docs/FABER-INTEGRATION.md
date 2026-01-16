@@ -176,11 +176,10 @@ Use the @agent-fractary-spec:spec-manager agent to archive:
 1. All specs for issue collected
 2. Pre-archive checks performed
 3. Specs uploaded to cloud storage
-4. Archive index updated
-5. GitHub issue commented with archive URLs
-6. GitHub PR commented with archive URLs
-7. Local specs removed
-8. Git commit created
+4. GitHub issue commented with archive URLs
+5. GitHub PR commented with archive URLs
+6. Local specs removed
+7. Git commit created
 
 **Pre-Archive Checks**:
 
@@ -508,12 +507,6 @@ Check validation status:
 /fractary-spec:validate 123
 ```
 
-Check archival status:
-
-```bash
-cat .fractary/specs/archive-index.json | jq '.archives[] | select(.issue_number == "123")'
-```
-
 ## Integration Testing
 
 Test full workflow:
@@ -572,12 +565,7 @@ Check pre-conditions:
 
 ### Specs Still in Local
 
-Archival may have failed. Check:
-```bash
-cat .fractary/specs/archive-index.json
-```
-
-If not in index, retry:
+Archival may have failed. Retry:
 ```bash
 /fractary-spec:archive 123
 ```

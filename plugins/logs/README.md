@@ -453,7 +453,6 @@ logs:
     cloud_archive_path: archive/logs
     # Archive paths are root directories only. Each log type
     # determines its own naming and structure during creation.
-    archive_index_file: archive-index.json
   retention:
     # ... retention policies
   session_logging:
@@ -553,8 +552,6 @@ The logs plugin integrates via **agent-to-agent invocation**:
 - When archiving logs, log-manager prepares metadata
 - log-manager invokes file-manager to upload each file
 - file-manager returns cloud URLs
-- log-manager updates archive index with URLs
-- Archived logs remain searchable via index
 
 **Without fractary-file**:
 - Archival operations will fail
@@ -579,7 +576,6 @@ Auto-capture during FABER:
 
 ```
 /logs/
-├── .archive-index.json       # Archive metadata (searchable)
 ├── sessions/                 # Session logs
 │   ├── session-123-2025-01-15.md
 │   └── session-124-2025-01-16.md
@@ -652,13 +648,6 @@ Combine search and read for custom analysis:
 /fractary-logs:search "interesting pattern" --since 2024-01-01
 /fractary-logs:read <issue>
 # Manual analysis or pipe to custom scripts
-```
-
-### Archive Index
-
-Direct access to archive index:
-```bash
-cat /logs/.archive-index.json | jq '.archives[] | select(.issue_number == "123")'
 ```
 
 ### Bulk Operations
