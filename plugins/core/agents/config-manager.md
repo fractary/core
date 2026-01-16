@@ -40,6 +40,10 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 14. ALWAYS support rollback on failure - restore from backup
 15. With --dry-run, show proposed changes without applying
 16. With --validate-only, validate current config without changes
+17. ONLY modify config sections for plugins being configured - PRESERVE all other sections
+18. ALWAYS create/update `.fractary/.gitignore` with logs directory ignored
+19. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
+20. MERGE new config sections with existing - never overwrite unrelated plugin sections
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -156,6 +160,315 @@ If configuration write or validation fails:
 4. Provide clear error message with recovery steps
 
 </BACKUP_OPERATIONS>
+
+<GITIGNORE_MANAGEMENT>
+
+## .fractary/.gitignore Management
+
+The config process must ensure `.fractary/.gitignore` exists and contains appropriate entries for the logs directory.
+
+### Required Entries by Plugin
+
+**Logs Plugin:**
+```
+# Logs plugin - session logs (may contain sensitive data)
+logs/
+```
+
+**Backups (always added):**
+```
+# Config backups
+backups/
+```
+
+### Gitignore Update Strategy
+
+**CRITICAL**: Only ADD entries, never remove existing entries. Other plugins may have added their own entries.
+
+1. **Read existing .gitignore** (if exists)
+2. **Parse into sections** by comment headers (lines starting with `#`)
+3. **Check for required entries** for each plugin being configured
+4. **Add missing entries** under appropriate section headers
+5. **Preserve all existing entries** from other plugins
+
+### Section Headers
+
+Use consistent section headers to identify which plugin added which entries:
+
+```
+# === fractary-core ===
+backups/
+
+# === fractary-logs ===
+logs/
+
+# === fractary-codex ===
+# (entries added by codex plugin)
+
+# === other-plugin ===
+# (entries from other plugins preserved)
+```
+
+### Implementation
+
+When updating `.fractary/.gitignore`:
+
+```python
+def update_gitignore(plugins_to_configure, logs_path):
+    gitignore_path = ".fractary/.gitignore"
+
+    # Read existing content (preserve everything)
+    existing_content = ""
+    if file_exists(gitignore_path):
+        existing_content = read_file(gitignore_path)
+
+    # Parse existing entries
+    existing_entries = set(line.strip() for line in existing_content.split('\n')
+                          if line.strip() and not line.startswith('#'))
+
+    # Determine entries to add
+    entries_to_add = []
+
+    # Always ensure backups/ is ignored
+    if "backups/" not in existing_entries:
+        entries_to_add.append(("fractary-core", "backups/"))
+
+    # If logs plugin is being configured, ensure logs path is ignored
+    if "logs" in plugins_to_configure:
+        logs_entry = f"{logs_path.replace('.fractary/', '')}/"  # e.g., "logs/"
+        if logs_entry not in existing_entries:
+            entries_to_add.append(("fractary-logs", logs_entry))
+
+    # Build new content by appending to existing
+    if entries_to_add:
+        new_content = existing_content.rstrip('\n')
+        for section, entry in entries_to_add:
+            section_header = f"# === {section} ==="
+            if section_header not in existing_content:
+                new_content += f"\n\n{section_header}\n{entry}"
+            else:
+                # Find section and append entry
+                # (In practice, just append at end under new section)
+                new_content += f"\n{entry}"
+
+        write_file(gitignore_path, new_content + "\n")
+```
+
+### Example .gitignore Output
+
+After configuring logs plugin with default path `.fractary/logs`:
+
+```gitignore
+# === fractary-core ===
+backups/
+
+# === fractary-logs ===
+logs/
+```
+
+If codex plugin was previously configured (preserved):
+
+```gitignore
+# === fractary-codex ===
+cache/
+.codex-temp/
+
+# === fractary-core ===
+backups/
+
+# === fractary-logs ===
+logs/
+```
+
+### Handling Path Changes
+
+When the logs path is changed (via `--context` or arguments), the gitignore MUST be updated:
+
+**Scenario**: User runs `/fractary-core:config --context "change logs directory to .fractary/session-logs"`
+
+**Required Actions**:
+1. Detect that `logs.storage.local_path` is changing
+2. Determine the old path (from existing config) and new path
+3. Update `.fractary/.gitignore`:
+   - Keep the `# === fractary-logs ===` section header
+   - Replace the old entry with the new path
+4. Warn user about the change in preview
+
+**Implementation**:
+```python
+def update_gitignore_for_path_change(old_logs_path, new_logs_path):
+    """
+    Update .gitignore when logs path changes.
+    """
+    gitignore_path = ".fractary/.gitignore"
+    content = read_file(gitignore_path)
+
+    # Extract relative path from .fractary/ (e.g., ".fractary/logs" -> "logs/")
+    old_entry = old_logs_path.replace('.fractary/', '') + '/'
+    new_entry = new_logs_path.replace('.fractary/', '') + '/'
+
+    # Replace old entry with new entry
+    if old_entry in content:
+        content = content.replace(old_entry, new_entry)
+        write_file(gitignore_path, content)
+        return "updated"
+    else:
+        # Old entry not found - add new entry and warn
+        return "warning"
+```
+
+**Preview Output for Path Change**:
+```
+=== CONFIGURATION PREVIEW ===
+
+Mode: Incremental Update
+
+CHANGES to logs section:
+  logs.storage.local_path: .fractary/logs -> .fractary/session-logs
+
+.gitignore update required:
+  - OLD: logs/
+  - NEW: session-logs/
+
+WARNING: Ensure any existing logs in .fractary/logs/ are moved to the new location.
+```
+
+**If gitignore cannot be auto-updated** (e.g., old entry not found, complex formatting):
+```
+WARNING: Logs path changed but .gitignore could not be auto-updated.
+
+Please manually update .fractary/.gitignore:
+  1. Remove or update the old entry: logs/
+  2. Add the new entry: session-logs/
+
+This ensures your session logs remain excluded from git.
+```
+
+</GITIGNORE_MANAGEMENT>
+
+<SECTION_PRESERVATION>
+
+## Config Section Preservation
+
+When updating `.fractary/config.yaml`, ONLY modify sections for plugins being configured. All other sections must be preserved exactly as they are.
+
+### Principles
+
+1. **Read before write**: Always read existing config first
+2. **Section-level merge**: Merge at the top-level section (plugin) level
+3. **Preserve unknown sections**: If a section exists that this agent doesn't manage, preserve it
+4. **Version field**: Always preserve or set `version: "2.0"`
+
+### Managed Sections
+
+This agent manages these top-level sections:
+- `work`
+- `repo`
+- `logs`
+- `file`
+- `spec`
+- `docs`
+- `codex`
+
+### Unmanaged Sections (Preserve As-Is)
+
+Any section not in the managed list must be preserved exactly:
+- `faber` (managed by fractary-faber plugin)
+- `faber-cloud` (managed by fractary-faber-cloud plugin)
+- Custom user sections
+- Any future plugin sections
+
+### Implementation
+
+```python
+def merge_config(existing_config, new_config, plugins_to_configure):
+    """
+    Merge new configuration into existing, only updating specified plugins.
+
+    Args:
+        existing_config: dict from current .fractary/config.yaml
+        new_config: dict with new values for plugins being configured
+        plugins_to_configure: list of plugin names to update
+
+    Returns:
+        Merged config dict
+    """
+    result = existing_config.copy()
+
+    # Always ensure version is set
+    result['version'] = '2.0'
+
+    # Only update sections for plugins being configured
+    for plugin in plugins_to_configure:
+        if plugin in new_config:
+            result[plugin] = new_config[plugin]
+
+    # All other sections remain unchanged
+    return result
+```
+
+### Example: Preserving faber Section
+
+**Existing config:**
+```yaml
+version: "2.0"
+
+work:
+  active_handler: github
+  # ... work config ...
+
+faber:
+  workflow: standard
+  phases:
+    - frame
+    - architect
+  # ... faber config (NOT managed by this agent) ...
+```
+
+**After running:** `/fractary-core:config --plugins logs`
+
+```yaml
+version: "2.0"
+
+work:
+  active_handler: github
+  # ... work config unchanged ...
+
+faber:
+  workflow: standard
+  phases:
+    - frame
+    - architect
+  # ... faber config PRESERVED exactly ...
+
+logs:
+  schema_version: "2.0"
+  storage:
+    local_path: .fractary/logs
+  # ... new logs config ...
+```
+
+### Preview Output for Section Changes
+
+When showing changes, clearly indicate which sections are being modified:
+
+```
+=== CONFIGURATION PREVIEW ===
+
+Sections to be MODIFIED:
+  - logs (new)
+
+Sections PRESERVED (unchanged):
+  - work
+  - repo
+  - faber
+  - faber-cloud
+
+Changes to logs section:
+  [show diff or new content]
+```
+
+</SECTION_PRESERVATION>
 
 <WORKFLOW>
 
@@ -306,13 +619,14 @@ Build updated configuration by:
 
 Mode: Fresh Setup
 
-Configuration to create: .fractary/config.yaml
+Files to create/update:
+  - .fractary/config.yaml (create)
+  - .fractary/.gitignore (create/update)
 
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
-  - docs/
-  - docs/architecture/
+  - .fractary/backups/
   - docs/architecture/ADR/
   - docs/guides/
 
@@ -323,6 +637,10 @@ Plugins to configure:
   - file (local)
   - spec
   - docs
+
+.gitignore entries to add:
+  - backups/  (fractary-core)
+  - logs/     (fractary-logs)
 
 Environment variables status:
   - GITHUB_TOKEN: [Present/Missing]
@@ -337,24 +655,37 @@ Environment variables status:
 Mode: Incremental Update
 Backup will be created: .fractary/backups/config-YYYYMMDD-HHMMSS.yaml
 
-CHANGES:
+CONFIG SECTIONS:
+
+  Sections to MODIFY:
+    - logs (updating)
+
+  Sections PRESERVED (unchanged):
+    - work
+    - repo
+    - faber          (not managed by this agent)
+    - faber-cloud    (not managed by this agent)
+
+CHANGES to logs section:
 
 BEFORE:
-  work:
-    active_handler: github
+  logs:
+    storage:
+      local_path: .fractary/logs
 
 AFTER:
-  work:
-    active_handler: jira
-    handlers:
-      jira:
-        url: ${JIRA_URL}
-        project_key: ${JIRA_PROJECT_KEY}
-        ...
+  logs:
+    storage:
+      local_path: .fractary/logs
+      cloud_archive_path: archive/logs/{year}/{month}
+    # ... additional config ...
+
+.gitignore:
+  - Existing entries: PRESERVED
+  - Adding (if missing): logs/
 
 Environment variables status:
-  - JIRA_TOKEN: [Present/Missing]
-  - JIRA_URL: [Present/Missing]
+  - GITHUB_TOKEN: [Present/Missing]
 ```
 
 ### Step 9: Confirm Changes with User
@@ -403,10 +734,11 @@ Store BACKUP_TIMESTAMP for potential rollback.
 
 ### Step 11: Apply Configuration Changes
 
-**Create directories:**
+**11a. Create directories:**
 ```bash
 mkdir -p .fractary/logs
 mkdir -p .fractary/specs
+mkdir -p .fractary/backups
 mkdir -p docs/architecture/ADR
 mkdir -p docs/guides
 mkdir -p docs/schema
@@ -415,10 +747,89 @@ mkdir -p docs/standards
 mkdir -p docs/operations/runbooks
 ```
 
-**Write configuration:**
-Use Write tool to create/update `.fractary/config.yaml` with the proposed configuration.
+**11b. Write configuration (with section preservation):**
 
-**Initialize archive indexes:**
+For **fresh setup** or **--force**:
+- Write complete configuration with all plugin sections
+
+For **incremental mode**:
+1. Read existing `.fractary/config.yaml`
+2. Parse YAML into sections
+3. For each plugin being configured: replace that section with new config
+4. For all other sections: preserve exactly as-is (including unknown sections like `faber`)
+5. Write merged configuration
+
+```
+# Pseudocode for section-preserving write
+existing = read_yaml(".fractary/config.yaml")
+new_config = build_config_for_plugins(plugins_to_configure)
+
+merged = {}
+merged['version'] = '2.0'
+
+# Preserve ALL existing sections first
+for section in existing:
+    if section != 'version':
+        merged[section] = existing[section]
+
+# Then overlay new config ONLY for plugins being configured
+for plugin in plugins_to_configure:
+    if plugin in new_config:
+        merged[plugin] = new_config[plugin]
+
+write_yaml(".fractary/config.yaml", merged)
+```
+
+**11c. Create/update .fractary/.gitignore:**
+
+1. Read existing `.fractary/.gitignore` if it exists
+2. Parse existing entries (preserve ALL existing entries from other plugins)
+3. **Detect path changes** (incremental mode):
+   - Compare old `logs.storage.local_path` with new value
+   - If changed: update gitignore entry from old path to new path
+4. Add required entries if missing:
+   - `backups/` (always, under `# === fractary-core ===`)
+   - `{logs_path}/` (if logs plugin configured, under `# === fractary-logs ===`)
+5. Write updated .gitignore
+
+```bash
+# Ensure .gitignore exists and has required entries
+GITIGNORE=".fractary/.gitignore"
+
+# Create if doesn't exist
+touch "$GITIGNORE"
+
+# Add backups if not present
+grep -qxF 'backups/' "$GITIGNORE" || echo -e '\n# === fractary-core ===\nbackups/' >> "$GITIGNORE"
+
+# For logs path - handle both fresh setup and path changes
+LOGS_PATH="logs"  # Default, or extract from config: logs.storage.local_path minus ".fractary/"
+
+# If path changed (incremental mode), update the entry
+if [ -n "$OLD_LOGS_PATH" ] && [ "$OLD_LOGS_PATH" != "$LOGS_PATH" ]; then
+    # Replace old entry with new entry
+    sed -i "s|^${OLD_LOGS_PATH}/$|${LOGS_PATH}/|" "$GITIGNORE"
+    if ! grep -qxF "${LOGS_PATH}/" "$GITIGNORE"; then
+        # Replacement failed, warn user
+        echo "WARNING: Could not auto-update .gitignore for logs path change"
+        echo "Please manually update: ${OLD_LOGS_PATH}/ -> ${LOGS_PATH}/"
+    fi
+else
+    # Fresh setup or no change - just ensure entry exists
+    grep -qxF "${LOGS_PATH}/" "$GITIGNORE" || echo -e '\n# === fractary-logs ===\n'"${LOGS_PATH}/" >> "$GITIGNORE"
+fi
+```
+
+**Path Change Warning** (shown in preview):
+```
+.gitignore will be updated:
+  - OLD entry: logs/
+  - NEW entry: session-logs/
+
+NOTE: Move existing logs from .fractary/logs/ to .fractary/session-logs/ if needed.
+```
+
+**11d. Initialize archive indexes:**
 ```bash
 # Create archive index files if they don't exist
 [ -f .fractary/logs/archive-index.json ] || echo '{"version":"1.0","entries":[]}' > .fractary/logs/archive-index.json
@@ -662,6 +1073,27 @@ To fix:
 3. Test manually: [specific test command]
 ```
 
+### Gitignore Update Failed (Path Change)
+```
+Warning: Logs path changed but .gitignore could not be auto-updated
+
+Configuration updated successfully, but .gitignore needs manual attention.
+
+Path change detected:
+  OLD: .fractary/logs/
+  NEW: .fractary/session-logs/
+
+Please manually update .fractary/.gitignore:
+  1. Find the line: logs/
+  2. Change it to: session-logs/
+
+This ensures your session logs remain excluded from git commits.
+
+Additionally, if you have existing logs:
+  - Move files from .fractary/logs/ to .fractary/session-logs/
+  - Or leave them if you want to preserve the old location
+```
+
 </ERROR_HANDLING>
 
 <OUTPUTS>
@@ -674,7 +1106,10 @@ To fix:
 === FRACTARY CORE CONFIGURATION ===
 
 Mode: Fresh Setup
-Configuration: .fractary/config.yaml (will be created)
+
+Files to create/update:
+  - .fractary/config.yaml (create)
+  - .fractary/.gitignore (create)
 
 Detecting platforms...
   Git remote: git@github.com:fractary/core.git
@@ -684,12 +1119,17 @@ Detecting platforms...
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
+  - .fractary/backups/
   - docs/architecture/ADR/
   - docs/guides/
   - docs/schema/
   - docs/api/
   - docs/standards/
   - docs/operations/runbooks/
+
+.gitignore entries to add:
+  - backups/  (fractary-core)
+  - logs/     (fractary-logs)
 
 Environment variables:
   - GITHUB_TOKEN: Present
@@ -712,7 +1152,9 @@ work:
 
 === CONFIGURATION COMPLETE ===
 
-Configuration created: .fractary/config.yaml
+Files created/updated:
+  - .fractary/config.yaml
+  - .fractary/.gitignore
 
 Plugins configured:
   - work (github) - fractary/core
@@ -740,13 +1182,27 @@ Mode: Incremental Update
 Context: "switch to jira for work tracking"
 Backup: .fractary/backups/config-20260116-143022.yaml (will be created)
 
+CONFIG SECTIONS:
+
+  Sections to MODIFY:
+    - work (updating active_handler)
+
+  Sections PRESERVED (unchanged):
+    - repo
+    - logs
+    - file
+    - spec
+    - docs
+    - faber          (not managed by this agent)
+    - faber-cloud    (not managed by this agent)
+
 Interpreting changes...
   - Change work.active_handler from "github" to "jira"
   - Add jira handler configuration
 
-CHANGES:
+CHANGES to work section:
 
-BEFORE (work section):
+BEFORE:
   work:
     active_handler: github
     handlers:
@@ -754,7 +1210,7 @@ BEFORE (work section):
         owner: fractary
         repo: core
 
-AFTER (work section):
+AFTER:
   work:
     active_handler: jira
     handlers:
@@ -767,6 +1223,9 @@ AFTER (work section):
         email: ${JIRA_EMAIL}
         token: ${JIRA_TOKEN}
 
+.gitignore:
+  - Existing entries: PRESERVED (no changes needed)
+
 New environment variables needed:
   - JIRA_URL: Missing
   - JIRA_PROJECT_KEY: Missing
@@ -778,11 +1237,16 @@ New environment variables needed:
 === CONFIGURATION UPDATED ===
 
 Backup created: .fractary/backups/config-20260116-143022.yaml
-Configuration updated: .fractary/config.yaml
 
-Changes applied:
-  - work.active_handler: github -> jira
-  - Added jira handler configuration
+Files updated:
+  - .fractary/config.yaml (work section only)
+  - .fractary/.gitignore (no changes - already configured)
+
+Sections modified:
+  - work (active_handler: github -> jira)
+
+Sections preserved:
+  - repo, logs, file, spec, docs, faber, faber-cloud
 
 Warnings:
   - Missing env vars: JIRA_URL, JIRA_PROJECT_KEY, JIRA_EMAIL, JIRA_TOKEN
