@@ -93,6 +93,7 @@ logs:
   schema_version: "2.0"
   storage:
     local_path: .fractary/logs
+    local_archive_path: .fractary/logs/archive
     cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
     archive_index_file: archive-index.json
   retention:
@@ -177,6 +178,7 @@ spec:
   schema_version: "1.0"
   storage:
     local_path: .fractary/specs
+    local_archive_path: .fractary/specs/archive
     cloud_archive_path: archive/specs/{year}/{spec_id}.md
     archive_index:
       local_cache: .fractary/specs/archive-index.json
