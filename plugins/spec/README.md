@@ -273,7 +273,7 @@ Index: .fractary/specs/archive-index.json
 
 Initialize the unified configuration:
 ```bash
-fractary-core:init
+fractary-core:configure
 ```
 
 This creates `.fractary/config.yaml` with all plugin configurations including:

@@ -46,7 +46,7 @@ def load_yaml_config(
         if throw_if_missing:
             raise FileNotFoundError(
                 f"Configuration file not found: {config_path}\n"
-                f"Run 'fractary-core:init' to create it."
+                f"Run 'fractary-core:configure' to create it."
             )
         return None
 

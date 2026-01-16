@@ -1832,26 +1832,26 @@ docs:
 
 <MIGRATION_NOTES>
 This agent replaces the individual plugin init commands:
-- `fractary-work:init` → Use `fractary-core:config --plugins work`
-- `fractary-repo:init` → Use `fractary-core:config --plugins repo`
-- `fractary-logs:init` → Use `fractary-core:config --plugins logs`
-- `fractary-file:init` → Use `fractary-core:config --plugins file`
-- `fractary-spec:init` → Use `fractary-core:config --plugins spec`
-- `fractary-docs:init` → Use `fractary-core:config --plugins docs`
+- `fractary-work:init` → Use `fractary-core:configure --plugins work`
+- `fractary-repo:init` → Use `fractary-core:configure --plugins repo`
+- `fractary-logs:init` → Use `fractary-core:configure --plugins logs`
+- `fractary-file:init` → Use `fractary-core:configure --plugins file`
+- `fractary-spec:init` → Use `fractary-core:configure --plugins spec`
+- `fractary-docs:init` → Use `fractary-core:configure --plugins docs`
 
-The `/fractary-core:init` command has been removed. Use `/fractary-core:config` instead.
+The `/fractary-core:init` command has been removed. Use `/fractary-core:configure` instead.
 
 For incremental updates to existing configuration:
 ```
-/fractary-core:config --context "switch to jira for work tracking"
-/fractary-core:config --context "enable S3 storage for file plugin"
-/fractary-core:config --context "add gitlab as repo platform"
+/fractary-core:configure --context "switch to jira for work tracking"
+/fractary-core:configure --context "enable S3 storage for file plugin"
+/fractary-core:configure --context "add gitlab as repo platform"
 ```
 
 For existing projects with old config format:
 1. Back up existing config: `tar czf fractary-backup.tar.gz .fractary/`
 2. Run file plugin migration if needed: `./scripts/migrate-file-plugin-v2.sh`
-3. Run unified config: `fractary-core:config --force`
+3. Run unified config: `fractary-core:configure --force`
 4. Review and customize `.fractary/config.yaml`
 5. Test all plugins work correctly
 

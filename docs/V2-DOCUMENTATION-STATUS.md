@@ -37,7 +37,7 @@ The following plugin README files still contain v1.x configuration examples and 
 
 Initialize with:
 ```bash
-fractary-core:init --plugins work
+fractary-core:configure --plugins work
 # Or deprecated wrapper:
 /fractary-work:init
 ```
@@ -72,7 +72,7 @@ See `.fractary/core/config.example.yaml` for complete examples.
 
 **Quick setup (Recommended):**
 ```bash
-fractary-core:init --plugins repo
+fractary-core:configure --plugins repo
 ```
 
 **Manual setup:**
@@ -111,7 +111,7 @@ Replace with: "Configuration is in `.fractary/core/config.yaml` under the `docs`
 **Recommended updates:**
 - Replace all `.fractary/config.yaml` with `.fractary/core/config.yaml`
 - Update configuration section to show unified config format
-- Update init instructions to use `fractary-core:init --plugins file`
+- Update init instructions to use `fractary-core:configure --plugins file`
 
 ### plugins/logs/README.md
 **Status:** ✅ Updated to reference unified `.fractary/config.yaml` configuration.
@@ -160,8 +160,8 @@ When updating documentation, follow these standards:
 - ❌ `.fractary/plugins/{name}/config.json` (deprecated)
 
 ### Init Command References
-- ✅ `fractary-core:init` (recommended)
-- ✅ `fractary-core:init --plugins work` (specific plugins)
+- ✅ `fractary-core:configure` (recommended)
+- ✅ `fractary-core:configure --plugins work` (specific plugins)
 - ⚠️ `/fractary-work:init` (deprecated but supported with notice)
 
 ### Config Format Examples
