@@ -5,7 +5,6 @@
     "cloud_archive_path": "archive/logs/{year}/{month}/{issue_number}",
     "cloud_logs_path": "archive/logs/claude-logs/{year}",
     "cloud_summaries_path": "archive/logs/claude-summaries/{year}",
-    "archive_index_file": ".archive-index.json",
     "provider": "s3",
     "bucket": "fractary-logs",
     "limits": {
@@ -358,10 +357,8 @@
       "threshold_mb": 1
     },
     "post_archive": {
-      "update_archive_index": true,
       "comment_on_issue": true,
-      "remove_from_local": true,
-      "keep_index": true
+      "remove_from_local": true
     }
   },
   "session_logging": {

@@ -32,10 +32,6 @@
           "type": "string",
           "description": "Cloud path template for AI summaries (supports {year})"
         },
-        "archive_index_file": {
-          "type": "string",
-          "default": ".archive-index.json"
-        },
         "provider": {
           "type": "string",
           "enum": ["s3", "r2", "gcs", "local"],
@@ -365,10 +361,8 @@
         "post_archive": {
           "type": "object",
           "properties": {
-            "update_archive_index": {"type": "boolean"},
             "comment_on_issue": {"type": "boolean"},
-            "remove_from_local": {"type": "boolean"},
-            "keep_index": {"type": "boolean"}
+            "remove_from_local": {"type": "boolean"}
           }
         }
       }

@@ -18,9 +18,8 @@ You support two archive modes: cloud storage (preferred) or local archive (fallb
 1. ALWAYS verify issue is closed or PR merged before archiving (unless --force)
 2. PREFER cloud upload via plugins/spec/scripts/upload-to-cloud.sh when available
 3. FALLBACK to local archive when cloud storage is not configured
-4. ALWAYS sync archive index after archiving
-5. ALWAYS comment on GitHub issue with archive location
-6. NEVER delete local specs until archive succeeds (cloud OR local)
+4. ALWAYS comment on GitHub issue with archive location
+5. NEVER delete local specs until archive succeeds (cloud OR local)
 </CRITICAL_RULES>
 
 <ARCHIVE_MODE_DETECTION>
@@ -64,12 +63,9 @@ This ensures Codex can reference files consistently regardless of storage locati
    a. Determine local archive path: .fractary/specs/archive/{filename} (same filename as original)
    b. Call plugins/spec/scripts/archive-local.sh <local_path> <archive_path>
    c. Add to archive metadata with local_archive_path (no cloud_url)
-7. Update archive index:
-   a. Update local .fractary/specs/archive-index.json
-   b. If cloud mode: sync to cloud via plugins/spec/scripts/sync-index.sh
-8. Comment on GitHub issue with archive location
-9. Remove original spec files (only after successful archive)
-10. Git commit changes
+7. Comment on GitHub issue with archive location
+8. Remove original spec files (only after successful archive)
+9. Git commit changes
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -101,11 +97,6 @@ Warnings (prompt unless --skip-warnings):
 - Returns JSON: `{"archive_path": "...", "size_bytes": ..., "checksum": "..."}`
 - Creates archive directory structure if needed
 - Does NOT require cloud storage configuration
-
-**Index Sync Script**: plugins/spec/scripts/sync-index.sh
-- Usage: `sync-index.sh <operation> <local_index> [cloud_index]`
-- Operations: download, upload, check
-- Upload operation syncs local index to S3 (only in cloud mode)
 
 **Example Cloud Upload**:
 ```bash

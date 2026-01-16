@@ -15,7 +15,7 @@
 - ✅ **Sensitive Data Redaction**: API keys, tokens, passwords, credit cards
 - ✅ **Search**: Fast local + cloud search with filters
 - ✅ **Analysis**: Error extraction, pattern detection, session summaries, time tracking
-- ✅ **Archive Index**: Metadata tracking for all logs
+- ✅ **Cloud Storage**: Upload and retrieve logs from cloud providers
 - ✅ **Security**: Secure temp directories, input validation, concurrency control
 
 ### Commands Available
@@ -162,7 +162,6 @@ If upgrading from alpha version:
    - Summaries will be generated for all archived sessions
 
 3. **Verify**:
-   - Check archive index: `/logs/.archive-index.json`
    - Search archived logs: `/fractary-logs:search "test"`
    - Review summaries in cloud storage
 
