@@ -1,5 +1,5 @@
 ---
-name: config-manager
+name: configurator
 description: |
   MUST BE USED when user wants to initialize or configure Fractary Core for a project.
   Use PROACTIVELY when user mentions "setup fractary", "initialize project", "configure plugins", or when commands fail due to missing configuration.
@@ -422,21 +422,28 @@ backups/
 
 ### Section Headers
 
-Use consistent section headers to identify which plugin added which entries:
+Use consistent section headers to identify which plugin added which entries.
 
+**Standard Format** (5 equals signs, start AND end markers):
 ```
-# === fractary-core ===
+# ===== fractary-core (managed) =====
 backups/
+# ===== end fractary-core =====
 
-# === fractary-logs ===
+# ===== fractary-logs (managed) =====
 logs/
+# ===== end fractary-logs =====
 
-# === fractary-codex ===
+# ===== fractary-codex (managed) =====
 # (entries added by codex plugin)
+# ===== end fractary-codex =====
 
-# === other-plugin ===
-# (entries from other plugins preserved)
+# ===== fractary-faber (managed) =====
+# (entries added by faber plugin)
+# ===== end fractary-faber =====
 ```
+
+**Migration**: When encountering old formats (e.g., `# === fractary-core ===` without end marker), update to new format.
 
 ### Implementation
 
@@ -450,6 +457,9 @@ def update_gitignore(plugins_to_configure, logs_path):
     existing_content = ""
     if file_exists(gitignore_path):
         existing_content = read_file(gitignore_path)
+
+    # Migrate old format markers to new format (if found)
+    existing_content = migrate_gitignore_markers(existing_content)
 
     # Parse existing entries
     existing_entries = set(line.strip() for line in existing_content.split('\n')
@@ -468,19 +478,94 @@ def update_gitignore(plugins_to_configure, logs_path):
         if logs_entry not in existing_entries:
             entries_to_add.append(("fractary-logs", logs_entry))
 
-    # Build new content by appending to existing
+    # Build new content using standard section format
     if entries_to_add:
         new_content = existing_content.rstrip('\n')
         for section, entry in entries_to_add:
-            section_header = f"# === {section} ==="
-            if section_header not in existing_content:
-                new_content += f"\n\n{section_header}\n{entry}"
+            start_marker = f"# ===== {section} (managed) ====="
+            end_marker = f"# ===== end {section} ====="
+            if start_marker not in existing_content:
+                new_content += f"\n\n{start_marker}\n{entry}\n{end_marker}"
             else:
-                # Find section and append entry
-                # (In practice, just append at end under new section)
-                new_content += f"\n{entry}"
+                # Section exists - update it (see update_gitignore_section)
+                new_content = update_gitignore_section(new_content, section, entry)
 
         write_file(gitignore_path, new_content + "\n")
+
+
+def migrate_gitignore_markers(content):
+    """
+    Migrate old-format markers to new standard format.
+    Old: # === fractary-core ===
+    New: # ===== fractary-core (managed) ===== ... # ===== end fractary-core =====
+    """
+    import re
+
+    # Pattern for old-style markers (3 equals, no end marker)
+    old_pattern = r'# === (fractary-\w+) ==='
+
+    # Find all old markers and their content
+    lines = content.split('\n')
+    result_lines = []
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+        old_match = re.match(old_pattern, line)
+
+        if old_match:
+            plugin_name = old_match.group(1)
+            # Convert to new format
+            result_lines.append(f"# ===== {plugin_name} (managed) =====")
+
+            # Collect entries until next section or end of file
+            i += 1
+            section_entries = []
+            while i < len(lines):
+                next_line = lines[i]
+                # Stop at next section header or empty line followed by header
+                if re.match(r'# ===', next_line):
+                    break
+                if next_line.strip():
+                    section_entries.append(next_line)
+                i += 1
+
+            result_lines.extend(section_entries)
+            result_lines.append(f"# ===== end {plugin_name} =====")
+            result_lines.append("")  # Add blank line after section
+            continue
+
+        result_lines.append(line)
+        i += 1
+
+    return '\n'.join(result_lines)
+
+
+def update_gitignore_section(content, section, entry):
+    """
+    Update an existing section with a new entry.
+    Finds the section by markers and adds entry before end marker.
+    """
+    start_marker = f"# ===== {section} (managed) ====="
+    end_marker = f"# ===== end {section} ====="
+
+    lines = content.split('\n')
+    result = []
+    in_section = False
+
+    for line in lines:
+        if line.strip() == start_marker:
+            in_section = True
+            result.append(line)
+        elif line.strip() == end_marker and in_section:
+            # Add entry before end marker
+            result.append(entry)
+            result.append(line)
+            in_section = False
+        else:
+            result.append(line)
+
+    return '\n'.join(result)
 ```
 
 ### Example .gitignore Output
@@ -488,25 +573,34 @@ def update_gitignore(plugins_to_configure, logs_path):
 After configuring logs plugin with default path `.fractary/logs`:
 
 ```gitignore
-# === fractary-core ===
+# ===== fractary-core (managed) =====
 backups/
+# ===== end fractary-core =====
 
-# === fractary-logs ===
+# ===== fractary-logs (managed) =====
 logs/
+# ===== end fractary-logs =====
 ```
 
-If codex plugin was previously configured (preserved):
+If codex and faber plugins were previously configured (preserved):
 
 ```gitignore
-# === fractary-codex ===
-cache/
-.codex-temp/
+# ===== fractary-codex (managed) =====
+codex/cache/
+# ===== end fractary-codex =====
 
-# === fractary-core ===
+# ===== fractary-faber (managed) =====
+runs/
+faber/state/
+# ===== end fractary-faber =====
+
+# ===== fractary-core (managed) =====
 backups/
+# ===== end fractary-core =====
 
-# === fractary-logs ===
+# ===== fractary-logs (managed) =====
 logs/
+# ===== end fractary-logs =====
 ```
 
 ### Handling Path Changes
@@ -1023,8 +1117,8 @@ write_yaml(".fractary/config.yaml", merged)
    - Compare old `logs.storage.local_path` with new value
    - If changed: update gitignore entry from old path to new path
 4. Add required entries if missing:
-   - `backups/` (always, under `# === fractary-core ===`)
-   - `{logs_path}/` (if logs plugin configured, under `# === fractary-logs ===`)
+   - `backups/` (always, in `# ===== fractary-core (managed) =====` section)
+   - `{logs_path}/` (if logs plugin configured, in `# ===== fractary-logs (managed) =====` section)
 5. Write updated .gitignore
 
 ```bash
@@ -1034,24 +1128,57 @@ GITIGNORE=".fractary/.gitignore"
 # Create if doesn't exist
 touch "$GITIGNORE"
 
-# Add backups if not present
-grep -qxF 'backups/' "$GITIGNORE" || echo -e '\n# === fractary-core ===\nbackups/' >> "$GITIGNORE"
+# Function to add/update a managed section
+update_managed_section() {
+    local plugin="$1"
+    local entries="$2"
+    local file="$3"
+    local start_marker="# ===== ${plugin} (managed) ====="
+    local end_marker="# ===== end ${plugin} ====="
+
+    # Check if section exists
+    if grep -q "$start_marker" "$file"; then
+        # Remove existing section and add updated one
+        sed -i "/$start_marker/,/$end_marker/d" "$file"
+    fi
+
+    # Add new section
+    {
+        echo ""
+        echo "$start_marker"
+        echo "$entries"
+        echo "$end_marker"
+    } >> "$file"
+}
+
+# Migrate old format markers to new format (if found)
+migrate_old_markers() {
+    local file="$1"
+    # Convert old 3-equals format to new 5-equals format
+    sed -i 's/^# === \(fractary-[a-z]*\) ===$/# ===== \1 (managed) =====/g' "$file"
+}
+
+# Run migration first
+migrate_old_markers "$GITIGNORE"
+
+# Add fractary-core section (backups)
+if ! grep -q "# ===== fractary-core (managed) =====" "$GITIGNORE"; then
+    update_managed_section "fractary-core" "backups/" "$GITIGNORE"
+fi
 
 # For logs path - handle both fresh setup and path changes
 LOGS_PATH="logs"  # Default, or extract from config: logs.storage.local_path minus ".fractary/"
 
 # If path changed (incremental mode), update the entry
 if [ -n "$OLD_LOGS_PATH" ] && [ "$OLD_LOGS_PATH" != "$LOGS_PATH" ]; then
-    # Replace old entry with new entry
-    sed -i "s|^${OLD_LOGS_PATH}/$|${LOGS_PATH}/|" "$GITIGNORE"
-    if ! grep -qxF "${LOGS_PATH}/" "$GITIGNORE"; then
-        # Replacement failed, warn user
-        echo "WARNING: Could not auto-update .gitignore for logs path change"
-        echo "Please manually update: ${OLD_LOGS_PATH}/ -> ${LOGS_PATH}/"
-    fi
+    # Update fractary-logs section with new path
+    update_managed_section "fractary-logs" "${LOGS_PATH}/" "$GITIGNORE"
+    echo "Updated .gitignore: ${OLD_LOGS_PATH}/ -> ${LOGS_PATH}/"
 else
     # Fresh setup or no change - just ensure entry exists
-    grep -qxF "${LOGS_PATH}/" "$GITIGNORE" || echo -e '\n# === fractary-logs ===\n'"${LOGS_PATH}/" >> "$GITIGNORE"
+    if ! grep -q "# ===== fractary-logs (managed) =====" "$GITIGNORE"; then
+        update_managed_section "fractary-logs" "${LOGS_PATH}/" "$GITIGNORE"
+    fi
 fi
 ```
 
