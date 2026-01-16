@@ -270,10 +270,12 @@ When cloud storage is not configured, specs are archived locally:
 
 ```
 .fractary/specs/archive/
-└── 2026/
-    ├── WORK-00123-feature.md
-    └── WORK-00124-bugfix.md
+├── WORK-00123-feature.md
+├── WORK-00124-bugfix.md
+└── ...
 ```
+
+The archive mirrors the local structure - specs are moved to the archive root while preserving their original filenames.
 
 **Key Points**:
 - The archive directory is **gitignored** (won't be committed)
@@ -285,9 +287,11 @@ When cloud storage is not configured, specs are archived locally:
 When `fractary-file` plugin is configured with cloud storage:
 
 ```
-Cloud: archive/specs/{year}/{issue_number}.md
+Cloud: archive/specs/{filename}
 Local: Spec files are removed after successful upload
 ```
+
+The cloud archive path mirrors the local structure - only the root differs.
 
 **Benefits over local archive**:
 - Specs completely removed from local machine
@@ -355,16 +359,19 @@ After configuring, the archive command will automatically use cloud storage.
 
 ### Archive Location
 
+Archive paths are root directories. The spec plugin determines file naming during creation;
+archive simply mirrors the local structure.
+
 **Cloud Storage (when configured):**
 ```
-Cloud: archive/specs/{year}/{issue_number}.md
+Cloud: archive/specs/{filename}
 Index: .fractary/specs/archive-index.json (local cache)
        archive/specs/.archive-index.json (cloud backup)
 ```
 
 **Local Archive (fallback):**
 ```
-Archive: .fractary/specs/archive/{year}/{issue_number}.md
+Archive: .fractary/specs/archive/{filename}
 Index: .fractary/specs/archive-index.json
 ```
 
@@ -401,7 +408,10 @@ spec:
   schema_version: "1.0"
   storage:
     local_path: .fractary/specs
-    cloud_archive_path: archive/specs/{year}/{spec_id}.md
+    local_archive_path: .fractary/specs/archive
+    cloud_archive_path: archive/specs
+    # Archive paths are root directories only. The spec plugin
+    # determines file naming and structure. Archive mirrors local.
     archive_index:
       local_cache: .fractary/specs/archive-index.json
       cloud_backup: archive/specs/.archive-index.json

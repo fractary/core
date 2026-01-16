@@ -31,8 +31,20 @@ To determine archive mode, check if cloud storage is available:
 2. If push script exists, attempt cloud upload first
 3. If cloud upload fails or push script missing, use local archive mode
 
-Local archive path: .fractary/logs/archive/{year}/{month}/{issue}/
-Cloud archive path: archive/logs/{year}/{month}/{issue}/filename
+**Archive path principle**: The archive paths are root directories only. Each log type
+determines its own naming and structure during creation (e.g., sessions may include dates,
+issues may include issue numbers). Archive simply mirrors whatever structure exists in
+`.fractary/logs/` to the archive root.
+
+- Local root: `.fractary/logs/archive/`
+- Cloud root: `archive/logs/`
+- Structure after root is IDENTICAL for both (mirrors local_path)
+
+Example: If log is at `.fractary/logs/sessions/2026-01-15-issue-123.md`, archive is at:
+- Local: `.fractary/logs/archive/sessions/2026-01-15-issue-123.md`
+- Cloud: `archive/logs/sessions/2026-01-15-issue-123.md`
+
+This ensures Codex can reference files consistently regardless of storage location.
 </ARCHIVE_MODE_DETECTION>
 
 <WORKFLOW>
@@ -45,20 +57,21 @@ Cloud archive path: archive/logs/{year}/{month}/{issue}/filename
    a. If --local flag: use local archive
    b. Else: check for cloud storage availability
    c. If cloud not available: use local archive
-5. For each log file:
+5. For each log file (preserving original path structure relative to .fractary/logs/):
    a. Check size (if > 1MB, compress with plugins/logs/scripts/compress-logs.sh)
    b. Prepare upload metadata with plugins/logs/scripts/prepare-upload-metadata.sh
+   c. Compute relative_path = path after .fractary/logs/ (e.g., "sessions/2026-01-15-issue-123.md")
 
    **Cloud Mode:**
-   c. Determine cloud path: archive/logs/{year}/{month}/{issue}/filename
-   d. Call plugins/logs/scripts/upload-to-cloud.sh <local_path> <cloud_path>
-   e. Parse JSON response to get cloud_url
-   f. Add to archive metadata with cloud_url
+   d. Determine cloud path: archive/logs/{relative_path}
+   e. Call plugins/logs/scripts/upload-to-cloud.sh <local_path> <cloud_path>
+   f. Parse JSON response to get cloud_url
+   g. Add to archive metadata with cloud_url
 
    **Local Mode:**
-   c. Determine local archive path: .fractary/logs/archive/{year}/{month}/{issue}/filename
-   d. Call plugins/logs/scripts/archive-local.sh <local_path> <archive_path>
-   e. Add to archive metadata with local_archive_path (no cloud_url)
+   d. Determine local archive path: .fractary/logs/archive/{relative_path}
+   e. Call plugins/logs/scripts/archive-local.sh <local_path> <archive_path>
+   f. Add to archive metadata with local_archive_path (no cloud_url)
 6. Update archive index:
    - Call plugins/logs/scripts/update-index.sh <issue> <metadata_json>
    - Updates .fractary/logs/.archive-index.json
@@ -108,14 +121,18 @@ Cloud archive path: archive/logs/{year}/{month}/{issue}/filename
 # Collect logs
 LOGS=$(plugins/logs/scripts/collect-logs.sh 123)
 
-# For each log file
+# For each log file, preserve relative path structure
 for LOG_FILE in $(echo "$LOGS" | jq -r '.[]'); do
-  # Upload
-  RESULT=$(plugins/logs/scripts/upload-to-cloud.sh \
-    "$LOG_FILE" \
-    "archive/logs/2026/01/123/$(basename "$LOG_FILE")")
+  # Extract relative path from .fractary/logs/
+  REL_PATH="${LOG_FILE#.fractary/logs/}"
+  # Cloud archive path mirrors local structure
+  CLOUD_PATH="archive/logs/${REL_PATH}"
+
+  RESULT=$(plugins/logs/scripts/upload-to-cloud.sh "$LOG_FILE" "$CLOUD_PATH")
   CLOUD_URL=$(echo "$RESULT" | jq -r '.cloud_url')
 done
+# Example: .fractary/logs/sessions/2026-01-15-issue-123.md
+#       -> archive/logs/sessions/2026-01-15-issue-123.md
 ```
 
 **Example Local Archive**:
@@ -123,13 +140,17 @@ done
 # Collect logs
 LOGS=$(plugins/logs/scripts/collect-logs.sh 123)
 
-# For each log file
+# For each log file, preserve relative path structure
 for LOG_FILE in $(echo "$LOGS" | jq -r '.[]'); do
-  # Archive locally
-  RESULT=$(plugins/logs/scripts/archive-local.sh \
-    "$LOG_FILE" \
-    ".fractary/logs/archive/2026/01/123/$(basename "$LOG_FILE")")
+  # Extract relative path from .fractary/logs/
+  REL_PATH="${LOG_FILE#.fractary/logs/}"
+  # Local archive path mirrors local structure
+  ARCHIVE_PATH=".fractary/logs/archive/${REL_PATH}"
+
+  RESULT=$(plugins/logs/scripts/archive-local.sh "$LOG_FILE" "$ARCHIVE_PATH")
   ARCHIVE_PATH=$(echo "$RESULT" | jq -r '.archive_path')
 done
+# Example: .fractary/logs/sessions/2026-01-15-issue-123.md
+#       -> .fractary/logs/archive/sessions/2026-01-15-issue-123.md
 ```
 </SCRIPTS_USAGE>

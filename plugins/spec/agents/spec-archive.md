@@ -29,8 +29,19 @@ To determine archive mode, check if cloud storage is available:
 2. If push script exists, attempt cloud upload first
 3. If cloud upload fails or push script missing, use local archive mode
 
-Local archive path: .fractary/specs/archive/{year}/
-Cloud archive path: archive/specs/{year}/SPEC-{issue}.md
+**Archive path principle**: The archive paths are root directories only. The spec plugin
+determines file naming and structure during creation. Archive simply mirrors whatever
+structure exists in `.fractary/specs/` to the archive root.
+
+- Local root: `.fractary/specs/archive/`
+- Cloud root: `archive/specs/`
+- Structure after root is IDENTICAL for both (mirrors local_path)
+
+Example: If spec is at `.fractary/specs/WORK-00123.md`, archive is at:
+- Local: `.fractary/specs/archive/WORK-00123.md`
+- Cloud: `archive/specs/WORK-00123.md`
+
+This ensures Codex can reference files consistently regardless of storage location.
 </ARCHIVE_MODE_DETECTION>
 
 <WORKFLOW>
@@ -42,15 +53,15 @@ Cloud archive path: archive/specs/{year}/SPEC-{issue}.md
    a. If --local flag: use local archive
    b. Else: check for cloud storage availability
    c. If cloud not available: use local archive
-6. For each spec file:
+6. For each spec file (preserving original filename):
    **Cloud Mode:**
-   a. Determine cloud path: archive/specs/{year}/SPEC-{issue}.md
+   a. Determine cloud path: archive/specs/{filename} (same filename as original)
    b. Call plugins/spec/scripts/upload-to-cloud.sh <local_path> <cloud_path>
    c. Parse JSON response to get cloud_url
    d. Add to archive metadata with cloud_url
 
    **Local Mode:**
-   a. Determine local archive path: .fractary/specs/archive/{year}/SPEC-{issue}.md
+   a. Determine local archive path: .fractary/specs/archive/{filename} (same filename as original)
    b. Call plugins/spec/scripts/archive-local.sh <local_path> <archive_path>
    c. Add to archive metadata with local_archive_path (no cloud_url)
 7. Update archive index:
@@ -98,17 +109,21 @@ Warnings (prompt unless --skip-warnings):
 
 **Example Cloud Upload**:
 ```bash
+# Original file: .fractary/specs/WORK-00123.md
+# Cloud archive: archive/specs/WORK-00123.md (same filename, different root)
 RESULT=$(plugins/spec/scripts/upload-to-cloud.sh \
-  "specs/SPEC-123.md" \
-  "archive/specs/2026/SPEC-123.md")
+  ".fractary/specs/WORK-00123.md" \
+  "archive/specs/WORK-00123.md")
 CLOUD_URL=$(echo "$RESULT" | jq -r '.cloud_url')
 ```
 
 **Example Local Archive**:
 ```bash
+# Original file: .fractary/specs/WORK-00123.md
+# Local archive: .fractary/specs/archive/WORK-00123.md (same filename, different root)
 RESULT=$(plugins/spec/scripts/archive-local.sh \
   ".fractary/specs/WORK-00123.md" \
-  ".fractary/specs/archive/2026/WORK-00123.md")
+  ".fractary/specs/archive/WORK-00123.md")
 ARCHIVE_PATH=$(echo "$RESULT" | jq -r '.archive_path')
 ```
 </SCRIPTS_USAGE>

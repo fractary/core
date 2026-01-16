@@ -94,8 +94,10 @@ logs:
   storage:
     local_path: .fractary/logs
     local_archive_path: .fractary/logs/archive
-    cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
+    cloud_archive_path: archive/logs
     archive_index_file: archive-index.json
+    # Archive paths are root directories only. The logs plugin determines
+    # file naming and directory structure. Archive mirrors local structure.
   retention:
     default:
       local_days: 30
@@ -179,7 +181,9 @@ spec:
   storage:
     local_path: .fractary/specs
     local_archive_path: .fractary/specs/archive
-    cloud_archive_path: archive/specs/{year}/{spec_id}.md
+    cloud_archive_path: archive/specs
+    # Archive paths are root directories only. The spec plugin determines
+    # file naming and directory structure. Archive mirrors local structure.
     archive_index:
       local_cache: .fractary/specs/archive-index.json
       cloud_backup: archive/specs/.archive-index.json

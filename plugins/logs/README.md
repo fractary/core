@@ -294,12 +294,15 @@ When cloud storage is not configured, logs are archived locally:
 
 ```
 .fractary/logs/archive/
-└── 2026/
-    └── 01/
-        └── 123/
-            ├── session-abc123-2026-01-15.md
-            └── session-def456-2026-01-16.md
+├── sessions/
+│   ├── 2026-01-15-issue-123.md
+│   └── 2026-01-16-issue-124.md
+├── builds/
+│   └── 123-build.log
+└── ...
 ```
+
+The archive mirrors the local structure - logs are moved to the archive root while preserving their subdirectory structure and filenames. Each log type determines its own naming convention during creation (e.g., sessions may include dates).
 
 **Key Points**:
 - The archive directory is **gitignored** (won't be committed)
@@ -311,9 +314,11 @@ When cloud storage is not configured, logs are archived locally:
 When `fractary-file` plugin is configured with cloud storage:
 
 ```
-Cloud: archive/logs/{year}/{month}/{issue}/filename.md.gz
+Cloud: archive/logs/{relative_path_from_local}
 Local: Log files are removed after successful upload
 ```
+
+The cloud archive path mirrors the local structure - only the root differs.
 
 **Benefits over local archive**:
 - Logs completely removed from local machine
@@ -444,7 +449,10 @@ logs:
   schema_version: "2.0"
   storage:
     local_path: .fractary/logs
-    cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
+    local_archive_path: .fractary/logs/archive
+    cloud_archive_path: archive/logs
+    # Archive paths are root directories only. Each log type
+    # determines its own naming and structure during creation.
     archive_index_file: archive-index.json
   retention:
     # ... retention policies
@@ -460,8 +468,9 @@ For configuration details, see the [Configuration Guide](../../docs/guides/confi
 ```json
 {
   "storage": {
-    "local_path": "/logs",
-    "cloud_archive_path": "archive/logs/{year}/{month}/{issue_number}",
+    "local_path": ".fractary/logs",
+    "local_archive_path": ".fractary/logs/archive",
+    "cloud_archive_path": "archive/logs",
     "provider": "s3",
     "bucket": "fractary-logs"
   }
@@ -506,8 +515,8 @@ For configuration details, see the [Configuration Guide](../../docs/guides/confi
 ```json
 {
   "storage": {
-    "cloud_logs_path": "archive/logs/claude-logs/{year}",
-    "cloud_summaries_path": "archive/logs/claude-summaries/{year}"
+    "cloud_logs_path": "archive/logs/claude-logs",
+    "cloud_summaries_path": "archive/logs/claude-summaries"
   }
 }
 ```
