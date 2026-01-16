@@ -1139,7 +1139,9 @@ update_managed_section() {
     # Check if section exists
     if grep -q "$start_marker" "$file"; then
         # Remove existing section and add updated one
-        sed -i "/$start_marker/,/$end_marker/d" "$file"
+        # Use portable sed approach (works on both macOS and Linux)
+        local tmp_file="${file}.tmp"
+        sed "/$start_marker/,/$end_marker/d" "$file" > "$tmp_file" && mv "$tmp_file" "$file"
     fi
 
     # Add new section
@@ -1155,7 +1157,9 @@ update_managed_section() {
 migrate_old_markers() {
     local file="$1"
     # Convert old 3-equals format to new 5-equals format
-    sed -i 's/^# === \(fractary-[a-z]*\) ===$/# ===== \1 (managed) =====/g' "$file"
+    # Use portable sed approach (works on both macOS and Linux)
+    local tmp_file="${file}.tmp"
+    sed 's/^# === \(fractary-[a-z]*\) ===$/# ===== \1 (managed) =====/g' "$file" > "$tmp_file" && mv "$tmp_file" "$file"
 }
 
 # Run migration first

@@ -17,6 +17,21 @@ All configuration agents are named `configurator`:
 - `fractary-faber:configurator` - FABER workflow configuration
 - `fractary-codex:configurator` - Codex plugin configuration
 
+### Migration from config-manager
+
+The agents were renamed from `config-manager` to `configurator` for consistency. If you have scripts or documentation referencing the old names:
+
+| Old Name | New Name |
+|----------|----------|
+| `fractary-core:config-manager` | `fractary-core:configurator` |
+| `fractary-faber:config-manager` | `fractary-faber:configurator` |
+| `fractary-codex:config-manager` | `fractary-codex:configurator` |
+
+The commands remain unchanged:
+- `/fractary-core:configure`
+- `/fractary-faber:configure`
+- `/fractary-codex:configure`
+
 ## Gitignore Section Markers
 
 ### Standard Format
