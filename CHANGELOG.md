@@ -80,7 +80,7 @@ All existing projects must be re-initialized:
 tar czf fractary-backup.tar.gz .fractary/
 
 # Re-initialize with unified config
-fractary-core:init
+fractary-core:configure
 ```
 
 See the [Migration Guide](docs/guides/configuration.md#migration-guide) for detailed instructions.
@@ -151,11 +151,11 @@ work:
 #### Init Commands
 Individual plugin init commands are now **deprecated** and delegate to unified init:
 
-- `fractary-work:init` → Use `fractary-core:init --plugins work`
-- `fractary-repo:init` → Use `fractary-core:init --plugins repo`
-- `fractary-logs:init` → Use `fractary-core:init --plugins logs`
-- `fractary-file:init` → Use `fractary-core:init --plugins file`
-- `fractary-spec:init` → Use `fractary-core:init --plugins spec`
+- `fractary-work:init` → Use `fractary-core:configure --plugins work`
+- `fractary-repo:init` → Use `fractary-core:configure --plugins repo`
+- `fractary-logs:init` → Use `fractary-core:configure --plugins logs`
+- `fractary-file:init` → Use `fractary-core:configure --plugins file`
+- `fractary-spec:init` → Use `fractary-core:configure --plugins spec`
 
 These commands still work but show deprecation warnings and delegate to the unified init.
 
@@ -227,7 +227,7 @@ For projects upgrading from v1.x:
 
 - [ ] Backup existing config: `tar czf fractary-backup.tar.gz .fractary/`
 - [ ] Update to v2.0: `npm install @fractary/core@2.0.0`
-- [ ] Run unified init: `fractary-core:init`
+- [ ] Run unified configure: `fractary-core:configure`
 - [ ] Manually merge custom settings from old config
 - [ ] Validate new config: `fractary-core config validate`
 - [ ] Test all plugins work correctly

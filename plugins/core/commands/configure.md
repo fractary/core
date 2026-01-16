@@ -1,5 +1,5 @@
 ---
-name: fractary-core:config
+name: fractary-core:configure
 description: Configure Fractary Core - unified configuration for all plugins (init, update, validate)
 allowed-tools: Task(fractary-core:config-manager)
 model: claude-haiku-4-5

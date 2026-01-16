@@ -83,7 +83,7 @@ Changelog documents track all notable changes to a project, organized by version
 The configuration format has changed from JSON to YAML.
 
 **Migration Guide**: Convert your `.fractary/config.json` to `.fractary/core/config.yaml`.
-Run `fractary-core:init` to generate the new format.
+Run `fractary-core:configure` to generate the new format.
 ```
 
 ### 2. Entry Format

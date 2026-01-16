@@ -64,7 +64,7 @@ async function validateCommand(options: { verbose?: boolean }): Promise<void> {
     if (!existsSync(configPath)) {
       console.log(chalk.red('❌ Configuration file not found'));
       console.log(chalk.yellow('\nTo create a configuration file, run:'));
-      console.log(chalk.cyan('  fractary-core:init'));
+      console.log(chalk.cyan('  fractary-core:configure'));
       process.exit(1);
     }
 
@@ -227,7 +227,7 @@ async function showCommand(): Promise<void> {
     if (!existsSync(configPath)) {
       console.log(chalk.red('❌ Configuration file not found'));
       console.log(chalk.yellow('\nTo create a configuration file, run:'));
-      console.log(chalk.cyan('  fractary-core:init'));
+      console.log(chalk.cyan('  fractary-core:configure'));
       process.exit(1);
     }
 
