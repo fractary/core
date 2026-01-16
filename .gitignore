@@ -25,6 +25,10 @@ Thumbs.db
 .fractary/specs/*.md
 .fractary/codex/cache/
 
+# Local archive directories (gitignored to keep archived items out of source control)
+.fractary/specs/archive/
+.fractary/logs/archive/
+
 # Old structure (backward compat for pre-v2.0)
 /logs/
 /specs/

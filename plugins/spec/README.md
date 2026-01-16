@@ -240,6 +240,102 @@ When work completes:
 /fractary-spec:archive 123
 ```
 
+### Why Archive Specs?
+
+Specs become **outdated and misleading** once work is complete. If Claude finds an old spec during searches, it may rely on that information which no longer reflects the current codebase. Archiving:
+
+1. **Removes specs from the workspace** - Prevents accidental discovery
+2. **Preserves them for reference** - You can still explicitly access archived specs
+3. **Keeps Claude focused on current information** - No stale context pollution
+
+### Archive Modes
+
+The archive command supports two modes:
+
+| Mode | Description | When Used |
+|------|-------------|-----------|
+| **Cloud Storage** (Preferred) | Uploads to S3/R2/GCS | When `fractary-file` is configured |
+| **Local Archive** (Fallback) | Moves to `.fractary/specs/archive/` | When cloud storage not configured |
+
+**Automatic Mode Detection**: The archive command automatically detects which mode to use based on whether cloud storage is configured.
+
+**Force Local Archive**: Use `--local` flag to skip cloud storage attempt:
+```bash
+/fractary-spec:archive 123 --local
+```
+
+### Local Archive (Default Fallback)
+
+When cloud storage is not configured, specs are archived locally:
+
+```
+.fractary/specs/archive/
+├── WORK-00123-feature.md
+├── WORK-00124-bugfix.md
+└── ...
+```
+
+The archive mirrors the local structure - specs are moved to the archive root while preserving their original filenames.
+
+**Key Points**:
+- The archive directory is **gitignored** (won't be committed)
+- The archive directory is **hidden from Claude** (via `.claude/settings.json` deny rules)
+- Specs are preserved locally but won't pollute Claude's context
+
+### Cloud Archive (Preferred)
+
+When `fractary-file` plugin is configured with cloud storage:
+
+```
+Cloud: archive/specs/{filename}
+Local: Spec files are removed after successful upload
+```
+
+The cloud archive path mirrors the local structure - only the root differs.
+
+**Benefits over local archive**:
+- Specs completely removed from local machine
+- Accessible from any machine via `/fractary-spec:read`
+- Two-tier index ensures recoverability
+
+### Configuring Cloud Storage
+
+To enable cloud archiving, configure the `file` section in `.fractary/config.yaml`:
+
+```yaml
+file:
+  schema_version: "2.0"
+  sources:
+    specs:
+      type: s3           # Options: s3, r2, gcs, gdrive, local
+      bucket: my-project-files
+      prefix: specs/
+      region: us-east-1
+      local:
+        base_path: .fractary/specs
+      push:
+        compress: false
+        keep_local: false  # Remove local after upload
+      auth:
+        profile: default   # AWS profile or use env vars
+```
+
+**For Cloudflare R2:**
+```yaml
+file:
+  sources:
+    specs:
+      type: r2
+      bucket: my-project-files
+      prefix: specs/
+      account_id: ${CLOUDFLARE_ACCOUNT_ID}
+      auth:
+        access_key_id: ${R2_ACCESS_KEY_ID}
+        secret_access_key: ${R2_SECRET_ACCESS_KEY}
+```
+
+After configuring, the archive command will automatically use cloud storage.
+
 ### Pre-Archive Checks
 
 **Required**:
@@ -254,18 +350,48 @@ When work completes:
 
 1. Collect all specs for issue
 2. Check conditions
-3. Upload to cloud (fractary-file)
-4. Update archive index
-5. Comment on GitHub (issue + PR)
-6. Remove from local
-7. Git commit
+3. **Determine archive mode** (cloud or local)
+4. Upload to cloud OR move to local archive
+5. Update archive index
+6. Comment on GitHub (issue + PR)
+7. Remove original spec files
+8. Git commit
 
 ### Archive Location
 
+Archive paths are root directories. The spec plugin determines file naming during creation;
+archive simply mirrors the local structure.
+
+**Cloud Storage (when configured):**
 ```
-Cloud: archive/specs/{year}/{issue_number}.md
+Cloud: archive/specs/{filename}
+Index: .fractary/specs/archive-index.json (local cache)
+       archive/specs/.archive-index.json (cloud backup)
+```
+
+**Local Archive (fallback):**
+```
+Archive: .fractary/specs/archive/{filename}
 Index: .fractary/specs/archive-index.json
 ```
+
+### How Claude is Protected from Archived Specs
+
+Both archive modes ensure Claude cannot accidentally find archived specs:
+
+1. **Gitignore**: `.fractary/specs/archive/` is gitignored
+2. **Claude Settings**: `.claude/settings.json` contains deny rules:
+   ```json
+   {
+     "permissions": {
+       "deny": [
+         "Read(./.fractary/specs/archive/**)"
+       ]
+     }
+   }
+   ```
+
+This prevents Claude's search tools (Glob/Grep/Read) from accessing archived content.
 
 ## Configuration
 
@@ -282,7 +408,10 @@ spec:
   schema_version: "1.0"
   storage:
     local_path: .fractary/specs
-    cloud_archive_path: archive/specs/{year}/{spec_id}.md
+    local_archive_path: .fractary/specs/archive
+    cloud_archive_path: archive/specs
+    # Archive paths are root directories only. The spec plugin
+    # determines file naming and structure. Archive mirrors local.
     archive_index:
       local_cache: .fractary/specs/archive-index.json
       cloud_backup: archive/specs/.archive-index.json

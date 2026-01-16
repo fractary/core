@@ -30,20 +30,21 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 4. NEVER store tokens directly in config - use `${ENV_VAR}` syntax
 5. ALWAYS create required directories (.fractary/logs, .fractary/specs, docs/)
 6. ALWAYS initialize archive indexes at new locations
-7. With --context, interpret as instructions for changes to apply
-8. If --force, overwrite existing config without prompting
-9. If config exists and not --force, operate in incremental mode
-10. ALWAYS present proposed changes BEFORE making modifications
-11. ALWAYS use AskUserQuestion for confirmation before applying changes (unless --yes)
-12. ALWAYS create timestamped backup before modifying existing config
-13. ALWAYS validate all inputs (--context, plugin names, handler names)
-14. ALWAYS support rollback on failure - restore from backup
-15. With --dry-run, show proposed changes without applying
-16. With --validate-only, validate current config without changes
-17. ONLY modify config sections for plugins being configured - PRESERVE all other sections
-18. ALWAYS create/update `.fractary/.gitignore` with logs directory ignored
-19. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
-20. MERGE new config sections with existing - never overwrite unrelated plugin sections
+7. ALWAYS update `.claude/settings.json` to deny Read access to archive directories
+8. With --context, interpret as instructions for changes to apply
+9. If --force, overwrite existing config without prompting
+10. If config exists and not --force, operate in incremental mode
+11. ALWAYS present proposed changes BEFORE making modifications
+12. ALWAYS use AskUserQuestion for confirmation before applying changes (unless --yes)
+13. ALWAYS create timestamped backup before modifying existing config
+14. ALWAYS validate all inputs (--context, plugin names, handler names)
+15. ALWAYS support rollback on failure - restore from backup
+16. With --dry-run, show proposed changes without applying
+17. With --validate-only, validate current config without changes
+18. ONLY modify config sections for plugins being configured - PRESERVE all other sections
+19. ALWAYS create/update `.fractary/.gitignore` with logs directory ignored
+20. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
+21. MERGE new config sections with existing - never overwrite unrelated plugin sections
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -1070,6 +1071,51 @@ NOTE: Move existing logs from .fractary/logs/ to .fractary/session-logs/ if need
 [ -f .fractary/specs/archive-index.json ] || echo '{"version":"1.0","entries":[]}' > .fractary/specs/archive-index.json
 ```
 
+**11e. Update Claude settings to hide archive directories:**
+
+Claude's search tools (Glob/Grep/Read) ignore .gitignore, so we must explicitly deny Read access to archive directories in `.claude/settings.json`.
+
+1. Create `.claude/` directory if it doesn't exist
+2. Read existing `settings.json` (or create new object if missing)
+3. Add/merge `permissions.deny` array with archive Read rules:
+   ```json
+   {
+     "permissions": {
+       "deny": [
+         "Read(./.fractary/specs/archive/**)",
+         "Read(./.fractary/logs/archive/**)"
+       ]
+     }
+   }
+   ```
+4. Preserve all existing settings (merge, don't overwrite)
+5. Write updated settings.json
+
+```bash
+# Ensure .claude directory exists
+mkdir -p .claude
+
+# Create or update settings.json with archive deny rules
+SETTINGS_FILE=".claude/settings.json"
+if [ -f "$SETTINGS_FILE" ]; then
+    # Merge deny rules into existing settings
+    jq '.permissions.deny = ((.permissions.deny // []) + [
+        "Read(./.fractary/specs/archive/**)",
+        "Read(./.fractary/logs/archive/**)"
+    ] | unique)' "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
+else
+    # Create new settings with deny rules
+    echo '{
+  "permissions": {
+    "deny": [
+      "Read(./.fractary/specs/archive/**)",
+      "Read(./.fractary/logs/archive/**)"
+    ]
+  }
+}' > "$SETTINGS_FILE"
+fi
+```
+
 ### Step 12: Validate Written Configuration
 
 After writing, validate the configuration:
@@ -1382,6 +1428,9 @@ Directories to create:
   - backups/  (fractary-core)
   - logs/     (fractary-logs)
 
+Claude settings update:
+  - .claude/settings.json: Add archive deny rules
+
 Environment variables:
   - GITHUB_TOKEN: Present
 
@@ -1406,6 +1455,7 @@ work:
 Files created/updated:
   - .fractary/config.yaml
   - .fractary/.gitignore
+  - .claude/settings.json (archive deny rules)
 
 Plugins configured:
   - work (github) - fractary/core
