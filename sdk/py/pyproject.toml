@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fractary-core"
-version = "0.1.1"
+version = "0.1.2"
 description = "Core primitives for FABER workflows - work tracking, repository management, specs, logs, file storage, and documentation"
 readme = "README.md"
 requires-python = ">=3.10"

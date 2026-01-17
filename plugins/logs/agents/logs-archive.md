@@ -21,7 +21,7 @@ You support two archive modes: cloud storage (preferred) or local archive (fallb
 4. FALLBACK to local archive when cloud storage is not configured
 5. ALWAYS comment on GitHub issue with archive location
 6. With --retry, only re-attempt failed operations from partial archive
-7. NEVER delete local logs until archive succeeds (cloud OR local)
+7. MUST use the archive scripts - NEVER do manual file copies. The scripts handle both archiving AND removal of originals.
 </CRITICAL_RULES>
 
 <ARCHIVE_MODE_DETECTION>
@@ -64,16 +64,17 @@ This ensures Codex can reference files consistently regardless of storage locati
    **Cloud Mode:**
    d. Determine cloud path: archive/logs/{relative_path}
    e. Call plugins/logs/scripts/upload-to-cloud.sh <local_path> <cloud_path>
+      - Script uploads to cloud AND removes original file on success
    f. Parse JSON response to get cloud_url
    g. Add to archive metadata with cloud_url
 
    **Local Mode:**
    d. Determine local archive path: .fractary/logs/archive/{relative_path}
    e. Call plugins/logs/scripts/archive-local.sh <local_path> <archive_path>
+      - Script copies to archive, verifies checksum, AND removes original file on success
    f. Add to archive metadata with local_archive_path (no cloud_url)
 6. Comment on GitHub issue with archive location
-7. Remove original log files (only after successful archive)
-8. Git commit changes if needed
+7. Git commit changes if needed
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -85,6 +86,9 @@ This ensures Codex can reference files consistently regardless of storage locati
 </ARGUMENTS>
 
 <SCRIPTS_USAGE>
+**IMPORTANT**: The upload and archive scripts handle the COMPLETE archive operation including removal of the original file.
+Do NOT use manual file operations (cp, mv, Write tool). Always use these scripts.
+
 **Collect Logs**: plugins/logs/scripts/collect-logs.sh
 - Usage: `collect-logs.sh <issue_number>`
 - Returns JSON array of log file paths
@@ -100,11 +104,15 @@ This ensures Codex can reference files consistently regardless of storage locati
 **Upload to Cloud (Cloud Mode)**: plugins/logs/scripts/upload-to-cloud.sh
 - Usage: `upload-to-cloud.sh <local_path> <cloud_path>`
 - Returns JSON: `{"cloud_url": "...", "size_bytes": ..., "checksum": "..."}`
+- Uploads file to cloud storage via file plugin
+- **Removes original file after successful upload**
 - Requires: File plugin configured (.fractary/config.yaml with file section)
 
 **Local Archive (Local Mode)**: plugins/logs/scripts/archive-local.sh
 - Usage: `archive-local.sh <local_path> <archive_path>`
 - Returns JSON: `{"archive_path": "...", "size_bytes": ..., "checksum": "..."}`
+- Copies to archive, verifies checksum matches
+- **Removes original file after successful copy and verification**
 - Creates archive directory structure if needed
 - Does NOT require cloud storage configuration
 
