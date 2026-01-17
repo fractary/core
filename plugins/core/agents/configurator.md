@@ -309,7 +309,7 @@ try:
         sys.exit(1)
 
     # Check at least one plugin section exists
-    plugin_sections = ['work', 'repo', 'logs', 'file', 'spec', 'docs', 'codex']
+    plugin_sections = ['work', 'repo', 'logs', 'file', 'spec', 'docs']
     found_plugins = [p for p in plugin_sections if p in config]
     if not found_plugins:
         print('ERROR: No plugin sections found', file=sys.stderr)
@@ -713,11 +713,11 @@ This agent manages these top-level sections:
 - `file`
 - `spec`
 - `docs`
-- `codex`
 
 ### Unmanaged Sections (Preserve As-Is)
 
 Any section not in the managed list must be preserved exactly:
+- `codex` (managed by fractary-codex plugin)
 - `faber` (managed by fractary-faber plugin)
 - `faber-cloud` (managed by fractary-faber-cloud plugin)
 - Custom user sections
@@ -2244,13 +2244,6 @@ file:
     timeout_seconds: 300
     verify_checksums: true
     parallel_uploads: 4
-
-# Codex configuration (cross-project access)
-codex:
-  schema_version: "2.0"
-  organization: fractary  # Auto-detected from git remote
-  project: core  # Auto-detected from git remote
-  dependencies: {}
 
 # Specification management configuration
 spec:
