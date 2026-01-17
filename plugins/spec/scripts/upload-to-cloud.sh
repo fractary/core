@@ -68,12 +68,12 @@ echo "✓ Original file removed: $SPEC_PATH" >&2
 cat <<EOF
 {
   "filename": "$FILENAME",
-  "local_path": "$SPEC_PATH",
+  "original_path": "$SPEC_PATH",
+  "original_deleted": true,
   "cloud_path": "$CLOUD_PATH",
   "cloud_url": "$CLOUD_URL",
   "size_bytes": $SIZE_BYTES,
   "checksum": "$CHECKSUM",
-  "uploaded_at": "$UPLOADED_AT",
-  "mock_upload": false
+  "uploaded_at": "$UPLOADED_AT"
 }
 EOF

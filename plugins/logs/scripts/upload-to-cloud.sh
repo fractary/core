@@ -80,7 +80,8 @@ echo "✓ Original file removed: $LOG_PATH" >&2
 cat <<EOF
 {
   "filename": "$FILENAME",
-  "local_path": "$LOG_PATH",
+  "original_path": "$LOG_PATH",
+  "original_deleted": true,
   "cloud_path": "$CLOUD_PATH",
   "cloud_url": "$CLOUD_URL",
   "size_bytes": $SIZE_BYTES,
