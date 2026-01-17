@@ -44,6 +44,7 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 18. ALWAYS create/update `.fractary/.gitignore` with logs directory ignored
 19. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
 20. MERGE new config sections with existing - never overwrite unrelated plugin sections
+21. NEVER create an "artifacts" source in the file section - only create "specs" and "logs" sources
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -892,6 +893,78 @@ AskUserQuestion(
 )
 ```
 
+### Step 5b: Cloud Storage Configuration (If S3/Cloud Selected)
+
+If file handler is S3 or cloud-based storage:
+
+1. **Auto-derive bucket name from project name**:
+
+   Parse the repo name to extract project and sub-project:
+
+   ```bash
+   # For subdomain-style names like "etl.corthion.ai"
+   # Extract: project=corthion, sub-project=etl
+   # Bucket: corthion-etl-files
+
+   parse_bucket_name() {
+       local repo_name="$1"  # e.g., "etl.corthion.ai"
+
+       # Check if repo name contains dots (subdomain pattern)
+       if echo "$repo_name" | grep -q '\.'; then
+           # Split by dots
+           local parts
+           IFS='.' read -ra parts <<< "$repo_name"
+
+           # Pattern: {sub}.{project}.{tld} or {sub}.{project}
+           if [ "${#parts[@]}" -ge 2 ]; then
+               local sub_project="${parts[0]}"        # etl
+               local project="${parts[1]}"            # corthion
+               echo "${project}-${sub_project}-files" # corthion-etl-files
+               return 0
+           fi
+       fi
+
+       # Fallback: simple {project}-files
+       echo "${repo_name}-files"
+   }
+   ```
+
+   **Examples**:
+   - `etl.corthion.ai` → `corthion-etl-files`
+   - `api.myapp.com` → `myapp-api-files`
+   - `my-project` → `my-project-files` (no subdomain, use simple pattern)
+
+2. **Ask user to confirm or customize bucket name**:
+   ```
+   AskUserQuestion(
+     questions: [{
+       question: "Use derived bucket name '{derived_bucket_name}' for cloud storage?",
+       header: "Bucket Name",
+       options: [
+         { label: "Yes, use derived name", description: "Use {derived_bucket_name} (Recommended)" },
+         { label: "Custom name", description: "I'll specify a different bucket name" }
+       ],
+       multiSelect: false
+     }]
+   )
+   ```
+
+3. **Ask about archive storage preference**:
+   ```
+   AskUserQuestion(
+     questions: [{
+       question: "Where should archived logs and specs be stored?",
+       header: "Archive Storage",
+       options: [
+         { label: "Cloud (S3)", description: "Archive to S3 bucket with lifecycle management (Recommended)" },
+         { label: "Local only", description: "Keep archives in local .fractary/ directory" },
+         { label: "Both", description: "Archive to cloud and keep local copies" }
+       ],
+       multiSelect: false
+     }]
+   )
+   ```
+
 ### Step 6: Interpret --context for Changes (Incremental Mode)
 
 For incremental mode with --context provided:
@@ -1298,7 +1371,9 @@ Configured plugins:
   - docs
 
 Project: {org}/{project}
-Bucket: {project}-files
+Bucket: Auto-derived using parse_bucket_name() function
+  - Subdomain pattern: {project}-{sub-project}-files (e.g., corthion-etl-files)
+  - Simple pattern: {project}-files (e.g., my-project-files)
 
 Connection tests:
   - GitHub API: [Pass/Fail/Skipped]
@@ -1885,7 +1960,7 @@ file:
   sources:
     specs:
       type: s3
-      bucket: core-files  # Auto-generated from project name
+      bucket: core-files  # Auto-derived: {project}-{sub-project}-files or {project}-files
       prefix: specs/
       region: us-east-1
       local:
@@ -1897,7 +1972,7 @@ file:
         profile: default
     logs:
       type: s3
-      bucket: core-files  # Auto-generated from project name
+      bucket: core-files  # Auto-derived: {project}-{sub-project}-files or {project}-files
       prefix: logs/
       region: us-east-1
       local:
