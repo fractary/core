@@ -164,14 +164,24 @@ validate_plugin_name() {
     fi
 }
 
-# Usage for comma-separated list:
+# Usage for comma-separated list (POSIX-compatible):
 validate_plugins_list() {
     local input="$1"
     local validated=""
 
-    # Split by comma and validate each
-    IFS=',' read -ra plugins <<< "$input"
-    for plugin in "${plugins[@]}"; do
+    # Split by comma using portable method (not bash arrays)
+    # Save original IFS, set to comma, restore after
+    local old_ifs="$IFS"
+    IFS=','
+
+    # Use set -- to split into positional parameters (POSIX-compatible)
+    set -- $input
+
+    # Restore IFS
+    IFS="$old_ifs"
+
+    # Iterate through positional parameters
+    for plugin in "$@"; do
         plugin=$(echo "$plugin" | tr -d ' ')  # Remove spaces
         if ! validated_plugin=$(validate_plugin_name "$plugin"); then
             return 1
@@ -930,7 +940,8 @@ If file handler is S3 or cloud-based storage:
    # - No underscores, no uppercase, no consecutive hyphens
 
    # List of known multi-part TLDs to skip
-   KNOWN_TLDS="co.uk|com.au|co.nz|org.uk|co.jp|com.br|co.in"
+   # Comprehensive list covering major country-code second-level domains
+   KNOWN_TLDS="co.uk|org.uk|gov.uk|ac.uk|com.au|net.au|org.au|co.nz|org.nz|co.jp|or.jp|co.in|org.in|com.br|org.br|co.za|org.za|com.cn|org.cn|com.mx|org.mx|com.ar|org.ar|co.kr|or.kr"
 
    parse_bucket_name() {
        local repo_name="$1"  # e.g., "etl.corthion.ai"
