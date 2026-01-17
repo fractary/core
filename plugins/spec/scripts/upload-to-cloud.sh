@@ -56,6 +56,14 @@ fi
 
 echo "✓ Upload successful: $CLOUD_URL" >&2
 
+# Delete original file after successful upload (consistent with archive-local.sh behavior)
+if ! rm -f "$SPEC_PATH"; then
+    echo "Warning: Failed to remove original file: $SPEC_PATH" >&2
+    # Continue anyway - the upload was successful
+fi
+
+echo "✓ Original file removed: $SPEC_PATH" >&2
+
 # Output result in expected format (matches spec plugin expectations)
 cat <<EOF
 {

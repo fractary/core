@@ -68,6 +68,14 @@ fi
 
 echo "✓ Upload successful: $CLOUD_URL" >&2
 
+# Delete original file after successful upload (consistent with archive-local.sh behavior)
+if ! rm -f "$LOG_PATH"; then
+    echo "Warning: Failed to remove original file: $LOG_PATH" >&2
+    # Continue anyway - the upload was successful
+fi
+
+echo "✓ Original file removed: $LOG_PATH" >&2
+
 # Output result in expected format (matches logs plugin expectations)
 cat <<EOF
 {
