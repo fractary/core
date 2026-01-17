@@ -905,27 +905,106 @@ If file handler is S3 or cloud-based storage:
    # For subdomain-style names like "etl.corthion.ai"
    # Extract: project=corthion, sub-project=etl
    # Bucket: corthion-etl-files
+   #
+   # S3 Bucket Naming Requirements:
+   # - 3-63 characters
+   # - Lowercase letters, numbers, and hyphens only
+   # - Must start with letter or number
+   # - No underscores, no uppercase, no consecutive hyphens
+
+   # List of known multi-part TLDs to skip
+   KNOWN_TLDS="co.uk|com.au|co.nz|org.uk|co.jp|com.br|co.in"
 
    parse_bucket_name() {
        local repo_name="$1"  # e.g., "etl.corthion.ai"
 
-       # Check if repo name contains dots (subdomain pattern)
-       if echo "$repo_name" | grep -q '\.'; then
-           # Split by dots
-           local parts
-           IFS='.' read -ra parts <<< "$repo_name"
+       # Step 1: Strip trailing dots
+       repo_name=$(echo "$repo_name" | sed 's/\.$//')
 
-           # Pattern: {sub}.{project}.{tld} or {sub}.{project}
-           if [ "${#parts[@]}" -ge 2 ]; then
-               local sub_project="${parts[0]}"        # etl
-               local project="${parts[1]}"            # corthion
-               echo "${project}-${sub_project}-files" # corthion-etl-files
-               return 0
-           fi
+       # Step 2: Check if empty after stripping
+       if [ -z "$repo_name" ]; then
+           echo "ERROR: Empty repo name" >&2
+           return 1
        fi
 
-       # Fallback: simple {project}-files
-       echo "${repo_name}-files"
+       # Step 3: Strip known multi-part TLDs (e.g., .co.uk, .com.au)
+       local stripped_name
+       stripped_name=$(echo "$repo_name" | sed -E "s/\.(${KNOWN_TLDS})$//")
+
+       # Step 4: Strip simple TLD if present (last segment after dot)
+       # Only if we have at least 2 dots remaining (sub.project.tld pattern)
+       local dot_count
+       dot_count=$(echo "$stripped_name" | tr -cd '.' | wc -c)
+
+       if [ "$dot_count" -ge 2 ]; then
+           # Remove last segment (TLD): api.v2.myapp.com -> api.v2.myapp
+           stripped_name=$(echo "$stripped_name" | sed 's/\.[^.]*$//')
+       fi
+
+       # Step 5: Extract parts using portable cut (not bash arrays)
+       local bucket_name
+       if echo "$stripped_name" | grep -q '\.'; then
+           # Has dots - extract sub-project and project
+           # For "etl.corthion" -> project=corthion, sub=etl
+           # For "api.v2.myapp" -> project=myapp, sub=api-v2 (combine extras)
+           local sub_project project remaining
+
+           sub_project=$(echo "$stripped_name" | cut -d'.' -f1)
+           remaining=$(echo "$stripped_name" | cut -d'.' -f2-)
+
+           # Check if remaining has more dots (e.g., v2.myapp)
+           if echo "$remaining" | grep -q '\.'; then
+               # Multiple middle parts: combine all but last as sub-project
+               # api.v2.myapp -> sub=api-v2, project=myapp
+               project=$(echo "$remaining" | rev | cut -d'.' -f1 | rev)
+               local middle
+               middle=$(echo "$remaining" | rev | cut -d'.' -f2- | rev | tr '.' '-')
+               sub_project="${sub_project}-${middle}"
+           else
+               project="$remaining"
+           fi
+
+           bucket_name="${project}-${sub_project}-files"
+       else
+           # No dots - simple project name
+           bucket_name="${stripped_name}-files"
+       fi
+
+       # Step 6: Sanitize for S3 compliance
+       # - Convert to lowercase
+       # - Replace underscores with hyphens
+       # - Remove invalid characters (keep only a-z, 0-9, -)
+       # - Collapse multiple hyphens to single hyphen
+       # - Remove leading/trailing hyphens
+       bucket_name=$(echo "$bucket_name" | \
+           tr '[:upper:]' '[:lower:]' | \
+           tr '_' '-' | \
+           sed 's/[^a-z0-9-]//g' | \
+           sed 's/--*/-/g' | \
+           sed 's/^-//' | \
+           sed 's/-$//')
+
+       # Step 7: Validate length (3-63 characters)
+       local length
+       length=$(echo -n "$bucket_name" | wc -c)
+
+       if [ "$length" -lt 3 ]; then
+           echo "ERROR: Bucket name too short (min 3 chars): $bucket_name" >&2
+           return 1
+       fi
+
+       if [ "$length" -gt 63 ]; then
+           # Truncate to 63 chars, ensuring we don't end with hyphen
+           bucket_name=$(echo "$bucket_name" | cut -c1-63 | sed 's/-$//')
+       fi
+
+       # Step 8: Ensure starts with letter or number (not hyphen)
+       if echo "$bucket_name" | grep -q '^-'; then
+           bucket_name=$(echo "$bucket_name" | sed 's/^-//')
+       fi
+
+       echo "$bucket_name"
+       return 0
    }
    ```
 
@@ -933,6 +1012,9 @@ If file handler is S3 or cloud-based storage:
    - `etl.corthion.ai` → `corthion-etl-files`
    - `api.myapp.com` → `myapp-api-files`
    - `my-project` → `my-project-files` (no subdomain, use simple pattern)
+   - `api.v2.myapp.com` → `myapp-api-v2-files` (multiple subdomains combined)
+   - `api.myapp.co.uk` → `myapp-api-files` (multi-part TLD stripped)
+   - `My_Project.App` → `app-my-project-files` (sanitized: lowercase, underscores to hyphens)
 
 2. **Ask user to confirm or customize bucket name**:
    ```
