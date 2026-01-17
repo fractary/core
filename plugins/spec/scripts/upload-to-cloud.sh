@@ -49,6 +49,12 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
+# Validate cloud_path to prevent directory traversal attacks
+if [[ "$CLOUD_PATH" =~ \.\. ]] || [[ "$CLOUD_PATH" =~ ^/ ]]; then
+    echo '{"error": "Invalid cloud path: cannot contain .. or start with /"}' >&2
+    exit 1
+fi
+
 # Extract configuration
 TYPE=$(echo "$SOURCE_CONFIG" | jq -r '.type // "s3"')
 BUCKET=$(echo "$SOURCE_CONFIG" | jq -r '.bucket')
@@ -72,16 +78,34 @@ fi
 echo "Uploading to cloud storage: $TYPE://$BUCKET/$CLOUD_PATH" >&2
 
 case "$TYPE" in
-    s3|r2)
-        # S3/R2 handler: region, bucket, access_key, secret_key, endpoint, local_path, remote_path, public
+    s3)
+        # S3 handler: region, bucket, access_key, secret_key, endpoint, local_path, remote_path, public
         if ! UPLOAD_RESULT=$("$UPLOAD_SCRIPT" "$REGION" "$BUCKET" "" "" "" "$SPEC_PATH" "$CLOUD_PATH" "false" 2>&1); then
             echo '{"error": "Upload failed", "details": "'"$(echo "$UPLOAD_RESULT" | tr '\n' ' ' | sed 's/"/\\"/g')"'"}' >&2
             exit 1
         fi
         ;;
+    r2)
+        # R2 handler: account_id, bucket_name, access_key, secret_key, local_path, remote_path, public, public_url
+        ACCOUNT_ID=$(echo "$SOURCE_CONFIG" | jq -r '.account_id // ""')
+        if [[ -z "$ACCOUNT_ID" ]]; then
+            echo '{"error": "No account_id configured for R2 storage"}' >&2
+            exit 1
+        fi
+        if ! UPLOAD_RESULT=$("$UPLOAD_SCRIPT" "$ACCOUNT_ID" "$BUCKET" "" "" "$SPEC_PATH" "$CLOUD_PATH" "false" "" 2>&1); then
+            echo '{"error": "Upload failed", "details": "'"$(echo "$UPLOAD_RESULT" | tr '\n' ' ' | sed 's/"/\\"/g')"'"}' >&2
+            exit 1
+        fi
+        ;;
     gcs)
+        # GCS handler: project_id, bucket_name, service_account_key, region, local_path, remote_path, public
         PROJECT_ID=$(echo "$SOURCE_CONFIG" | jq -r '.project_id // ""')
-        if ! UPLOAD_RESULT=$("$UPLOAD_SCRIPT" "$PROJECT_ID" "$BUCKET" "$SPEC_PATH" "$CLOUD_PATH" 2>&1); then
+        SERVICE_ACCOUNT_KEY=$(echo "$SOURCE_CONFIG" | jq -r '.service_account_key // ""')
+        if [[ -z "$PROJECT_ID" ]]; then
+            echo '{"error": "No project_id configured for GCS storage"}' >&2
+            exit 1
+        fi
+        if ! UPLOAD_RESULT=$("$UPLOAD_SCRIPT" "$PROJECT_ID" "$BUCKET" "$SERVICE_ACCOUNT_KEY" "$REGION" "$SPEC_PATH" "$CLOUD_PATH" "false" 2>&1); then
             echo '{"error": "Upload failed", "details": "'"$(echo "$UPLOAD_RESULT" | tr '\n' ' ' | sed 's/"/\\"/g')"'"}' >&2
             exit 1
         fi
@@ -105,7 +129,22 @@ fi
 
 echo "✓ Upload successful: $CLOUD_URL" >&2
 
-# Delete original file after successful upload (consistent with archive-local.sh behavior)
+# Verify checksum before deleting original file
+if [[ "$CHECKSUM" != "unknown" ]]; then
+    LOCAL_CHECKSUM=$(sha256sum "$SPEC_PATH" 2>/dev/null | awk '{print $1}')
+    # Extract hex checksum from "sha256:..." format
+    UPLOADED_CHECKSUM="${CHECKSUM#sha256:}"
+
+    if [[ "$LOCAL_CHECKSUM" != "$UPLOADED_CHECKSUM" ]]; then
+        echo '{"error": "Checksum verification failed: upload may be corrupted"}' >&2
+        echo "  Local: $LOCAL_CHECKSUM" >&2
+        echo "  Remote: $UPLOADED_CHECKSUM" >&2
+        exit 1
+    fi
+    echo "✓ Checksum verified: $LOCAL_CHECKSUM" >&2
+fi
+
+# Delete original file after successful upload and verification
 if ! rm -f "$SPEC_PATH"; then
     echo "Warning: Failed to remove original file: $SPEC_PATH" >&2
     # Continue anyway - the upload was successful
