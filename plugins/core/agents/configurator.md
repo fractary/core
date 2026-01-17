@@ -897,14 +897,31 @@ AskUserQuestion(
 
 If file handler is S3 or cloud-based storage:
 
-1. **Auto-derive bucket name from project name**:
+1. **Ask user for environment**:
+   ```
+   AskUserQuestion(
+     questions: [{
+       question: "Which environment is this configuration for?",
+       header: "Environment",
+       options: [
+         { label: "dev", description: "Development environment (Recommended for local work)" },
+         { label: "staging", description: "Staging/test environment" },
+         { label: "prod", description: "Production environment" }
+       ],
+       multiSelect: false
+     }]
+   )
+   ```
+
+2. **Auto-derive bucket name from project name**:
 
    Parse the repo name to extract project and sub-project:
 
    ```bash
    # For subdomain-style names like "etl.corthion.ai"
    # Extract: project=corthion, sub-project=etl
-   # Bucket: corthion-etl-files
+   # Bucket format: {project}-{sub-project}-fractary-{env}
+   # Example: corthion-etl-fractary-dev
    #
    # S3 Bucket Naming Requirements:
    # - 3-63 characters
@@ -917,6 +934,12 @@ If file handler is S3 or cloud-based storage:
 
    parse_bucket_name() {
        local repo_name="$1"  # e.g., "etl.corthion.ai"
+       local env="$2"        # e.g., "dev", "staging", "prod"
+
+       # Default environment to "dev" if not provided
+       if [ -z "$env" ]; then
+           env="dev"
+       fi
 
        # Step 1: Strip trailing dots
        repo_name=$(echo "$repo_name" | sed 's/\.$//')
@@ -964,10 +987,10 @@ If file handler is S3 or cloud-based storage:
                project="$remaining"
            fi
 
-           bucket_name="${project}-${sub_project}-files"
+           bucket_name="${project}-${sub_project}-fractary-${env}"
        else
            # No dots - simple project name
-           bucket_name="${stripped_name}-files"
+           bucket_name="${stripped_name}-fractary-${env}"
        fi
 
        # Step 6: Sanitize for S3 compliance
@@ -1008,15 +1031,15 @@ If file handler is S3 or cloud-based storage:
    }
    ```
 
-   **Examples**:
-   - `etl.corthion.ai` → `corthion-etl-files`
-   - `api.myapp.com` → `myapp-api-files`
-   - `my-project` → `my-project-files` (no subdomain, use simple pattern)
-   - `api.v2.myapp.com` → `myapp-api-v2-files` (multiple subdomains combined)
-   - `api.myapp.co.uk` → `myapp-api-files` (multi-part TLD stripped)
-   - `My_Project.App` → `app-my-project-files` (sanitized: lowercase, underscores to hyphens)
+   **Examples** (with env=dev):
+   - `etl.corthion.ai` → `corthion-etl-fractary-dev`
+   - `api.myapp.com` → `myapp-api-fractary-dev`
+   - `my-project` → `my-project-fractary-dev` (no subdomain, use simple pattern)
+   - `api.v2.myapp.com` → `myapp-api-v2-fractary-dev` (multiple subdomains combined)
+   - `api.myapp.co.uk` → `myapp-api-fractary-dev` (multi-part TLD stripped)
+   - `My_Project.App` → `app-my-project-fractary-dev` (sanitized: lowercase, underscores to hyphens)
 
-2. **Ask user to confirm or customize bucket name**:
+3. **Ask user to confirm or customize bucket name**:
    ```
    AskUserQuestion(
      questions: [{
@@ -1031,7 +1054,7 @@ If file handler is S3 or cloud-based storage:
    )
    ```
 
-3. **Ask about archive storage preference**:
+4. **Ask about archive storage preference**:
    ```
    AskUserQuestion(
      questions: [{
@@ -1454,8 +1477,8 @@ Configured plugins:
 
 Project: {org}/{project}
 Bucket: Auto-derived using parse_bucket_name() function
-  - Subdomain pattern: {project}-{sub-project}-files (e.g., corthion-etl-files)
-  - Simple pattern: {project}-files (e.g., my-project-files)
+  - Subdomain pattern: {project}-{sub-project}-fractary-{env} (e.g., corthion-etl-fractary-dev)
+  - Simple pattern: {project}-fractary-{env} (e.g., my-project-fractary-dev)
 
 Connection tests:
   - GitHub API: [Pass/Fail/Skipped]
@@ -2042,7 +2065,7 @@ file:
   sources:
     specs:
       type: s3
-      bucket: core-files  # Auto-derived: {project}-{sub-project}-files or {project}-files
+      bucket: core-fractary-dev  # Auto-derived: {project}-{sub-project}-fractary-{env}
       prefix: specs/
       region: us-east-1
       local:
@@ -2054,7 +2077,7 @@ file:
         profile: default
     logs:
       type: s3
-      bucket: core-files  # Auto-derived: {project}-{sub-project}-files or {project}-files
+      bucket: core-fractary-dev  # Auto-derived: {project}-{sub-project}-fractary-{env}
       prefix: logs/
       region: us-east-1
       local:
