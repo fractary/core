@@ -169,24 +169,36 @@ validate_plugins_list() {
     local input="$1"
     local validated=""
 
-    # Split by comma using portable method (not bash arrays)
-    # Save original IFS, set to comma, restore after
-    local old_ifs="$IFS"
-    IFS=','
+    # Validate input is not empty
+    if [ -z "$input" ]; then
+        echo "ERROR: Empty plugin list" >&2
+        return 1
+    fi
 
-    # Use set -- to split into positional parameters (POSIX-compatible)
-    set -- $input
+    # Process comma-separated list using portable while loop with parameter expansion
+    # This avoids unsafe unquoted variable expansion
+    local remaining="$input"
+    while [ -n "$remaining" ]; do
+        # Extract first plugin (everything before first comma, or entire string if no comma)
+        local plugin="${remaining%%,*}"
 
-    # Restore IFS
-    IFS="$old_ifs"
+        # Remove leading/trailing whitespace
+        plugin=$(echo "$plugin" | tr -d ' ')
 
-    # Iterate through positional parameters
-    for plugin in "$@"; do
-        plugin=$(echo "$plugin" | tr -d ' ')  # Remove spaces
-        if ! validated_plugin=$(validate_plugin_name "$plugin"); then
-            return 1
+        # Skip empty entries (e.g., from trailing commas)
+        if [ -n "$plugin" ]; then
+            if ! validated_plugin=$(validate_plugin_name "$plugin"); then
+                return 1
+            fi
+            validated="${validated:+$validated,}$validated_plugin"
         fi
-        validated="${validated:+$validated,}$validated_plugin"
+
+        # Remove processed plugin from remaining (handle case where no comma exists)
+        if [ "$remaining" = "${remaining#*,}" ]; then
+            # No comma found, we're done
+            break
+        fi
+        remaining="${remaining#*,}"
     done
 
     echo "$validated"
@@ -941,7 +953,8 @@ If file handler is S3 or cloud-based storage:
 
    # List of known multi-part TLDs to skip
    # Comprehensive list covering major country-code second-level domains
-   KNOWN_TLDS="co.uk|org.uk|gov.uk|ac.uk|com.au|net.au|org.au|co.nz|org.nz|co.jp|or.jp|co.in|org.in|com.br|org.br|co.za|org.za|com.cn|org.cn|com.mx|org.mx|com.ar|org.ar|co.kr|or.kr"
+   # NOTE: Dots are escaped as \. for proper regex matching in sed -E
+   KNOWN_TLDS="co\.uk|org\.uk|gov\.uk|ac\.uk|com\.au|net\.au|org\.au|co\.nz|org\.nz|co\.jp|or\.jp|co\.in|org\.in|com\.br|org\.br|co\.za|org\.za|com\.cn|org\.cn|com\.mx|org\.mx|com\.ar|org\.ar|co\.kr|or\.kr"
 
    parse_bucket_name() {
        local repo_name="$1"  # e.g., "etl.corthion.ai"
@@ -1035,6 +1048,27 @@ If file handler is S3 or cloud-based storage:
        # Step 8: Ensure starts with letter or number (not hyphen)
        if echo "$bucket_name" | grep -q '^-'; then
            bucket_name=$(echo "$bucket_name" | sed 's/^-//')
+       fi
+
+       # Step 9: Final validation - ensure bucket name meets all S3 requirements
+       # Re-check length after all modifications
+       length=$(echo -n "$bucket_name" | wc -c)
+       if [ "$length" -lt 3 ]; then
+           echo "ERROR: Final bucket name too short after sanitization (min 3 chars): '$bucket_name'" >&2
+           return 1
+       fi
+
+       # Validate bucket name only contains allowed characters
+       if ! echo "$bucket_name" | grep -qE '^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]{1,2}$'; then
+           echo "ERROR: Invalid bucket name format: '$bucket_name'" >&2
+           echo "       Must start and end with letter/number, contain only lowercase letters, numbers, and hyphens" >&2
+           return 1
+       fi
+
+       # Check for consecutive hyphens (S3 doesn't allow --)
+       if echo "$bucket_name" | grep -q '\-\-'; then
+           echo "ERROR: Bucket name contains consecutive hyphens: '$bucket_name'" >&2
+           return 1
        fi
 
        echo "$bucket_name"
