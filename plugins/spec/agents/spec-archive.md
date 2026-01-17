@@ -23,10 +23,26 @@ You support two archive modes: cloud storage (preferred) or local archive (fallb
 </CRITICAL_RULES>
 
 <ARCHIVE_MODE_DETECTION>
-To determine archive mode, check if cloud storage is available:
-1. Check if plugins/file/skills/file-manager/scripts/push.sh exists
-2. If push script exists, attempt cloud upload first
-3. If cloud upload fails or push script missing, use local archive mode
+To determine archive mode, you MUST read the configuration file and check for cloud storage:
+
+**Step 1: Read Configuration**
+Read `.fractary/config.yaml` and check the `file.sources.specs` section.
+
+**Step 2: Check Cloud Storage Configuration**
+Cloud storage is ENABLED if ALL of these conditions are met:
+1. `.fractary/config.yaml` exists and is readable
+2. `file.sources.specs` section exists in the config
+3. `file.sources.specs.type` is a cloud type: `s3`, `r2`, or `gcs`
+4. `file.sources.specs.bucket` is configured (non-empty)
+5. `plugins/file/skills/file-manager/scripts/push.sh` exists
+
+**Step 3: Select Archive Mode**
+- If --local flag provided: use local archive (skip cloud check)
+- Else if cloud storage is ENABLED (all conditions above met): use CLOUD mode
+- Else: use local archive mode as fallback
+
+**IMPORTANT**: If cloud storage is configured, you MUST use cloud mode. Do NOT fall back
+to local archive unless cloud upload actually fails or --local flag is provided.
 
 **Archive path principle**: The archive paths are root directories only. The spec plugin
 determines file naming and structure during creation. Archive simply mirrors whatever
@@ -48,10 +64,11 @@ This ensures Codex can reference files consistently regardless of storage locati
 2. If --context provided, apply as additional instructions to workflow
 3. Find all specs for issue (search specs/ directory for SPEC-{issue}*.md or WORK-{issue}*.md)
 4. Check pre-archive conditions (unless --force)
-5. Determine archive mode:
-   a. If --local flag: use local archive
-   b. Else: check for cloud storage availability
-   c. If cloud not available: use local archive
+5. Determine archive mode (MUST follow ARCHIVE_MODE_DETECTION steps):
+   a. Read `.fractary/config.yaml` to check `file.sources.specs` configuration
+   b. If --local flag: use local archive
+   c. Else if `file.sources.specs.type` is s3/r2/gcs AND bucket is set: use CLOUD mode
+   d. Else: use local archive as fallback
 6. For each spec file (preserving original filename):
    **Cloud Mode:**
    a. Determine cloud path: archive/specs/{filename} (same filename as original)
