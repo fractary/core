@@ -1115,6 +1115,108 @@ If file handler is S3 or cloud-based storage:
    )
    ```
 
+5. **Apply archive storage preference to configuration**:
+
+   Based on the user's archive storage preference, configure the logs and spec plugins appropriately:
+
+   **Cloud (S3) selected:**
+   ```yaml
+   logs:
+     storage:
+       local_path: .fractary/logs
+       cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
+     retention:
+       default:
+         auto_archive: true
+         cleanup_after_archive: true  # Remove local after cloud upload
+
+   spec:
+     storage:
+       local_path: .fractary/specs
+       cloud_archive_path: archive/specs/{year}/{spec_id}.md
+     archive:
+       auto_archive_on:
+         issue_close: true
+         pr_merge: true
+
+   file:
+     sources:
+       specs:
+         type: s3
+         # ... S3 config
+       logs:
+         type: s3
+         # ... S3 config
+   ```
+
+   **Local only selected:**
+   ```yaml
+   logs:
+     storage:
+       local_path: .fractary/logs
+       # No cloud_archive_path
+     retention:
+       default:
+         auto_archive: false  # Archives stay local
+         cleanup_after_archive: false
+
+   spec:
+     storage:
+       local_path: .fractary/specs
+       # No cloud_archive_path
+     archive:
+       auto_archive_on:
+         issue_close: false
+         pr_merge: false
+
+   file:
+     sources:
+       specs:
+         type: local
+         base_path: .fractary/specs
+       logs:
+         type: local
+         base_path: .fractary/logs
+   ```
+
+   **Both selected:**
+   ```yaml
+   logs:
+     storage:
+       local_path: .fractary/logs
+       cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
+     retention:
+       default:
+         auto_archive: true
+         cleanup_after_archive: false  # Keep local copies after cloud upload
+
+   spec:
+     storage:
+       local_path: .fractary/specs
+       cloud_archive_path: archive/specs/{year}/{spec_id}.md
+     archive:
+       auto_archive_on:
+         issue_close: true
+         pr_merge: true
+
+   file:
+     sources:
+       specs:
+         type: s3
+         # ... S3 config
+         local:
+           base_path: .fractary/specs
+         push:
+           keep_local: true  # Keep local copies
+       logs:
+         type: s3
+         # ... S3 config
+         local:
+           base_path: .fractary/logs
+         push:
+           keep_local: true  # Keep local copies
+   ```
+
 ### Step 6: Interpret --context for Changes (Incremental Mode)
 
 For incremental mode with --context provided:
@@ -1967,7 +2069,11 @@ Recovery steps:
 </OUTPUTS>
 
 <EXAMPLE_CONFIG>
-The generated `.fractary/config.yaml` should follow this structure:
+The generated `.fractary/config.yaml` should follow this structure.
+
+**Note**: The example below shows S3 cloud storage with archive preference "Cloud (S3)".
+For "Local only" preference, file sources would use `type: local` and archive paths would be omitted.
+For "Both" preference, S3 sources would include `push.keep_local: true`.
 
 ```yaml
 version: "2.0"
