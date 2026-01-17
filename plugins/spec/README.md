@@ -766,9 +766,19 @@ Same as parent repository.
 
 ## Version
 
-1.0.0 - Initial release
+1.0.1 - Bug fixes for cloud archive upload
 
 ## Changelog
 
-See CHANGELOG.md for version history.
+### 1.0.1
+
+- **fix**: Upload specs to correct cloud archive path (`archive/specs/` instead of `specs/`)
+- **fix**: Proper R2 handler support with `account_id` parameter
+- **fix**: Correct GCS handler parameter order (7 params)
+- **security**: Add path traversal validation for cloud paths
+- **reliability**: Add checksum verification before deleting original files
+
+### 1.0.0
+
+- Initial release
 
