@@ -44,6 +44,7 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 18. ALWAYS create/update `.fractary/.gitignore` with logs directory ignored
 19. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
 20. MERGE new config sections with existing - never overwrite unrelated plugin sections
+21. NEVER create an "artifacts" source in the file section - only create "specs" and "logs" sources
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -163,19 +164,41 @@ validate_plugin_name() {
     fi
 }
 
-# Usage for comma-separated list:
+# Usage for comma-separated list (POSIX-compatible):
 validate_plugins_list() {
     local input="$1"
     local validated=""
 
-    # Split by comma and validate each
-    IFS=',' read -ra plugins <<< "$input"
-    for plugin in "${plugins[@]}"; do
-        plugin=$(echo "$plugin" | tr -d ' ')  # Remove spaces
-        if ! validated_plugin=$(validate_plugin_name "$plugin"); then
-            return 1
+    # Validate input is not empty
+    if [ -z "$input" ]; then
+        echo "ERROR: Empty plugin list" >&2
+        return 1
+    fi
+
+    # Process comma-separated list using portable while loop with parameter expansion
+    # This avoids unsafe unquoted variable expansion
+    local remaining="$input"
+    while [ -n "$remaining" ]; do
+        # Extract first plugin (everything before first comma, or entire string if no comma)
+        local plugin="${remaining%%,*}"
+
+        # Remove leading/trailing whitespace
+        plugin=$(echo "$plugin" | tr -d ' ')
+
+        # Skip empty entries (e.g., from trailing commas)
+        if [ -n "$plugin" ]; then
+            if ! validated_plugin=$(validate_plugin_name "$plugin"); then
+                return 1
+            fi
+            validated="${validated:+$validated,}$validated_plugin"
         fi
-        validated="${validated:+$validated,}$validated_plugin"
+
+        # Remove processed plugin from remaining (handle case where no comma exists)
+        if [ "$remaining" = "${remaining#*,}" ]; then
+            # No comma found, we're done
+            break
+        fi
+        remaining="${remaining#*,}"
     done
 
     echo "$validated"
@@ -892,6 +915,308 @@ AskUserQuestion(
 )
 ```
 
+### Step 5b: Cloud Storage Configuration (If S3/Cloud Selected)
+
+If file handler is S3 or cloud-based storage:
+
+1. **Ask user for environment**:
+   ```
+   AskUserQuestion(
+     questions: [{
+       question: "Which environment is this configuration for?",
+       header: "Environment",
+       options: [
+         { label: "dev", description: "Development environment (Recommended for local work)" },
+         { label: "staging", description: "Staging/test environment" },
+         { label: "prod", description: "Production environment" }
+       ],
+       multiSelect: false
+     }]
+   )
+   ```
+
+2. **Auto-derive bucket name from project name**:
+
+   Parse the repo name to extract project and sub-project:
+
+   ```bash
+   # For subdomain-style names like "etl.corthion.ai"
+   # Extract: project=corthion, sub-project=etl
+   # Bucket format: {project}-{sub-project}-fractary-{env}
+   # Example: corthion-etl-fractary-dev
+   #
+   # S3 Bucket Naming Requirements:
+   # - 3-63 characters
+   # - Lowercase letters, numbers, and hyphens only
+   # - Must start with letter or number
+   # - No underscores, no uppercase, no consecutive hyphens
+
+   # List of known multi-part TLDs to skip
+   # Comprehensive list covering major country-code second-level domains
+   # NOTE: Dots are escaped as \. for proper regex matching in sed -E
+   KNOWN_TLDS="co\.uk|org\.uk|gov\.uk|ac\.uk|com\.au|net\.au|org\.au|co\.nz|org\.nz|co\.jp|or\.jp|co\.in|org\.in|com\.br|org\.br|co\.za|org\.za|com\.cn|org\.cn|com\.mx|org\.mx|com\.ar|org\.ar|co\.kr|or\.kr"
+
+   parse_bucket_name() {
+       local repo_name="$1"  # e.g., "etl.corthion.ai"
+       local env="$2"        # e.g., "dev", "staging", "prod"
+
+       # Default environment to "dev" if not provided
+       if [ -z "$env" ]; then
+           env="dev"
+       fi
+
+       # Step 1: Strip trailing dots
+       repo_name=$(echo "$repo_name" | sed 's/\.$//')
+
+       # Step 2: Check if empty after stripping
+       if [ -z "$repo_name" ]; then
+           echo "ERROR: Empty repo name" >&2
+           return 1
+       fi
+
+       # Step 3: Strip known multi-part TLDs (e.g., .co.uk, .com.au)
+       local stripped_name
+       stripped_name=$(echo "$repo_name" | sed -E "s/\.(${KNOWN_TLDS})$//")
+
+       # Step 4: Strip simple TLD if present (last segment after dot)
+       # Only if we have at least 2 dots remaining (sub.project.tld pattern)
+       local dot_count
+       dot_count=$(echo "$stripped_name" | tr -cd '.' | wc -c)
+
+       if [ "$dot_count" -ge 2 ]; then
+           # Remove last segment (TLD): api.v2.myapp.com -> api.v2.myapp
+           stripped_name=$(echo "$stripped_name" | sed 's/\.[^.]*$//')
+       fi
+
+       # Step 5: Extract parts using portable cut (not bash arrays)
+       local bucket_name
+       if echo "$stripped_name" | grep -q '\.'; then
+           # Has dots - extract sub-project and project
+           # For "etl.corthion" -> project=corthion, sub=etl
+           # For "api.v2.myapp" -> project=myapp, sub=api-v2 (combine extras)
+           local sub_project project remaining
+
+           sub_project=$(echo "$stripped_name" | cut -d'.' -f1)
+           remaining=$(echo "$stripped_name" | cut -d'.' -f2-)
+
+           # Check if remaining has more dots (e.g., v2.myapp)
+           if echo "$remaining" | grep -q '\.'; then
+               # Multiple middle parts: combine all but last as sub-project
+               # api.v2.myapp -> sub=api-v2, project=myapp
+               project=$(echo "$remaining" | rev | cut -d'.' -f1 | rev)
+               local middle
+               middle=$(echo "$remaining" | rev | cut -d'.' -f2- | rev | tr '.' '-')
+               sub_project="${sub_project}-${middle}"
+           else
+               project="$remaining"
+           fi
+
+           bucket_name="${project}-${sub_project}-fractary-${env}"
+       else
+           # No dots - simple project name
+           bucket_name="${stripped_name}-fractary-${env}"
+       fi
+
+       # Step 6: Sanitize for S3 compliance
+       # - Convert to lowercase
+       # - Replace underscores with hyphens
+       # - Remove invalid characters (keep only a-z, 0-9, -)
+       # - Collapse multiple hyphens to single hyphen
+       # - Remove leading/trailing hyphens
+       bucket_name=$(echo "$bucket_name" | \
+           tr '[:upper:]' '[:lower:]' | \
+           tr '_' '-' | \
+           sed 's/[^a-z0-9-]//g' | \
+           sed 's/--*/-/g' | \
+           sed 's/^-//' | \
+           sed 's/-$//')
+
+       # Step 7: Validate length (3-63 characters)
+       local length
+       length=$(echo -n "$bucket_name" | wc -c)
+
+       if [ "$length" -lt 3 ]; then
+           echo "ERROR: Bucket name too short (min 3 chars): $bucket_name" >&2
+           return 1
+       fi
+
+       if [ "$length" -gt 63 ]; then
+           # Truncate to 63 chars, ensuring we don't end with hyphen
+           bucket_name=$(echo "$bucket_name" | cut -c1-63 | sed 's/-$//')
+       fi
+
+       # Step 8: Ensure starts with letter or number (not hyphen)
+       if echo "$bucket_name" | grep -q '^-'; then
+           bucket_name=$(echo "$bucket_name" | sed 's/^-//')
+       fi
+
+       # Step 9: Final validation - ensure bucket name meets all S3 requirements
+       # Re-check length after all modifications
+       length=$(echo -n "$bucket_name" | wc -c)
+       if [ "$length" -lt 3 ]; then
+           echo "ERROR: Final bucket name too short after sanitization (min 3 chars): '$bucket_name'" >&2
+           return 1
+       fi
+
+       # Validate bucket name only contains allowed characters
+       if ! echo "$bucket_name" | grep -qE '^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]{1,2}$'; then
+           echo "ERROR: Invalid bucket name format: '$bucket_name'" >&2
+           echo "       Must start and end with letter/number, contain only lowercase letters, numbers, and hyphens" >&2
+           return 1
+       fi
+
+       # Check for consecutive hyphens (S3 doesn't allow --)
+       if echo "$bucket_name" | grep -q '\-\-'; then
+           echo "ERROR: Bucket name contains consecutive hyphens: '$bucket_name'" >&2
+           return 1
+       fi
+
+       echo "$bucket_name"
+       return 0
+   }
+   ```
+
+   **Examples** (with env=dev):
+   - `etl.corthion.ai` → `corthion-etl-fractary-dev`
+   - `api.myapp.com` → `myapp-api-fractary-dev`
+   - `my-project` → `my-project-fractary-dev` (no subdomain, use simple pattern)
+   - `api.v2.myapp.com` → `myapp-api-v2-fractary-dev` (multiple subdomains combined)
+   - `api.myapp.co.uk` → `myapp-api-fractary-dev` (multi-part TLD stripped)
+   - `My_Project.App` → `app-my-project-fractary-dev` (sanitized: lowercase, underscores to hyphens)
+
+3. **Ask user to confirm or customize bucket name**:
+   ```
+   AskUserQuestion(
+     questions: [{
+       question: "Use derived bucket name '{derived_bucket_name}' for cloud storage?",
+       header: "Bucket Name",
+       options: [
+         { label: "Yes, use derived name", description: "Use {derived_bucket_name} (Recommended)" },
+         { label: "Custom name", description: "I'll specify a different bucket name" }
+       ],
+       multiSelect: false
+     }]
+   )
+   ```
+
+4. **Ask about archive storage preference**:
+   ```
+   AskUserQuestion(
+     questions: [{
+       question: "Where should archived logs and specs be stored?",
+       header: "Archive Storage",
+       options: [
+         { label: "Cloud (S3)", description: "Archive to S3 bucket with lifecycle management (Recommended)" },
+         { label: "Local only", description: "Keep archives in local .fractary/ directory" },
+         { label: "Both", description: "Archive to cloud and keep local copies" }
+       ],
+       multiSelect: false
+     }]
+   )
+   ```
+
+5. **Apply archive storage preference to configuration**:
+
+   Based on the user's archive storage preference, configure the logs and spec plugins appropriately:
+
+   **Cloud (S3) selected:**
+   ```yaml
+   logs:
+     storage:
+       local_path: .fractary/logs
+       cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
+     retention:
+       default:
+         auto_archive: true
+         cleanup_after_archive: true  # Remove local after cloud upload
+
+   spec:
+     storage:
+       local_path: .fractary/specs
+       cloud_archive_path: archive/specs/{year}/{spec_id}.md
+     archive:
+       auto_archive_on:
+         issue_close: true
+         pr_merge: true
+
+   file:
+     sources:
+       specs:
+         type: s3
+         # ... S3 config
+       logs:
+         type: s3
+         # ... S3 config
+   ```
+
+   **Local only selected:**
+   ```yaml
+   logs:
+     storage:
+       local_path: .fractary/logs
+       # No cloud_archive_path
+     retention:
+       default:
+         auto_archive: false  # Archives stay local
+         cleanup_after_archive: false
+
+   spec:
+     storage:
+       local_path: .fractary/specs
+       # No cloud_archive_path
+     archive:
+       auto_archive_on:
+         issue_close: false
+         pr_merge: false
+
+   file:
+     sources:
+       specs:
+         type: local
+         base_path: .fractary/specs
+       logs:
+         type: local
+         base_path: .fractary/logs
+   ```
+
+   **Both selected:**
+   ```yaml
+   logs:
+     storage:
+       local_path: .fractary/logs
+       cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
+     retention:
+       default:
+         auto_archive: true
+         cleanup_after_archive: false  # Keep local copies after cloud upload
+
+   spec:
+     storage:
+       local_path: .fractary/specs
+       cloud_archive_path: archive/specs/{year}/{spec_id}.md
+     archive:
+       auto_archive_on:
+         issue_close: true
+         pr_merge: true
+
+   file:
+     sources:
+       specs:
+         type: s3
+         # ... S3 config
+         local:
+           base_path: .fractary/specs
+         push:
+           keep_local: true  # Keep local copies
+       logs:
+         type: s3
+         # ... S3 config
+         local:
+           base_path: .fractary/logs
+         push:
+           keep_local: true  # Keep local copies
+   ```
+
 ### Step 6: Interpret --context for Changes (Incremental Mode)
 
 For incremental mode with --context provided:
@@ -1298,7 +1623,9 @@ Configured plugins:
   - docs
 
 Project: {org}/{project}
-Bucket: {project}-files
+Bucket: Auto-derived using parse_bucket_name() function
+  - Subdomain pattern: {project}-{sub-project}-fractary-{env} (e.g., corthion-etl-fractary-dev)
+  - Simple pattern: {project}-fractary-{env} (e.g., my-project-fractary-dev)
 
 Connection tests:
   - GitHub API: [Pass/Fail/Skipped]
@@ -1742,7 +2069,11 @@ Recovery steps:
 </OUTPUTS>
 
 <EXAMPLE_CONFIG>
-The generated `.fractary/config.yaml` should follow this structure:
+The generated `.fractary/config.yaml` should follow this structure.
+
+**Note**: The example below shows S3 cloud storage with archive preference "Cloud (S3)".
+For "Local only" preference, file sources would use `type: local` and archive paths would be omitted.
+For "Both" preference, S3 sources would include `push.keep_local: true`.
 
 ```yaml
 version: "2.0"
@@ -1885,7 +2216,7 @@ file:
   sources:
     specs:
       type: s3
-      bucket: core-files  # Auto-generated from project name
+      bucket: core-fractary-dev  # Auto-derived: {project}-{sub-project}-fractary-{env}
       prefix: specs/
       region: us-east-1
       local:
@@ -1897,7 +2228,7 @@ file:
         profile: default
     logs:
       type: s3
-      bucket: core-files  # Auto-generated from project name
+      bucket: core-fractary-dev  # Auto-derived: {project}-{sub-project}-fractary-{env}
       prefix: logs/
       region: us-east-1
       local:
