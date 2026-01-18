@@ -87,15 +87,45 @@ export class GDriveStorage implements Storage {
   }
 
   /**
+   * Escape a string for use in Google Drive query syntax
+   * Single quotes must be escaped with backslash
+   */
+  private escapeQueryString(str: string): string {
+    return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  }
+
+  /**
+   * Check if a string looks like a Google Drive file ID
+   * Drive file IDs are typically 28-44 characters, alphanumeric with - and _
+   */
+  private isFileId(id: string): boolean {
+    // More permissive regex to handle various Google Drive ID formats
+    return /^[a-zA-Z0-9_-]{20,50}$/.test(id) && !id.includes('/');
+  }
+
+  /**
+   * Check if an error is a "not found" error
+   * Google APIs uses error.code (number) or error.errors[].reason
+   */
+  private isNotFoundError(error: any): boolean {
+    return (
+      error.code === 404 ||
+      error.status === 404 ||
+      error.errors?.some((e: any) => e.reason === 'notFound')
+    );
+  }
+
+  /**
    * Find a file by name in the configured folder
    */
   private async findFile(id: string): Promise<string | null> {
     const drive = await this.getClient();
     const fileName = this.getFileName(id);
+    const escapedFileName = this.escapeQueryString(fileName);
     const folderId = this.getParentFolderId();
 
     const response = await drive.files.list({
-      q: `name = '${fileName}' and '${folderId}' in parents and trashed = false`,
+      q: `name = '${escapedFileName}' and '${folderId}' in parents and trashed = false`,
       fields: 'files(id, name)',
       spaces: 'drive',
     });
@@ -165,7 +195,7 @@ export class GDriveStorage implements Storage {
 
     // Check if id is a direct file ID or a path-like name
     let fileId = id;
-    if (!id.match(/^[a-zA-Z0-9_-]{25,}$/)) {
+    if (!this.isFileId(id)) {
       // Looks like a path, search for the file
       fileId = (await this.findFile(id)) || id;
     }
@@ -178,7 +208,7 @@ export class GDriveStorage implements Storage {
 
       return response.data as string;
     } catch (error: any) {
-      if (error.code === 404) {
+      if (this.isNotFoundError(error)) {
         return null;
       }
       throw error;
@@ -193,8 +223,8 @@ export class GDriveStorage implements Storage {
       const fileId = await this.findFile(id);
       return fileId !== null;
     } catch (error: any) {
-      // Only treat 404 as "not found", rethrow other errors
-      if (error.code === 404) {
+      // Only treat "not found" as false, rethrow other errors
+      if (this.isNotFoundError(error)) {
         return false;
       }
       throw error;
@@ -213,7 +243,8 @@ export class GDriveStorage implements Storage {
     do {
       let query = `'${folderId}' in parents and trashed = false`;
       if (prefix) {
-        query += ` and name contains '${prefix}'`;
+        const escapedPrefix = this.escapeQueryString(prefix);
+        query += ` and name contains '${escapedPrefix}'`;
       }
 
       const response = await drive.files.list({
@@ -245,7 +276,7 @@ export class GDriveStorage implements Storage {
 
     // Check if id is a direct file ID or a path-like name
     let fileId = id;
-    if (!id.match(/^[a-zA-Z0-9_-]{25,}$/)) {
+    if (!this.isFileId(id)) {
       fileId = (await this.findFile(id)) || id;
     }
 
@@ -253,7 +284,7 @@ export class GDriveStorage implements Storage {
       await drive.files.delete({ fileId });
     } catch (error: any) {
       // Ignore if file doesn't exist
-      if (error.code !== 404) {
+      if (!this.isNotFoundError(error)) {
         throw error;
       }
     }
@@ -265,7 +296,7 @@ export class GDriveStorage implements Storage {
   async getUrl(id: string, _expiresIn?: number): Promise<string | null> {
     // Check if id is a direct file ID or a path-like name
     let fileId = id;
-    if (!id.match(/^[a-zA-Z0-9_-]{25,}$/)) {
+    if (!this.isFileId(id)) {
       fileId = (await this.findFile(id)) || id;
     }
 

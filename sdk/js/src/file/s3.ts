@@ -75,6 +75,18 @@ export class S3Storage implements Storage {
   }
 
   /**
+   * Check if an error is a "not found" error
+   * AWS SDK v3 uses error.name and error.$metadata.httpStatusCode
+   */
+  private isNotFoundError(error: any): boolean {
+    return (
+      error.name === 'NoSuchKey' ||
+      error.name === 'NotFound' ||
+      error.$metadata?.httpStatusCode === 404
+    );
+  }
+
+  /**
    * Write content to S3
    */
   async write(id: string, content: string): Promise<string> {
@@ -117,7 +129,7 @@ export class S3Storage implements Storage {
       }
       return null;
     } catch (error: any) {
-      if (error.name === 'NoSuchKey' || error.$metadata?.httpStatusCode === 404) {
+      if (this.isNotFoundError(error)) {
         return null;
       }
       throw error;
@@ -142,7 +154,7 @@ export class S3Storage implements Storage {
       await client.send(command);
       return true;
     } catch (error: any) {
-      if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+      if (this.isNotFoundError(error)) {
         return false;
       }
       throw error;

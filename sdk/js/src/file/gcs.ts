@@ -67,6 +67,18 @@ export class GCSStorage implements Storage {
   }
 
   /**
+   * Check if an error is a "not found" error
+   * Google Cloud SDK uses error.code (number) or error.errors[].reason
+   */
+  private isNotFoundError(error: any): boolean {
+    return (
+      error.code === 404 ||
+      error.code === 'ENOENT' ||
+      error.errors?.some((e: any) => e.reason === 'notFound')
+    );
+  }
+
+  /**
    * Write content to GCS
    */
   async write(id: string, content: string): Promise<string> {
@@ -99,7 +111,7 @@ export class GCSStorage implements Storage {
       const [contents] = await file.download();
       return contents.toString('utf-8');
     } catch (error: any) {
-      if (error.code === 404) {
+      if (this.isNotFoundError(error)) {
         return null;
       }
       throw error;
@@ -118,8 +130,8 @@ export class GCSStorage implements Storage {
       const [exists] = await file.exists();
       return exists;
     } catch (error: any) {
-      // Only treat 404 as "not found", rethrow other errors
-      if (error.code === 404) {
+      // Only treat "not found" as false, rethrow other errors
+      if (this.isNotFoundError(error)) {
         return false;
       }
       throw error;
@@ -159,7 +171,7 @@ export class GCSStorage implements Storage {
       await file.delete();
     } catch (error: any) {
       // Ignore if file doesn't exist
-      if (error.code !== 404) {
+      if (!this.isNotFoundError(error)) {
         throw error;
       }
     }
