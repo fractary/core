@@ -13,7 +13,16 @@ import {
   DocMetadata,
   DocSearchQuery,
   DocsManagerConfig,
+  MetadataMode,
 } from './types';
+
+/**
+ * Frontmatter parsing result
+ */
+interface FrontmatterResult {
+  metadata: DocMetadata;
+  body: string;
+}
 
 /**
  * Documentation Manager - Create, manage, and search documentation
@@ -21,10 +30,12 @@ import {
 export class DocsManager {
   private docsDir: string;
   private defaultFormat: DocFormat;
+  private metadataMode: MetadataMode;
 
   constructor(config: DocsManagerConfig) {
     this.docsDir = config.docsDir;
     this.defaultFormat = config.defaultFormat || 'markdown';
+    this.metadataMode = config.metadataMode || 'frontmatter';
     this.ensureDir(this.docsDir);
   }
 
@@ -54,7 +65,124 @@ export class DocsManager {
   }
 
   /**
+   * Determine the effective metadata mode for a document format
+   * Frontmatter only makes sense for markdown files
+   */
+  private getEffectiveMetadataMode(format: DocFormat): MetadataMode {
+    if (format !== 'markdown') {
+      return 'sidecar';
+    }
+    return this.metadataMode;
+  }
+
+  /**
+   * Parse frontmatter from markdown content
+   */
+  private parseFrontmatter(content: string): FrontmatterResult {
+    const frontmatterRegex = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/;
+    const match = content.match(frontmatterRegex);
+
+    if (!match) {
+      // No frontmatter found, return content as-is with minimal metadata
+      return {
+        metadata: { title: '' },
+        body: content,
+      };
+    }
+
+    const frontmatterContent = match[1];
+    const body = match[2];
+
+    let metadata: DocMetadata;
+    try {
+      const parsed = yaml.load(frontmatterContent) as Record<string, unknown>;
+      metadata = {
+        title: (parsed.title as string) || '',
+        description: parsed.description as string | undefined,
+        authors: parsed.authors as string[] | undefined,
+        tags: parsed.tags as string[] | undefined,
+        docType: parsed.docType as string | undefined,
+        status: parsed.status as string | undefined,
+        version: parsed.version as string | undefined,
+      };
+
+      // Parse dates
+      if (parsed.createdAt) {
+        metadata.createdAt = new Date(parsed.createdAt as string);
+      }
+      if (parsed.updatedAt) {
+        metadata.updatedAt = new Date(parsed.updatedAt as string);
+      }
+
+      // Copy any additional fields
+      for (const [key, value] of Object.entries(parsed)) {
+        if (!(key in metadata)) {
+          metadata[key] = value;
+        }
+      }
+    } catch {
+      metadata = { title: '' };
+    }
+
+    return { metadata, body };
+  }
+
+  /**
+   * Write frontmatter to markdown content
+   */
+  private writeFrontmatter(metadata: DocMetadata, body: string): string {
+    // Prepare metadata object for YAML serialization
+    const yamlMetadata: Record<string, unknown> = {};
+
+    // Add standard fields
+    if (metadata.title) yamlMetadata.title = metadata.title;
+    if (metadata.description) yamlMetadata.description = metadata.description;
+    if (metadata.authors && metadata.authors.length > 0) yamlMetadata.authors = metadata.authors;
+    if (metadata.tags && metadata.tags.length > 0) yamlMetadata.tags = metadata.tags;
+    if (metadata.docType) yamlMetadata.docType = metadata.docType;
+    if (metadata.status) yamlMetadata.status = metadata.status;
+    if (metadata.version) yamlMetadata.version = metadata.version;
+
+    // Add dates
+    if (metadata.createdAt) {
+      yamlMetadata.createdAt = metadata.createdAt instanceof Date
+        ? metadata.createdAt.toISOString()
+        : metadata.createdAt;
+    }
+    if (metadata.updatedAt) {
+      yamlMetadata.updatedAt = metadata.updatedAt instanceof Date
+        ? metadata.updatedAt.toISOString()
+        : metadata.updatedAt;
+    }
+
+    // Add any additional custom fields
+    for (const [key, value] of Object.entries(metadata)) {
+      if (
+        value !== undefined &&
+        !['title', 'description', 'authors', 'tags', 'docType', 'status', 'version', 'createdAt', 'updatedAt'].includes(key)
+      ) {
+        yamlMetadata[key] = value;
+      }
+    }
+
+    const frontmatter = yaml.dump(yamlMetadata, { lineWidth: -1 });
+    return `---\n${frontmatter}---\n\n${body}`;
+  }
+
+  /**
+   * Extract body content from content that may have frontmatter
+   */
+  private extractBody(content: string): string {
+    const result = this.parseFrontmatter(content);
+    return result.body;
+  }
+
+  /**
    * Create a new document
+   * @param id - Document identifier
+   * @param content - Document body content (without frontmatter)
+   * @param metadata - Document metadata
+   * @param format - Document format (default: markdown)
    */
   async createDoc(
     id: string,
@@ -64,7 +192,7 @@ export class DocsManager {
   ): Promise<Doc> {
     const docFormat = format || this.defaultFormat;
     const docPath = this.getDocPath(id, docFormat);
-    const metaPath = this.getMetadataPath(id);
+    const effectiveMode = this.getEffectiveMetadataMode(docFormat);
 
     // Add timestamps
     const fullMetadata: DocMetadata = {
@@ -73,15 +201,23 @@ export class DocsManager {
       updatedAt: new Date(),
     };
 
-    // Write content
-    fs.writeFileSync(docPath, content, 'utf-8');
+    // Extract body content in case content already has frontmatter
+    const bodyContent = this.extractBody(content);
 
-    // Write metadata
-    fs.writeFileSync(metaPath, yaml.dump(fullMetadata), 'utf-8');
+    if (effectiveMode === 'frontmatter') {
+      // Write content with embedded frontmatter
+      const fullContent = this.writeFrontmatter(fullMetadata, bodyContent);
+      fs.writeFileSync(docPath, fullContent, 'utf-8');
+    } else {
+      // Sidecar mode: separate content and metadata files
+      const metaPath = this.getMetadataPath(id);
+      fs.writeFileSync(docPath, bodyContent, 'utf-8');
+      fs.writeFileSync(metaPath, yaml.dump(fullMetadata), 'utf-8');
+    }
 
     return {
       id,
-      content,
+      content: bodyContent,
       format: docFormat,
       metadata: fullMetadata,
       path: docPath,
@@ -90,6 +226,7 @@ export class DocsManager {
 
   /**
    * Get a document by ID
+   * Supports both frontmatter and sidecar metadata modes
    */
   async getDoc(id: string): Promise<Doc | null> {
     // Try to find the doc with any format
@@ -98,13 +235,24 @@ export class DocsManager {
     for (const format of formats) {
       const docPath = this.getDocPath(id, format);
       if (fs.existsSync(docPath)) {
-        const content = fs.readFileSync(docPath, 'utf-8');
-        const metaPath = this.getMetadataPath(id);
+        const rawContent = fs.readFileSync(docPath, 'utf-8');
+        const effectiveMode = this.getEffectiveMetadataMode(format);
         let metadata: DocMetadata = { title: id };
+        let content: string;
 
-        if (fs.existsSync(metaPath)) {
-          const metaContent = fs.readFileSync(metaPath, 'utf-8');
-          metadata = yaml.load(metaContent) as DocMetadata;
+        if (effectiveMode === 'frontmatter') {
+          // Parse frontmatter from content
+          const result = this.parseFrontmatter(rawContent);
+          metadata = result.metadata.title ? result.metadata : { ...metadata, ...result.metadata };
+          content = result.body;
+        } else {
+          // Sidecar mode: check for .meta.yaml file
+          content = rawContent;
+          const metaPath = this.getMetadataPath(id);
+          if (fs.existsSync(metaPath)) {
+            const metaContent = fs.readFileSync(metaPath, 'utf-8');
+            metadata = yaml.load(metaContent) as DocMetadata;
+          }
         }
 
         return {
@@ -122,6 +270,9 @@ export class DocsManager {
 
   /**
    * Update a document
+   * @param id - Document identifier
+   * @param content - New body content (without frontmatter)
+   * @param metadata - Metadata fields to update (merged with existing)
    */
   async updateDoc(
     id: string,
@@ -140,14 +291,25 @@ export class DocsManager {
     };
 
     const docPath = this.getDocPath(id, existingDoc.format);
-    const metaPath = this.getMetadataPath(id);
+    const effectiveMode = this.getEffectiveMetadataMode(existingDoc.format);
 
-    fs.writeFileSync(docPath, content, 'utf-8');
-    fs.writeFileSync(metaPath, yaml.dump(updatedMetadata), 'utf-8');
+    // Extract body content in case content already has frontmatter
+    const bodyContent = this.extractBody(content);
+
+    if (effectiveMode === 'frontmatter') {
+      // Write content with embedded frontmatter
+      const fullContent = this.writeFrontmatter(updatedMetadata, bodyContent);
+      fs.writeFileSync(docPath, fullContent, 'utf-8');
+    } else {
+      // Sidecar mode: separate content and metadata files
+      const metaPath = this.getMetadataPath(id);
+      fs.writeFileSync(docPath, bodyContent, 'utf-8');
+      fs.writeFileSync(metaPath, yaml.dump(updatedMetadata), 'utf-8');
+    }
 
     return {
       id,
-      content,
+      content: bodyContent,
       format: existingDoc.format,
       metadata: updatedMetadata,
       path: docPath,
@@ -156,6 +318,7 @@ export class DocsManager {
 
   /**
    * Delete a document
+   * Removes both the document file and any sidecar metadata file if it exists
    */
   async deleteDoc(id: string): Promise<boolean> {
     const doc = await this.getDoc(id);
@@ -170,6 +333,7 @@ export class DocsManager {
       fs.unlinkSync(docPath);
     }
 
+    // Also delete sidecar metadata file if it exists (for backward compatibility)
     if (fs.existsSync(metaPath)) {
       fs.unlinkSync(metaPath);
     }
@@ -238,6 +402,11 @@ export class DocsManager {
       results = results.filter((doc) =>
         doc.metadata.authors?.includes(query.author!)
       );
+    }
+
+    // Filter by docType
+    if (query.docType) {
+      results = results.filter((doc) => doc.metadata.docType === query.docType);
     }
 
     // Filter by date range
