@@ -7,13 +7,17 @@
 
 import { Storage, GCSStorageConfig } from './types';
 
+// Type-only imports for better type safety (doesn't cause runtime import)
+type GCStorage = import('@google-cloud/storage').Storage;
+type GCSBucket = import('@google-cloud/storage').Bucket;
+
 /**
  * Google Cloud Storage implementation
  */
 export class GCSStorage implements Storage {
   private config: GCSStorageConfig;
-  private storageClient: any = null;
-  private bucket: any = null;
+  private storageClient: GCStorage | null = null;
+  private bucket: GCSBucket | null = null;
 
   constructor(config: GCSStorageConfig) {
     this.config = config;
@@ -22,7 +26,7 @@ export class GCSStorage implements Storage {
   /**
    * Get or create the GCS client (lazy loaded)
    */
-  private async getClient(): Promise<any> {
+  private async getClient(): Promise<{ storage: GCStorage; bucket: GCSBucket }> {
     if (this.storageClient && this.bucket) {
       return { storage: this.storageClient, bucket: this.bucket };
     }
@@ -113,8 +117,12 @@ export class GCSStorage implements Storage {
     try {
       const [exists] = await file.exists();
       return exists;
-    } catch (error) {
-      return false;
+    } catch (error: any) {
+      // Only treat 404 as "not found", rethrow other errors
+      if (error.code === 404) {
+        return false;
+      }
+      throw error;
     }
   }
 

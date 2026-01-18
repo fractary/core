@@ -10,13 +10,16 @@
 
 import { Storage, GDriveStorageConfig } from './types';
 
+// Type-only import for better type safety (doesn't cause runtime import)
+// Using drive_v3.Drive directly causes complex type resolution issues
+type DriveClient = import('googleapis').drive_v3.Drive;
+
 /**
  * Google Drive storage implementation
  */
 export class GDriveStorage implements Storage {
   private config: GDriveStorageConfig;
-  private driveClient: any = null;
-  private auth: any = null;
+  private driveClient: DriveClient | null = null;
 
   constructor(config: GDriveStorageConfig) {
     this.config = config;
@@ -25,7 +28,7 @@ export class GDriveStorage implements Storage {
   /**
    * Get or create the Google Drive client (lazy loaded)
    */
-  private async getClient(): Promise<any> {
+  private async getClient(): Promise<DriveClient> {
     if (this.driveClient) {
       return this.driveClient;
     }
@@ -45,16 +48,18 @@ export class GDriveStorage implements Storage {
           refresh_token: this.config.refreshToken,
         });
 
-        this.auth = oauth2Client;
         this.driveClient = google.drive({ version: 'v3', auth: oauth2Client });
       } else {
         // Use Application Default Credentials
-        const auth = new google.auth.GoogleAuth({
+        const googleAuth = new google.auth.GoogleAuth({
           scopes: ['https://www.googleapis.com/auth/drive'],
         });
 
-        this.auth = await auth.getClient();
-        this.driveClient = google.drive({ version: 'v3', auth: this.auth });
+        const authClient = await googleAuth.getClient();
+        this.driveClient = google.drive({
+          version: 'v3',
+          auth: authClient as Parameters<typeof google.drive>[0]['auth'],
+        });
       }
 
       return this.driveClient;
@@ -96,7 +101,7 @@ export class GDriveStorage implements Storage {
     });
 
     if (response.data.files && response.data.files.length > 0) {
-      return response.data.files[0].id;
+      return response.data.files[0].id ?? null;
     }
 
     return null;
@@ -127,6 +132,9 @@ export class GDriveStorage implements Storage {
         media,
         fields: 'id',
       });
+      if (!response.data.id) {
+        throw new Error('Failed to update file: no file ID returned');
+      }
       fileId = response.data.id;
     } else {
       // Create new file
@@ -140,6 +148,9 @@ export class GDriveStorage implements Storage {
         media,
         fields: 'id',
       });
+      if (!response.data.id) {
+        throw new Error('Failed to create file: no file ID returned');
+      }
       fileId = response.data.id;
     }
 
@@ -178,8 +189,16 @@ export class GDriveStorage implements Storage {
    * Check if file exists in Google Drive
    */
   async exists(id: string): Promise<boolean> {
-    const fileId = await this.findFile(id);
-    return fileId !== null;
+    try {
+      const fileId = await this.findFile(id);
+      return fileId !== null;
+    } catch (error: any) {
+      // Only treat 404 as "not found", rethrow other errors
+      if (error.code === 404) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -206,11 +225,13 @@ export class GDriveStorage implements Storage {
 
       if (response.data.files) {
         for (const file of response.data.files) {
-          results.push(file.name);
+          if (file.name) {
+            results.push(file.name);
+          }
         }
       }
 
-      pageToken = response.data.nextPageToken;
+      pageToken = response.data.nextPageToken ?? undefined;
     } while (pageToken);
 
     return results;

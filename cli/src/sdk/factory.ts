@@ -16,6 +16,7 @@ import type {
   LogManager,
   FileManager,
   DocsManager,
+  StorageConfig,
 } from '@fractary/core';
 
 /**
@@ -129,7 +130,7 @@ export interface FileManagerOptions {
   /**
    * Direct storage configuration (overrides source and basePath)
    */
-  storageConfig?: any;
+  storageConfig?: StorageConfig;
 }
 
 /**

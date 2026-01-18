@@ -65,6 +65,38 @@ export class FileManager {
   }
 
   /**
+   * Validate a file path for security issues
+   *
+   * @param path - Path to validate
+   * @throws Error if path is invalid or contains security issues
+   */
+  private validatePath(path: string): void {
+    if (!path || path.trim() === '') {
+      throw new Error('Path cannot be empty');
+    }
+
+    // Check for directory traversal sequences
+    if (path.includes('..')) {
+      throw new Error('Path cannot contain directory traversal sequences (..)');
+    }
+
+    // Check for null bytes (potential security issue)
+    if (path.includes('\0')) {
+      throw new Error('Path cannot contain null bytes');
+    }
+
+    // Check for absolute paths on Windows
+    if (/^[a-zA-Z]:/.test(path)) {
+      throw new Error('Absolute Windows paths are not allowed');
+    }
+
+    // Check for absolute Unix paths (starting with /)
+    if (path.startsWith('/')) {
+      throw new Error('Absolute paths are not allowed');
+    }
+  }
+
+  /**
    * Write file content
    *
    * @param path - Path/identifier for the file
@@ -72,6 +104,7 @@ export class FileManager {
    * @returns URI or path where the content was written
    */
   async write(path: string, content: string): Promise<string> {
+    this.validatePath(path);
     return this.storage.write(path, content);
   }
 
@@ -82,6 +115,7 @@ export class FileManager {
    * @returns File content or null if not found
    */
   async read(path: string): Promise<string | null> {
+    this.validatePath(path);
     return this.storage.read(path);
   }
 
@@ -92,6 +126,7 @@ export class FileManager {
    * @returns True if the file exists
    */
   async exists(path: string): Promise<boolean> {
+    this.validatePath(path);
     return this.storage.exists(path);
   }
 
@@ -102,6 +137,9 @@ export class FileManager {
    * @returns List of file paths/identifiers
    */
   async list(prefix?: string): Promise<string[]> {
+    if (prefix) {
+      this.validatePath(prefix);
+    }
     return this.storage.list(prefix);
   }
 
@@ -111,6 +149,7 @@ export class FileManager {
    * @param path - Path/identifier for the file
    */
   async delete(path: string): Promise<void> {
+    this.validatePath(path);
     return this.storage.delete(path);
   }
 
@@ -122,11 +161,13 @@ export class FileManager {
    * @returns URI or path where the content was copied
    */
   async copy(sourcePath: string, destPath: string): Promise<string> {
-    const content = await this.read(sourcePath);
+    this.validatePath(sourcePath);
+    this.validatePath(destPath);
+    const content = await this.storage.read(sourcePath);
     if (!content) {
       throw new Error(`Source file not found: ${sourcePath}`);
     }
-    return this.write(destPath, content);
+    return this.storage.write(destPath, content);
   }
 
   /**
@@ -137,8 +178,10 @@ export class FileManager {
    * @returns URI or path where the content was moved
    */
   async move(sourcePath: string, destPath: string): Promise<string> {
+    this.validatePath(sourcePath);
+    this.validatePath(destPath);
     const result = await this.copy(sourcePath, destPath);
-    await this.delete(sourcePath);
+    await this.storage.delete(sourcePath);
     return result;
   }
 
@@ -150,6 +193,7 @@ export class FileManager {
    * @returns URL or null if not supported
    */
   async getUrl(path: string, expiresIn?: number): Promise<string | null> {
+    this.validatePath(path);
     if (this.storage.getUrl) {
       return this.storage.getUrl(path, expiresIn);
     }

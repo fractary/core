@@ -7,12 +7,15 @@
 
 import { Storage, S3StorageConfig } from './types';
 
+// Type-only import for better type safety (doesn't cause runtime import)
+type S3Client = import('@aws-sdk/client-s3').S3Client;
+
 /**
  * AWS S3 storage implementation
  */
 export class S3Storage implements Storage {
   private config: S3StorageConfig;
-  private s3Client: any = null;
+  private s3Client: S3Client | null = null;
 
   constructor(config: S3StorageConfig) {
     this.config = config;
@@ -21,7 +24,7 @@ export class S3Storage implements Storage {
   /**
    * Get or create the S3 client (lazy loaded)
    */
-  private async getClient(): Promise<any> {
+  private async getClient(): Promise<S3Client> {
     if (this.s3Client) {
       return this.s3Client;
     }

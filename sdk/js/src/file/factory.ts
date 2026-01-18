@@ -48,61 +48,76 @@ export function createStorage(config: StorageConfig): Storage {
 }
 
 /**
- * Create S3 storage (with lazy module loading)
+ * Create S3 storage (with lazy module loading and instance caching)
  */
 function createS3Storage(config: S3StorageConfig): Storage {
-  // Return a proxy that lazy-loads the actual implementation
+  let cachedStorage: Storage | null = null;
+
   return new Proxy({} as Storage, {
     get(_target, prop) {
       return async (...args: any[]) => {
-        const { S3Storage } = await import('./s3');
-        const storage = new S3Storage(config);
-        return (storage as any)[prop](...args);
+        if (!cachedStorage) {
+          const { S3Storage } = await import('./s3');
+          cachedStorage = new S3Storage(config);
+        }
+        return (cachedStorage as any)[prop](...args);
       };
     },
   });
 }
 
 /**
- * Create R2 storage (with lazy module loading)
+ * Create R2 storage (with lazy module loading and instance caching)
  */
 function createR2Storage(config: R2StorageConfig): Storage {
+  let cachedStorage: Storage | null = null;
+
   return new Proxy({} as Storage, {
     get(_target, prop) {
       return async (...args: any[]) => {
-        const { R2Storage } = await import('./r2');
-        const storage = new R2Storage(config);
-        return (storage as any)[prop](...args);
+        if (!cachedStorage) {
+          const { R2Storage } = await import('./r2');
+          cachedStorage = new R2Storage(config);
+        }
+        return (cachedStorage as any)[prop](...args);
       };
     },
   });
 }
 
 /**
- * Create GCS storage (with lazy module loading)
+ * Create GCS storage (with lazy module loading and instance caching)
  */
 function createGCSStorage(config: GCSStorageConfig): Storage {
+  let cachedStorage: Storage | null = null;
+
   return new Proxy({} as Storage, {
     get(_target, prop) {
       return async (...args: any[]) => {
-        const { GCSStorage } = await import('./gcs');
-        const storage = new GCSStorage(config);
-        return (storage as any)[prop](...args);
+        if (!cachedStorage) {
+          const { GCSStorage } = await import('./gcs');
+          cachedStorage = new GCSStorage(config);
+        }
+        return (cachedStorage as any)[prop](...args);
       };
     },
   });
 }
 
 /**
- * Create Google Drive storage (with lazy module loading)
+ * Create Google Drive storage (with lazy module loading and instance caching)
  */
 function createGDriveStorage(config: GDriveStorageConfig): Storage {
+  let cachedStorage: Storage | null = null;
+
   return new Proxy({} as Storage, {
     get(_target, prop) {
       return async (...args: any[]) => {
-        const { GDriveStorage } = await import('./gdrive');
-        const storage = new GDriveStorage(config);
-        return (storage as any)[prop](...args);
+        if (!cachedStorage) {
+          const { GDriveStorage } = await import('./gdrive');
+          cachedStorage = new GDriveStorage(config);
+        }
+        return (cachedStorage as any)[prop](...args);
       };
     },
   });
