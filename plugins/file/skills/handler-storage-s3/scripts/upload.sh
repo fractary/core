@@ -33,25 +33,32 @@ if [[ -n "$ACCESS_KEY" ]] && [[ -n "$SECRET_KEY" ]]; then
 fi
 export AWS_DEFAULT_REGION="$REGION"
 
-# Build endpoint argument
-ENDPOINT_ARG=""
+# Build optional arguments as arrays (safe from shell injection)
+ENDPOINT_ARGS=()
 if [[ -n "$ENDPOINT" ]]; then
-    ENDPOINT_ARG="--endpoint-url $ENDPOINT"
+    ENDPOINT_ARGS=("--endpoint-url" "$ENDPOINT")
 fi
 
-# Determine ACL
-ACL_FLAG=""
+ACL_ARGS=()
 if [[ "$PUBLIC" == "true" ]]; then
-    ACL_FLAG="--acl public-read"
+    ACL_ARGS=("--acl" "public-read")
 fi
 
 # Upload file
-if ! eval aws s3 cp \"$LOCAL_PATH\" \"s3://${BUCKET_NAME}/${REMOTE_PATH}\" \
-    $ENDPOINT_ARG \
-    $ACL_FLAG \
+if ! aws s3 cp "$LOCAL_PATH" "s3://${BUCKET_NAME}/${REMOTE_PATH}" \
+    "${ENDPOINT_ARGS[@]}" \
+    "${ACL_ARGS[@]}" \
     2>&1; then
     echo "Error: Failed to upload file to S3" >&2
     exit 12
+fi
+
+# Verify upload - ensure file actually arrived in S3
+if ! aws s3 ls "s3://${BUCKET_NAME}/${REMOTE_PATH}" \
+    "${ENDPOINT_ARGS[@]}" \
+    >/dev/null 2>&1; then
+    echo "Error: Upload verification failed - file not found in S3 after upload" >&2
+    exit 13
 fi
 
 # Calculate metadata
@@ -80,8 +87,8 @@ if [[ "$PUBLIC" == "true" ]]; then
     fi
 else
     # Presigned URL (24 hours)
-    URL=$(eval aws s3 presign \"s3://${BUCKET_NAME}/${REMOTE_PATH}\" \
-        $ENDPOINT_ARG \
+    URL=$(aws s3 presign "s3://${BUCKET_NAME}/${REMOTE_PATH}" \
+        "${ENDPOINT_ARGS[@]}" \
         --expires-in 86400 2>/dev/null || echo "s3://${BUCKET_NAME}/${REMOTE_PATH}")
 fi
 

@@ -49,6 +49,14 @@ if ! aws s3 cp "$LOCAL_PATH" "s3://${BUCKET_NAME}/${REMOTE_PATH}" \
     exit 12
 fi
 
+# Verify upload - ensure file actually arrived in R2
+if ! aws s3 ls "s3://${BUCKET_NAME}/${REMOTE_PATH}" \
+    --endpoint-url "$R2_ENDPOINT" \
+    >/dev/null 2>&1; then
+    echo "Error: Upload verification failed - file not found in R2 after upload" >&2
+    exit 13
+fi
+
 # Calculate metadata
 if SIZE=$(stat -c%s "$LOCAL_PATH" 2>/dev/null); then
     :
