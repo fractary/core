@@ -16,6 +16,7 @@ import type {
   LogManager,
   FileManager,
   DocsManager,
+  StorageConfig,
 } from '@fractary/core';
 
 /**
@@ -112,19 +113,93 @@ export async function getLogManager(config?: any): Promise<LogManager> {
 }
 
 /**
- * Get FileManager instance (lazy-loaded with dynamic import)
+ * Options for creating a FileManager instance
  */
-export async function getFileManager(config?: any): Promise<FileManager> {
-  if (!instances.file) {
-    try {
-      // Dynamic import to avoid loading SDK at module load time
-      const { FileManager } = await import('@fractary/core/dist/file');
-      instances.file = new FileManager(config);
-    } catch (error) {
-      throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
-    }
+export interface FileManagerOptions {
+  /**
+   * Named source from config.yaml (e.g., 'specs', 'logs')
+   * If provided, uses the source configuration from .fractary/config.yaml
+   */
+  source?: string;
+
+  /**
+   * Base path for local storage (used if no source is specified)
+   */
+  basePath?: string;
+
+  /**
+   * Direct storage configuration (overrides source and basePath)
+   */
+  storageConfig?: StorageConfig;
+}
+
+/**
+ * Get FileManager instance (lazy-loaded with dynamic import)
+ *
+ * Supports multiple configuration modes:
+ * 1. Named source: getFileManager({ source: 'specs' }) - uses config.yaml source
+ * 2. Base path: getFileManager({ basePath: './files' }) - local storage
+ * 3. Storage config: getFileManager({ storageConfig: { type: 's3', ... } }) - explicit config
+ * 4. Default: getFileManager() - local storage at .fractary/files
+ */
+export async function getFileManager(options?: FileManagerOptions): Promise<FileManager> {
+  // If requesting a specific source, don't cache (different sources = different instances)
+  const cacheKey = options?.source || options?.storageConfig?.type || 'default';
+
+  // For now, only cache the default instance
+  if (cacheKey === 'default' && instances.file) {
+    return instances.file;
   }
-  return instances.file;
+
+  try {
+    // Dynamic import to avoid loading SDK at module load time
+    const { FileManager, createStorageFromSource } = await import('@fractary/core/dist/file');
+    const { loadFileConfig } = await import('@fractary/core/dist/common/config');
+
+    let fileManager: FileManager;
+
+    if (options?.storageConfig) {
+      // Direct storage configuration
+      fileManager = new FileManager({ storageConfig: options.storageConfig });
+    } else if (options?.source) {
+      // Load from named source in config.yaml
+      const fileConfig = loadFileConfig();
+      if (fileConfig?.sources?.[options.source]) {
+        const storage = createStorageFromSource(options.source, fileConfig);
+        fileManager = new FileManager({ storage });
+      } else {
+        throw new Error(
+          `Source '${options.source}' not found in configuration. ` +
+            `Available sources: ${Object.keys(fileConfig?.sources || {}).join(', ') || 'none'}`
+        );
+      }
+    } else if (options?.basePath) {
+      // Local storage with custom base path
+      fileManager = new FileManager({ basePath: options.basePath });
+    } else {
+      // Default: local storage
+      fileManager = new FileManager();
+    }
+
+    // Cache default instance
+    if (cacheKey === 'default') {
+      instances.file = fileManager;
+    }
+
+    return fileManager;
+  } catch (error) {
+    throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
+  }
+}
+
+/**
+ * Get FileManager for a specific source from config.yaml
+ *
+ * @param sourceName - Name of the source (e.g., 'specs', 'logs')
+ * @returns FileManager configured for the specified source
+ */
+export async function getFileManagerForSource(sourceName: string): Promise<FileManager> {
+  return getFileManager({ source: sourceName });
 }
 
 /**

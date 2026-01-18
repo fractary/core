@@ -31,6 +31,23 @@ export interface Config {
   };
   file?: {
     basePath?: string;
+    sources?: Record<string, {
+      type: 'local' | 's3' | 'r2' | 'gcs' | 'gdrive';
+      bucket?: string;
+      prefix?: string;
+      region?: string;
+      projectId?: string;
+      accountId?: string;
+      folderId?: string;
+      local?: { basePath: string };
+      auth?: {
+        profile?: string;
+        accessKeyId?: string;
+        secretAccessKey?: string;
+        keyFilePath?: string;
+      };
+      publicUrl?: string;
+    }>;
   };
   docs?: {
     docsDir?: string;
