@@ -54,6 +54,14 @@ if ! eval aws s3 cp \"$LOCAL_PATH\" \"s3://${BUCKET_NAME}/${REMOTE_PATH}\" \
     exit 12
 fi
 
+# Verify upload - ensure file actually arrived in S3
+if ! eval aws s3 ls \"s3://${BUCKET_NAME}/${REMOTE_PATH}\" \
+    $ENDPOINT_ARG \
+    >/dev/null 2>&1; then
+    echo "Error: Upload verification failed - file not found in S3 after upload" >&2
+    exit 13
+fi
+
 # Calculate metadata
 if SIZE=$(stat -c%s "$LOCAL_PATH" 2>/dev/null); then
     :

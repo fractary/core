@@ -38,6 +38,14 @@ if ! gcloud storage cp "$LOCAL_PATH" "gs://${BUCKET_NAME}/${REMOTE_PATH}" \
     exit 12
 fi
 
+# Verify upload - ensure file actually arrived in GCS
+if ! gcloud storage ls "gs://${BUCKET_NAME}/${REMOTE_PATH}" \
+    --project="$PROJECT_ID" \
+    >/dev/null 2>&1; then
+    echo "Error: Upload verification failed - file not found in GCS after upload" >&2
+    exit 13
+fi
+
 # Make public if requested
 if [[ "$PUBLIC" == "true" ]]; then
     if command -v gsutil >/dev/null 2>&1; then

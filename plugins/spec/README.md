@@ -766,9 +766,17 @@ Same as parent repository.
 
 ## Version
 
-1.0.1 - Bug fixes for cloud archive upload
+2.0.6 - Upload verification and defense in depth
 
 ## Changelog
+
+### 2.0.6
+
+- **security**: Add upload verification to all cloud storage handlers (S3, R2, GCS)
+- **security**: Exit code 13 for upload verification failures
+- **reliability**: Agent now performs independent verification after upload scripts return
+- **reliability**: Defense in depth - local files only deleted after cloud verification confirms success
+- **docs**: Added UPLOAD_VERIFICATION section to spec-archive agent with verification instructions
 
 ### 1.0.1
 

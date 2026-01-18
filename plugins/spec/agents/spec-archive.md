@@ -20,6 +20,8 @@ You support two archive modes: cloud storage (preferred) or local archive (fallb
 3. FALLBACK to local archive when cloud storage is not configured
 4. ALWAYS comment on GitHub issue with archive location
 5. MUST use the archive scripts - NEVER do manual file copies. The scripts handle both archiving AND removal of originals.
+6. ALWAYS verify upload success INDEPENDENTLY after upload-to-cloud.sh returns - NEVER trust script output alone
+7. NEVER delete local files until independent verification confirms file exists in cloud storage
 </CRITICAL_RULES>
 
 <ARCHIVE_MODE_DETECTION>
@@ -73,9 +75,10 @@ This ensures Codex can reference files consistently regardless of storage locati
    **Cloud Mode:**
    a. Determine cloud path: archive/specs/{filename} (same filename as original)
    b. Call plugins/spec/scripts/upload-to-cloud.sh <local_path> <cloud_path>
-      - Script uploads to cloud AND removes original file on success
    c. Parse JSON response to get cloud_url
-   d. Add to archive metadata with cloud_url
+   d. **CRITICAL: Verify upload independently** (see UPLOAD_VERIFICATION section)
+   e. Only if verification succeeds: add to archive metadata with cloud_url
+   f. If verification fails: DO NOT delete local file, report error
 
    **Local Mode:**
    a. Determine local archive path: .fractary/specs/archive/{filename} (same filename as original)
@@ -143,3 +146,64 @@ RESULT=$(plugins/spec/scripts/archive-local.sh \
 ARCHIVE_PATH=$(echo "$RESULT" | jq -r '.archive_path')
 ```
 </SCRIPTS_USAGE>
+
+<UPLOAD_VERIFICATION>
+**CRITICAL: Defense in Depth for Cloud Uploads**
+
+After upload-to-cloud.sh returns, you MUST verify the upload independently before considering it successful.
+The upload script now includes verification (exit code 13 = verification failed), but as a defense-in-depth measure,
+you should ALSO verify independently since the script could have bugs or the user might have an old version.
+
+**Why This Matters:**
+- Old script versions may have `|| true` that silently swallows errors
+- Scripts report success based on their exit code, but may not verify file exists
+- Network issues can cause partial uploads
+- Data loss is PERMANENT if you delete local file before confirming cloud upload
+
+**Verification Steps (Cloud Mode Only):**
+
+1. **After upload-to-cloud.sh returns successfully**, run independent verification:
+
+   **For S3:**
+   ```bash
+   aws s3 ls "s3://{bucket}/{cloud_path}" --region {region}
+   ```
+
+   **For R2:**
+   ```bash
+   aws s3 ls "s3://{bucket}/{cloud_path}" --endpoint-url "https://{account_id}.r2.cloudflarestorage.com"
+   ```
+
+   **For GCS:**
+   ```bash
+   gcloud storage ls "gs://{bucket}/{cloud_path}"
+   ```
+
+2. **Check verification result:**
+   - If command succeeds (file found): Upload verified, safe to proceed
+   - If command fails (file not found): Upload FAILED - DO NOT delete local file
+
+3. **On verification failure:**
+   - Report error to user: "Upload verification failed - file not found in cloud storage"
+   - Keep local file intact
+   - Do NOT add to archive metadata
+   - Suggest user check cloud storage configuration and credentials
+
+**Example Verification Flow:**
+```bash
+# After upload-to-cloud.sh succeeds
+CLOUD_PATH="archive/specs/WORK-00123.md"
+BUCKET="my-bucket"
+REGION="us-east-1"
+
+# Independent verification
+if aws s3 ls "s3://${BUCKET}/${CLOUD_PATH}" --region "$REGION" >/dev/null 2>&1; then
+    echo "✓ Upload verified - file confirmed in S3"
+    # Safe to proceed with metadata update and local cleanup
+else
+    echo "✗ Upload verification FAILED - file not found in S3"
+    echo "Local file preserved at: .fractary/specs/WORK-00123.md"
+    # DO NOT delete local file or update metadata
+fi
+```
+</UPLOAD_VERIFICATION>
