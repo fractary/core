@@ -191,19 +191,10 @@ Download file from configured cloud storage.
 ./skills/file-manager/scripts/pull.sh specs archive/SPEC-001.md ./SPEC-001.md
 ```
 
-## Migration from Handler Skills
+## Architecture
 
-The previous architecture used separate handler skills (handler-storage-s3, handler-storage-gcs, etc.)
-with shell scripts for each provider. The new SDK-backed approach consolidates this:
+All storage operations are handled through the @fractary/core SDK:
 
-**Before** (Handler Pattern):
-```
-file-manager Skill → handler-storage-s3 Skill → scripts/upload.sh (calls aws cli)
-file-manager Skill → handler-storage-gcs Skill → scripts/upload.sh (calls gcloud)
-file-manager Skill → handler-storage-r2 Skill → scripts/upload.sh (calls aws cli)
-```
-
-**After** (SDK Pattern):
 ```
 file-manager Skill → SDK Storage Factory → S3Storage/GCSStorage/R2Storage/etc.
 ```
@@ -213,12 +204,7 @@ file-manager Skill → SDK Storage Factory → S3Storage/GCSStorage/R2Storage/et
 - Type-safe TypeScript implementation
 - Consistent error handling across all providers
 - Easier testing and maintenance
-- No shell script maintenance
-
-**Compatibility**:
-- Handler skills still work for backward compatibility
-- Configuration format unchanged
-- Gradual migration supported
+- Works across CLI, MCP, and plugin contexts
 
 ## Dependencies
 

@@ -4,7 +4,7 @@ Multi-provider file storage plugin with unified interface across Local, R2, S3, 
 
 ## Overview
 
-The `fractary-file` plugin provides a unified interface for file storage operations across multiple storage providers. It uses a **handler pattern** architecture to support different storage backends while maintaining a consistent API.
+The `fractary-file` plugin provides a unified interface for file storage operations across multiple storage providers. It uses the **@fractary/core SDK** to handle all storage backends through a single, type-safe implementation.
 
 ### Key Features
 
@@ -174,44 +174,31 @@ vim .fractary/config.yaml
 
 ## Architecture
 
-The plugin uses a **three-layer architecture** for context efficiency and maintainability:
+The plugin uses the **@fractary/core SDK** for all storage operations:
 
 ```
 ┌─────────────────────────────────────┐
-│  Layer 1: file-manager Agent       │  ← Decision logic, validation
-│  (agents/file-manager.md)          │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│  Layer 2: file-manager Skill        │  ← Handler routing, config loading
+│  file-manager Skill                 │  ← Orchestration, validation
 │  (skills/file-manager/SKILL.md)    │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│  Layer 3: Handler Skills            │  ← Provider-specific operations
-│  (skills/handler-storage-*)        │
-│  - handler-storage-local            │
-│  - handler-storage-r2               │
-│  - handler-storage-s3               │
-│  - handler-storage-gcs              │
-│  - handler-storage-gdrive           │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│  Scripts (Pure Execution)           │  ← NOT in LLM context
-│  (skills/handler-storage-*/scripts)│
-│  - upload.sh, download.sh, etc.     │
+│  @fractary/core SDK                 │  ← Storage implementations
+│  - S3Storage                        │
+│  - R2Storage                        │
+│  - GCSStorage                       │
+│  - GDriveStorage                    │
+│  - LocalStorage                     │
 └─────────────────────────────────────┘
 ```
 
 **Benefits**:
-- **55-60% context reduction** (scripts outside LLM context)
-- **Easy to extend** (add new handler = add new skill + scripts)
-- **Clear separation** of concerns (routing vs execution)
-- **Independent handlers** (providers don't affect each other)
+- **Single source of truth** for all storage logic
+- **Type-safe TypeScript** implementations
+- **Consistent error handling** across providers
+- **Unified interface** for CLI, MCP, and plugins
+- **Lazy-loaded SDKs** - only loads what you need
 
 ## Operations
 
@@ -696,80 +683,53 @@ The fractary-codex plugin can read archived content via the `read` operation wit
 
 ```
 plugins/file/
-├── .claude-plugin/
-│   └── plugin.json               # Plugin manifest
 ├── agents/
-│   └── file-manager.md           # Orchestration agent (Layer 1)
+│   └── file-*.md                 # Orchestration agents
 ├── commands/
-│   └── (future: init, show-config, test-connection)
+│   └── *.md                      # CLI commands
 ├── config/
 │   └── config.example.json       # Configuration template
 ├── skills/
 │   ├── common/
-│   │   └── functions.sh          # Shared utilities (19 functions)
-│   ├── file-manager/             # Routing skill (Layer 2)
-│   │   ├── SKILL.md
-│   │   ├── workflow/
-│   │   │   ├── route-operation.md      # 9-step routing process
-│   │   │   └── validate-config.md      # 8-step validation
-│   │   └── docs/
-│   ├── handler-storage-local/    # Local filesystem handler
-│   │   ├── SKILL.md
-│   │   ├── scripts/              # 6 operations
-│   │   └── docs/
-│   ├── handler-storage-r2/       # Cloudflare R2 handler
-│   │   ├── SKILL.md
-│   │   ├── scripts/              # 6 operations
-│   │   └── docs/
-│   ├── handler-storage-s3/       # AWS S3 handler
-│   │   ├── SKILL.md
-│   │   ├── scripts/              # 6 operations
-│   │   └── docs/
-│   ├── handler-storage-gcs/      # Google Cloud Storage handler
-│   │   ├── SKILL.md
-│   │   ├── scripts/              # 6 operations
-│   │   └── docs/
-│   └── handler-storage-gdrive/   # Google Drive handler
-│       ├── SKILL.md
-│       ├── scripts/              # 6 operations
-│       └── docs/
-│           └── oauth-setup-guide.md    # Comprehensive OAuth guide
+│   │   └── functions.sh          # Shared utilities
+│   └── file-manager/             # Main skill (SDK-backed)
+│       ├── SKILL.md              # Skill documentation
+│       └── scripts/
+│           ├── storage.mjs       # Node.js SDK wrapper
+│           ├── push.sh           # Upload helper
+│           └── pull.sh           # Download helper
+├── archived/                     # Legacy handler skills
+│   └── skills/
+│       └── handler-storage-*/    # Old handler implementations
 └── README.md                     # This file
 ```
 
-## Adding New Handlers
+## Adding New Storage Providers
 
-To add a new storage provider:
+To add a new storage provider, implement it in the SDK:
 
-1. **Create handler directory**:
-   ```bash
-   mkdir -p plugins/file/skills/handler-storage-{provider}/{scripts,docs}
+1. **Create storage implementation** in `sdk/js/src/file/`:
+   ```typescript
+   // sdk/js/src/file/newprovider.ts
+   export class NewProviderStorage implements Storage {
+     async write(id: string, content: string): Promise<string> { ... }
+     async read(id: string): Promise<string | null> { ... }
+     async exists(id: string): Promise<boolean> { ... }
+     async list(prefix?: string): Promise<string[]> { ... }
+     async delete(id: string): Promise<void> { ... }
+     async getUrl?(id: string, expiresIn?: number): Promise<string | null> { ... }
+   }
    ```
 
-2. **Create SKILL.md** with handler metadata
+2. **Add configuration types** in `sdk/js/src/file/types.ts`
 
-3. **Implement 6 operation scripts**:
-   - `upload.sh`
-   - `download.sh`
-   - `delete.sh`
-   - `list.sh`
-   - `get-url.sh`
-   - `read.sh`
+3. **Update factory** in `sdk/js/src/file/factory.ts` to handle the new type
 
-4. **Follow the pattern**:
-   - Pure execution (no config loading in scripts)
-   - All parameters passed from skill
-   - Return structured JSON
-   - Cross-platform compatible
+4. **Export** from `sdk/js/src/file/index.ts`
 
-5. **Add documentation**:
-   - Setup guide in `docs/`
-   - Configuration examples
-   - Authentication instructions
+5. **Add optional peer dependency** if using a cloud SDK
 
-6. **Update routing**: Add handler case to `skills/file-manager/workflow/route-operation.md`
-
-See existing handlers for reference.
+The plugin will automatically support the new provider through the SDK.
 
 ## Troubleshooting
 
@@ -863,19 +823,31 @@ All cloud handlers implement retry with exponential backoff:
 
 ### Core
 
-- **bash** 4.0+
-- **jq** (JSON processing)
-- **envsubst** (environment variable expansion)
+- **Node.js** 18.0+
+- **@fractary/core** SDK
 
-### Per Handler
+### Cloud Storage SDKs (Optional)
 
-| Handler | CLI Tool | Version | Install |
-|---------|----------|---------|---------|
-| Local   | Native bash | Any | Built-in |
-| R2      | aws cli | 2.0+ | https://aws.amazon.com/cli/ |
-| S3      | aws cli | 2.0+ | https://aws.amazon.com/cli/ |
-| GCS     | gcloud  | Latest | https://cloud.google.com/sdk |
-| Google Drive | rclone | 1.50+ | https://rclone.org/install/ |
+Install only the SDKs you need:
+
+```bash
+# For S3 and R2
+npm install @aws-sdk/client-s3 @aws-sdk/credential-providers @aws-sdk/s3-request-presigner
+
+# For Google Cloud Storage
+npm install @google-cloud/storage
+
+# For Google Drive
+npm install googleapis
+```
+
+| Provider | npm Package | Authentication |
+|----------|-------------|----------------|
+| Local    | (none)      | Filesystem permissions |
+| S3       | @aws-sdk/client-s3 | IAM roles, profiles, or keys |
+| R2       | @aws-sdk/client-s3 | R2 API tokens |
+| GCS      | @google-cloud/storage | ADC or service account |
+| GDrive   | googleapis  | OAuth2 |
 
 ## Testing
 
