@@ -99,7 +99,7 @@ export interface DocTypeRegistryConfig {
   baseDir?: string;
 
   /**
-   * Path to core doc-types directory (defaults to bundled types)
+   * Path to core templates/docs directory (defaults to bundled types)
    */
   coreTypesPath?: string;
 
@@ -174,7 +174,7 @@ export class DocTypeRegistry {
     this.coreTypes = new Map();
     this.customTypes = new Map();
 
-    // Default to looking for doc-types relative to package root
+    // Default to looking for templates/docs relative to package root
     // When installed as a package, this should be resolved differently
     this.coreTypesPath =
       config?.coreTypesPath || this.findCoreTypesPath();
@@ -191,18 +191,18 @@ export class DocTypeRegistry {
   }
 
   /**
-   * Find the core doc-types directory
+   * Find the core templates/docs directory (templates/docs)
    */
   private findCoreTypesPath(): string {
     // Try common locations
     const candidates = [
       // Development: relative to SDK source
-      path.resolve(__dirname, '../../../../doc-types'),
+      path.resolve(__dirname, '../../../../templates/docs'),
       // Development: from repo root
-      path.resolve(process.cwd(), 'doc-types'),
+      path.resolve(process.cwd(), 'templates/docs'),
       // Installed package: look in parent directories
-      path.resolve(__dirname, '../../../../../doc-types'),
-      path.resolve(__dirname, '../../../../../../doc-types'),
+      path.resolve(__dirname, '../../../../../templates/docs'),
+      path.resolve(__dirname, '../../../../../../templates/docs'),
     ];
 
     for (const candidate of candidates) {
@@ -216,7 +216,7 @@ export class DocTypeRegistry {
   }
 
   /**
-   * Load all core doc types from the doc-types directory
+   * Load all core doc types from the templates/docs directory
    */
   private loadCoreTypes(): void {
     const manifestPath = path.join(this.coreTypesPath, 'manifest.yaml');
@@ -445,13 +445,13 @@ export class DocTypeRegistry {
    * Get the manifest URL for core types
    */
   static getCoreManifestUrl(): string {
-    return 'https://raw.githubusercontent.com/fractary/core/main/doc-types/manifest.yaml';
+    return 'https://raw.githubusercontent.com/fractary/core/main/templates/docs/manifest.yaml';
   }
 
   /**
    * Get the base URL for a specific core type
    */
   static getCoreTypeUrl(typeId: string): string {
-    return `https://raw.githubusercontent.com/fractary/core/main/doc-types/${typeId}`;
+    return `https://raw.githubusercontent.com/fractary/core/main/templates/docs/${typeId}`;
   }
 }

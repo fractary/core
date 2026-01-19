@@ -13,7 +13,7 @@
 version: "1.0"
 
 # Base URL for raw file access (used by remote tools/SDKs)
-base_url: https://raw.githubusercontent.com/fractary/core/main/doc-types
+base_url: https://raw.githubusercontent.com/fractary/core/main/templates/docs
 
 doc_types:
   - id: adr

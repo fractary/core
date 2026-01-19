@@ -1,9 +1,0 @@
-{
-  "index_file": "docs/CHANGELOG-INDEX.md",
-  "organization": "flat",
-  "group_by": [],
-  "sort_by": "project",
-  "sort_order": "asc",
-  "entry_template": "- [**{{project}}**]({{relative_path}}) - Last updated: {{date_updated}}",
-  "section_template": ""
-}

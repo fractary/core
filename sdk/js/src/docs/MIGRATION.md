@@ -4,10 +4,10 @@ This document describes how to migrate the `fractary-docs` plugin (in `claude-pl
 
 ## Architecture Overview
 
-Doc types are now stored as **language-agnostic YAML/Markdown files** in the `doc-types/` directory at the repository root:
+Doc types are now stored as **language-agnostic YAML/Markdown files** in the `templates/docs/` directory at the repository root:
 
 ```
-doc-types/
+templates/docs/
 ├── manifest.yaml           # Lists all core types with GitHub URLs
 ├── adr/
 │   ├── type.yaml          # Type definition (schema, frontmatter rules)
@@ -28,10 +28,10 @@ doc-types/
 ### GitHub URLs
 
 Core types are accessible at:
-- Manifest: `https://raw.githubusercontent.com/fractary/core/main/doc-types/manifest.yaml`
-- Type definition: `https://raw.githubusercontent.com/fractary/core/main/doc-types/{type}/type.yaml`
-- Template: `https://raw.githubusercontent.com/fractary/core/main/doc-types/{type}/template.md`
-- Standards: `https://raw.githubusercontent.com/fractary/core/main/doc-types/{type}/standards.md`
+- Manifest: `https://raw.githubusercontent.com/fractary/core/main/templates/docs/manifest.yaml`
+- Type definition: `https://raw.githubusercontent.com/fractary/core/main/templates/docs/{type}/type.yaml`
+- Template: `https://raw.githubusercontent.com/fractary/core/main/templates/docs/{type}/template.md`
+- Standards: `https://raw.githubusercontent.com/fractary/core/main/templates/docs/{type}/standards.md`
 
 ## Migration Steps
 
@@ -127,16 +127,16 @@ After migration, the following can be removed from the plugin:
 ```
 plugins/docs/types/
 ├── _untyped/     # Keep - special case
-├── adr/          # REMOVE - moved to doc-types/
-├── api/          # REMOVE - moved to doc-types/
-├── architecture/ # REMOVE - moved to doc-types/
-├── audit/        # REMOVE - moved to doc-types/
-├── dataset/      # REMOVE - moved to doc-types/
-├── etl/          # REMOVE - moved to doc-types/
-├── guides/       # REMOVE - moved to doc-types/
-├── infrastructure/ # REMOVE - moved to doc-types/
-├── standards/    # REMOVE - moved to doc-types/
-└── testing/      # REMOVE - moved to doc-types/
+├── adr/          # REMOVE - moved to templates/docs/
+├── api/          # REMOVE - moved to templates/docs/
+├── architecture/ # REMOVE - moved to templates/docs/
+├── audit/        # REMOVE - moved to templates/docs/
+├── dataset/      # REMOVE - moved to templates/docs/
+├── etl/          # REMOVE - moved to templates/docs/
+├── guides/       # REMOVE - moved to templates/docs/
+├── infrastructure/ # REMOVE - moved to templates/docs/
+├── standards/    # REMOVE - moved to templates/docs/
+└── testing/      # REMOVE - moved to templates/docs/
 ```
 
 ## Custom Doc Types
@@ -146,7 +146,7 @@ Projects can define custom doc types as directories:
 ### 1. Create type directory
 
 ```
-.fractary/doc-types/runbook/
+.fractary/templates/docs/runbook/
 ├── type.yaml      # Required: type definition
 ├── template.md    # Required: document template
 └── standards.md   # Optional: standards/conventions
@@ -200,9 +200,9 @@ status:
 docs:
   custom_types:
     - id: runbook
-      path: .fractary/doc-types/runbook
+      path: .fractary/templates/docs/runbook
     - id: postmortem
-      path: .fractary/doc-types/postmortem
+      path: .fractary/templates/docs/postmortem
 ```
 
 ### 4. Use via CLI
@@ -231,7 +231,7 @@ const adrType = registry.getType('adr');
 // Load custom type from URL
 await registry.loadCustomTypeFromUrl(
   'runbook',
-  'https://example.com/doc-types/runbook'
+  'https://example.com/templates/docs/runbook'
 );
 ```
 
@@ -240,7 +240,7 @@ await registry.loadCustomTypeFromUrl(
 ```typescript
 const registry = new DocTypeRegistry({
   customTypes: [
-    { id: 'runbook', path: '.fractary/doc-types/runbook' }
+    { id: 'runbook', path: '.fractary/templates/docs/runbook' }
   ]
 });
 ```
@@ -250,11 +250,11 @@ const registry = new DocTypeRegistry({
 ```typescript
 // Get manifest URL
 DocTypeRegistry.getCoreManifestUrl();
-// https://raw.githubusercontent.com/fractary/core/main/doc-types/manifest.yaml
+// https://raw.githubusercontent.com/fractary/core/main/templates/docs/manifest.yaml
 
 // Get type URL
 DocTypeRegistry.getCoreTypeUrl('adr');
-// https://raw.githubusercontent.com/fractary/core/main/doc-types/adr
+// https://raw.githubusercontent.com/fractary/core/main/templates/docs/adr
 ```
 
 ## CLI Commands Reference
