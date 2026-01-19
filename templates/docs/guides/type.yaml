@@ -1,0 +1,61 @@
+# How-to Guide Type Definition
+
+id: guides
+display_name: How-to Guide
+description: Step-by-step tutorials and how-to guides
+
+output_path: docs/guides
+
+file_naming:
+  pattern: "GUIDE-{slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - date
+  optional_fields:
+    - author
+    - difficulty
+    - time_required
+    - tags
+    - related
+    - prerequisites
+  defaults:
+    type: guides
+    difficulty: intermediate
+
+structure:
+  required_sections:
+    - Overview
+    - Prerequisites
+    - Steps
+  optional_sections:
+    - Verification
+    - Troubleshooting
+    - Next Steps
+    - Related Guides
+  section_order:
+    - Overview
+    - Prerequisites
+    - Steps
+    - Verification
+    - Troubleshooting
+    - Next Steps
+    - Related Guides
+
+status:
+  allowed_values:
+    - draft
+    - review
+    - published
+    - outdated
+  default: draft
+
+index_config:
+  index_file: docs/guides/README.md
+  sort_by: title
+  sort_order: asc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{difficulty}}"

@@ -1,8 +1,0 @@
-{
-  "index_file": "docs/datasets/README.md",
-  "organization": "flat",
-  "group_by": [],
-  "sort_by": "title",
-  "entry_template": "- [**{{title}}**]({{relative_path}}) - {{description_short}}",
-  "section_template": ""
-}

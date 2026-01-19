@@ -1,0 +1,66 @@
+# Infrastructure Documentation Type Definition
+
+id: infrastructure
+display_name: Infrastructure Documentation
+description: Infrastructure, deployment, and operations documentation
+
+output_path: docs/infrastructure
+
+file_naming:
+  pattern: "INFRA-{slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+  optional_fields:
+    - owner
+    - environment
+    - tags
+    - related
+    - provider
+  defaults:
+    type: infrastructure
+    status: draft
+
+structure:
+  required_sections:
+    - Overview
+    - Resources
+    - Deployment
+  optional_sections:
+    - Architecture
+    - Networking
+    - Security
+    - Monitoring
+    - Runbook
+    - Related
+  section_order:
+    - Overview
+    - Architecture
+    - Resources
+    - Networking
+    - Security
+    - Deployment
+    - Monitoring
+    - Runbook
+    - Related
+
+status:
+  allowed_values:
+    - draft
+    - review
+    - approved
+    - production
+    - deprecated
+  default: draft
+
+index_config:
+  index_file: docs/infrastructure/README.md
+  sort_by: title
+  sort_order: asc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{environment}} ({{status}})"

@@ -1,0 +1,83 @@
+# Core Doc Types Manifest
+#
+# This manifest lists all core document types available in Fractary.
+# The format matches .fractary/config.yaml's docs.custom_types section,
+# so users can extend with their own types using the same structure.
+#
+# Each type is a directory containing:
+#   - type.yaml     : Type definition (schema, frontmatter rules, file naming)
+#   - template.md   : Mustache template for document generation
+#   - standards.md  : Standards and conventions for this type
+#   - examples/     : (optional) Example documents
+
+version: "1.0"
+
+# Base URL for raw file access (used by remote tools/SDKs)
+base_url: https://raw.githubusercontent.com/fractary/core/main/templates/docs
+
+doc_types:
+  - id: adr
+    display_name: Architecture Decision Record
+    description: Documents significant architectural decisions, their context, and consequences
+    path: ./adr
+    url: ${base_url}/adr/type.yaml
+
+  - id: api
+    display_name: API Documentation
+    description: API reference documentation with endpoint specifications
+    path: ./api
+    url: ${base_url}/api/type.yaml
+
+  - id: architecture
+    display_name: Architecture Documentation
+    description: System architecture documentation with diagrams and component descriptions
+    path: ./architecture
+    url: ${base_url}/architecture/type.yaml
+
+  - id: audit
+    display_name: Audit Report
+    description: Security audits, compliance checks, and assessment reports
+    path: ./audit
+    url: ${base_url}/audit/type.yaml
+
+  - id: changelog
+    display_name: Changelog
+    description: Version history and release notes documentation
+    path: ./changelog
+    url: ${base_url}/changelog/type.yaml
+
+  - id: dataset
+    display_name: Dataset Documentation
+    description: Data schema and dataset documentation
+    path: ./dataset
+    url: ${base_url}/dataset/type.yaml
+
+  - id: etl
+    display_name: ETL Pipeline Documentation
+    description: ETL and data pipeline documentation
+    path: ./etl
+    url: ${base_url}/etl/type.yaml
+
+  - id: guides
+    display_name: How-To Guide
+    description: Step-by-step guides and tutorials
+    path: ./guides
+    url: ${base_url}/guides/type.yaml
+
+  - id: infrastructure
+    display_name: Infrastructure Documentation
+    description: Infrastructure, deployment, and operations documentation
+    path: ./infrastructure
+    url: ${base_url}/infrastructure/type.yaml
+
+  - id: standards
+    display_name: Standards & Conventions
+    description: Coding standards, style guides, and team conventions
+    path: ./standards
+    url: ${base_url}/standards/type.yaml
+
+  - id: testing
+    display_name: Testing Documentation
+    description: Test plans, test results, and QA documentation
+    path: ./testing
+    url: ${base_url}/testing/type.yaml

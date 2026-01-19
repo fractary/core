@@ -1,0 +1,66 @@
+# ETL Pipeline Documentation Type Definition
+
+id: etl
+display_name: ETL Pipeline Documentation
+description: Data pipeline and ETL job documentation
+
+output_path: docs/etl
+
+file_naming:
+  pattern: "ETL-{slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+  optional_fields:
+    - owner
+    - schedule
+    - tags
+    - related
+    - dependencies
+  defaults:
+    type: etl
+    status: draft
+
+structure:
+  required_sections:
+    - Overview
+    - Sources
+    - Transformations
+    - Destinations
+  optional_sections:
+    - Pipeline Diagram
+    - Schedule
+    - Monitoring
+    - Error Handling
+    - Related Pipelines
+  section_order:
+    - Overview
+    - Pipeline Diagram
+    - Sources
+    - Transformations
+    - Destinations
+    - Schedule
+    - Monitoring
+    - Error Handling
+    - Related Pipelines
+
+status:
+  allowed_values:
+    - draft
+    - development
+    - staging
+    - production
+    - deprecated
+  default: draft
+
+index_config:
+  index_file: docs/etl/README.md
+  sort_by: title
+  sort_order: asc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{status}}"

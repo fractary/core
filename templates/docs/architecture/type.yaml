@@ -1,0 +1,63 @@
+# Architecture Documentation Type Definition
+
+id: architecture
+display_name: Architecture Documentation
+description: System architecture and design documentation
+
+output_path: docs/architecture
+
+file_naming:
+  pattern: "ARCH-{slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+  optional_fields:
+    - author
+    - reviewers
+    - tags
+    - related
+    - version
+  defaults:
+    type: architecture
+    status: draft
+
+structure:
+  required_sections:
+    - Overview
+    - Components
+    - Data Flow
+  optional_sections:
+    - Architecture Diagram
+    - Technology Stack
+    - Security Considerations
+    - Scalability
+    - Related Documents
+  section_order:
+    - Overview
+    - Architecture Diagram
+    - Components
+    - Data Flow
+    - Technology Stack
+    - Security Considerations
+    - Scalability
+    - Related Documents
+
+status:
+  allowed_values:
+    - draft
+    - review
+    - approved
+    - deprecated
+  default: draft
+
+index_config:
+  index_file: docs/architecture/README.md
+  sort_by: title
+  sort_order: asc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{status}}"

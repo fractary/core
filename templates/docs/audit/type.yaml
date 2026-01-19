@@ -1,0 +1,61 @@
+# Audit Report Type Definition
+
+id: audit
+display_name: Audit Report
+description: Security audits, compliance checks, and quality assessments
+
+output_path: docs/audits
+
+file_naming:
+  pattern: "AUDIT-{date}-{slug}.md"
+  slug_source: title
+  slug_max_length: 40
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+    - auditor
+  optional_fields:
+    - scope
+    - tags
+    - related
+    - next_audit_date
+  defaults:
+    type: audit
+    status: draft
+
+structure:
+  required_sections:
+    - Executive Summary
+    - Scope
+    - Findings
+    - Summary
+  optional_sections:
+    - Methodology
+    - Recommendations
+    - Appendix
+  section_order:
+    - Executive Summary
+    - Scope
+    - Methodology
+    - Findings
+    - Summary
+    - Recommendations
+    - Appendix
+
+status:
+  allowed_values:
+    - draft
+    - review
+    - final
+    - archived
+  default: draft
+
+index_config:
+  index_file: docs/audits/README.md
+  sort_by: date
+  sort_order: desc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{date}} ({{status}})"

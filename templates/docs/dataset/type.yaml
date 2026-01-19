@@ -1,0 +1,63 @@
+# Dataset Documentation Type Definition
+
+id: dataset
+display_name: Dataset Documentation
+description: Data schema documentation and field definitions
+
+output_path: docs/data
+
+file_naming:
+  pattern: "DATA-{slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+  optional_fields:
+    - owner
+    - version
+    - tags
+    - related
+    - source
+  defaults:
+    type: dataset
+    status: draft
+
+structure:
+  required_sections:
+    - Overview
+    - Schema
+  optional_sections:
+    - Relationships
+    - Indexes
+    - Data Sources
+    - Data Quality
+    - Sample Data
+    - Related Datasets
+  section_order:
+    - Overview
+    - Schema
+    - Relationships
+    - Indexes
+    - Data Sources
+    - Data Quality
+    - Sample Data
+    - Related Datasets
+
+status:
+  allowed_values:
+    - draft
+    - review
+    - approved
+    - deprecated
+  default: draft
+
+index_config:
+  index_file: docs/data/README.md
+  sort_by: title
+  sort_order: asc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{status}}"

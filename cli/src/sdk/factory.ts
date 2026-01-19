@@ -17,6 +17,7 @@ import type {
   FileManager,
   DocsManager,
   StorageConfig,
+  DocTypeRegistry,
 } from '@fractary/core';
 
 /**
@@ -29,6 +30,7 @@ interface SDKInstances {
   logs?: LogManager;
   file?: FileManager;
   docs?: DocsManager;
+  docTypeRegistry?: DocTypeRegistry;
 }
 
 const instances: SDKInstances = {};
@@ -55,7 +57,7 @@ export async function getWorkManager(config?: any): Promise<WorkManager> {
   if (!instances.work) {
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { WorkManager } = await import('@fractary/core/dist/work');
+      const { WorkManager } = await import('@fractary/core/work');
       instances.work = new WorkManager(config);
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
@@ -71,7 +73,7 @@ export async function getRepoManager(config?: any): Promise<RepoManager> {
   if (!instances.repo) {
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { RepoManager } = await import('@fractary/core/dist/repo');
+      const { RepoManager } = await import('@fractary/core/repo');
       instances.repo = new RepoManager(config);
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
@@ -87,7 +89,7 @@ export async function getSpecManager(config?: any): Promise<SpecManager> {
   if (!instances.spec) {
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { SpecManager } = await import('@fractary/core/dist/spec');
+      const { SpecManager } = await import('@fractary/core/spec');
       instances.spec = new SpecManager(config);
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
@@ -103,7 +105,7 @@ export async function getLogManager(config?: any): Promise<LogManager> {
   if (!instances.logs) {
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { LogManager } = await import('@fractary/core/dist/logs');
+      const { LogManager } = await import('@fractary/core/logs');
       instances.logs = new LogManager(config);
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
@@ -153,8 +155,8 @@ export async function getFileManager(options?: FileManagerOptions): Promise<File
 
   try {
     // Dynamic import to avoid loading SDK at module load time
-    const { FileManager, createStorageFromSource } = await import('@fractary/core/dist/file');
-    const { loadFileConfig } = await import('@fractary/core/dist/common/config');
+    const { FileManager, createStorageFromSource } = await import('@fractary/core/file');
+    const { loadFileConfig } = await import('@fractary/core/common/config');
 
     let fileManager: FileManager;
 
@@ -209,13 +211,34 @@ export async function getDocsManager(config?: any): Promise<DocsManager> {
   if (!instances.docs) {
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { DocsManager } = await import('@fractary/core/dist/docs');
-      instances.docs = new DocsManager(config);
+      const { DocsManager } = await import('@fractary/core/docs');
+      // Provide sensible defaults if no config is provided
+      const docsConfig = config || {
+        docsDir: process.env.FRACTARY_DOCS_DIR || './docs',
+        metadataMode: 'frontmatter',
+      };
+      instances.docs = new DocsManager(docsConfig);
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
     }
   }
   return instances.docs;
+}
+
+/**
+ * Get DocTypeRegistry instance (lazy-loaded with dynamic import)
+ */
+export async function getDocTypeRegistry(config?: any): Promise<DocTypeRegistry> {
+  if (!instances.docTypeRegistry) {
+    try {
+      // Dynamic import to avoid loading SDK at module load time
+      const { DocTypeRegistry } = await import('@fractary/core/docs');
+      instances.docTypeRegistry = new DocTypeRegistry(config);
+    } catch (error) {
+      throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
+    }
+  }
+  return instances.docTypeRegistry;
 }
 
 /**
@@ -228,6 +251,7 @@ export function clearInstances(): void {
   instances.logs = undefined;
   instances.file = undefined;
   instances.docs = undefined;
+  instances.docTypeRegistry = undefined;
 }
 
 /**

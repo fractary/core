@@ -1,0 +1,61 @@
+# Standards & Conventions Type Definition
+
+id: standards
+display_name: Standards & Conventions
+description: Coding standards, style guides, and team conventions
+
+output_path: docs/standards
+
+file_naming:
+  pattern: "STD-{slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+  optional_fields:
+    - owner
+    - applies_to
+    - tags
+    - related
+    - version
+  defaults:
+    type: standards
+    status: draft
+
+structure:
+  required_sections:
+    - Overview
+    - Standards
+  optional_sections:
+    - Scope
+    - Exceptions
+    - Enforcement
+    - References
+    - Changelog
+  section_order:
+    - Overview
+    - Scope
+    - Standards
+    - Exceptions
+    - Enforcement
+    - References
+    - Changelog
+
+status:
+  allowed_values:
+    - draft
+    - review
+    - approved
+    - deprecated
+  default: draft
+
+index_config:
+  index_file: docs/standards/README.md
+  sort_by: title
+  sort_order: asc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{status}}"
