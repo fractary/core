@@ -1,0 +1,65 @@
+# Testing Documentation Type Definition
+
+id: testing
+display_name: Testing Documentation
+description: Test plans, test results, and QA documentation
+
+output_path: docs/testing
+
+file_naming:
+  pattern: "TEST-{slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+  optional_fields:
+    - tester
+    - version
+    - tags
+    - related
+    - test_type
+  defaults:
+    type: testing
+    status: draft
+
+structure:
+  required_sections:
+    - Overview
+    - Test Scope
+    - Test Cases
+    - Results Summary
+  optional_sections:
+    - Test Environment
+    - Test Data
+    - Issues Found
+    - Recommendations
+    - Sign-off
+  section_order:
+    - Overview
+    - Test Scope
+    - Test Environment
+    - Test Cases
+    - Test Data
+    - Results Summary
+    - Issues Found
+    - Recommendations
+    - Sign-off
+
+status:
+  allowed_values:
+    - draft
+    - in_progress
+    - completed
+    - signed_off
+  default: draft
+
+index_config:
+  index_file: docs/testing/README.md
+  sort_by: date
+  sort_order: desc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{status}} ({{results.pass_rate}})"

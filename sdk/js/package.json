@@ -1,11 +1,14 @@
 {
   "name": "@fractary/core",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Fractary Core SDK - Primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "typesVersions": {
     "*": {
+      "common/config": [
+        "dist/common/config.d.ts"
+      ],
       "common/yaml-config": [
         "dist/common/yaml-config.d.ts"
       ],
@@ -61,6 +64,10 @@
     "./common/yaml-config": {
       "types": "./dist/common/yaml-config.d.ts",
       "default": "./dist/common/yaml-config.js"
+    },
+    "./common/config": {
+      "types": "./dist/common/config.d.ts",
+      "default": "./dist/common/config.js"
     }
   },
   "files": [

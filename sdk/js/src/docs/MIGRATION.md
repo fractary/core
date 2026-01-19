@@ -2,13 +2,36 @@
 
 This document describes how to migrate the `fractary-docs` plugin (in `claude-plugins` repository) to use the new SDK/CLI doc type system.
 
-## Overview
+## Architecture Overview
 
-The docs plugin previously maintained its own doc type definitions in `plugins/docs/types/`. These have now been moved to the SDK with CLI access, enabling:
+Doc types are now stored as **language-agnostic YAML/Markdown files** in the `doc-types/` directory at the repository root:
 
-1. **CLI doc type commands**: `fractary-core docs types`, `fractary-core docs type-info <type>`
-2. **SDK DocTypeRegistry**: Programmatic access to doc types
-3. **Custom types via config**: Projects can define custom doc types in `.fractary/config.yaml`
+```
+doc-types/
+├── manifest.yaml           # Lists all core types with GitHub URLs
+├── adr/
+│   ├── type.yaml          # Type definition (schema, frontmatter rules)
+│   ├── template.md        # Mustache template for document generation
+│   └── standards.md       # Standards and conventions
+├── api/
+│   └── ...
+└── ...
+```
+
+### Benefits
+
+- **Language agnostic**: Any SDK (JS, Python, etc.) can parse YAML/Markdown
+- **GitHub referenceable**: Types can be fetched via raw GitHub URLs
+- **Easy custom types**: Users create a directory with `type.yaml` + `template.md`
+- **Multi-file ready**: Directory structure supports future expansion
+
+### GitHub URLs
+
+Core types are accessible at:
+- Manifest: `https://raw.githubusercontent.com/fractary/core/main/doc-types/manifest.yaml`
+- Type definition: `https://raw.githubusercontent.com/fractary/core/main/doc-types/{type}/type.yaml`
+- Template: `https://raw.githubusercontent.com/fractary/core/main/doc-types/{type}/template.md`
+- Standards: `https://raw.githubusercontent.com/fractary/core/main/doc-types/{type}/standards.md`
 
 ## Migration Steps
 
@@ -104,47 +127,134 @@ After migration, the following can be removed from the plugin:
 ```
 plugins/docs/types/
 ├── _untyped/     # Keep - special case
-├── adr/          # REMOVE - moved to SDK
-├── api/          # REMOVE - moved to SDK
-├── architecture/ # REMOVE - moved to SDK
-├── audit/        # REMOVE - moved to SDK
-├── dataset/      # REMOVE - moved to SDK
-├── etl/          # REMOVE - moved to SDK
-├── guides/       # REMOVE - moved to SDK
-├── infrastructure/ # REMOVE - moved to SDK
-├── standards/    # REMOVE - moved to SDK
-└── testing/      # REMOVE - moved to SDK
+├── adr/          # REMOVE - moved to doc-types/
+├── api/          # REMOVE - moved to doc-types/
+├── architecture/ # REMOVE - moved to doc-types/
+├── audit/        # REMOVE - moved to doc-types/
+├── dataset/      # REMOVE - moved to doc-types/
+├── etl/          # REMOVE - moved to doc-types/
+├── guides/       # REMOVE - moved to doc-types/
+├── infrastructure/ # REMOVE - moved to doc-types/
+├── standards/    # REMOVE - moved to doc-types/
+└── testing/      # REMOVE - moved to doc-types/
 ```
 
-### 6. Config Support for Custom Types
+## Custom Doc Types
 
-Projects can now define custom doc types in `.fractary/config.yaml`:
+Projects can define custom doc types as directories:
+
+### 1. Create type directory
+
+```
+.fractary/doc-types/runbook/
+├── type.yaml      # Required: type definition
+├── template.md    # Required: document template
+└── standards.md   # Optional: standards/conventions
+```
+
+### 2. type.yaml format
+
+```yaml
+id: runbook
+display_name: Runbook
+description: Operational runbook documentation
+
+output_path: docs/runbooks
+
+file_naming:
+  pattern: "RUNBOOK-{slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - date
+  optional_fields:
+    - owner
+    - tags
+  defaults:
+    type: runbook
+    status: draft
+
+structure:
+  required_sections:
+    - Overview
+    - Steps
+  optional_sections:
+    - Prerequisites
+    - Troubleshooting
+
+status:
+  allowed_values:
+    - draft
+    - approved
+    - deprecated
+  default: draft
+```
+
+### 3. Configure in `.fractary/config.yaml`
 
 ```yaml
 docs:
   custom_types:
     - id: runbook
-      path: .fractary/doc-types/runbook.json
+      path: .fractary/doc-types/runbook
     - id: postmortem
-      path: .fractary/doc-types/postmortem.json
+      path: .fractary/doc-types/postmortem
 ```
 
-Custom type JSON format:
-```json
-{
-  "id": "runbook",
-  "displayName": "Runbook",
-  "description": "Operational runbook documentation",
-  "template": "# {{title}}\n\n## Overview\n...",
-  "outputPath": "docs/runbooks",
-  "fileNaming": {
-    "pattern": "RUNBOOK-{slug}.md"
-  },
-  "frontmatter": {
-    "requiredFields": ["title", "type", "date"],
-    "optionalFields": ["owner", "tags"]
-  }
-}
+### 4. Use via CLI
+
+```bash
+fractary-core docs types          # Lists runbook alongside core types
+fractary-core docs create my-runbook --doc-type runbook --title "Service Restart"
+```
+
+## SDK Usage
+
+### Load types programmatically
+
+```typescript
+import { DocTypeRegistry } from '@fractary/core/docs';
+
+// Load core types automatically
+const registry = new DocTypeRegistry();
+
+// Get all types
+const allTypes = registry.getAllTypes();
+
+// Get specific type
+const adrType = registry.getType('adr');
+
+// Load custom type from URL
+await registry.loadCustomTypeFromUrl(
+  'runbook',
+  'https://example.com/doc-types/runbook'
+);
+```
+
+### Configure custom types
+
+```typescript
+const registry = new DocTypeRegistry({
+  customTypes: [
+    { id: 'runbook', path: '.fractary/doc-types/runbook' }
+  ]
+});
+```
+
+### Get GitHub URLs
+
+```typescript
+// Get manifest URL
+DocTypeRegistry.getCoreManifestUrl();
+// https://raw.githubusercontent.com/fractary/core/main/doc-types/manifest.yaml
+
+// Get type URL
+DocTypeRegistry.getCoreTypeUrl('adr');
+// https://raw.githubusercontent.com/fractary/core/main/doc-types/adr
 ```
 
 ## CLI Commands Reference
@@ -180,11 +290,13 @@ fractary-core docs search --doc-type api --json
 
 ## Benefits of Migration
 
-1. **Single source of truth** - Doc types defined once in SDK
-2. **CLI/MCP access** - Types available to all interfaces, not just plugins
-3. **Custom types** - Projects can define their own doc types
-4. **Reduced context** - No need to load skill per doc type
-5. **Consistent behavior** - SDK enforces frontmatter, validation, etc.
+1. **Single source of truth** - Doc types defined once, accessible everywhere
+2. **Language agnostic** - YAML/Markdown works for JS, Python, or any SDK
+3. **CLI/MCP access** - Types available to all interfaces, not just plugins
+4. **Custom types** - Projects can define their own doc types as directories
+5. **GitHub URLs** - Types can be fetched remotely for cross-project sharing
+6. **Reduced context** - No need to load skill per doc type
+7. **Consistent behavior** - SDK enforces frontmatter, validation, etc.
 
 ## Backward Compatibility
 

@@ -1,0 +1,45 @@
+# Changelog Type Definition
+
+id: changelog
+display_name: Changelog
+description: Version history and release notes
+
+output_path: docs
+
+file_naming:
+  pattern: "CHANGELOG.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+  optional_fields:
+    - version
+    - date
+  defaults:
+    type: changelog
+    title: Changelog
+
+structure:
+  required_sections: []
+  optional_sections:
+    - Added
+    - Changed
+    - Deprecated
+    - Removed
+    - Fixed
+    - Security
+  section_order:
+    - Added
+    - Changed
+    - Deprecated
+    - Removed
+    - Fixed
+    - Security
+
+status:
+  allowed_values:
+    - current
+  default: current

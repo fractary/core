@@ -1,0 +1,74 @@
+# ADR (Architecture Decision Record) Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for Architecture Decision Record documents.
+
+id: adr
+display_name: Architecture Decision Record
+description: Documents significant architectural decisions, their context, and consequences
+
+# Output configuration
+output_path: docs/architecture/adr
+
+# File naming rules
+file_naming:
+  pattern: "ADR-{number}-{slug}.md"
+  auto_number: true
+  number_format: "{:05d}"
+  slug_source: title
+  slug_max_length: 50
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+  optional_fields:
+    - author
+    - deciders
+    - tags
+    - related
+    - supersedes
+    - superseded_by
+    - work_id
+  defaults:
+    type: adr
+    status: proposed
+
+# Document structure
+structure:
+  required_sections:
+    - Status
+    - Context
+    - Decision
+    - Consequences
+  optional_sections:
+    - Alternatives Considered
+    - References
+    - Notes
+  section_order:
+    - Status
+    - Context
+    - Decision
+    - Alternatives Considered
+    - Consequences
+    - References
+    - Notes
+
+# Status workflow
+status:
+  allowed_values:
+    - proposed
+    - accepted
+    - deprecated
+    - superseded
+  default: proposed
+
+# Index file configuration
+index_config:
+  index_file: docs/architecture/adr/README.md
+  sort_by: created
+  sort_order: desc
+  entry_template: "- [**ADR-{{number}}**: {{title}}]({{relative_path}}) - {{status}}"

@@ -1,0 +1,63 @@
+# API Documentation Type Definition
+
+id: api
+display_name: API Documentation
+description: API endpoint documentation with request/response examples
+
+output_path: docs/api
+
+file_naming:
+  pattern: "{service}-{endpoint-slug}.md"
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - status
+    - date
+  optional_fields:
+    - service
+    - version
+    - author
+    - tags
+    - related
+  defaults:
+    type: api
+    status: draft
+
+structure:
+  required_sections:
+    - Overview
+    - Endpoints
+    - Authentication
+    - Error Codes
+  optional_sections:
+    - Examples
+    - Rate Limiting
+    - Pagination
+    - Related Endpoints
+  section_order:
+    - Overview
+    - Endpoints
+    - Authentication
+    - Examples
+    - Error Codes
+    - Rate Limiting
+    - Pagination
+    - Related Endpoints
+
+status:
+  allowed_values:
+    - draft
+    - review
+    - published
+    - deprecated
+  default: draft
+
+index_config:
+  index_file: docs/api/README.md
+  sort_by: title
+  sort_order: asc
+  entry_template: "- [{{title}}]({{relative_path}}) - {{status}}"
