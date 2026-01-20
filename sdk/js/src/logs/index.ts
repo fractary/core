@@ -5,4 +5,5 @@
  */
 
 export { LogManager } from './manager';
+export { LogTypeRegistry } from './type-registry';
 export * from './types';

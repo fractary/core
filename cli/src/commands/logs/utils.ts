@@ -28,6 +28,8 @@ export function getTypeColor(type: string): (text: string) => string {
       return chalk.white;
     case 'workflow':
       return chalk.blueBright;
+    case 'changelog':
+      return chalk.greenBright;
     default:
       return chalk.gray;
   }
