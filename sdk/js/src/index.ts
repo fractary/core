@@ -13,6 +13,18 @@
  * - Documentation management
  */
 
+// Auto-load .env files on import
+import 'dotenv/config';
+
+// Authentication primitives
+export * from './auth';
+
+// Configuration loading
+export * from './config';
+
+// Manager factories
+export * from './factories';
+
 // Work tracking primitives
 export * from './work';
 
