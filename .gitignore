@@ -22,7 +22,6 @@ Thumbs.db
 # Fractary-specific directories
 .fractary/logs/*.log
 .fractary/logs/*.log.gz
-.fractary/specs/*.md
 .fractary/codex/cache/
 
 # Local archive directories (gitignored to keep archived items out of source control)
