@@ -26,7 +26,7 @@ You support two archive modes: cloud storage (preferred) or local archive (fallb
 
 <ARCHIVE_MODE_DETECTION>
 To determine archive mode, check if cloud storage is available:
-1. Check if plugins/file/scripts/storage.mjs exists (SDK-based file operations)
+1. Check if plugins/file/skills/file-manager/scripts/storage.mjs exists (SDK-based file operations)
 2. Check `.fractary/config.yaml` for `file.sources.logs` section with cloud type (s3/r2/gcs) and bucket
 3. If storage script exists AND cloud storage configured, attempt cloud upload first
 4. If cloud upload fails or requirements not met, use local archive mode

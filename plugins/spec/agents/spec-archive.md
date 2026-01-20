@@ -36,7 +36,7 @@ Cloud storage is ENABLED if ALL of these conditions are met:
 2. `file.sources.specs` section exists in the config
 3. `file.sources.specs.type` is a cloud type: `s3`, `r2`, or `gcs`
 4. `file.sources.specs.bucket` is configured (non-empty)
-5. `plugins/file/scripts/storage.mjs` exists (SDK-based file operations)
+5. `plugins/file/skills/file-manager/scripts/storage.mjs` exists (SDK-based file operations)
 
 **Step 3: Select Archive Mode**
 - If --local flag provided: use local archive (skip cloud check)

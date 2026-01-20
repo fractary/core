@@ -43,7 +43,7 @@ fi
 
 # Locate the storage.mjs script (SDK-based file operations)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STORAGE_SCRIPT="$SCRIPT_DIR/../../file/scripts/storage.mjs"
+STORAGE_SCRIPT="$SCRIPT_DIR/../../file/skills/file-manager/scripts/storage.mjs"
 
 if [[ ! -f "$STORAGE_SCRIPT" ]]; then
     echo '{"error": "Storage script not found: '"$STORAGE_SCRIPT"'"}' >&2
