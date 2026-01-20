@@ -223,7 +223,27 @@ function createLogsValidateCommand(): Command {
           process.exit(3);
         }
 
-        const content = fs.readFileSync(resolvedPath, 'utf-8');
+        let content: string;
+        try {
+          content = fs.readFileSync(resolvedPath, 'utf-8');
+        } catch (readError) {
+          const errorMessage = readError instanceof Error ? readError.message : 'Unknown error';
+          if (options.json) {
+            console.error(
+              JSON.stringify(
+                {
+                  status: 'error',
+                  error: { code: 'FILE_READ_ERROR', message: `Could not read file: ${errorMessage}` },
+                },
+                null,
+                2
+              )
+            );
+          } else {
+            console.error(chalk.red(`Could not read file: ${errorMessage}`));
+          }
+          process.exit(3);
+        }
 
         // Parse frontmatter
         const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);

@@ -281,7 +281,14 @@ export class LogTypeRegistry {
     this.customTypes = new Map();
 
     // Default to looking for templates/logs relative to package root
-    this.coreTypesPath = config?.coreTypesPath || this.findCoreTypesPath();
+    // Only resolve path if we need to load core types
+    if (config?.coreTypesPath) {
+      this.coreTypesPath = config.coreTypesPath;
+    } else if (!config?.skipCoreTypes) {
+      this.coreTypesPath = this.findCoreTypesPath();
+    } else {
+      this.coreTypesPath = '';
+    }
 
     // Load core types unless explicitly skipped
     if (!config?.skipCoreTypes) {
@@ -301,6 +308,7 @@ export class LogTypeRegistry {
 
   /**
    * Find the core templates/logs directory
+   * @throws Error if no valid templates directory is found
    */
   private findCoreTypesPath(): string {
     // Try common locations
@@ -320,8 +328,12 @@ export class LogTypeRegistry {
       }
     }
 
-    // Fallback - will fail later if types not found
-    return candidates[0];
+    // No valid path found - throw informative error
+    const triedPaths = candidates.map((c) => `  - ${c}`).join('\n');
+    throw new Error(
+      `Could not find core log types manifest (manifest.yaml) in any of the expected locations:\n${triedPaths}\n` +
+        'If you are using @fractary/core as a dependency, ensure the templates/logs directory is included in the package.'
+    );
   }
 
   /**
