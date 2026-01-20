@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "3.1.8",
+      "version": "3.1.9",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -163,7 +163,7 @@
         "name": "fractary-logs",
         "source": "./plugins/logs",
         "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
-        "version": "4.0.2",
+        "version": "4.0.3",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -241,7 +241,7 @@
         "name": "fractary-spec",
         "source": "./plugins/spec",
         "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
-        "version": "2.0.6",
+        "version": "2.0.7",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
