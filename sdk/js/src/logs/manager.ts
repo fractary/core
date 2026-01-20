@@ -20,9 +20,11 @@ import {
   CaptureSession,
   LogAppendOptions,
   ArchiveResult,
+  LogTypeDefinition,
 } from './types';
 import { loadLogConfig, findProjectRoot } from '../common/config';
 import { LogError } from '../common/errors';
+import { LogTypeRegistry, LogTypeRegistryConfig } from './type-registry';
 
 /**
  * Generate a unique log ID
@@ -98,22 +100,68 @@ function redactSensitive(content: string): string {
 }
 
 /**
+ * Extended config for LogManager that includes type registry options
+ */
+export interface LogManagerConfig extends LogConfig {
+  /** Custom templates path for log types */
+  customTemplatesPath?: string;
+  /** Type registry configuration */
+  typeRegistry?: LogTypeRegistryConfig;
+}
+
+/**
  * Log Manager
  *
  * Handles session logging, build logs, and operational logs.
  */
 export class LogManager {
-  private config: LogConfig;
+  private config: LogManagerConfig;
   private logsDir: string;
   private activeSession: CaptureSession | null = null;
+  private typeRegistry: LogTypeRegistry;
 
-  constructor(config?: LogConfig) {
+  constructor(config?: LogManagerConfig) {
     const projectRoot = findProjectRoot();
-    const defaultConfig: LogConfig = {
+    const defaultConfig: LogManagerConfig = {
       localPath: path.join(projectRoot, '.fractary/logs'),
     };
     this.config = config || loadLogConfig() || defaultConfig;
     this.logsDir = this.config.localPath || path.join(projectRoot, 'logs');
+
+    // Initialize type registry
+    this.typeRegistry = new LogTypeRegistry({
+      baseDir: projectRoot,
+      customManifestPath: this.config.customTemplatesPath,
+      ...this.config.typeRegistry,
+    });
+  }
+
+  /**
+   * Get the type registry instance
+   */
+  getTypeRegistry(): LogTypeRegistry {
+    return this.typeRegistry;
+  }
+
+  /**
+   * Get all available log types
+   */
+  getLogTypes(): LogTypeDefinition[] {
+    return this.typeRegistry.getAllTypes();
+  }
+
+  /**
+   * Get a specific log type by ID
+   */
+  getLogType(id: string): LogTypeDefinition | null {
+    return this.typeRegistry.getType(id);
+  }
+
+  /**
+   * Check if a log type exists
+   */
+  hasLogType(id: string): boolean {
+    return this.typeRegistry.hasType(id);
   }
 
   /**
@@ -243,11 +291,13 @@ export class LogManager {
    * Find a log by ID
    */
   private findLogById(id: string): string | null {
-    // Search through all type directories
-    const types: LogType[] = ['session', 'build', 'deployment', 'test', 'debug', 'audit', 'operational', 'workflow'];
+    // Search through all type directories (from registry + legacy types)
+    const registryTypes = this.typeRegistry.getTypeIds();
+    const legacyTypes: LogType[] = ['session', 'build', 'deployment', 'test', 'debug', 'audit', 'operational', 'workflow'];
+    const allTypes = new Set([...registryTypes, ...legacyTypes]);
 
-    for (const type of types) {
-      const typeDir = this.getTypeDir(type);
+    for (const type of allTypes) {
+      const typeDir = this.getTypeDir(type as LogType);
       if (!fs.existsSync(typeDir)) continue;
 
       const found = this.searchDirForId(typeDir, id);
@@ -330,12 +380,19 @@ export class LogManager {
    */
   listLogs(options?: LogListOptions): LogEntry[] {
     const logs: LogEntry[] = [];
-    const types: LogType[] = options?.type
-      ? [options.type]
-      : ['session', 'build', 'deployment', 'test', 'debug', 'audit', 'operational', 'workflow'];
 
-    for (const type of types) {
-      const typeDir = this.getTypeDir(type);
+    // Get types from registry + legacy types
+    let typesToSearch: string[];
+    if (options?.type) {
+      typesToSearch = [options.type];
+    } else {
+      const registryTypes = this.typeRegistry.getTypeIds();
+      const legacyTypes = ['session', 'build', 'deployment', 'test', 'debug', 'audit', 'operational', 'workflow'];
+      typesToSearch = [...new Set([...registryTypes, ...legacyTypes])];
+    }
+
+    for (const type of typesToSearch) {
+      const typeDir = this.getTypeDir(type as LogType);
       if (!fs.existsSync(typeDir)) continue;
 
       this.collectLogsFromDir(typeDir, logs, options);

@@ -1,0 +1,93 @@
+# Workflow Log Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for workflow execution log entries.
+
+id: workflow
+display_name: Workflow Log
+description: FABER phases, ETL pipelines, data workflows, automation steps
+
+# Output configuration
+output_path: .fractary/logs/workflow
+
+# File naming rules
+file_naming:
+  pattern: "{date}-{workflow_id}.md"
+  date_format: "YYYYMMDD-HHmmss"
+  slug_source: workflow_id
+  slug_max_length: 36
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - log_type
+    - title
+    - workflow_id
+    - timestamp
+    - status
+  optional_fields:
+    - work_item_id
+    - phase
+    - workflow_type
+    - context
+    - work_id
+    - tags
+  defaults:
+    log_type: workflow
+    status: pending
+
+# Document structure
+structure:
+  required_sections:
+    - Operations
+  optional_sections:
+    - Current Phase
+    - Decisions
+    - Artifacts
+    - Metrics
+    - Next Steps
+  section_order:
+    - Current Phase
+    - Operations
+    - Decisions
+    - Artifacts
+    - Metrics
+    - Next Steps
+
+# Status workflow
+status:
+  allowed_values:
+    - pending
+    - running
+    - success
+    - failure
+    - partial
+    - cancelled
+  default: pending
+
+# FABER phase classification
+phase:
+  allowed_values:
+    - Frame
+    - Architect
+    - Build
+    - Evaluate
+    - Release
+  default: Frame
+
+# Workflow type classification
+workflow_type:
+  allowed_values:
+    - faber
+    - etl
+    - cicd
+    - data-pipeline
+    - custom
+  default: faber
+
+# Retention policy
+retention:
+  default_local_days: 30
+  default_cloud_days: 90
+  auto_archive: true
+  cleanup_after_archive: true

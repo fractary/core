@@ -1,0 +1,87 @@
+# Audit Log Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for audit and compliance log entries.
+
+id: audit
+display_name: Audit Log
+description: Security events, access logs, compliance tracking, change audits
+
+# Output configuration
+output_path: .fractary/logs/audit
+
+# File naming rules
+file_naming:
+  pattern: "{date}-{audit_id}.md"
+  date_format: "YYYYMMDD-HHmmss"
+  slug_source: audit_id
+  slug_max_length: 36
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - log_type
+    - title
+    - audit_id
+    - date
+    - status
+    - audit_type
+    - severity
+  optional_fields:
+    - user
+    - action
+    - resource
+    - work_id
+    - tags
+  defaults:
+    log_type: audit
+    status: active
+
+# Document structure
+structure:
+  required_sections:
+    - Event Details
+    - Context
+  optional_sections:
+    - Impact Assessment
+    - Evidence
+    - Recommended Actions
+  section_order:
+    - Event Details
+    - Context
+    - Impact Assessment
+    - Evidence
+    - Recommended Actions
+
+# Status workflow
+status:
+  allowed_values:
+    - active
+    - completed
+    - archived
+  default: active
+
+# Audit type classification
+audit_type:
+  allowed_values:
+    - security
+    - compliance
+    - performance
+    - access
+    - change
+  default: security
+
+# Severity levels
+severity:
+  allowed_values:
+    - info
+    - warning
+    - critical
+  default: info
+
+# Retention policy
+retention:
+  default_local_days: 90
+  default_cloud_days: forever
+  auto_archive: true
+  cleanup_after_archive: false

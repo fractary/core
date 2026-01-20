@@ -1,0 +1,77 @@
+# Test Log Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for test execution log entries.
+
+id: test
+display_name: Test Log
+description: Test runs, QA results, test failures, coverage reports, CI test output
+
+# Output configuration
+output_path: .fractary/logs/test
+
+# File naming rules
+file_naming:
+  pattern: "{date}-{test_id}.md"
+  date_format: "YYYYMMDD-HHmmss"
+  slug_source: test_id
+  slug_max_length: 36
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - log_type
+    - title
+    - test_id
+    - date
+    - status
+  optional_fields:
+    - test_type
+    - test_framework
+    - pass_count
+    - fail_count
+    - skip_count
+    - coverage_percent
+    - duration_seconds
+    - work_id
+    - tags
+  defaults:
+    log_type: test
+    status: running
+
+# Document structure
+structure:
+  required_sections:
+    - Summary
+  optional_sections:
+    - Failures
+    - Output
+  section_order:
+    - Summary
+    - Failures
+    - Output
+
+# Status workflow
+status:
+  allowed_values:
+    - running
+    - passed
+    - failed
+    - skipped
+  default: running
+
+# Test type classification
+test_type:
+  allowed_values:
+    - unit
+    - integration
+    - e2e
+    - performance
+  default: unit
+
+# Retention policy
+retention:
+  default_local_days: 7
+  default_cloud_days: 14
+  auto_archive: true
+  cleanup_after_archive: true

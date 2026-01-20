@@ -1,0 +1,71 @@
+# Session Log Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for Claude Code session log entries.
+
+id: session
+display_name: Session Log
+description: Claude Code sessions, conversation tracking, token usage, interaction history
+
+# Output configuration
+output_path: .fractary/logs/sessions
+
+# File naming rules
+file_naming:
+  pattern: "{date}-{session_id}.md"
+  date_format: "YYYYMMDD-HHmmss"
+  slug_source: session_id
+  slug_max_length: 36
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - log_type
+    - title
+    - session_id
+    - date
+    - status
+  optional_fields:
+    - conversation_id
+    - repository
+    - branch
+    - model
+    - token_count
+    - duration_seconds
+    - work_id
+    - tags
+  defaults:
+    log_type: session
+    status: active
+
+# Document structure
+structure:
+  required_sections:
+    - Metadata
+    - Conversation
+  optional_sections:
+    - Summary
+    - Decisions
+    - Follow-ups
+  section_order:
+    - Metadata
+    - Conversation
+    - Summary
+    - Decisions
+    - Follow-ups
+
+# Status workflow
+status:
+  allowed_values:
+    - active
+    - stopped
+    - archived
+    - error
+  default: active
+
+# Retention policy
+retention:
+  default_local_days: 7
+  default_cloud_days: forever
+  auto_archive: true
+  cleanup_after_archive: true

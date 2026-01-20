@@ -1,0 +1,89 @@
+# Operational Log Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for operational and infrastructure log entries.
+
+id: operational
+display_name: Operational Log
+description: System events, service health, monitoring alerts, incident logs
+
+# Output configuration
+output_path: .fractary/logs/operational
+
+# File naming rules
+file_naming:
+  pattern: "{date}-{event_id}.md"
+  date_format: "YYYYMMDD-HHmmss"
+  slug_source: event_id
+  slug_max_length: 36
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - log_type
+    - title
+    - event_id
+    - date
+    - status
+    - service
+  optional_fields:
+    - severity
+    - category
+    - environment
+    - work_id
+    - tags
+  defaults:
+    log_type: operational
+    status: active
+
+# Document structure
+structure:
+  required_sections:
+    - Event Details
+    - Description
+  optional_sections:
+    - Impact
+    - Response Actions
+    - Resolution
+    - Follow-up
+  section_order:
+    - Event Details
+    - Description
+    - Impact
+    - Response Actions
+    - Resolution
+    - Follow-up
+
+# Status workflow
+status:
+  allowed_values:
+    - active
+    - investigating
+    - resolved
+    - archived
+  default: active
+
+# Severity levels
+severity:
+  allowed_values:
+    - info
+    - warning
+    - error
+    - critical
+  default: info
+
+# Category classification
+category:
+  allowed_values:
+    - health
+    - alert
+    - maintenance
+    - incident
+  default: health
+
+# Retention policy
+retention:
+  default_local_days: 30
+  default_cloud_days: 90
+  auto_archive: true
+  cleanup_after_archive: true

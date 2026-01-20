@@ -25,47 +25,74 @@ Common triggers:
 - "Log this..." (without specific type)
 </WHEN_TO_USE>
 
-<AVAILABLE_LOG_TYPES>
+<CLI_COMMANDS>
+## List All Available Log Types
+```bash
+fractary-core logs types --json
+```
+Returns array of available types with id, display_name, description, output_path.
 
-## Decision Tree
+## Get Detailed Type Information
+```bash
+fractary-core logs type-info <type> --json
+```
+Returns full type definition including frontmatter requirements, structure, status values, and retention policy.
+
+## Create Log Entry
+```bash
+fractary-core logs write --type <type> --title "<title>" --content "<content>" [--issue <number>] [--json]
+```
+</CLI_COMMANDS>
+
+<WORKFLOW>
+1. Run `fractary-core logs types --json` to get current available types
+2. Parse JSON response to build type options list
+3. Analyze the user's request for type indicators
+4. If type is clear from context → recommend that type
+5. If unclear → ask clarifying questions using the type list
+6. Once type is determined → provide the CLI command to create the log
+7. If truly ambiguous → suggest 2-3 most likely options and let user choose
+</WORKFLOW>
+
+<DECISION_TREE>
 
 **Is it a Claude Code or AI conversation?**
-→ Use **log-type-session** (Session Log)
+→ Use **session** (Session Log)
   - Conversation tracking, token usage, AI interaction history
 
 **Is it a build, compilation, or CI/CD output?**
-→ Use **log-type-build** (Build Log)
+→ Use **build** (Build Log)
   - npm/cargo/make builds, CI output, compilation results
 
 **Is it a deployment or release to an environment?**
-→ Use **log-type-deployment** (Deployment Log)
+→ Use **deployment** (Deployment Log)
   - Production deploys, staging releases, rollbacks
 
 **Is it debugging, troubleshooting, or error investigation?**
-→ Use **log-type-debug** (Debug Log)
+→ Use **debug** (Debug Log)
   - Bug investigation, error analysis, troubleshooting sessions
 
 **Is it a security, compliance, or access event?**
-→ Use **log-type-audit** (Audit Log)
+→ Use **audit** (Audit Log)
   - Security events, access logs, compliance tracking
 
 **Is it test execution or QA results?**
-→ Use **log-type-test** (Test Log)
+→ Use **test** (Test Log)
   - Test runs, coverage reports, QA results
 
 **Is it a multi-step workflow or pipeline execution?**
-→ Use **log-type-workflow** (Workflow Log)
+→ Use **workflow** (Workflow Log)
   - FABER phases, ETL pipelines, automation workflows
 
 **Is it a system event, alert, or incident?**
-→ Use **log-type-operational** (Operational Log)
+→ Use **operational** (Operational Log)
   - Service health, monitoring alerts, infrastructure events
 
 **Is it tracking a version change or update?**
-→ Use **log-type-changelog** (Changelog Log)
+→ Use **changelog** (Changelog Log)
   - Version changes, feature updates, release notes
 
-</AVAILABLE_LOG_TYPES>
+</DECISION_TREE>
 
 <TYPE_SUMMARY_TABLE>
 
@@ -82,17 +109,6 @@ Common triggers:
 | **changelog** | Version tracking | Feature updates, breaking changes |
 
 </TYPE_SUMMARY_TABLE>
-
-<WORKFLOW>
-1. Analyze the user's request for type indicators
-2. If type is clear from context → recommend that specific log-type-* skill
-3. If unclear → ask clarifying questions:
-   - "What is this log recording? (build, deployment, debug session, etc.)"
-   - "Is this a one-time event or ongoing process?"
-   - "Who is the audience for this log?"
-4. Once type is determined → invoke the appropriate log-type-* skill
-5. If truly ambiguous → suggest 2-3 most likely options and let user choose
-</WORKFLOW>
 
 <CLARIFYING_QUESTIONS>
 When the intent is unclear, ask one of these:
@@ -114,11 +130,23 @@ When the intent is unclear, ask one of these:
 → Ask: "What type of activity? A debugging session, a workflow execution, or something else?"
 
 **Example 2**: User says "Save the test output"
-→ Clear match → log-type-test
+→ Clear match → test
 → Recommend: "This sounds like test execution results. I'll use the test log type."
+→ Run: `fractary-core logs write --type test --title "Test Output" --content "..." --json`
 
 **Example 3**: User says "Log what I did today"
 → Likely session log
 → Ask: "Are you logging a Claude Code session, or a different type of activity?"
 
 </EXAMPLES>
+
+<DYNAMIC_TYPE_DISCOVERY>
+IMPORTANT: The list of log types is dynamic and may include custom types.
+Always run `fractary-core logs types --json` to get the current list of available types.
+Do not rely solely on the hardcoded decision tree - check for custom types that may
+better match the user's needs.
+
+Custom types appear when:
+- Project has `.fractary/logs/templates/manifest.yaml`
+- logs.custom_templates_path is set in config
+</DYNAMIC_TYPE_DISCOVERY>

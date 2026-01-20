@@ -1,0 +1,70 @@
+# Core Log Types Manifest
+#
+# This manifest lists all core log types available in Fractary.
+# The format matches .fractary/config.yaml's logs.custom_types section,
+# so users can extend with their own types using the same structure.
+#
+# Each type is a directory containing:
+#   - type.yaml     : Type definition (schema, frontmatter rules, file naming)
+#   - template.md   : Mustache template for log generation
+#   - standards.md  : Standards and conventions for this type
+
+version: "1.0"
+
+# Base URL for raw file access (used by remote tools/SDKs)
+base_url: https://raw.githubusercontent.com/fractary/core/main/templates/logs
+
+log_types:
+  - id: audit
+    display_name: Audit Log
+    description: Security events, access logs, compliance tracking, change audits
+    path: ./audit
+    url: ${base_url}/audit/type.yaml
+
+  - id: build
+    display_name: Build Log
+    description: CI/CD builds, compilation output, npm/cargo/make builds, build failures
+    path: ./build
+    url: ${base_url}/build/type.yaml
+
+  - id: changelog
+    display_name: Changelog Log
+    description: Version changes, feature updates, release notes, configuration changes
+    path: ./changelog
+    url: ${base_url}/changelog/type.yaml
+
+  - id: debug
+    display_name: Debug Log
+    description: Troubleshooting, bug investigation, error analysis, debugging notes
+    path: ./debug
+    url: ${base_url}/debug/type.yaml
+
+  - id: deployment
+    display_name: Deployment Log
+    description: Production deploys, staging releases, rollbacks, environment updates
+    path: ./deployment
+    url: ${base_url}/deployment/type.yaml
+
+  - id: operational
+    display_name: Operational Log
+    description: System events, service health, monitoring alerts, incident logs
+    path: ./operational
+    url: ${base_url}/operational/type.yaml
+
+  - id: session
+    display_name: Session Log
+    description: Claude Code sessions, conversation tracking, token usage, interaction history
+    path: ./session
+    url: ${base_url}/session/type.yaml
+
+  - id: test
+    display_name: Test Log
+    description: Test runs, QA results, test failures, coverage reports, CI test output
+    path: ./test
+    url: ${base_url}/test/type.yaml
+
+  - id: workflow
+    display_name: Workflow Log
+    description: FABER phases, ETL pipelines, data workflows, automation steps
+    path: ./workflow
+    url: ${base_url}/workflow/type.yaml

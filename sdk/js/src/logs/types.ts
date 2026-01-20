@@ -20,6 +20,16 @@ export {
   CaptureResult,
 } from '../common/types';
 
+// Re-export type registry types
+export {
+  LogTypeDefinition,
+  LogTypeRegistryConfig,
+  CustomLogTypeConfig,
+} from './type-registry';
+
+// Re-export manager config
+export { LogManagerConfig } from './manager';
+
 /**
  * Session capture state stored in state module
  */

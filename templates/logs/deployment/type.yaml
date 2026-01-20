@@ -1,0 +1,78 @@
+# Deployment Log Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for deployment and release log entries.
+
+id: deployment
+display_name: Deployment Log
+description: Production deploys, staging releases, rollbacks, environment updates
+
+# Output configuration
+output_path: .fractary/logs/deployment
+
+# File naming rules
+file_naming:
+  pattern: "{date}-{deployment_id}.md"
+  date_format: "YYYYMMDD-HHmmss"
+  slug_source: deployment_id
+  slug_max_length: 36
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - log_type
+    - title
+    - deployment_id
+    - date
+    - status
+    - environment
+  optional_fields:
+    - version
+    - commit_sha
+    - deployment_tool
+    - duration_seconds
+    - work_id
+    - tags
+  defaults:
+    log_type: deployment
+    status: pending
+
+# Document structure
+structure:
+  required_sections:
+    - Configuration
+    - Deployment Steps
+  optional_sections:
+    - Verification
+    - Summary
+  section_order:
+    - Configuration
+    - Deployment Steps
+    - Verification
+    - Summary
+
+# Status workflow
+status:
+  allowed_values:
+    - pending
+    - deploying
+    - success
+    - failure
+    - rolled_back
+  default: pending
+
+# Environment classification
+environment:
+  allowed_values:
+    - development
+    - staging
+    - production
+    - test
+  default: staging
+
+# Retention policy
+retention:
+  default_local_days: 30
+  default_cloud_days: forever
+  auto_archive: true
+  cleanup_after_archive: false

@@ -1,0 +1,79 @@
+# Debug Log Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for debug session log entries.
+
+id: debug
+display_name: Debug Log
+description: Troubleshooting, bug investigation, error analysis, debugging notes
+
+# Output configuration
+output_path: .fractary/logs/debug
+
+# File naming rules
+file_naming:
+  pattern: "{date}-{debug_id}.md"
+  date_format: "YYYYMMDD-HHmmss"
+  slug_source: debug_id
+  slug_max_length: 36
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - log_type
+    - title
+    - debug_id
+    - date
+    - status
+  optional_fields:
+    - issue_number
+    - component
+    - severity
+    - repository
+    - branch
+    - work_id
+    - tags
+  defaults:
+    log_type: debug
+    status: active
+
+# Document structure
+structure:
+  required_sections:
+    - Problem Description
+    - Investigation Steps
+  optional_sections:
+    - Findings
+    - Root Cause
+    - Resolution
+  section_order:
+    - Problem Description
+    - Investigation Steps
+    - Findings
+    - Root Cause
+    - Resolution
+
+# Status workflow
+status:
+  allowed_values:
+    - active
+    - stopped
+    - resolved
+    - archived
+  default: active
+
+# Severity levels
+severity:
+  allowed_values:
+    - low
+    - medium
+    - high
+    - critical
+  default: medium
+
+# Retention policy
+retention:
+  default_local_days: 14
+  default_cloud_days: 30
+  auto_archive: true
+  cleanup_after_archive: true

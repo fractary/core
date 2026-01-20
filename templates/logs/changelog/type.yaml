@@ -1,0 +1,72 @@
+# Changelog Log Type Definition
+#
+# This file defines the schema, frontmatter rules, and configuration
+# for change tracking log entries.
+
+id: changelog
+display_name: Changelog Log
+description: Version changes, feature updates, release notes, configuration changes
+
+# Output configuration
+output_path: .fractary/logs/changelog
+
+# File naming rules
+file_naming:
+  pattern: "{date}-{change_id}.md"
+  date_format: "YYYYMMDD-HHmmss"
+  slug_source: change_id
+  slug_max_length: 36
+
+# Frontmatter schema
+frontmatter:
+  required_fields:
+    - log_type
+    - title
+    - change_id
+    - date
+    - version
+    - change_type
+  optional_fields:
+    - breaking
+    - component
+    - issue_number
+    - work_id
+    - tags
+  defaults:
+    log_type: changelog
+    breaking: false
+
+# Document structure
+structure:
+  required_sections:
+    - Summary
+    - Details
+  optional_sections:
+    - Migration
+    - Before/After
+    - Related
+  section_order:
+    - Summary
+    - Type
+    - Details
+    - Migration
+    - Before/After
+    - Related
+
+# Change type classification
+change_type:
+  allowed_values:
+    - added
+    - changed
+    - fixed
+    - removed
+    - deprecated
+    - security
+  default: changed
+
+# Retention policy
+retention:
+  default_local_days: forever
+  default_cloud_days: forever
+  auto_archive: false
+  cleanup_after_archive: false
