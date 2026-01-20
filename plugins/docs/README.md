@@ -2,7 +2,7 @@
 
 Type-agnostic documentation system with operation-specific skills and data-driven type context.
 
-**Version**: 2.0.0 | **Architecture**: Operation-focused with 93% less code duplication
+**Version**: 3.1.0 | **Architecture**: Operation-focused with SDK/CLI integration
 
 ## Overview
 
@@ -131,13 +131,16 @@ The plugin uses a **three-layer architecture** optimized for context efficiency:
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Type Context (Data-Driven Behavior)                    │
-│  types/{doc_type}/                                      │
-│    ├─ schema.json           (structure validation)     │
-│    ├─ template.md           (content template)         │
-│    ├─ standards.md          (writing guidelines)       │
-│    ├─ validation-rules.md   (quality checks)           │
-│    └─ index-config.json     (index organization)       │
+│  Type Context (Data-Driven Behavior via SDK/CLI)        │
+│  templates/docs/{doc_type}/  (core types)               │
+│  .fractary/docs/templates/   (custom project types)     │
+│    ├─ type.yaml             (type definition)          │
+│    ├─ template.md           (Mustache template)        │
+│    └─ standards.md          (writing guidelines)       │
+│                                                         │
+│  CLI Commands:                                          │
+│    fractary-core docs types      (list all types)      │
+│    fractary-core docs type-info  (get type details)    │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -172,7 +175,60 @@ All document types use the same operation skills but with different type context
 
 ## Type Context System
 
-Each document type is defined by 5 files in `types/{doc_type}/`:
+Document types are defined in `templates/docs/{doc_type}/` (core types) or via custom project templates.
+
+### Core Types Location
+
+Core doc types are stored in the repository at `templates/docs/` and loaded by the SDK:
+
+```
+templates/docs/
+├── manifest.yaml      # Lists all core doc types with URLs
+├── adr/
+│   ├── type.yaml     # Type definition (schema, frontmatter, file naming)
+│   ├── template.md   # Mustache template
+│   └── standards.md  # Writing guidelines
+├── api/
+├── architecture/
+└── ... (11 types total)
+```
+
+### Custom Project Types
+
+Projects can define custom doc types by:
+
+1. Setting `custom_templates_path` in `.fractary/config.yaml`:
+   ```yaml
+   docs:
+     custom_templates_path: .fractary/docs/templates/manifest.yaml
+   ```
+
+2. Creating a manifest and type directories:
+   ```
+   .fractary/docs/templates/
+   ├── manifest.yaml
+   └── runbook/
+       ├── type.yaml
+       ├── template.md
+       └── standards.md
+   ```
+
+### CLI Commands
+
+```bash
+# List all doc types (core + custom)
+fractary-core docs types
+
+# Get type definition
+fractary-core docs type-info adr --json
+
+# Create document with type
+fractary-core docs create my-doc --doc-type adr --title "My ADR"
+```
+
+### Type Definition Files
+
+Each document type is defined by 3 files:
 
 ### 1. `schema.json`
 
@@ -492,41 +548,77 @@ Use the @agent-fractary-docs:docs-manager agent to write API documentation:
 
 ## Adding New Document Types
 
-To add a new document type (e.g., `changelog`):
+To add a new custom document type (e.g., `changelog`) to your project:
 
-### 1. Create type directory
+### 1. Configure custom templates path
+
+Add to `.fractary/config.yaml`:
+```yaml
+docs:
+  custom_templates_path: .fractary/docs/templates/manifest.yaml
+```
+
+### 2. Create manifest and type directory
 
 ```bash
-mkdir -p plugins/docs/types/changelog
+mkdir -p .fractary/docs/templates/changelog
 ```
 
-### 2. Create 5 type context files
-
-**schema.json**:
-```json
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "fractary_doc_type": {"const": "changelog"},
-    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
-    "release_date": {"type": "string", "format": "date"},
-    "status": {"enum": ["draft", "released"]}
-  },
-  "required": ["fractary_doc_type", "version", "release_date"]
-}
+Create `.fractary/docs/templates/manifest.yaml`:
+```yaml
+version: "1.0"
+doc_types:
+  - id: changelog
+    display_name: Changelog
+    description: Version history and release notes
+    path: ./changelog
 ```
 
-**template.md**:
+### 3. Create 3 type context files
+
+**type.yaml** (type definition):
+```yaml
+id: changelog
+display_name: Changelog
+description: Version history and release notes
+
+output_path: docs/changelog
+
+file_naming:
+  pattern: "CHANGELOG-{version}.md"
+  slug_source: version
+
+frontmatter:
+  required_fields:
+    - title
+    - type
+    - version
+    - release_date
+  optional_fields:
+    - status
+  defaults:
+    type: changelog
+    status: draft
+
+structure:
+  required_sections:
+    - Added
+    - Changed
+    - Fixed
+  optional_sections:
+    - Deprecated
+    - Removed
+    - Security
+
+status:
+  allowed_values:
+    - draft
+    - released
+  default: draft
+```
+
+**template.md** (Mustache template):
 ```markdown
----
-title: "{{title}}"
-fractary_doc_type: changelog
-version: {{version}}
-release_date: {{release_date}}
-status: {{status}}
----
-
 # {{title}}
 
 ## Version {{version}} - {{release_date}}
@@ -540,11 +632,13 @@ status: {{status}}
 ### Fixed
 {{fixed}}
 
+{{#deprecated}}
 ### Deprecated
 {{deprecated}}
+{{/deprecated}}
 ```
 
-**standards.md**:
+**standards.md** (writing guidelines):
 ```markdown
 # Changelog Standards
 
@@ -563,40 +657,17 @@ Follow Keep a Changelog format (keepachangelog.com)
 Use semantic versioning (semver.org)
 ```
 
-**validation-rules.md**:
-```markdown
-# Changelog Validation Rules
-
-## Frontmatter
-- version must follow semver
-- release_date must be valid date
-
-## Content
-- Must have at least one of: Added, Changed, Fixed
-- Each section must have bullet points
-- Links to issues/PRs encouraged
-```
-
-**index-config.json**:
-```json
-{
-  "index_file": "docs/changelog/README.md",
-  "organization": "flat",
-  "group_by": [],
-  "sort_by": "version",
-  "sort_order": "desc",
-  "entry_template": "- [**{{version}}**]({{relative_path}}) - {{release_date}}",
-  "section_template": "## {{group_name}}"
-}
-```
-
-### 3. Use immediately
+### 4. Use immediately
 
 ```bash
+# Verify type is loaded
+fractary-core docs types
+
+# Create a changelog
 /fractary-docs:write changelog
 ```
 
-No skill changes needed! The operation skills automatically load the new type context.
+The CLI and plugin automatically discover custom types from the configured manifest path.
 
 ## Migration from v1.x
 
@@ -646,36 +717,60 @@ fractary_doc_type: api
 
 ## Configuration
 
-Configuration is stored in `.fractary/config.yaml` (project) or `~/.config/fractary/docs/config.json` (global).
+Configuration is stored in `.fractary/config.yaml`:
 
 ### Example Configuration
 
-```json
-{
-  "schema_version": "2.0",
-  "output_paths": {
-    "documentation": "docs",
-    "api": "docs/api",
-    "adr": "docs/architecture/adrs",
-    "dataset": "docs/datasets",
-    "etl": "docs/etl",
-    "testing": "docs/testing"
-  },
-  "validation": {
-    "auto_validate": true,
-    "lint_markdown": true,
-    "check_links": true
-  },
-  "indexing": {
-    "auto_update": true,
-    "parallel_execution": true,
-    "max_concurrent": 10
-  },
-  "frontmatter": {
-    "codex_sync": true,
-    "default_status": "draft"
-  }
-}
+```yaml
+docs:
+  schema_version: "1.1"
+
+  # Path to custom doc type templates (optional)
+  # When set, CLI/SDK will load custom types from this manifest
+  # in addition to the core types bundled with Fractary
+  custom_templates_path: .fractary/docs/templates/manifest.yaml
+
+  doc_types:
+    adr:
+      enabled: true
+      path: docs/architecture/ADR
+      auto_number: true
+    api:
+      enabled: true
+      path: docs/api
+      auto_update_index: true
+
+  output_paths:
+    documentation: docs
+    adrs: docs/architecture/ADR
+    api_docs: docs/api
+
+  validation:
+    lint_on_generate: true
+    check_links_on_generate: false
+    required_sections:
+      adr: [Status, Context, Decision, Consequences]
+      api: [Overview, Request, Response]
+```
+
+### Custom Templates Path
+
+The `custom_templates_path` setting enables project-specific doc types:
+
+1. **Core types** are always available (11 built-in types from `templates/docs/`)
+2. **Custom types** are loaded from the specified manifest path
+3. Custom types can **override** core types by using the same ID
+
+Example custom manifest at `.fractary/docs/templates/manifest.yaml`:
+```yaml
+version: "1.0"
+doc_types:
+  - id: runbook
+    display_name: Runbook
+    path: ./runbook
+  - id: adr  # Overrides core ADR type
+    display_name: Custom ADR
+    path: ./adr
 ```
 
 ## Frontmatter Schema
@@ -791,113 +886,120 @@ Not `type: api` (deprecated v1.x format).
 
 ### "Type context not found"
 
-Verify the type directory exists:
+Verify the type exists:
 ```bash
-ls plugins/docs/types/{doc_type}/
-# Should show: schema.json, template.md, standards.md, validation-rules.md, index-config.json
+# List all available types
+fractary-core docs types
+
+# Check if specific type is loaded
+fractary-core docs type-info {doc_type} --json
+```
+
+For custom types, verify the type directory exists:
+```bash
+ls .fractary/docs/templates/{doc_type}/
+# Should show: type.yaml, template.md, standards.md
 ```
 
 ### Validation failing
 
-Check specific errors and ensure document follows type standards:
+Check the type definition and standards:
 ```bash
-cat plugins/docs/types/{doc_type}/standards.md
-cat plugins/docs/types/{doc_type}/validation-rules.md
+# View type definition
+fractary-core docs type-info {doc_type} --json
+
+# Check standards file
+cat templates/docs/{doc_type}/standards.md
 ```
 
-### Index not updating
+### Custom types not loading
 
-Verify `index-config.json` exists and is valid JSON:
+Verify `custom_templates_path` is set in `.fractary/config.yaml`:
+```yaml
+docs:
+  custom_templates_path: .fractary/docs/templates/manifest.yaml
+```
+
+Check the manifest exists and is valid YAML:
 ```bash
-cat plugins/docs/types/{doc_type}/index-config.json | jq .
+cat .fractary/docs/templates/manifest.yaml
 ```
 
 ## File Structure
 
 ```
-plugins/docs/
+plugins/docs/                          # Plugin directory
 ├── .claude-plugin/
-│   └── plugin.json                    # Plugin manifest (v2.0.0)
-├── agents/
-│   └── docs-manager.md                # Main coordination agent
+│   └── plugin.json                    # Plugin manifest (v3.1.0)
+├── agents/                            # Agent definitions
+│   ├── docs-audit.md
+│   ├── docs-check-consistency.md
+│   ├── docs-list.md
+│   ├── docs-validate.md
+│   └── docs-write.md                  # Main write agent (uses CLI)
 ├── skills/
-│   ├── doc-writer/                    # CREATE + UPDATE operation
-│   │   ├── SKILL.md
-│   │   └── scripts/
-│   │       ├── write-doc.sh
-│   │       ├── render-template.sh
-│   │       └── version-bump.sh
-│   ├── doc-validator/                 # VALIDATE operation
-│   │   ├── SKILL.md
-│   │   └── scripts/
-│   │       ├── validate-frontmatter.sh
-│   │       └── validate-structure.sh
-│   ├── doc-classifier/                # CLASSIFY operation
-│   │   ├── SKILL.md
-│   │   └── scripts/
-│   │       ├── classify-by-path.sh
-│   │       └── classify-by-content.sh
-│   ├── doc-lister/                    # LIST operation
-│   │   ├── SKILL.md
-│   │   └── scripts/
-│   │       └── list-docs.sh
-│   ├── docs-manager-skill/            # Single-doc coordinator
-│   │   ├── SKILL.md
-│   │   └── scripts/
-│   │       ├── coordinate-write.sh
-│   │       ├── coordinate-validate.sh
-│   │       └── coordinate-index.sh
-│   ├── docs-director-skill/           # Multi-doc coordinator
-│   │   ├── SKILL.md
-│   │   └── scripts/
-│   │       ├── batch-write.sh
-│   │       ├── audit-docs.sh
-│   │       └── pattern-expand.sh
+│   ├── doc-type-selector/             # Type selection (uses CLI)
 │   └── _shared/
 │       └── lib/
-│           ├── index-updater.sh       # README.md index generation
-│           └── dual-format-generator.sh # README + JSON generation
-├── types/                             # Type context (data-driven)
-│   ├── api/
-│   │   ├── schema.json
-│   │   ├── template.md
-│   │   ├── standards.md
-│   │   ├── validation-rules.md
-│   │   └── index-config.json
-│   ├── adr/
-│   ├── architecture/
-│   ├── dataset/
-│   ├── etl/
-│   ├── testing/
-│   ├── guides/
-│   ├── standards/
-│   ├── infrastructure/
-│   ├── audit/
-│   └── _untyped/
+│           ├── index-updater.sh
+│           └── slugify.sh
 └── commands/
     ├── write.md                       # /fractary-docs:write
     ├── validate.md                    # /fractary-docs:validate
     ├── list.md                        # /fractary-docs:list
-    └── audit.md                       # /fractary-docs:audit
+    ├── audit.md                       # /fractary-docs:audit
+    └── check-consistency.md
+
+templates/docs/                        # Core doc types (in repo root)
+├── manifest.yaml                      # Lists all 11 core types
+├── adr/
+│   ├── type.yaml                      # Type definition
+│   ├── template.md                    # Mustache template
+│   └── standards.md                   # Writing guidelines
+├── api/
+├── architecture/
+├── audit/
+├── changelog/
+├── dataset/
+├── etl/
+├── guides/
+├── infrastructure/
+├── standards/
+└── testing/
+
+.fractary/docs/templates/              # Custom project types (optional)
+├── manifest.yaml                      # Custom type manifest
+└── {custom-type}/
+    ├── type.yaml
+    ├── template.md
+    └── standards.md
 ```
 
 ## Version
+
+**3.1.0** - SDK/CLI integration with language-agnostic templates
+
+**Changes in 3.1.0**:
+- Doc types moved from plugin skills to `templates/docs/` (YAML/Markdown format)
+- SDK `DocTypeRegistry` loads types from templates directory
+- CLI commands: `fractary-core docs types`, `fractary-core docs type-info`
+- Custom types supported via `docs.custom_templates_path` in config
+- Agents use CLI commands instead of loading skills directly
 
 **2.0.0** - Architecture refactor (operation-specific skills with data-driven type context)
 
 **Breaking changes from 1.x**:
 - Frontmatter field: `type:` → `fractary_doc_type:`
-- Commands: `/fractary-docs:*` → `/fractary-docs:*`
 - Skills: Type-specific → Operation-specific
 
 ## Contributing
 
 To contribute:
 
-1. **Add new document type**: Create 5 files in `types/{doc_type}/`
-2. **Enhance operation**: Modify operation skill (doc-writer, doc-validator, etc.)
-3. **Improve coordination**: Update manager or director skills
-4. **Test thoroughly**: Validate against all 11 existing types
+1. **Add new core doc type**: Create 3 files in `templates/docs/{doc_type}/` (type.yaml, template.md, standards.md)
+2. **Enhance SDK/CLI**: Modify `sdk/js/src/docs/` or `cli/src/commands/docs/`
+3. **Improve agents**: Update agents in `plugins/docs/agents/`
+4. **Test thoroughly**: Validate with `fractary-core docs types` and test document creation
 
 ## See Also
 

@@ -89,9 +89,15 @@ export interface CustomDocTypeConfig {
  */
 export interface DocTypeRegistryConfig {
   /**
-   * Custom doc types to load from config
+   * Custom doc types to load from config (individual type configs)
    */
   customTypes?: CustomDocTypeConfig[];
+
+  /**
+   * Path to custom manifest.yaml file (loads all types from manifest)
+   * This is typically set from docs.custom_templates_path in config.yaml
+   */
+  customManifestPath?: string;
 
   /**
    * Base directory for resolving relative paths
@@ -184,7 +190,12 @@ export class DocTypeRegistry {
       this.loadCoreTypes();
     }
 
-    // Load custom types if provided
+    // Load custom types from manifest file if provided
+    if (config?.customManifestPath) {
+      this.loadCustomTypesFromManifest(config.customManifestPath);
+    }
+
+    // Load individual custom types if provided (can override manifest types)
     if (config?.customTypes) {
       this.loadCustomTypes(config.customTypes);
     }
@@ -241,6 +252,42 @@ export class DocTypeRegistry {
       }
     } catch (error) {
       console.warn('Failed to load core doc types:', error);
+    }
+  }
+
+  /**
+   * Load custom doc types from a manifest file
+   * This is used when docs.custom_templates_path is set in config.yaml
+   */
+  private loadCustomTypesFromManifest(manifestPath: string): void {
+    // Resolve path relative to baseDir if not absolute
+    const resolvedPath = path.isAbsolute(manifestPath)
+      ? manifestPath
+      : path.join(this.baseDir, manifestPath);
+
+    if (!fs.existsSync(resolvedPath)) {
+      // Custom manifest is optional - don't warn if not found
+      return;
+    }
+
+    try {
+      const manifestContent = fs.readFileSync(resolvedPath, 'utf-8');
+      const manifest = yaml.load(manifestContent) as Manifest;
+
+      // Get the directory containing the manifest
+      const manifestDir = path.dirname(resolvedPath);
+
+      for (const entry of manifest.doc_types || []) {
+        // Resolve type directory relative to manifest location
+        const typeDirPath = path.join(manifestDir, entry.path.replace('./', ''));
+
+        const docType = this.loadDocTypeFromDirectory(entry.id, typeDirPath);
+        if (docType) {
+          this.customTypes.set(docType.id, docType);
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to load custom doc types from ${manifestPath}:`, error);
     }
   }
 

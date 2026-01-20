@@ -227,13 +227,35 @@ export async function getDocsManager(config?: any): Promise<DocsManager> {
 
 /**
  * Get DocTypeRegistry instance (lazy-loaded with dynamic import)
+ *
+ * Automatically loads custom_templates_path from docs config if available.
  */
 export async function getDocTypeRegistry(config?: any): Promise<DocTypeRegistry> {
   if (!instances.docTypeRegistry) {
     try {
       // Dynamic import to avoid loading SDK at module load time
       const { DocTypeRegistry } = await import('@fractary/core/docs');
-      instances.docTypeRegistry = new DocTypeRegistry(config);
+
+      // Build registry config, merging any provided config with project config
+      let registryConfig = config || {};
+
+      // If no customManifestPath provided, try to load from project config
+      if (!registryConfig.customManifestPath) {
+        try {
+          const { loadYamlConfig } = await import('@fractary/core/common/yaml-config');
+          const projectConfig = loadYamlConfig();
+          if (projectConfig?.docs?.custom_templates_path) {
+            registryConfig = {
+              ...registryConfig,
+              customManifestPath: projectConfig.docs.custom_templates_path,
+            };
+          }
+        } catch {
+          // Config not available, continue without custom types
+        }
+      }
+
+      instances.docTypeRegistry = new DocTypeRegistry(registryConfig);
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
     }

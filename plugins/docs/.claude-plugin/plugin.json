@@ -1,6 +1,6 @@
 {
   "name": "fractary-docs",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "Documentation system with per-type skills for Claude auto-discovery. Each document type (ADR, API, architecture, etc.) has its own skill with synonyms for natural language matching.",
   "commands": "./commands/",
   "agents": [

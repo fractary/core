@@ -2172,6 +2172,9 @@ repo:
 # Logs management configuration
 logs:
   schema_version: "2.0"
+  # Path to custom log type templates (local project overrides)
+  # Falls back to core templates if not specified
+  custom_templates_path: .fractary/logs/templates/manifest.yaml
   storage:
     local_path: .fractary/logs
     cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
@@ -2276,6 +2279,9 @@ spec:
 # Documentation management configuration
 docs:
   schema_version: "1.1"
+  # Path to custom doc type templates (local project overrides)
+  # Falls back to core templates if not specified
+  custom_templates_path: .fractary/docs/templates/manifest.yaml
   doc_types:
     adr:
       enabled: true

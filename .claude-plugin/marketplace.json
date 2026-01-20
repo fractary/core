@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "3.1.7",
+      "version": "3.1.8",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -15,7 +15,7 @@
         "name": "fractary-core",
         "source": "./plugins/core",
         "description": "Core initialization and configuration for Fractary plugins",
-        "version": "3.1.5",
+        "version": "3.1.6",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -277,7 +277,7 @@
         "name": "fractary-docs",
         "source": "./plugins/docs",
         "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-        "version": "3.0.2",
+        "version": "3.1.0",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"

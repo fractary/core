@@ -81,6 +81,11 @@ export interface RepoConfig {
  */
 export interface LogsConfig {
   schema_version: string;
+  /**
+   * Path to custom log type templates manifest (local project overrides)
+   * Falls back to core templates if not specified
+   */
+  custom_templates_path?: string;
   storage?: Record<string, any>;
   retention?: Record<string, any>;
   session_logging?: Record<string, any>;
@@ -141,6 +146,11 @@ export interface SpecConfig {
  */
 export interface DocsConfig {
   schema_version: string;
+  /**
+   * Path to custom doc type templates manifest (local project overrides)
+   * Falls back to core templates if not specified
+   */
+  custom_templates_path?: string;
   hooks?: Record<string, any>;
   doc_types?: Record<string, any>;
   output_paths?: Record<string, any>;
