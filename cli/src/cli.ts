@@ -8,6 +8,7 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { loadEnv } from '@fractary/core/config';
 import { createWorkCommand } from './commands/work';
 import { createRepoCommand } from './commands/repo';
 import { createSpecCommand } from './commands/spec';
@@ -15,6 +16,10 @@ import { createLogsCommand } from './commands/logs';
 import { createFileCommand } from './commands/file';
 import { createDocsCommand } from './commands/docs';
 import { registerConfigCommand } from './commands/config';
+
+// Load environment variables from .env files before any config loading
+// This ensures tokens and other settings are available to SDK operations
+loadEnv();
 
 // Package information
 const packageJson = require('../package.json');

@@ -6,11 +6,17 @@
   "types": "dist/index.d.ts",
   "typesVersions": {
     "*": {
+      "config": [
+        "dist/config/index.d.ts"
+      ],
       "common/config": [
         "dist/common/config.d.ts"
       ],
       "common/yaml-config": [
         "dist/common/yaml-config.d.ts"
+      ],
+      "common/secrets": [
+        "dist/common/secrets.d.ts"
       ],
       "work": [
         "dist/work/index.d.ts"
@@ -36,6 +42,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "default": "./dist/config/index.js"
     },
     "./work": {
       "types": "./dist/work/index.d.ts",
@@ -68,6 +78,10 @@
     "./common/config": {
       "types": "./dist/common/config.d.ts",
       "default": "./dist/common/config.js"
+    },
+    "./common/secrets": {
+      "types": "./dist/common/secrets.d.ts",
+      "default": "./dist/common/secrets.js"
     }
   },
   "files": [

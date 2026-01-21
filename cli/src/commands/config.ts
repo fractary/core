@@ -9,45 +9,9 @@
 import { Command } from 'commander';
 import { loadConfig, getConfigPath, configExists } from '../utils/config.js';
 import chalk from 'chalk';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { validateEnvVars, findProjectRoot } from '@fractary/core/common/yaml-config';
-
-/**
- * Redact sensitive values from config for display
- */
-function redactConfig(config: any): any {
-  if (!config) return config;
-
-  const redacted = JSON.parse(JSON.stringify(config));
-
-  function redactObject(obj: any): void {
-    for (const key in obj) {
-      if (typeof obj[key] === 'string') {
-        // Redact values that look like tokens or contain ${ENV_VAR}
-        if (
-          key.toLowerCase().includes('token') ||
-          key.toLowerCase().includes('key') ||
-          key.toLowerCase().includes('secret') ||
-          key.toLowerCase().includes('password') ||
-          obj[key].includes('${')
-        ) {
-          if (obj[key].includes('${')) {
-            // Keep environment variable references
-            obj[key] = obj[key];
-          } else {
-            // Redact actual values
-            obj[key] = '********';
-          }
-        }
-      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-        redactObject(obj[key]);
-      }
-    }
-  }
-
-  redactObject(redacted);
-  return redacted;
-}
+import { redactConfig } from '@fractary/core/common/secrets';
 
 /**
  * Validate configuration command
