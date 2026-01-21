@@ -13,9 +13,6 @@
  * - Documentation management
  */
 
-// Auto-load .env files on import
-import 'dotenv/config';
-
 // Authentication primitives
 export * from './auth';
 

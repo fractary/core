@@ -5,6 +5,9 @@
  * with integrated authentication support.
  */
 
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+import * as fs from 'fs';
 import {
   loadYamlConfig,
   CoreYamlConfig,
@@ -19,6 +22,73 @@ import {
 } from '../common/yaml-config';
 import type { TokenProvider, GitHubConfig, GitHubAppConfig } from '../auth/types';
 import { createTokenProvider } from '../auth';
+import { findProjectRoot } from '../common/yaml-config';
+
+/** Track whether loadEnv has been called */
+let envLoaded = false;
+
+/**
+ * Load environment variables from .env files
+ *
+ * This function explicitly loads .env files - it must be called manually
+ * rather than being a side effect of importing the module.
+ *
+ * Searches for .env files in the following order:
+ * 1. Current working directory
+ * 2. Project root (directory containing .fractary or .git)
+ *
+ * @param options Loading options
+ * @returns true if .env was loaded, false if no .env file found
+ *
+ * @example
+ * ```typescript
+ * import { loadEnv, loadConfig } from '@fractary/core';
+ *
+ * // Explicitly load .env before loading config
+ * loadEnv();
+ * const config = await loadConfig();
+ * ```
+ */
+export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolean {
+  const { cwd = process.cwd(), force = false } = options;
+
+  // Skip if already loaded (unless force is true)
+  if (envLoaded && !force) {
+    return true;
+  }
+
+  // Try loading from current working directory first
+  const cwdEnvPath = path.join(cwd, '.env');
+  if (fs.existsSync(cwdEnvPath)) {
+    dotenv.config({ path: cwdEnvPath });
+    envLoaded = true;
+    return true;
+  }
+
+  // Try loading from project root
+  try {
+    const projectRoot = findProjectRoot(cwd);
+    const rootEnvPath = path.join(projectRoot, '.env');
+    if (fs.existsSync(rootEnvPath)) {
+      dotenv.config({ path: rootEnvPath });
+      envLoaded = true;
+      return true;
+    }
+  } catch {
+    // findProjectRoot failed - that's okay
+  }
+
+  return false;
+}
+
+/**
+ * Check if environment variables have been loaded
+ *
+ * @returns true if loadEnv() has been called successfully
+ */
+export function isEnvLoaded(): boolean {
+  return envLoaded;
+}
 
 /**
  * GitHub configuration extracted from yaml config

@@ -10,6 +10,45 @@ import { WorkManager } from './work';
 import { RepoManager } from './repo';
 import { loadConfig, LoadedConfig } from './config/loader';
 import type { WorkConfig, RepoConfig } from './common/types';
+import { ConfigurationError } from './common/errors';
+
+/** Regex pattern for valid GitHub owner/repo format */
+const PROJECT_FORMAT_REGEX = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
+
+/**
+ * Validate and parse project string into owner/repo
+ *
+ * @param project Project string in "owner/repo" format
+ * @returns Tuple of [owner, repo] or null if invalid
+ * @throws ConfigurationError if format is invalid
+ */
+function parseProject(project: string): [string, string] {
+  if (!project || typeof project !== 'string') {
+    throw new ConfigurationError(
+      'Invalid project configuration: project must be a non-empty string',
+      { project }
+    );
+  }
+
+  const trimmed = project.trim();
+
+  if (!PROJECT_FORMAT_REGEX.test(trimmed)) {
+    throw new ConfigurationError(
+      `Invalid project format: "${project}". Expected "owner/repo" format (e.g., "fractary/core")`,
+      { project }
+    );
+  }
+
+  const parts = trimmed.split('/');
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    throw new ConfigurationError(
+      `Invalid project format: "${project}". Expected exactly one "/" separator`,
+      { project }
+    );
+  }
+
+  return [parts[0], parts[1]];
+}
 
 /**
  * Options for creating managers
@@ -29,6 +68,7 @@ export interface CreateManagerOptions {
  * @param config Loaded configuration
  * @param token Token from token provider (if available)
  * @returns WorkConfig for WorkManager
+ * @throws ConfigurationError if project format is invalid
  */
 function buildWorkConfig(config: LoadedConfig, token?: string): WorkConfig {
   // Get platform from work config or default to github
@@ -46,8 +86,9 @@ function buildWorkConfig(config: LoadedConfig, token?: string): WorkConfig {
   let repo = handlerConfig.repo;
   const project = handlerConfig.project || config.github?.project;
 
-  if (!owner && !repo && project && project.includes('/')) {
-    [owner, repo] = project.split('/');
+  // Parse and validate project format if we need to extract owner/repo
+  if (!owner && !repo && project) {
+    [owner, repo] = parseProject(project);
   }
 
   return {
@@ -65,6 +106,7 @@ function buildWorkConfig(config: LoadedConfig, token?: string): WorkConfig {
  * @param config Loaded configuration
  * @param token Token from token provider (if available)
  * @returns RepoConfig for RepoManager
+ * @throws ConfigurationError if project format is invalid
  */
 function buildRepoConfig(config: LoadedConfig, token?: string): RepoConfig {
   // Get platform from repo config or default to github
@@ -85,8 +127,9 @@ function buildRepoConfig(config: LoadedConfig, token?: string): RepoConfig {
   let repo = handlerConfig.repo;
   const project = handlerConfig.project || config.github?.project;
 
-  if (!owner && !repo && project && project.includes('/')) {
-    [owner, repo] = project.split('/');
+  // Parse and validate project format if we need to extract owner/repo
+  if (!owner && !repo && project) {
+    [owner, repo] = parseProject(project);
   }
 
   return {

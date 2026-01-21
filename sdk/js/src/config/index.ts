@@ -6,6 +6,8 @@
 
 // Re-export from loader
 export {
+  loadEnv,
+  isEnvLoaded,
   loadConfig,
   loadConfigSync,
   type LoadedConfig,

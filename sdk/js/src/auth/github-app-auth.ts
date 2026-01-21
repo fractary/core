@@ -41,6 +41,9 @@ export class GitHubAppAuth {
   private readonly privateKey: string;
   private cachedToken: CachedToken | null = null;
 
+  /** In-flight token request promise (for race condition prevention) */
+  private pendingTokenRequest: Promise<string> | null = null;
+
   /** Token refresh buffer - refresh 5 minutes before expiration */
   private static readonly REFRESH_BUFFER_MS = 5 * 60 * 1000;
 
@@ -202,6 +205,9 @@ export class GitHubAppAuth {
    * Returns a cached token if still valid, otherwise generates a new one.
    * Tokens are automatically refreshed 5 minutes before expiration.
    *
+   * Thread-safe: concurrent calls will share the same pending request
+   * to prevent redundant API calls and potential rate limiting.
+   *
    * @returns Installation access token string
    * @throws AuthenticationError if token cannot be obtained
    */
@@ -211,6 +217,28 @@ export class GitHubAppAuth {
       return this.cachedToken!.token;
     }
 
+    // If there's already a pending request, wait for it
+    // This prevents multiple concurrent calls from triggering multiple API requests
+    if (this.pendingTokenRequest) {
+      return this.pendingTokenRequest;
+    }
+
+    // Create a new token request and track it
+    this.pendingTokenRequest = this.fetchAndCacheToken();
+
+    try {
+      return await this.pendingTokenRequest;
+    } finally {
+      // Clear the pending request once complete (success or failure)
+      this.pendingTokenRequest = null;
+    }
+  }
+
+  /**
+   * Internal method to fetch and cache token
+   * Separated from getInstallationToken to enable promise sharing
+   */
+  private async fetchAndCacheToken(): Promise<string> {
     // Exchange JWT for new installation token
     const response = await this.exchangeJWTForToken();
 
@@ -227,9 +255,11 @@ export class GitHubAppAuth {
    * Clear the cached token
    *
    * Forces the next getInstallationToken() call to fetch a fresh token.
+   * Note: Does not cancel any in-flight request.
    */
   clearCache(): void {
     this.cachedToken = null;
+    this.pendingTokenRequest = null;
   }
 
   /**
