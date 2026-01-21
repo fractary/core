@@ -13,6 +13,15 @@
  * - Documentation management
  */
 
+// Authentication primitives
+export * from './auth';
+
+// Configuration loading
+export * from './config';
+
+// Manager factories
+export * from './factories';
+
 // Work tracking primitives
 export * from './work';
 
