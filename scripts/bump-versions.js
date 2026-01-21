@@ -85,23 +85,38 @@ function verboseLog(msg) {
 }
 
 function getChangedFiles() {
-  try {
-    if (stagedOnly) {
+  if (stagedOnly) {
+    try {
       const result = execSync('git diff --cached --name-only', { encoding: 'utf-8' });
       return result.trim().split('\n').filter(Boolean);
+    } catch (e) {
+      return [];
     }
-    // Try to get changes from main branch, fallback to last commit
-    const result = execSync('git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1', {
-      encoding: 'utf-8'
+  }
+
+  // Try to get changes from main branch
+  try {
+    const result = execSync('git diff --name-only origin/main...HEAD', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe']
     });
     return result.trim().split('\n').filter(Boolean);
   } catch (e) {
-    // Fallback: try staged files
+    // Fallback: try diff from last commit
     try {
-      return execSync('git diff --cached --name-only', { encoding: 'utf-8' })
-        .trim().split('\n').filter(Boolean);
+      const result = execSync('git diff --name-only HEAD~1', {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      return result.trim().split('\n').filter(Boolean);
     } catch (e2) {
-      return [];
+      // Final fallback: try staged files
+      try {
+        return execSync('git diff --cached --name-only', { encoding: 'utf-8' })
+          .trim().split('\n').filter(Boolean);
+      } catch (e3) {
+        return [];
+      }
     }
   }
 }
