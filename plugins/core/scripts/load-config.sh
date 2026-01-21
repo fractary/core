@@ -19,6 +19,10 @@
 
 set -euo pipefail
 
+# Get script directory for locating the Python extractor
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_EXTRACTOR="$SCRIPT_DIR/extract-config-section.py"
+
 # Check arguments
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <section> [validation_fields...]" >&2
@@ -87,20 +91,16 @@ if [ ! -f "$CONFIG_FILE" ]; then
     exit 3
 fi
 
-# Build validation fields argument for Python
-VALIDATION_ARGS=""
-for field in "${VALIDATION_FIELDS[@]}"; do
-    VALIDATION_ARGS="$VALIDATION_ARGS \"$field\""
-done
-
-# Extract and validate configuration using Python
-# This script extracts the specified section from the unified YAML config
-# and validates that required fields exist
-python3 - "$CONFIG_FILE" "$SECTION" "${VALIDATION_FIELDS[@]}" <<'PYTHON_SCRIPT'
+# Extract and validate configuration using external Python script
+# This provides better testability, IDE support, and maintainability
+if [ -f "$PYTHON_EXTRACTOR" ]; then
+    exec python3 "$PYTHON_EXTRACTOR" "$CONFIG_FILE" "$SECTION" "${VALIDATION_FIELDS[@]}"
+else
+    # Fallback to inline Python if external script not found
+    python3 - "$CONFIG_FILE" "$SECTION" "${VALIDATION_FIELDS[@]}" <<'PYTHON_SCRIPT'
 import sys
 import yaml
 import json
-import os
 
 config_file = sys.argv[1]
 section = sys.argv[2]
@@ -127,7 +127,6 @@ try:
 
     # Validate required fields if specified
     for field in validation_fields:
-        # Support nested fields like "handlers.github"
         parts = field.split('.')
         current = section_config
         for part in parts:
@@ -136,7 +135,7 @@ try:
                 sys.exit(3)
             current = current[part]
 
-    # Special validation for handler-based configs (work, repo, file)
+    # Special validation for handler-based configs
     if section in ['work', 'repo', 'file']:
         if 'active_handler' in section_config:
             active_handler = section_config['active_handler']
@@ -147,7 +146,6 @@ try:
                 print(f"  But {section}.handlers.{active_handler} is missing", file=sys.stderr)
                 sys.exit(3)
 
-    # Output section config as JSON for shell consumption
     print(json.dumps(section_config, indent=2))
 
 except FileNotFoundError:
@@ -160,3 +158,4 @@ except Exception as e:
     print(f"Error: Failed to load configuration: {e}", file=sys.stderr)
     sys.exit(3)
 PYTHON_SCRIPT
+fi

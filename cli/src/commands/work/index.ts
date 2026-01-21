@@ -855,8 +855,17 @@ async function buildWorkInitConfig(
  * and merges it with any existing configuration.
  */
 async function writeWorkConfig(initConfig: WorkInitConfig): Promise<string> {
-  // Load existing config or create new
-  const existingConfig = loadConfig() || { version: '2.0' };
+  // Load existing config or create new with explicit error handling
+  let existingConfig: CoreConfig;
+  try {
+    existingConfig = loadConfig() || { version: '2.0' };
+  } catch (error) {
+    // Log warning but continue with fresh config
+    console.warn(
+      chalk.yellow('Warning: Could not load existing config, creating new configuration')
+    );
+    existingConfig = { version: '2.0' };
+  }
 
   // Build handler config for the platform
   const handlerConfig: Record<string, unknown> = {};

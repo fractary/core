@@ -61,6 +61,58 @@ export interface Config {
 }
 
 /**
+ * Internal interfaces for SDK config structure
+ * These provide type safety when accessing the SDK's config format
+ */
+interface SdkStorageConfig {
+  local?: {
+    path?: string;
+  };
+  [key: string]: unknown;
+}
+
+interface SdkFileSource {
+  type?: string;
+  bucket?: string;
+  prefix?: string;
+  region?: string;
+  projectId?: string;
+  accountId?: string;
+  folderId?: string;
+  local?: { basePath?: string };
+  auth?: {
+    profile?: string;
+    accessKeyId?: string;
+    secretAccessKey?: string;
+    keyFilePath?: string;
+  };
+  publicUrl?: string;
+}
+
+interface SdkFileConfig {
+  sources?: Record<string, SdkFileSource>;
+  global_settings?: {
+    basePath?: string;
+  };
+  [key: string]: unknown;
+}
+
+interface SdkDocsConfig {
+  output_paths?: {
+    default?: string;
+  };
+  custom_templates_path?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Type guard to safely check if a value is an object
+ */
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
  * Convert SDK's LoadedConfig to MCP's flat Config format
  *
  * The SDK uses a handler-based config structure (active_handler + handlers map),
@@ -95,75 +147,74 @@ function convertToMcpConfig(sdkConfig: LoadedConfig): Config {
     };
   }
 
-  // Convert spec config
-  // SDK uses storage-based config, extract local path from storage.local
-  if (sdkConfig.spec) {
-    const specConfig = sdkConfig.spec as unknown as Record<string, unknown>;
-    const storage = specConfig.storage as Record<string, unknown> | undefined;
+  // Convert spec config - SDK uses storage-based config
+  if (sdkConfig.spec && isObject(sdkConfig.spec)) {
+    const storage = (sdkConfig.spec as { storage?: SdkStorageConfig }).storage;
     config.spec = {
-      localPath: (storage?.local as Record<string, unknown>)?.path as string | undefined,
+      localPath: storage?.local?.path,
     };
   }
 
-  // Convert logs config
-  // SDK uses storage-based config, extract local path from storage.local
-  if (sdkConfig.logs) {
-    const logsConfig = sdkConfig.logs as unknown as Record<string, unknown>;
-    const storage = logsConfig.storage as Record<string, unknown> | undefined;
+  // Convert logs config - SDK uses storage-based config
+  if (sdkConfig.logs && isObject(sdkConfig.logs)) {
+    const storage = (sdkConfig.logs as { storage?: SdkStorageConfig }).storage;
     config.logs = {
-      localPath: (storage?.local as Record<string, unknown>)?.path as string | undefined,
+      localPath: storage?.local?.path,
     };
   }
 
-  // Convert file config
-  // SDK uses sources-based config
-  if (sdkConfig.file) {
-    const fileConfig = sdkConfig.file as unknown as Record<string, unknown>;
-    const sources = fileConfig.sources as
-      | Record<string, Record<string, unknown>>
-      | undefined;
+  // Convert file config - SDK uses sources-based config
+  if (sdkConfig.file && isObject(sdkConfig.file)) {
+    const fileConfig = sdkConfig.file as SdkFileConfig;
+    const sources = fileConfig.sources;
 
-    // Convert sources to MCP format
+    // Convert sources to MCP format with type safety
     type FileSourceConfig = NonNullable<NonNullable<Config['file']>['sources']>;
     const mcpSources: FileSourceConfig = {};
+
     if (sources) {
       for (const [name, source] of Object.entries(sources)) {
-        mcpSources[name] = {
-          type: source.type as 'local' | 's3' | 'r2' | 'gcs' | 'gdrive',
-          bucket: source.bucket as string | undefined,
-          prefix: source.prefix as string | undefined,
-          region: source.region as string | undefined,
-          projectId: source.projectId as string | undefined,
-          accountId: source.accountId as string | undefined,
-          folderId: source.folderId as string | undefined,
-          local: source.local as { basePath: string } | undefined,
-          auth: source.auth as FileSourceConfig[string]['auth'],
-          publicUrl: source.publicUrl as string | undefined,
-        };
+        if (source && source.type) {
+          mcpSources[name] = {
+            type: source.type as 'local' | 's3' | 'r2' | 'gcs' | 'gdrive',
+            bucket: source.bucket,
+            prefix: source.prefix,
+            region: source.region,
+            projectId: source.projectId,
+            accountId: source.accountId,
+            folderId: source.folderId,
+            local: source.local as { basePath: string } | undefined,
+            auth: source.auth,
+            publicUrl: source.publicUrl,
+          };
+        }
       }
     }
 
     config.file = {
-      basePath: (fileConfig.global_settings as Record<string, unknown>)?.basePath as
-        | string
-        | undefined,
+      basePath: fileConfig.global_settings?.basePath,
       sources: Object.keys(mcpSources).length > 0 ? mcpSources : undefined,
     };
   }
 
-  // Convert docs config
-  // SDK uses output_paths or custom_templates_path
-  if (sdkConfig.docs) {
-    const docsConfig = sdkConfig.docs as unknown as Record<string, unknown>;
-    const outputPaths = docsConfig.output_paths as Record<string, unknown> | undefined;
+  // Convert docs config - SDK uses output_paths or custom_templates_path
+  if (sdkConfig.docs && isObject(sdkConfig.docs)) {
+    const docsConfig = sdkConfig.docs as SdkDocsConfig;
     config.docs = {
-      docsDir:
-        (outputPaths?.default as string) ||
-        (docsConfig.custom_templates_path as string | undefined),
+      docsDir: docsConfig.output_paths?.default || docsConfig.custom_templates_path,
     };
   }
 
   return config;
+}
+
+/**
+ * Sanitize an error for safe logging, including both message and stack trace
+ */
+function sanitizeError(error: Error): string {
+  const sanitizedMessage = sanitizeSecrets(error.message);
+  const sanitizedStack = error.stack ? sanitizeSecrets(error.stack) : undefined;
+  return sanitizedStack || sanitizedMessage;
 }
 
 /**
@@ -190,10 +241,9 @@ export async function loadConfig(): Promise<Config> {
     // Convert SDK's handler-based config to MCP's flat format
     return convertToMcpConfig(sdkConfig);
   } catch (error) {
-    // Sanitize error message to prevent token/secret exposure
+    // Sanitize error message AND stack trace to prevent token/secret exposure
     if (error instanceof Error) {
-      const sanitizedError = sanitizeSecrets(error.message);
-      console.error(`Failed to load config: ${sanitizedError}`);
+      console.error(`Failed to load config: ${sanitizeError(error)}`);
     }
     // Return empty config on error - tools will handle missing config gracefully
     return {};
