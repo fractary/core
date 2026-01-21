@@ -6,38 +6,11 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { findProjectRoot as yamlFindProjectRoot, loadYamlConfig } from './yaml-config';
 
-/**
- * Find the project root directory by looking for common markers
- */
-export function findProjectRoot(startDir: string = process.cwd()): string {
-  let currentDir = startDir;
-
-  // Common project root markers
-  const markers = [
-    'package.json',
-    '.git',
-    'tsconfig.json',
-    'pyproject.toml',
-    'setup.py',
-  ];
-
-  while (currentDir !== path.parse(currentDir).root) {
-    // Check if any marker exists in current directory
-    for (const marker of markers) {
-      const markerPath = path.join(currentDir, marker);
-      if (fs.existsSync(markerPath)) {
-        return currentDir;
-      }
-    }
-
-    // Move up one directory
-    currentDir = path.dirname(currentDir);
-  }
-
-  // If no marker found, return the starting directory
-  return startDir;
-}
+// Re-export findProjectRoot from yaml-config for backward compatibility
+// The yaml-config version includes better path normalization and safety checks
+export { yamlFindProjectRoot as findProjectRoot };
 
 /**
  * Check if a directory is a git repository
@@ -51,7 +24,7 @@ export function isGitRepository(dir: string = process.cwd()): boolean {
  * Get the .fractary directory path
  */
 export function getFractaryDir(projectRoot?: string): string {
-  const root = projectRoot || findProjectRoot();
+  const root = projectRoot || yamlFindProjectRoot();
   return path.join(root, '.fractary');
 }
 
@@ -68,8 +41,6 @@ export function ensureDir(dirPath: string): void {
  * Config loaders - extract plugin sections from unified YAML config
  * Uses .fractary/core/config.yaml as the single source of truth
  */
-
-import { loadYamlConfig } from './yaml-config';
 
 /**
  * Load work plugin configuration from unified YAML

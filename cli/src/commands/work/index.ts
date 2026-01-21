@@ -10,6 +10,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { getWorkManager } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
+import { loadConfig, writeConfig, getConfigPath, type CoreConfig } from '../../utils/config';
 
 /**
  * Create the work command tree
@@ -582,12 +583,14 @@ function createMilestoneSetCommand(): Command {
 
 // Init Command
 
-interface WorkConfig {
-  work: {
-    platform: string;
-    repository?: { owner: string; name: string };
-    project?: string;
-  };
+/**
+ * Work init config (internal, converted to SDK's YAML format)
+ */
+interface WorkInitConfig {
+  platform: string;
+  owner?: string;
+  repo?: string;
+  project?: string;
 }
 
 function createInitCommand(): Command {
@@ -608,11 +611,11 @@ function createInitCommand(): Command {
           }
         }
 
-        const config = await buildWorkConfig(platform, {
+        const initConfig = await buildWorkInitConfig(platform, {
           project: options.project,
         });
 
-        const configPath = await writeWorkConfig(config);
+        const configPath = await writeWorkConfig(initConfig);
 
         if (options.json) {
           console.log(
@@ -620,10 +623,11 @@ function createInitCommand(): Command {
               {
                 status: 'success',
                 data: {
-                  platform: config.work.platform,
+                  platform: initConfig.platform,
                   configPath,
-                  repository: config.work.repository,
-                  project: config.work.project,
+                  owner: initConfig.owner,
+                  repo: initConfig.repo,
+                  project: initConfig.project,
                 },
               },
               null,
@@ -632,7 +636,10 @@ function createInitCommand(): Command {
           );
         } else {
           console.log(chalk.green(`✓ Work tracking initialized`));
-          console.log(chalk.gray(`Platform: ${config.work.platform}`));
+          console.log(chalk.gray(`Platform: ${initConfig.platform}`));
+          if (initConfig.owner && initConfig.repo) {
+            console.log(chalk.gray(`Repository: ${initConfig.owner}/${initConfig.repo}`));
+          }
           console.log(chalk.gray(`Config: ${configPath}`));
         }
       } catch (error) {
@@ -807,16 +814,14 @@ function parseGitRemote(url: string): { owner: string; name: string } | null {
 }
 
 /**
- * Build work configuration
+ * Build work init configuration (internal format)
  */
-async function buildWorkConfig(
+async function buildWorkInitConfig(
   platform: string,
   options: { project?: string }
-): Promise<WorkConfig> {
-  const config: WorkConfig = {
-    work: {
-      platform,
-    },
+): Promise<WorkInitConfig> {
+  const config: WorkInitConfig = {
+    platform,
   };
 
   if (platform === 'github' || platform === 'gitlab' || platform === 'bitbucket') {
@@ -827,7 +832,8 @@ async function buildWorkConfig(
       if (remoteMatch) {
         const repoInfo = parseGitRemote(remoteMatch[1].trim());
         if (repoInfo) {
-          config.work.repository = repoInfo;
+          config.owner = repoInfo.owner;
+          config.repo = repoInfo.name;
         }
       }
     } catch {
@@ -835,7 +841,7 @@ async function buildWorkConfig(
     }
   } else if (platform === 'jira' || platform === 'linear') {
     if (options.project) {
-      config.work.project = options.project;
+      config.project = options.project;
     }
   }
 
@@ -843,32 +849,86 @@ async function buildWorkConfig(
 }
 
 /**
- * Write work configuration to file
+ * Write work configuration to SDK's YAML config file
+ *
+ * Converts the internal WorkInitConfig to the SDK's handler-based YAML format
+ * and merges it with any existing configuration.
  */
-async function writeWorkConfig(config: WorkConfig): Promise<string> {
-  const configDir = path.join(process.cwd(), '.fractary', 'core');
-  const configPath = path.join(configDir, 'config.json');
-
-  // Ensure directory exists
-  await fs.mkdir(configDir, { recursive: true });
-
-  // Read existing config if present
-  let existingConfig: Record<string, unknown> = {};
+async function writeWorkConfig(initConfig: WorkInitConfig): Promise<string> {
+  // Load existing config or create new with explicit error handling
+  let existingConfig: CoreConfig;
   try {
-    const existing = await fs.readFile(configPath, 'utf-8');
-    existingConfig = JSON.parse(existing);
-  } catch {
-    // No existing config, that's fine
+    existingConfig = loadConfig() || { version: '2.0' };
+  } catch (error) {
+    // Log warning but continue with fresh config
+    console.warn(
+      chalk.yellow('Warning: Could not load existing config, creating new configuration')
+    );
+    existingConfig = { version: '2.0' };
   }
 
-  // Merge with existing config
-  const mergedConfig = {
-    ...existingConfig,
-    ...config,
+  // Build handler config for the platform
+  const handlerConfig: Record<string, unknown> = {};
+
+  if (initConfig.owner) {
+    handlerConfig.owner = initConfig.owner;
+  }
+  if (initConfig.repo) {
+    handlerConfig.repo = initConfig.repo;
+  }
+  if (initConfig.project) {
+    handlerConfig.project = initConfig.project;
+  }
+
+  // Use environment variable reference for token (best practice)
+  const tokenEnvVar = getTokenEnvVar(initConfig.platform);
+  if (tokenEnvVar) {
+    handlerConfig.token = `\${${tokenEnvVar}}`;
+  }
+
+  // Build the work section in SDK's handler-based format
+  const existingHandlers = (existingConfig.work?.handlers || {}) as Record<string, Record<string, unknown>>;
+  const existingPlatformConfig = existingHandlers[initConfig.platform] || {};
+
+  const workConfig = {
+    active_handler: initConfig.platform,
+    handlers: {
+      ...existingHandlers,
+      [initConfig.platform]: {
+        ...existingPlatformConfig,
+        ...handlerConfig,
+      },
+    },
   };
 
-  // Write config
-  await fs.writeFile(configPath, JSON.stringify(mergedConfig, null, 2) + '\n');
+  // Merge with existing config
+  const mergedConfig: CoreConfig = {
+    ...existingConfig,
+    work: workConfig as CoreConfig['work'],
+  };
 
-  return configPath;
+  // Write using SDK's YAML config writer
+  writeConfig(mergedConfig);
+
+  return getConfigPath();
+}
+
+/**
+ * Get the environment variable name for a platform's token
+ */
+function getTokenEnvVar(platform: string): string | null {
+  switch (platform) {
+    case 'github':
+      return 'GITHUB_TOKEN';
+    case 'gitlab':
+      return 'GITLAB_TOKEN';
+    case 'bitbucket':
+      return 'BITBUCKET_TOKEN';
+    case 'jira':
+      return 'JIRA_TOKEN';
+    case 'linear':
+      return 'LINEAR_API_KEY';
+    default:
+      return null;
+  }
 }
