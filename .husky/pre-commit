@@ -3,6 +3,27 @@
 # Auto-bump versions based on staged files
 # This hook automatically bumps component versions when source files are staged
 
+# Version files to track
+# NPM packages
+VERSION_FILES="sdk/js/package.json cli/package.json mcp/server/package.json"
+# Claude plugins
+VERSION_FILES="$VERSION_FILES plugins/core/.claude-plugin/plugin.json"
+VERSION_FILES="$VERSION_FILES plugins/file/.claude-plugin/plugin.json"
+VERSION_FILES="$VERSION_FILES plugins/work/.claude-plugin/plugin.json"
+VERSION_FILES="$VERSION_FILES plugins/spec/.claude-plugin/plugin.json"
+VERSION_FILES="$VERSION_FILES plugins/logs/.claude-plugin/plugin.json"
+VERSION_FILES="$VERSION_FILES plugins/repo/.claude-plugin/plugin.json"
+VERSION_FILES="$VERSION_FILES plugins/docs/.claude-plugin/plugin.json"
+VERSION_FILES="$VERSION_FILES plugins/status/.claude-plugin/plugin.json"
+
+# Record which version files have pre-existing unstaged changes BEFORE bump script
+PRE_DIRTY_FILES=""
+for file in $VERSION_FILES; do
+  if [ -f "$file" ] && ! git diff --quiet "$file" 2>/dev/null; then
+    PRE_DIRTY_FILES="$PRE_DIRTY_FILES $file"
+  fi
+done
+
 # Run version bump script
 OUTPUT=$(node scripts/bump-versions.js --staged 2>&1)
 EXIT_CODE=$?
@@ -18,28 +39,31 @@ if [ $EXIT_CODE -ne 0 ]; then
   exit $EXIT_CODE
 fi
 
-# Stage any modified version files (only if they exist and were modified)
-# NPM packages
-VERSION_FILES="sdk/js/package.json cli/package.json mcp/server/package.json"
-# Claude plugins
-VERSION_FILES="$VERSION_FILES plugins/core/.claude-plugin/plugin.json"
-VERSION_FILES="$VERSION_FILES plugins/file/.claude-plugin/plugin.json"
-VERSION_FILES="$VERSION_FILES plugins/work/.claude-plugin/plugin.json"
-VERSION_FILES="$VERSION_FILES plugins/spec/.claude-plugin/plugin.json"
-VERSION_FILES="$VERSION_FILES plugins/logs/.claude-plugin/plugin.json"
-VERSION_FILES="$VERSION_FILES plugins/repo/.claude-plugin/plugin.json"
-VERSION_FILES="$VERSION_FILES plugins/docs/.claude-plugin/plugin.json"
-VERSION_FILES="$VERSION_FILES plugins/status/.claude-plugin/plugin.json"
-
+# Stage only files that were clean before but now have changes (modified by bump script)
 STAGED_FILES=""
+SKIPPED_FILES=""
 for file in $VERSION_FILES; do
-  # Check if file exists and has unstaged changes (modified by bump script)
   if [ -f "$file" ] && ! git diff --quiet "$file" 2>/dev/null; then
-    STAGED_FILES="$STAGED_FILES $file"
+    # Check if this file had pre-existing changes
+    case " $PRE_DIRTY_FILES " in
+      *" $file "*)
+        # File had pre-existing changes, don't auto-stage
+        SKIPPED_FILES="$SKIPPED_FILES $file"
+        ;;
+      *)
+        # File was clean before, safe to stage
+        STAGED_FILES="$STAGED_FILES $file"
+        ;;
+    esac
   fi
 done
 
 if [ -n "$STAGED_FILES" ]; then
   echo "Auto-staging version files:$STAGED_FILES"
   git add $STAGED_FILES
+fi
+
+if [ -n "$SKIPPED_FILES" ]; then
+  echo "Warning: Skipped auto-staging files with pre-existing changes:$SKIPPED_FILES"
+  echo "Please review and stage these files manually if needed."
 fi

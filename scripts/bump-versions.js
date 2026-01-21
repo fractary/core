@@ -194,11 +194,16 @@ function main() {
 
   const updates = [];
   const errors = [];
+  const skipped = [];
   let sdkBumped = false;
   let newSdkVersion = null;
 
-  // Check NPM packages first
-  for (const [component, versionFile] of Object.entries(NPM_VERSION_FILES)) {
+  // Check NPM packages first (process SDK first to get new version)
+  const npmComponents = Object.entries(NPM_VERSION_FILES);
+  // Sort to ensure 'sdk' is processed first
+  npmComponents.sort(([a], [b]) => (a === 'sdk' ? -1 : b === 'sdk' ? 1 : 0));
+
+  for (const [component, versionFile] of npmComponents) {
     const sourceChanged = checkSourceChanged(changedFiles, component);
     const versionBumped = checkVersionBumped(changedFiles, component);
 
@@ -252,18 +257,21 @@ function main() {
           updates.push(`${component}: ${oldVersion} -> ${newVersion}`);
         }
       } catch (e) {
-        verboseLog(`Skipping ${component}: ${e.message}`);
+        // Collect skipped components for reporting
+        skipped.push(`${component}: ${e.message}`);
       }
     }
   }
 
   // Update SDK dependencies in CLI and MCP if SDK was bumped
+  // Re-read package.json to avoid race condition with version bumps
   if (sdkBumped && newSdkVersion && !checkOnly) {
     for (const dependent of SDK_DEPENDENTS) {
       const versionFile = NPM_VERSION_FILES[dependent];
       if (!versionFile) continue;
 
       try {
+        // Re-read to get latest state (may have been modified by version bump above)
         const pkg = readJson(versionFile);
         const currentDep = pkg.dependencies?.[SDK_PACKAGE_NAME];
 
@@ -279,7 +287,7 @@ function main() {
           }
         }
       } catch (e) {
-        verboseLog(`Failed to update ${dependent} dependency: ${e.message}`);
+        skipped.push(`${dependent} dependency update: ${e.message}`);
       }
     }
   }
@@ -301,6 +309,12 @@ function main() {
       updates.forEach(u => console.log(`  ${u}`));
     } else {
       log('No version updates needed');
+    }
+
+    // Always report skipped components (not just in verbose mode)
+    if (skipped.length > 0) {
+      console.log('Warning - skipped components:');
+      skipped.forEach(s => console.log(`  - ${s}`));
     }
   }
 }
