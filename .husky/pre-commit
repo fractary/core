@@ -33,7 +33,8 @@ VERSION_FILES="$VERSION_FILES plugins/status/.claude-plugin/plugin.json"
 
 STAGED_FILES=""
 for file in $VERSION_FILES; do
-  if [ -f "$file" ] && git diff --name-only "$file" | grep -q .; then
+  # Check if file exists and has unstaged changes (modified by bump script)
+  if [ -f "$file" ] && ! git diff --quiet "$file" 2>/dev/null; then
     STAGED_FILES="$STAGED_FILES $file"
   fi
 done
