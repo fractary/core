@@ -1,0 +1,33 @@
+{
+  "name": "@fractary/core-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fractary Core Monorepo - SDK, CLI, MCP Server, and Plugins",
+  "workspaces": [
+    "sdk/js",
+    "cli",
+    "mcp/server"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "bump:check": "node scripts/bump-versions.js --check-only",
+    "bump:versions": "node scripts/bump-versions.js",
+    "test:versions": "node scripts/bump-versions.test.js"
+  },
+  "devDependencies": {
+    "husky": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fractary/core.git"
+  },
+  "author": "Fractary Team",
+  "license": "MIT"
+}
