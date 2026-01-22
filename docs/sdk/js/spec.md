@@ -320,6 +320,6 @@ const spec = specManager.createSpec('REST API Design', {
 ## Other Interfaces
 
 - **CLI:** [Spec Commands](/docs/cli/spec.md)
-- **MCP:** [Spec Tools](/docs/mcp/spec.md)
+- **MCP:** [Spec Tools](/docs/mcp/server/spec.md)
 - **Plugin:** [Spec Plugin](/docs/plugins/spec.md)
-- **Configuration:** [Spec Config](/docs/configuration/README.md#spec)
+- **Configuration:** [Spec Config](/docs/guides/configuration.md#spec-toolset)

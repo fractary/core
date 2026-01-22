@@ -82,12 +82,12 @@ fractary_{toolset}_{resource}_{action}
 
 | Toolset | Tool Count | Documentation |
 |---------|------------|---------------|
-| **Work** | 19 tools | [Work Tools](/docs/mcp/work.md) |
-| **Repo** | 38 tools | [Repo Tools](/docs/mcp/repo.md) |
-| **Spec** | 8 tools | [Spec Tools](/docs/mcp/spec.md) |
-| **Logs** | 10 tools | [Logs Tools](/docs/mcp/logs.md) |
-| **File** | 6 tools | [File Tools](/docs/mcp/file.md) |
-| **Docs** | - | [Docs Tools](/docs/mcp/docs.md) |
+| **Work** | 19 tools | [Work Tools](/docs/mcp/server/work.md) |
+| **Repo** | 38 tools | [Repo Tools](/docs/mcp/server/repo.md) |
+| **Spec** | 8 tools | [Spec Tools](/docs/mcp/server/spec.md) |
+| **Logs** | 10 tools | [Logs Tools](/docs/mcp/server/logs.md) |
+| **File** | 6 tools | [File Tools](/docs/mcp/server/file.md) |
+| **Docs** | - | [Docs Tools](/docs/mcp/server/docs.md) |
 
 ## Configuration
 
@@ -265,6 +265,6 @@ npx @fractary/core-mcp 2>mcp-debug.log
 
 ## Other Interfaces
 
-- **SDK:** [API Reference](/docs/sdk/README.md)
+- **SDK:** [API Reference](/docs/sdk/js/README.md)
 - **CLI:** [Command Reference](/docs/cli/README.md)
 - **Plugins:** [Plugin Reference](/docs/plugins/README.md)

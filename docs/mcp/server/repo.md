@@ -375,6 +375,6 @@ Get commit log.
 
 ## Other Interfaces
 
-- **SDK:** [Repo API](/docs/sdk/repo.md)
+- **SDK:** [Repo API](/docs/sdk/js/repo.md)
 - **CLI:** [Repo Commands](/docs/cli/repo.md)
 - **Plugin:** [Repo Plugin](/docs/plugins/repo.md)

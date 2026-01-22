@@ -319,7 +319,7 @@ export FRACTARY_SPEC_AUTO_VALIDATE=true
 
 ## Other Interfaces
 
-- **SDK:** [Spec API](/docs/sdk/spec.md)
-- **MCP:** [Spec Tools](/docs/mcp/spec.md)
+- **SDK:** [Spec API](/docs/sdk/js/spec.md)
+- **MCP:** [Spec Tools](/docs/mcp/server/spec.md)
 - **Plugin:** [Spec Plugin](/docs/plugins/spec.md)
-- **Configuration:** [Spec Config](/docs/configuration/README.md#spec)
+- **Configuration:** [Spec Config](/docs/guides/configuration.md#spec-toolset)

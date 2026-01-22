@@ -377,7 +377,7 @@ export FRACTARY_LOGS_MAX_AGE_DAYS=90
 
 ## Other Interfaces
 
-- **SDK:** [Logs API](/docs/sdk/logs.md)
-- **MCP:** [Logs Tools](/docs/mcp/logs.md)
+- **SDK:** [Logs API](/docs/sdk/js/logs.md)
+- **MCP:** [Logs Tools](/docs/mcp/server/logs.md)
 - **Plugin:** [Logs Plugin](/docs/plugins/logs.md)
-- **Configuration:** [Logs Config](/docs/configuration/README.md#logs)
+- **Configuration:** [Logs Config](/docs/guides/configuration.md#logs-toolset)

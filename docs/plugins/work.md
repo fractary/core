@@ -252,7 +252,7 @@ The Work plugin integrates with FABER workflow phases:
 
 ## Other Interfaces
 
-- **SDK:** [Work API](/docs/sdk/work.md)
+- **SDK:** [Work API](/docs/sdk/js/work.md)
 - **CLI:** [Work Commands](/docs/cli/work.md)
-- **MCP:** [Work Tools](/docs/mcp/work.md)
-- **Configuration:** [Work Config](/docs/configuration/README.md#work)
+- **MCP:** [Work Tools](/docs/mcp/server/work.md)
+- **Configuration:** [Work Config](/docs/guides/configuration.md#work-toolset)

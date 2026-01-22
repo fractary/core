@@ -314,6 +314,6 @@ List milestones.
 
 ## Other Interfaces
 
-- **SDK:** [Work API](/docs/sdk/work.md)
+- **SDK:** [Work API](/docs/sdk/js/work.md)
 - **CLI:** [Work Commands](/docs/cli/work.md)
 - **Plugin:** [Work Plugin](/docs/plugins/work.md)

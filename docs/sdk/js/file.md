@@ -329,6 +329,6 @@ const fileManager = new FileManager({
 ## Other Interfaces
 
 - **CLI:** [File Commands](/docs/cli/file.md)
-- **MCP:** [File Tools](/docs/mcp/file.md)
+- **MCP:** [File Tools](/docs/mcp/server/file.md)
 - **Plugin:** [File Plugin](/docs/plugins/file.md)
-- **Configuration:** [File Config](/docs/configuration/README.md#file)
+- **Configuration:** [File Config](/docs/guides/configuration.md#file-toolset)

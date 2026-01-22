@@ -340,6 +340,6 @@ Analyze logs for patterns.
 
 ## Other Interfaces
 
-- **SDK:** [Logs API](/docs/sdk/logs.md)
+- **SDK:** [Logs API](/docs/sdk/js/logs.md)
 - **CLI:** [Logs Commands](/docs/cli/logs.md)
 - **Plugin:** [Logs Plugin](/docs/plugins/logs.md)

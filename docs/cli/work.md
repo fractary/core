@@ -320,7 +320,7 @@ export LINEAR_API_KEY=lin_api_your_key
 
 ## Other Interfaces
 
-- **SDK:** [Work API](/docs/sdk/work.md)
-- **MCP:** [Work Tools](/docs/mcp/work.md)
+- **SDK:** [Work API](/docs/sdk/js/work.md)
+- **MCP:** [Work Tools](/docs/mcp/server/work.md)
 - **Plugin:** [Work Plugin](/docs/plugins/work.md)
-- **Configuration:** [Work Config](/docs/configuration/README.md#work)
+- **Configuration:** [Work Config](/docs/guides/configuration.md#work-toolset)

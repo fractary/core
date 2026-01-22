@@ -74,7 +74,7 @@ fractary-core work issue fetch 123 \
   --repo myrepo
 ```
 
-See the [Configuration Guide](/docs/configuration/README.md) for complete options.
+See the [Configuration Guide](/docs/guides/configuration.md) for complete options.
 
 ## Toolset Command Groups
 
@@ -209,6 +209,6 @@ fractary-core spec list --type feature
 
 ## Other Interfaces
 
-- **SDK:** [API Reference](/docs/sdk/README.md)
-- **MCP:** [Tool Reference](/docs/mcp/README.md)
+- **SDK:** [API Reference](/docs/sdk/js/README.md)
+- **MCP:** [Tool Reference](/docs/mcp/server/README.md)
 - **Plugins:** [Plugin Reference](/docs/plugins/README.md)

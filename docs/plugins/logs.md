@@ -345,7 +345,7 @@ Cleanup complete:
 
 ## Other Interfaces
 
-- **SDK:** [Logs API](/docs/sdk/logs.md)
+- **SDK:** [Logs API](/docs/sdk/js/logs.md)
 - **CLI:** [Logs Commands](/docs/cli/logs.md)
-- **MCP:** [Logs Tools](/docs/mcp/logs.md)
-- **Configuration:** [Logs Config](/docs/configuration/README.md#logs)
+- **MCP:** [Logs Tools](/docs/mcp/server/logs.md)
+- **Configuration:** [Logs Config](/docs/guides/configuration.md#logs-toolset)

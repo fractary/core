@@ -267,6 +267,6 @@ Archive a completed specification.
 
 ## Other Interfaces
 
-- **SDK:** [Spec API](/docs/sdk/spec.md)
+- **SDK:** [Spec API](/docs/sdk/js/spec.md)
 - **CLI:** [Spec Commands](/docs/cli/spec.md)
 - **Plugin:** [Spec Plugin](/docs/plugins/spec.md)

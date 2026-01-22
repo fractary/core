@@ -343,6 +343,6 @@ Export a document to another format.
 
 ## Other Interfaces
 
-- **SDK:** [Docs API](/docs/sdk/docs.md)
+- **SDK:** [Docs API](/docs/sdk/js/docs.md)
 - **CLI:** [Docs Commands](/docs/cli/docs.md)
 - **Plugin:** [Docs Plugin](/docs/plugins/docs.md)

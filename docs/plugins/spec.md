@@ -257,7 +257,7 @@ The Spec plugin is central to the FABER workflow:
 
 ## Other Interfaces
 
-- **SDK:** [Spec API](/docs/sdk/spec.md)
+- **SDK:** [Spec API](/docs/sdk/js/spec.md)
 - **CLI:** [Spec Commands](/docs/cli/spec.md)
-- **MCP:** [Spec Tools](/docs/mcp/spec.md)
-- **Configuration:** [Spec Config](/docs/configuration/README.md#spec)
+- **MCP:** [Spec Tools](/docs/mcp/server/spec.md)
+- **Configuration:** [Spec Config](/docs/guides/configuration.md#spec-toolset)

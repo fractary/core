@@ -387,6 +387,6 @@ try {
 ## Other Interfaces
 
 - **CLI:** [Repo Commands](/docs/cli/repo.md)
-- **MCP:** [Repo Tools](/docs/mcp/repo.md)
+- **MCP:** [Repo Tools](/docs/mcp/server/repo.md)
 - **Plugin:** [Repo Plugin](/docs/plugins/repo.md)
-- **Configuration:** [Repo Config](/docs/configuration/README.md#repo)
+- **Configuration:** [Repo Config](/docs/guides/configuration.md#repo-toolset)

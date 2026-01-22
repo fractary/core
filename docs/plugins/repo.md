@@ -314,7 +314,7 @@ Committed, pushed, PR created and merged.
 
 ## Other Interfaces
 
-- **SDK:** [Repo API](/docs/sdk/repo.md)
+- **SDK:** [Repo API](/docs/sdk/js/repo.md)
 - **CLI:** [Repo Commands](/docs/cli/repo.md)
-- **MCP:** [Repo Tools](/docs/mcp/repo.md)
-- **Configuration:** [Repo Config](/docs/configuration/README.md#repo)
+- **MCP:** [Repo Tools](/docs/mcp/server/repo.md)
+- **Configuration:** [Repo Config](/docs/guides/configuration.md#repo-toolset)

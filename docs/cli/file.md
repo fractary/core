@@ -365,7 +365,7 @@ export FRACTARY_FILE_S3_BUCKET=my-bucket
 
 ## Other Interfaces
 
-- **SDK:** [File API](/docs/sdk/file.md)
-- **MCP:** [File Tools](/docs/mcp/file.md)
+- **SDK:** [File API](/docs/sdk/js/file.md)
+- **MCP:** [File Tools](/docs/mcp/server/file.md)
 - **Plugin:** [File Plugin](/docs/plugins/file.md)
-- **Configuration:** [File Config](/docs/configuration/README.md#file)
+- **Configuration:** [File Config](/docs/guides/configuration.md#file-toolset)

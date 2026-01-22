@@ -406,7 +406,7 @@ export BITBUCKET_APP_PASSWORD=your_app_password
 
 ## Other Interfaces
 
-- **SDK:** [Repo API](/docs/sdk/repo.md)
-- **MCP:** [Repo Tools](/docs/mcp/repo.md)
+- **SDK:** [Repo API](/docs/sdk/js/repo.md)
+- **MCP:** [Repo Tools](/docs/mcp/server/repo.md)
 - **Plugin:** [Repo Plugin](/docs/plugins/repo.md)
-- **Configuration:** [Repo Config](/docs/configuration/README.md#repo)
+- **Configuration:** [Repo Config](/docs/guides/configuration.md#repo-toolset)

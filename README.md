@@ -203,14 +203,14 @@ core/
 
 | Interface | Description | Link |
 |-----------|-------------|------|
-| **SDK** | TypeScript API reference | [SDK Documentation](./docs/sdk/README.md) |
+| **SDK** | TypeScript API reference | [SDK Documentation](./docs/sdk/js/README.md) |
 | **CLI** | Command-line reference | [CLI Documentation](./docs/cli/README.md) |
-| **MCP** | MCP Server tools | [MCP Documentation](./docs/mcp/README.md) |
+| **MCP** | MCP Server tools | [MCP Documentation](./docs/mcp/server/README.md) |
 | **Plugins** | Claude Code plugins | [Plugin Documentation](./docs/plugins/README.md) |
 
 ### Guides
 
-- [Configuration Guide](./docs/configuration/README.md) - Unified `.fractary/config.yaml` reference
+- [Configuration Guide](./docs/guides/configuration.md) - Unified `.fractary/config.yaml` reference
 - [Integration Guide](./docs/guides/integration.md) - How to integrate into your projects
 - [Troubleshooting](./docs/guides/troubleshooting.md) - Common issues and solutions
 

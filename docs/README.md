@@ -12,12 +12,12 @@ Fractary Core is organized around six **toolsets** - functional areas that each 
 
 | Toolset | Description | Platforms |
 |---------|-------------|-----------|
-| **[Work](/docs/sdk/work.md)** | Work item and issue tracking | GitHub Issues, Jira, Linear |
-| **[Repo](/docs/sdk/repo.md)** | Repository and Git operations | GitHub, GitLab, Bitbucket |
-| **[Spec](/docs/sdk/spec.md)** | Technical specification management | Local storage |
-| **[Logs](/docs/sdk/logs.md)** | Session and operational logging | Local storage |
-| **[File](/docs/sdk/file.md)** | File storage operations | Local, S3 |
-| **[Docs](/docs/sdk/docs.md)** | Documentation management | Local storage |
+| **[Work](/docs/sdk/js/work.md)** | Work item and issue tracking | GitHub Issues, Jira, Linear |
+| **[Repo](/docs/sdk/js/repo.md)** | Repository and Git operations | GitHub, GitLab, Bitbucket |
+| **[Spec](/docs/sdk/js/spec.md)** | Technical specification management | Local storage |
+| **[Logs](/docs/sdk/js/logs.md)** | Session and operational logging | Local storage |
+| **[File](/docs/sdk/js/file.md)** | File storage operations | Local, S3 |
+| **[Docs](/docs/sdk/js/docs.md)** | Documentation management | Local storage |
 
 ## The 4 Interfaces
 
@@ -38,7 +38,7 @@ const workManager = new WorkManager({
 const issue = await workManager.fetchIssue(123);
 ```
 
-**[SDK Documentation](/docs/sdk/README.md)** - Installation, quick start, and API reference
+**[SDK Documentation](/docs/sdk/js/README.md)** - Installation, quick start, and API reference
 
 ### 2. CLI
 
@@ -72,7 +72,7 @@ The MCP (Model Context Protocol) Server exposes 81 tools for AI agent integratio
 }
 ```
 
-**[MCP Documentation](/docs/mcp/README.md)** - Setup and tool reference
+**[MCP Documentation](/docs/mcp/server/README.md)** - Setup and tool reference
 
 ### 4. Claude Plugins
 
@@ -95,16 +95,16 @@ Claude Code plugins provide agents, slash commands, and tools for enhanced workf
 
 | Toolset | SDK | CLI | MCP | Plugin |
 |---------|-----|-----|-----|--------|
-| Work | [API](/docs/sdk/work.md) | [Commands](/docs/cli/work.md) | [Tools](/docs/mcp/work.md) | [Plugin](/docs/plugins/work.md) |
-| Repo | [API](/docs/sdk/repo.md) | [Commands](/docs/cli/repo.md) | [Tools](/docs/mcp/repo.md) | [Plugin](/docs/plugins/repo.md) |
-| Spec | [API](/docs/sdk/spec.md) | [Commands](/docs/cli/spec.md) | [Tools](/docs/mcp/spec.md) | [Plugin](/docs/plugins/spec.md) |
-| Logs | [API](/docs/sdk/logs.md) | [Commands](/docs/cli/logs.md) | [Tools](/docs/mcp/logs.md) | [Plugin](/docs/plugins/logs.md) |
-| File | [API](/docs/sdk/file.md) | [Commands](/docs/cli/file.md) | [Tools](/docs/mcp/file.md) | [Plugin](/docs/plugins/file.md) |
-| Docs | [API](/docs/sdk/docs.md) | [Commands](/docs/cli/docs.md) | [Tools](/docs/mcp/docs.md) | [Plugin](/docs/plugins/docs.md) |
+| Work | [API](/docs/sdk/js/work.md) | [Commands](/docs/cli/work.md) | [Tools](/docs/mcp/server/work.md) | [Plugin](/docs/plugins/work.md) |
+| Repo | [API](/docs/sdk/js/repo.md) | [Commands](/docs/cli/repo.md) | [Tools](/docs/mcp/server/repo.md) | [Plugin](/docs/plugins/repo.md) |
+| Spec | [API](/docs/sdk/js/spec.md) | [Commands](/docs/cli/spec.md) | [Tools](/docs/mcp/server/spec.md) | [Plugin](/docs/plugins/spec.md) |
+| Logs | [API](/docs/sdk/js/logs.md) | [Commands](/docs/cli/logs.md) | [Tools](/docs/mcp/server/logs.md) | [Plugin](/docs/plugins/logs.md) |
+| File | [API](/docs/sdk/js/file.md) | [Commands](/docs/cli/file.md) | [Tools](/docs/mcp/server/file.md) | [Plugin](/docs/plugins/file.md) |
+| Docs | [API](/docs/sdk/js/docs.md) | [Commands](/docs/cli/docs.md) | [Tools](/docs/mcp/server/docs.md) | [Plugin](/docs/plugins/docs.md) |
 
 ### Supporting Documentation
 
-- **[Configuration Guide](/docs/configuration/README.md)** - Unified `.fractary/config.yaml` reference
+- **[Configuration Guide](/docs/guides/configuration.md)** - Unified `.fractary/config.yaml` reference
 - **[Integration Guide](/docs/guides/integration.md)** - Integration patterns and best practices
 - **[Troubleshooting](/docs/guides/troubleshooting.md)** - Common issues and solutions
 
@@ -163,7 +163,7 @@ repo:
       token: ${GITHUB_TOKEN}
 ```
 
-See the [Configuration Guide](/docs/configuration/README.md) for complete options.
+See the [Configuration Guide](/docs/guides/configuration.md) for complete options.
 
 ## Terminology Reference
 

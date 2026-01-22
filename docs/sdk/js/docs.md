@@ -346,6 +346,6 @@ if (result.outdated.length > 0) {
 ## Other Interfaces
 
 - **CLI:** [Docs Commands](/docs/cli/docs.md)
-- **MCP:** [Docs Tools](/docs/mcp/docs.md)
+- **MCP:** [Docs Tools](/docs/mcp/server/docs.md)
 - **Plugin:** [Docs Plugin](/docs/plugins/docs.md)
-- **Configuration:** [Docs Config](/docs/configuration/README.md#docs)
+- **Configuration:** [Docs Config](/docs/guides/configuration.md#docs-toolset)

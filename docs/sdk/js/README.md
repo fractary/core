@@ -89,18 +89,18 @@ const workManager = new WorkManager({
 });
 ```
 
-See the [Configuration Guide](/docs/configuration/README.md) for complete options.
+See the [Configuration Guide](/docs/guides/configuration.md) for complete options.
 
 ## Toolset Documentation
 
 | Toolset | Manager Class | Documentation |
 |---------|---------------|---------------|
-| **Work** | `WorkManager` | [Work API Reference](/docs/sdk/work.md) |
-| **Repo** | `RepoManager` | [Repo API Reference](/docs/sdk/repo.md) |
-| **Spec** | `SpecManager` | [Spec API Reference](/docs/sdk/spec.md) |
-| **Logs** | `LogManager` | [Logs API Reference](/docs/sdk/logs.md) |
-| **File** | `FileManager` | [File API Reference](/docs/sdk/file.md) |
-| **Docs** | `DocsManager` | [Docs API Reference](/docs/sdk/docs.md) |
+| **Work** | `WorkManager` | [Work API Reference](/docs/sdk/js/work.md) |
+| **Repo** | `RepoManager` | [Repo API Reference](/docs/sdk/js/repo.md) |
+| **Spec** | `SpecManager` | [Spec API Reference](/docs/sdk/js/spec.md) |
+| **Logs** | `LogManager` | [Logs API Reference](/docs/sdk/js/logs.md) |
+| **File** | `FileManager` | [File API Reference](/docs/sdk/js/file.md) |
+| **Docs** | `DocsManager` | [Docs API Reference](/docs/sdk/js/docs.md) |
 
 ## Platform Support
 
@@ -177,5 +177,5 @@ interface PaginatedResult<T> {
 ## Other Interfaces
 
 - **CLI:** [Command Reference](/docs/cli/README.md)
-- **MCP:** [Tool Reference](/docs/mcp/README.md)
+- **MCP:** [Tool Reference](/docs/mcp/server/README.md)
 - **Plugins:** [Plugin Reference](/docs/plugins/README.md)

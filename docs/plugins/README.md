@@ -57,7 +57,7 @@ Or configure specific plugins:
 fractary-core:configure --plugins work,repo
 ```
 
-See the [Configuration Guide](/docs/configuration/README.md) for complete options.
+See the [Configuration Guide](/docs/guides/configuration.md) for complete options.
 
 ## Commands vs Agents
 
@@ -198,6 +198,6 @@ For creating new plugins, see the [Plugin Development Guide](/docs/plugin-develo
 
 ## Other Interfaces
 
-- **SDK:** [API Reference](/docs/sdk/README.md)
+- **SDK:** [API Reference](/docs/sdk/js/README.md)
 - **CLI:** [Command Reference](/docs/cli/README.md)
-- **MCP:** [Tool Reference](/docs/mcp/README.md)
+- **MCP:** [Tool Reference](/docs/mcp/server/README.md)

@@ -320,7 +320,7 @@ export AWS_SECRET_ACCESS_KEY=your_secret_key
 
 ## Other Interfaces
 
-- **SDK:** [File API](/docs/sdk/file.md)
+- **SDK:** [File API](/docs/sdk/js/file.md)
 - **CLI:** [File Commands](/docs/cli/file.md)
-- **MCP:** [File Tools](/docs/mcp/file.md)
-- **Configuration:** [File Config](/docs/configuration/README.md#file)
+- **MCP:** [File Tools](/docs/mcp/server/file.md)
+- **Configuration:** [File Config](/docs/guides/configuration.md#file-toolset)

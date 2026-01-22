@@ -322,6 +322,6 @@ try {
 ## Other Interfaces
 
 - **CLI:** [Work Commands](/docs/cli/work.md)
-- **MCP:** [Work Tools](/docs/mcp/work.md)
+- **MCP:** [Work Tools](/docs/mcp/server/work.md)
 - **Plugin:** [Work Plugin](/docs/plugins/work.md)
-- **Configuration:** [Work Config](/docs/configuration/README.md#work)
+- **Configuration:** [Work Config](/docs/guides/configuration.md#work-toolset)

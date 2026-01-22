@@ -1,62 +1,39 @@
 # Configuration Guide
 
-Complete guide to configuring Fractary Core SDK, CLI, MCP server, and plugins using the unified YAML configuration (v2.0).
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Quick Start](#quick-start)
-- [Configuration Structure](#configuration-structure)
-- [Initialization](#initialization)
-- [Plugin Configuration](#plugin-configuration)
-- [Environment Variables](#environment-variables)
-- [Platform-Specific Configuration](#platform-specific-configuration)
-- [CLI Configuration](#cli-configuration)
-- [SDK Configuration](#sdk-configuration)
-- [MCP Server Configuration](#mcp-server-configuration)
-- [Migration Guide](#migration-guide)
+Complete guide to configuring Fractary Core across all interfaces: SDK, CLI, MCP Server, and Plugins.
 
 ## Overview
 
-**v2.0 introduces a unified YAML configuration system** that consolidates all plugin configs into a single `.fractary/core/config.yaml` file. This is a **breaking change** requiring projects to re-initialize.
+Fractary Core uses a unified YAML configuration system. All toolsets are configured in a single file at `.fractary/config.yaml`.
 
-### What's New in v2.0
+### Key Features
 
-- ✅ **Unified Configuration**: Single `.fractary/core/config.yaml` file for all plugins
-- ✅ **YAML Format**: Human-readable YAML (JSON no longer supported)
-- ✅ **Environment Variables**: Support for `${VAR_NAME}` and `${VAR_NAME:-default}` syntax
-- ✅ **Multi-Platform Support**: Configure multiple platforms per plugin
-- ✅ **Handler Pattern**: Switch between platforms via `active_handler` setting
-- ⚠️ **Breaking Change**: No backward compatibility with v1.x configs
+- **Unified Configuration**: Single `.fractary/config.yaml` file for all toolsets
+- **YAML Format**: Human-readable configuration
+- **Environment Variables**: Support for `${VAR_NAME}` and `${VAR_NAME:-default}` syntax
+- **Handler Pattern**: Easy switching between platforms via `active_handler`
+- **Auto-Detection**: Detects repository settings automatically
 
 ### Configuration Methods
 
-Fractary Core supports multiple configuration methods:
+Fractary Core supports multiple configuration methods, resolved in this order (highest priority first):
 
-1. **Unified Config File** - `.fractary/core/config.yaml` (primary method)
-2. **Environment Variables** - For credentials and runtime settings
-3. **Programmatic Configuration** - Direct configuration in code
-4. **CLI Flags** - Command-line overrides
-
-Configuration is resolved in this order (highest priority first):
-1. CLI flags
-2. Environment variables
-3. Project configuration file (`.fractary/core/config.yaml`)
-4. Default values
+1. **CLI flags** - Command-line arguments
+2. **Environment variables** - `FRACTARY_*` and platform-specific
+3. **Configuration file** - `.fractary/config.yaml`
+4. **Programmatic configuration** - Direct code configuration (SDK only)
+5. **Default values** - Built-in defaults
 
 ## Quick Start
 
-Configure your project with the unified configuration command:
+Initialize configuration using the configure command:
 
 ```bash
-# Configure all plugins (fresh setup)
+# Interactive configuration
 fractary-core:configure
 
-# Configure specific plugins only
+# Configure specific toolsets
 fractary-core:configure --plugins work,repo
-
-# Force overwrite existing config
-fractary-core:configure --force
 
 # Specify platforms
 fractary-core:configure \
@@ -64,50 +41,39 @@ fractary-core:configure \
   --repo-platform github \
   --file-handler local
 
-# Preview changes without applying (dry run)
+# Preview changes without applying
 fractary-core:configure --dry-run
 
 # Validate existing configuration
 fractary-core:configure --validate-only
-
-# Incremental update with natural language
-fractary-core:configure --context "switch to jira for work tracking"
 ```
 
-This creates `.fractary/config.yaml` with all necessary sections.
+## Configuration File
 
-## Configuration Structure
+### Location
 
-### File Location
+```
+.fractary/config.yaml
+```
 
-**v2.0 Configuration Path**: `.fractary/core/config.yaml`
-
-⚠️ **Important**: The config is located at `.fractary/core/config.yaml` (inside the `core/` directory), NOT `.fractary/core.yaml`.
+> **Note**: Legacy projects may have config at `.fractary/core/config.yaml`. The SDK supports both locations, preferring the newer path.
 
 ### Basic Structure
-
-The unified configuration follows this structure:
 
 ```yaml
 version: "2.0"
 
-# Each plugin section follows the handler pattern
-<plugin_name>:
-  active_handler: <handler_name>  # Which platform to use
+<toolset>:
+  active_handler: <handler_name>
   handlers:
     <handler_name>:
-      # Handler-specific configuration
-      token: ${ENV_VAR}  # Environment variable reference
+      # Handler-specific settings
+      token: ${ENV_VAR}
   defaults:
-    # Plugin-specific defaults
-  # Additional plugin settings
+    # Toolset-specific defaults
 ```
 
 ### Complete Example
-
-See `.fractary/core/config.example.yaml` for a comprehensive example with all plugins configured.
-
-Basic example:
 
 ```yaml
 version: "2.0"
@@ -126,9 +92,13 @@ repo:
   handlers:
     github:
       token: ${GITHUB_TOKEN}
-      api_url: https://api.github.com
   defaults:
     default_branch: main
+
+spec:
+  schema_version: "1.0"
+  storage:
+    local_path: /specs
 
 logs:
   schema_version: "2.0"
@@ -139,17 +109,11 @@ logs:
     redact_sensitive: true
 
 file:
-  schema_version: "1.0"
   active_handler: local
   handlers:
     local:
       base_path: .
       create_directories: true
-
-spec:
-  schema_version: "1.0"
-  storage:
-    local_path: /specs
 
 docs:
   schema_version: "1.1"
@@ -159,150 +123,17 @@ docs:
       path: docs/architecture/ADR
 ```
 
-## Initialization
+## Configuration by Interface
 
-### Using the Config Command
+### SDK Configuration
 
-The recommended way to create your configuration is using the config command:
+The SDK can be configured programmatically or by loading from the config file.
 
-```bash
-# Configure with auto-detection
-fractary-core:configure
-
-# Configure specific plugins
-fractary-core:configure --plugins work,repo,logs
-
-# Specify platforms
-fractary-core:configure --work-platform github --repo-platform github
-
-# Skip prompts
-fractary-core:configure --yes
-
-# Force overwrite
-fractary-core:configure --force
-
-# Preview changes without applying
-fractary-core:configure --dry-run
-
-# Validate existing config
-fractary-core:configure --validate-only
-```
-
-### Incremental Updates
-
-Update existing configuration with natural language descriptions:
-
-```bash
-# Switch work tracking platform
-fractary-core:configure --context "switch to jira for work tracking"
-
-# Enable cloud storage
-fractary-core:configure --context "enable S3 storage for file plugin"
-
-# Add a new platform
-fractary-core:configure --context "add gitlab as repo platform"
-```
-
-### Backup and Rollback
-
-The config command automatically:
-- Creates timestamped backups before modifying existing config
-- Stores backups in `.fractary/backups/`
-- Keeps the last 10 backups
-- Automatically rolls back on failure
-
-### Manual Configuration
-
-You can also manually create `.fractary/core/config.yaml`:
-
-```yaml
-# Work tracking configuration
-work:
-  provider: github
-  config:
-    owner: myorg
-    repo: myrepo
-    token: ${GITHUB_TOKEN}  # Environment variable reference
-
-# Repository configuration
-repo:
-  provider: github
-  config:
-    owner: myorg
-    repo: myrepo
-    token: ${GITHUB_TOKEN}
-    defaultBranch: main
-
-# Specification management
-spec:
-  directory: ./specs
-  template: feature
-  autoValidate: true
-
-# Log management
-logs:
-  directory: ./logs
-  level: info
-  redactSensitive: true
-  maxAgeDays: 90
-
-# File storage
-file:
-  baseDirectory: ./data
-  allowedPatterns:
-    - "*.json"
-    - "*.yaml"
-    - "*.txt"
-
-# Documentation
-docs:
-  directory: ./docs
-  format: markdown
-  defaultTags:
-    - project
-```
-
-### JSON Configuration
-
-Alternatively, use `.fractary/core.json`:
-
-```json
-{
-  "work": {
-    "provider": "github",
-    "config": {
-      "owner": "myorg",
-      "repo": "myrepo",
-      "token": "${GITHUB_TOKEN}"
-    }
-  },
-  "repo": {
-    "provider": "github",
-    "config": {
-      "owner": "myorg",
-      "repo": "myrepo",
-      "token": "${GITHUB_TOKEN}"
-    }
-  },
-  "spec": {
-    "directory": "./specs",
-    "template": "feature"
-  },
-  "logs": {
-    "directory": "./logs",
-    "level": "info"
-  }
-}
-```
-
-## SDK Configuration
-
-### Programmatic Configuration
+#### Programmatic Configuration
 
 ```typescript
-import { WorkManager, RepoManager, SpecManager, LogsManager } from '@fractary/core';
+import { WorkManager, RepoManager } from '@fractary/core';
 
-// Work tracking
 const workManager = new WorkManager({
   provider: 'github',
   config: {
@@ -311,117 +142,52 @@ const workManager = new WorkManager({
     token: process.env.GITHUB_TOKEN
   }
 });
-
-// Repository management
-const repoManager = new RepoManager({
-  provider: 'github',
-  config: {
-    owner: 'myorg',
-    repo: 'myrepo',
-    token: process.env.GITHUB_TOKEN
-  }
-});
-
-// Specifications
-const specManager = new SpecManager({
-  specDirectory: './specs',
-  defaultTemplate: 'feature'
-});
-
-// Logs
-const logsManager = new LogsManager({
-  logsDirectory: './logs',
-  redactSensitive: true
-});
 ```
 
-### Configuration from File
+#### Loading from Config File
 
 ```typescript
 import { loadConfig } from '@fractary/core';
 
-const config = await loadConfig('.fractary/core/config.yaml');
-
+const config = await loadConfig('.fractary/config.yaml');
 const workManager = new WorkManager(config.work);
-const repoManager = new RepoManager(config.repo);
 ```
 
-## CLI Configuration
+See the [SDK Documentation](/docs/sdk/js/README.md) for complete API reference.
 
-### Global Configuration
+### CLI Configuration
 
-The CLI reads from `.fractary/core/config.yaml` or environment variables.
-
-### Initialize Configuration
+The CLI reads configuration from `.fractary/config.yaml` automatically.
 
 ```bash
-# Recommended: Use unified config
-fractary-core:configure
+# Uses default config
+fractary-core work issue list
 
-# Or with specific options
-fractary-core:configure --plugins work,repo --work-platform github
-```
+# Override with specific config file
+fractary-core --config .fractary/staging.yaml work issue list
 
-### Override with Flags
-
-```bash
-# Override config file settings
+# Override with command-line flags
 fractary-core work issue fetch 123 \
   --provider github \
   --owner myorg \
-  --repo myrepo \
-  --token $GITHUB_TOKEN
+  --repo myrepo
 ```
 
-### Specify Config File
+See the [CLI Documentation](/docs/cli/README.md) for complete command reference.
+
+### MCP Server Configuration
+
+The MCP Server reads configuration from `.fractary/config.yaml` or a custom path.
 
 ```bash
-# Use a specific config file
-fractary-core --config .fractary/staging.yaml work issue list
+# Use default config
+npx @fractary/core-mcp
+
+# Use custom config
+npx @fractary/core-mcp --config .fractary/config.yaml
 ```
 
-## MCP Server Configuration
-
-### Server Configuration File
-
-Create `.fractary/core-mcp.yaml`:
-
-```yaml
-# Server settings
-server:
-  name: fractary-core
-  version: 0.1.0
-
-# Module configurations
-work:
-  provider: github
-  config:
-    owner: myorg
-    repo: myrepo
-    token: ${GITHUB_TOKEN}
-
-repo:
-  provider: github
-  config:
-    owner: myorg
-    repo: myrepo
-    token: ${GITHUB_TOKEN}
-
-spec:
-  directory: ./specs
-
-logs:
-  directory: ./logs
-  level: info
-
-file:
-  baseDirectory: ./data
-
-docs:
-  directory: ./docs
-```
-
-### Claude Code Integration
+#### Claude Code Integration
 
 Add to `.claude/settings.json`:
 
@@ -430,12 +196,7 @@ Add to `.claude/settings.json`:
   "mcpServers": {
     "fractary-core": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@fractary/core-mcp",
-        "--config",
-        ".fractary/core-mcp.yaml"
-      ],
+      "args": ["-y", "@fractary/core-mcp"],
       "env": {
         "GITHUB_TOKEN": "ghp_your_token_here"
       }
@@ -444,22 +205,39 @@ Add to `.claude/settings.json`:
 }
 ```
 
-## Plugin Configuration
+See the [MCP Documentation](/docs/mcp/server/README.md) for complete reference.
 
-### Fractary Core Plugin Configuration
+### Plugin Configuration
 
-**v2.0+:** All plugin configurations are now unified in a single `.fractary/config.yaml` file.
+Plugins read configuration from `.fractary/config.yaml`. Initialize with:
 
-Initialize or update the unified configuration:
 ```bash
 fractary-core:configure
 ```
 
-This creates `.fractary/config.yaml` with sections for all plugins:
+See the [Plugin Documentation](/docs/plugins/README.md) for plugin-specific details.
+
+## Toolset Configuration Reference
+
+### Work Toolset
+
+Work tracking configuration for GitHub Issues, Jira, and Linear.
+
+| Setting | Description | Required |
+|---------|-------------|----------|
+| `active_handler` | Active platform: `github`, `jira`, `linear` | Yes |
+| `handlers.github.owner` | Repository owner | Yes (GitHub) |
+| `handlers.github.repo` | Repository name | Yes (GitHub) |
+| `handlers.github.token` | Personal access token | Yes (GitHub) |
+| `handlers.github.api_url` | API URL (for GitHub Enterprise) | No |
+| `handlers.jira.host` | Jira instance URL | Yes (Jira) |
+| `handlers.jira.email` | Account email | Yes (Jira) |
+| `handlers.jira.token` | API token | Yes (Jira) |
+| `handlers.jira.project` | Project key | Yes (Jira) |
+| `handlers.linear.api_key` | Linear API key | Yes (Linear) |
+| `handlers.linear.team_id` | Team ID | Yes (Linear) |
 
 ```yaml
-version: "2.0"
-
 work:
   active_handler: github
   handlers:
@@ -467,7 +245,19 @@ work:
       owner: myorg
       repo: myrepo
       token: ${GITHUB_TOKEN}
+```
 
+### Repo Toolset
+
+Repository management configuration.
+
+| Setting | Description | Required |
+|---------|-------------|----------|
+| `active_handler` | Active platform: `github`, `gitlab`, `bitbucket` | Yes |
+| `defaults.default_branch` | Default branch name | No (default: main) |
+| `defaults.branch_naming.pattern` | Branch naming pattern | No |
+
+```yaml
 repo:
   active_handler: github
   handlers:
@@ -477,599 +267,227 @@ repo:
     default_branch: main
     branch_naming:
       pattern: "{prefix}/{issue_id}-{slug}"
-
-logs:
-  storage:
-    local_path: .fractary/logs
-
-spec:
-  storage:
-    local_path: .fractary/specs
-
-file:
-  schema_version: "2.0"
-  sources:
-    specs:
-      type: s3
-      bucket: myproject-files
-      prefix: specs/
 ```
 
-For detailed configuration options, see the config-manager agent documentation.
+### Spec Toolset
 
-## Environment Variables
+Specification management configuration.
 
-### Global Variables
+| Setting | Description | Required |
+|---------|-------------|----------|
+| `storage.local_path` | Path for spec files | No (default: /specs) |
+| `defaults.template` | Default template | No (default: feature) |
+| `defaults.auto_validate` | Auto-validate on save | No (default: true) |
 
-```bash
-# Work tracking
-export FRACTARY_WORK_PROVIDER=github
-export GITHUB_TOKEN=ghp_your_token_here
-export JIRA_TOKEN=your_jira_token
-export LINEAR_API_KEY=your_linear_key
-
-# Repository
-export FRACTARY_REPO_PROVIDER=github
-export GITLAB_TOKEN=your_gitlab_token
-export BITBUCKET_TOKEN=your_bitbucket_token
-
-# Directories
-export FRACTARY_SPEC_DIRECTORY=./specs
-export FRACTARY_LOGS_DIRECTORY=./logs
-export FRACTARY_FILE_BASE_DIRECTORY=./data
-export FRACTARY_DOCS_DIRECTORY=./docs
-
-# Logging
-export FRACTARY_LOG_LEVEL=info
-export FRACTARY_REDACT_SENSITIVE=true
-```
-
-### Module-Specific Variables
-
-```bash
-# Work module
-export FRACTARY_WORK_DEFAULT_LABELS=bug,priority:high
-export FRACTARY_WORK_AUTO_ASSIGN=true
-
-# Repo module
-export FRACTARY_REPO_DEFAULT_BRANCH=main
-export FRACTARY_REPO_AUTO_PUSH=false
-
-# Spec module
-export FRACTARY_SPEC_AUTO_VALIDATE=true
-export FRACTARY_SPEC_TEMPLATE=feature
-
-# Logs module
-export FRACTARY_LOGS_MAX_AGE_DAYS=90
-export FRACTARY_LOGS_AUTO_ARCHIVE=true
-```
-
-## Platform-Specific Configuration
-
-### GitHub
-
-```yaml
-work:
-  provider: github
-  config:
-    owner: myorg
-    repo: myrepo
-    token: ${GITHUB_TOKEN}
-    baseUrl: https://api.github.com  # For GitHub Enterprise
-
-repo:
-  provider: github
-  config:
-    owner: myorg
-    repo: myrepo
-    token: ${GITHUB_TOKEN}
-```
-
-**Environment Variables:**
-```bash
-export GITHUB_TOKEN=ghp_your_token_here
-export GITHUB_OWNER=myorg
-export GITHUB_REPO=myrepo
-```
-
-### Jira
-
-```yaml
-work:
-  provider: jira
-  config:
-    host: https://myorg.atlassian.net
-    email: user@example.com
-    token: ${JIRA_TOKEN}
-    project: PROJ
-```
-
-**Environment Variables:**
-```bash
-export JIRA_HOST=https://myorg.atlassian.net
-export JIRA_EMAIL=user@example.com
-export JIRA_TOKEN=your_jira_api_token
-export JIRA_PROJECT=PROJ
-```
-
-### Linear
-
-```yaml
-work:
-  provider: linear
-  config:
-    apiKey: ${LINEAR_API_KEY}
-    teamId: team-id
-```
-
-**Environment Variables:**
-```bash
-export LINEAR_API_KEY=lin_api_your_key_here
-export LINEAR_TEAM_ID=team-id
-```
-
-### GitLab
-
-```yaml
-repo:
-  provider: gitlab
-  config:
-    projectId: 12345
-    token: ${GITLAB_TOKEN}
-    baseUrl: https://gitlab.com/api/v4  # For self-hosted GitLab
-```
-
-**Environment Variables:**
-```bash
-export GITLAB_TOKEN=glpat_your_token_here
-export GITLAB_PROJECT_ID=12345
-```
-
-### Bitbucket
-
-```yaml
-repo:
-  provider: bitbucket
-  config:
-    workspace: myworkspace
-    repo: myrepo
-    username: ${BITBUCKET_USERNAME}
-    appPassword: ${BITBUCKET_APP_PASSWORD}
-```
-
-**Environment Variables:**
-```bash
-export BITBUCKET_USERNAME=your_username
-export BITBUCKET_APP_PASSWORD=your_app_password
-export BITBUCKET_WORKSPACE=myworkspace
-```
-
-## Advanced Configuration
-
-### Multi-Environment Setup
-
-Use different config files for different environments:
-
-```bash
-.fractary/
-└── core/
-    ├── config.yaml           # Default/local (unified config)
-    ├── staging.yaml          # Staging environment
-    ├── production.yaml       # Production environment
-    └── config.example.yaml   # Example template
-```
-
-**Usage:**
-```bash
-# Use staging config
-fractary-core --config .fractary/staging.yaml work issue list
-
-# Use production config
-fractary-core --config .fractary/production.yaml work issue create "Title"
-```
-
-### Configuration Validation
-
-```bash
-# Validate configuration
-fractary-core config validate
-
-# Show current configuration
-fractary-core config show
-
-# Test connection to providers
-fractary-core config test
-```
-
-### Secrets Management
-
-**Using environment files:**
-
-Create `.env`:
-```bash
-GITHUB_TOKEN=ghp_your_token_here
-JIRA_TOKEN=your_jira_token
-LINEAR_API_KEY=your_linear_key
-```
-
-Load in your application:
-```typescript
-import dotenv from 'dotenv';
-dotenv.config();
-
-const workManager = new WorkManager({
-  provider: 'github',
-  config: {
-    token: process.env.GITHUB_TOKEN
-  }
-});
-```
-
-**Using secret managers:**
-
-```typescript
-import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
-
-async function getSecret(name: string): Promise<string> {
-  const client = new SecretManagerServiceClient();
-  const [version] = await client.accessSecretVersion({ name });
-  return version.payload.data.toString();
-}
-
-const githubToken = await getSecret('projects/my-project/secrets/github-token/versions/latest');
-
-const workManager = new WorkManager({
-  provider: 'github',
-  config: {
-    token: githubToken
-  }
-});
-```
-
-## Configuration Precedence
-
-Configuration is merged in this order (later overrides earlier):
-
-1. **Default values** - Built-in defaults
-2. **Configuration file** - `.fractary/core/config.yaml`
-3. **Environment variables** - `FRACTARY_*` and platform-specific variables
-4. **CLI flags** - Command-line arguments
-5. **Programmatic overrides** - Direct code configuration
-
-## Configuration Schema
-
-Full configuration schema:
-
-```typescript
-interface CoreConfig {
-  work?: WorkConfig;
-  repo?: RepoConfig;
-  spec?: SpecConfig;
-  logs?: LogsConfig;
-  file?: FileConfig;
-  docs?: DocsConfig;
-}
-
-interface WorkConfig {
-  provider: 'github' | 'jira' | 'linear';
-  config: GitHubConfig | JiraConfig | LinearConfig;
-}
-
-interface RepoConfig {
-  provider: 'github' | 'gitlab' | 'bitbucket';
-  config: GitHubRepoConfig | GitLabConfig | BitbucketConfig;
-}
-
-interface SpecConfig {
-  directory: string;
-  template?: string;
-  autoValidate?: boolean;
-}
-
-interface LogsConfig {
-  directory: string;
-  level?: 'debug' | 'info' | 'warn' | 'error';
-  redactSensitive?: boolean;
-  maxAgeDays?: number;
-}
-
-interface FileConfig {
-  baseDirectory: string;
-  allowedPatterns?: string[];
-}
-
-interface DocsConfig {
-  directory: string;
-  format?: 'markdown' | 'html' | 'text';
-  defaultTags?: string[];
-}
-```
-
-## Troubleshooting
-
-### Configuration not loading
-
-```bash
-# Check current configuration
-fractary-core config show
-
-# Validate configuration file
-fractary-core config validate
-
-# Check environment variables
-env | grep FRACTARY
-```
-
-### Token authentication fails
-
-```bash
-# Test GitHub token
-curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user
-
-# Test Jira credentials
-curl -u "$JIRA_EMAIL:$JIRA_TOKEN" https://myorg.atlassian.net/rest/api/3/myself
-```
-
-### Configuration conflicts
-
-```bash
-# Clear cached configuration
-rm -rf .fractary/.cache
-
-# Reset to defaults
-fractary-core config reset
-
-# Reinitialize
-fractary-core work init --provider github
-```
-
-## Best Practices
-
-1. **Use environment variables for secrets** - Never commit tokens to version control
-2. **Use configuration files for settings** - Keep project-specific settings in `.fractary/`
-3. **Document required variables** - List all required environment variables in README
-4. **Validate configuration** - Run `config validate` before deployment
-5. **Use different configs per environment** - Separate staging and production configs
-6. **Version control config templates** - Commit `.fractary/core/config.example.yaml` with placeholder values
-
-## Migration Guide
-
-### Migrating from v1.x to v2.0
-
-v2.0 introduces a **breaking change** with the unified YAML configuration system. All projects must be re-initialized.
-
-#### What Changed
-
-**Before (v1.x):**
-- Multiple config files per plugin
-- JSON format
-- Per-plugin initialization
-
-**After (v2.0):**
-- Single config file: `.fractary/config.yaml`
-- YAML format only
-- Unified initialization command
-- Handler pattern for multi-platform support
-- Environment variable substitution: `${VAR_NAME}`
-
-#### Migration Steps
-
-**1. Backup Existing Configuration**
-
-```bash
-# Backup your entire .fractary directory
-tar czf fractary-backup-$(date +%Y%m%d).tar.gz .fractary/
-```
-
-**2. Upgrade to v2.0**
-
-```bash
-# Update CLI
-npm install -g @fractary/core-cli@2.0.0
-
-# Or update in your project
-npm install @fractary/core@2.0.0
-```
-
-**3. Remove Old Config (Optional)**
-
-```bash
-# Move old config out of the way
-mv .fractary .fractary.v1
-```
-
-**4. Initialize with New Config**
-
-```bash
-# Configure all plugins
-fractary-core:configure
-
-# Or specify platforms
-fractary-core:configure \
-  --work-platform github \
-  --repo-platform github \
-  --file-handler local
-```
-
-**5. Manually Merge Custom Settings**
-
-Compare your old and new configs:
-
-```bash
-# View old work config
-cat .fractary.v1/plugins/work/config.json | jq .
-
-# View new work config
-yq e '.work' .fractary/core/config.yaml
-
-# Edit new config to add custom settings
-vim .fractary/core/config.yaml
-```
-
-**6. Validate New Configuration**
-
-```bash
-# Validate YAML syntax and required fields
-fractary-core config validate
-
-# View redacted config
-fractary-core config show
-```
-
-**7. Test All Plugins**
-
-```bash
-# Test work plugin
-fractary-work:issue list
-
-# Test repo plugin
-fractary-repo:branch list
-
-# Test other plugins
-fractary-spec:list
-fractary-logs:search --query "test"
-```
-
-**8. Clean Up (Optional)**
-
-Once everything works:
-
-```bash
-# Remove old config backup
-rm -rf .fractary.v1
-```
-
-#### Configuration Mapping
-
-##### Work Plugin
-
-**Old (v1.x):**
-```json
-{
-  "platform": "github",
-  "owner": "myorg",
-  "repo": "myrepo",
-  "token": "ghp_..."
-}
-```
-
-**New (v2.0):** `.fractary/config.yaml`
-```yaml
-work:
-  active_handler: github
-  handlers:
-    github:
-      owner: myorg
-      repo: myrepo
-      token: ${GITHUB_TOKEN}
-      api_url: https://api.github.com
-```
-
-##### Repo Plugin
-
-**Old (v1.x):**
-```json
-{
-  "platform": "github",
-  "token": "ghp_..."
-}
-```
-
-**New (v2.0):** `.fractary/config.yaml`
-```yaml
-repo:
-  active_handler: github
-  handlers:
-    github:
-      token: ${GITHUB_TOKEN}
-      api_url: https://api.github.com
-  defaults:
-    default_branch: main
-```
-
-##### Spec Plugin
-
-**Old (v1.x):**
-```json
-{
-  "local_path": "/specs"
-}
-```
-
-**New (v2.0):** `.fractary/config.yaml`
 ```yaml
 spec:
   schema_version: "1.0"
   storage:
     local_path: /specs
+  defaults:
+    template: feature
 ```
 
-#### Deprecated Commands
+### Logs Toolset
 
-The following init commands are deprecated. Use the unified config command instead:
+Log management configuration.
 
-- `fractary-work:init` → Use `fractary-core:configure --plugins work`
-- `fractary-repo:init` → Use `fractary-core:configure --plugins repo`
-- `fractary-logs:init` → Use `fractary-core:configure --plugins logs`
-- `fractary-file:init` → Use `fractary-core:configure --plugins file`
-- `fractary-spec:init` → Use `fractary-core:configure --plugins spec`
-- `fractary-core:init` → **REMOVED** - Use `fractary-core:configure` instead
+| Setting | Description | Required |
+|---------|-------------|----------|
+| `storage.local_path` | Path for log files | No (default: /logs) |
+| `session_logging.enabled` | Enable session capture | No (default: true) |
+| `session_logging.redact_sensitive` | Redact tokens/passwords | No (default: true) |
+| `retention.max_age_days` | Days to retain logs | No (default: 90) |
 
-#### Common Migration Issues
+```yaml
+logs:
+  schema_version: "2.0"
+  storage:
+    local_path: /logs
+  session_logging:
+    enabled: true
+    redact_sensitive: true
+  retention:
+    max_age_days: 90
+```
 
-**Issue**: Config validation fails with "Missing version field"
+### File Toolset
 
-**Solution**: Add `version: "2.0"` at the top of your config file.
+File storage configuration.
 
-**Issue**: Environment variables not being substituted
+| Setting | Description | Required |
+|---------|-------------|----------|
+| `active_handler` | Active handler: `local`, `s3` | Yes |
+| `handlers.local.base_path` | Base directory | No (default: .) |
+| `handlers.local.create_directories` | Auto-create directories | No (default: true) |
+| `handlers.s3.bucket` | S3 bucket name | Yes (S3) |
+| `handlers.s3.region` | AWS region | Yes (S3) |
+| `handlers.s3.prefix` | Key prefix | No |
 
-**Solution**: Use the correct syntax: `${VAR_NAME}` or `${VAR_NAME:-default}`
+```yaml
+file:
+  active_handler: local
+  handlers:
+    local:
+      base_path: .
+      create_directories: true
+    s3:
+      bucket: my-bucket
+      region: us-east-1
+      prefix: data/
+```
 
-**Issue**: Old plugin configs still being read
+### Docs Toolset
 
-**Solution**: Old plugin-specific config files are no longer used in v2.0. All configuration is in `.fractary/config.yaml`.
+Documentation management configuration.
 
-**Issue**: "Configuration file not found" error
+| Setting | Description | Required |
+|---------|-------------|----------|
+| `storage.local_path` | Path for docs | No (default: /docs) |
+| `doc_types.<type>.enabled` | Enable document type | No |
+| `doc_types.<type>.path` | Path for type | No |
+| `defaults.format` | Default format | No (default: markdown) |
 
-**Solution**: Ensure config is at `.fractary/config.yaml`. Run `fractary-core:configure` if missing.
+```yaml
+docs:
+  schema_version: "1.1"
+  doc_types:
+    adr:
+      enabled: true
+      path: docs/architecture/ADR
+    api:
+      enabled: true
+      path: docs/api
+```
 
-#### Breaking Changes Summary
+## Environment Variables
 
-**Removed:**
-- Individual plugin config files
-- JSON config support
-- Automatic migration from v1.x
-- Per-plugin init commands (now deprecated wrappers)
-- `fractary-core:init` command (use `fractary-core:configure` instead)
+### Variable Substitution
 
-**Changed:**
-- Config location: Now at `.fractary/config.yaml` (unified)
-- Config format: JSON → YAML
-- Config command: Plugin-specific → Unified `fractary-core:configure`
+Use `${VAR_NAME}` syntax in configuration files:
 
-**Added:**
-- Handler pattern for multi-platform support
-- Environment variable substitution (`${VAR_NAME}`)
-- Incremental configuration updates with `--context`
-- Preview mode with `--dry-run`
-- Validation mode with `--validate-only`
-- Automatic backup and rollback
-- User confirmation before applying changes
-- Config validation command (`fractary-core config validate`)
-- Config display command (`fractary-core config show`)
-- Unified configuration for all plugins
+```yaml
+work:
+  handlers:
+    github:
+      token: ${GITHUB_TOKEN}          # Required variable
+      owner: ${GITHUB_OWNER:-myorg}   # With default value
+```
 
-#### Getting Help
+### Common Variables
 
-If you encounter migration issues:
+| Variable | Description | Used By |
+|----------|-------------|---------|
+| `GITHUB_TOKEN` | GitHub personal access token | Work, Repo |
+| `JIRA_TOKEN` | Jira API token | Work |
+| `LINEAR_API_KEY` | Linear API key | Work |
+| `GITLAB_TOKEN` | GitLab personal access token | Repo |
+| `BITBUCKET_USERNAME` | Bitbucket username | Repo |
+| `BITBUCKET_APP_PASSWORD` | Bitbucket app password | Repo |
+| `AWS_ACCESS_KEY_ID` | AWS access key | File (S3) |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key | File (S3) |
+| `AWS_REGION` | AWS region | File (S3) |
+| `FRACTARY_CONFIG` | Config file path | All |
+| `FRACTARY_LOG_LEVEL` | Log level | All |
 
-1. Check the example config: `.fractary/core/config.example.yaml`
-2. Run validation: `fractary-core config validate`
-3. Review docs: `docs/guides/configuration.md`
-4. Report issues: https://github.com/fractary/core/issues
+## Multiple Environments
 
-## Next Steps
+Use different config files for different environments:
 
-- [API Reference](./api-reference.md) - Complete API documentation
-- [Integration Guide](./integration.md) - Integration patterns
-- [Examples](../examples/) - Configuration examples
+```
+.fractary/
+├── config.yaml          # Default/local
+├── staging.yaml         # Staging environment
+├── production.yaml      # Production environment
+└── config.example.yaml  # Template (committed to git)
+```
+
+Usage:
+```bash
+fractary-core --config .fractary/staging.yaml work issue list
+```
+
+## Validation
+
+```bash
+# Validate configuration
+fractary-core:configure --validate-only
+
+# Show current configuration (secrets redacted)
+fractary-core config show
+
+# Test provider connections
+fractary-core config test
+```
+
+## Incremental Updates
+
+Update configuration using natural language:
+
+```bash
+fractary-core:configure --context "switch to jira for work tracking"
+fractary-core:configure --context "enable S3 storage for file toolset"
+```
+
+## Best Practices
+
+1. **Never commit secrets** - Use environment variables for tokens
+2. **Commit example config** - Include `.fractary/config.example.yaml` with placeholders
+3. **Use different configs per environment** - Separate staging and production
+4. **Validate before deployment** - Run `fractary-core:configure --validate-only`
+5. **Document required variables** - List environment variables in your README
+
+## Migration from v1.x
+
+### What Changed
+
+| Aspect | v1.x | v2.0 |
+|--------|------|------|
+| Config files | Multiple per-plugin | Single unified file |
+| Format | JSON | YAML only |
+| Location | `.fractary/plugins/<plugin>/config.json` | `.fractary/config.yaml` |
+| Init command | Per-plugin (`fractary-work:init`) | Unified (`fractary-core:configure`) |
+| Platform switching | Reconfigure | `active_handler` setting |
+
+### Migration Steps
+
+1. **Backup existing configuration**
+   ```bash
+   tar czf fractary-backup-$(date +%Y%m%d).tar.gz .fractary/
+   ```
+
+2. **Update packages**
+   ```bash
+   npm install @fractary/core@2.0.0
+   npm install -g @fractary/core-cli@2.0.0
+   ```
+
+3. **Initialize new configuration**
+   ```bash
+   fractary-core:configure
+   ```
+
+4. **Validate and test**
+   ```bash
+   fractary-core:configure --validate-only
+   fractary-core work issue list
+   ```
+
+### Deprecated Commands
+
+| Deprecated | Replacement |
+|------------|-------------|
+| `fractary-work:init` | `fractary-core:configure --plugins work` |
+| `fractary-repo:init` | `fractary-core:configure --plugins repo` |
+| `fractary-logs:init` | `fractary-core:configure --plugins logs` |
+| `fractary-file:init` | `fractary-core:configure --plugins file` |
+| `fractary-spec:init` | `fractary-core:configure --plugins spec` |
+| `fractary-core:init` | `fractary-core:configure` |
+
+## Related Documentation
+
+- [SDK Documentation](/docs/sdk/js/README.md) - Programmatic configuration details
+- [CLI Documentation](/docs/cli/README.md) - CLI flag overrides
+- [MCP Documentation](/docs/mcp/server/README.md) - MCP server configuration
+- [Plugin Documentation](/docs/plugins/README.md) - Plugin-specific settings
+- [Troubleshooting](/docs/guides/troubleshooting.md) - Common configuration issues

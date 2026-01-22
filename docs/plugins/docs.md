@@ -349,7 +349,7 @@ The Docs plugin supports various document types with specific templates and vali
 
 ## Other Interfaces
 
-- **SDK:** [Docs API](/docs/sdk/docs.md)
+- **SDK:** [Docs API](/docs/sdk/js/docs.md)
 - **CLI:** [Docs Commands](/docs/cli/docs.md)
-- **MCP:** [Docs Tools](/docs/mcp/docs.md)
-- **Configuration:** [Docs Config](/docs/configuration/README.md#docs)
+- **MCP:** [Docs Tools](/docs/mcp/server/docs.md)
+- **Configuration:** [Docs Config](/docs/guides/configuration.md#docs-toolset)

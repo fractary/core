@@ -282,6 +282,6 @@ Download a file from storage.
 
 ## Other Interfaces
 
-- **SDK:** [File API](/docs/sdk/file.md)
+- **SDK:** [File API](/docs/sdk/js/file.md)
 - **CLI:** [File Commands](/docs/cli/file.md)
 - **Plugin:** [File Plugin](/docs/plugins/file.md)

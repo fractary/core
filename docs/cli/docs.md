@@ -372,7 +372,7 @@ export FRACTARY_DOCS_DEFAULT_TAGS=project
 
 ## Other Interfaces
 
-- **SDK:** [Docs API](/docs/sdk/docs.md)
-- **MCP:** [Docs Tools](/docs/mcp/docs.md)
+- **SDK:** [Docs API](/docs/sdk/js/docs.md)
+- **MCP:** [Docs Tools](/docs/mcp/server/docs.md)
 - **Plugin:** [Docs Plugin](/docs/plugins/docs.md)
-- **Configuration:** [Docs Config](/docs/configuration/README.md#docs)
+- **Configuration:** [Docs Config](/docs/guides/configuration.md#docs-toolset)

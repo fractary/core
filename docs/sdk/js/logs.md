@@ -339,6 +339,6 @@ const logManager = new LogManager({
 ## Other Interfaces
 
 - **CLI:** [Logs Commands](/docs/cli/logs.md)
-- **MCP:** [Logs Tools](/docs/mcp/logs.md)
+- **MCP:** [Logs Tools](/docs/mcp/server/logs.md)
 - **Plugin:** [Logs Plugin](/docs/plugins/logs.md)
-- **Configuration:** [Logs Config](/docs/configuration/README.md#logs)
+- **Configuration:** [Logs Config](/docs/guides/configuration.md#logs-toolset)
