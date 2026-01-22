@@ -1932,6 +1932,12 @@ work:
     close_on_merge: true
     comment_on_state_change: true
     link_pr_to_issue: true
+  hooks:
+    auto_comment:
+      enabled: true
+      throttle_minutes: 0
+      async: false
+      detailed_analysis: false
 
 # Repository management configuration
 repo:
@@ -1967,6 +1973,23 @@ repo:
       merge:
         strategy: squash
         delete_branch: true
+  faber_integration:
+    enabled: true
+    branch_creation:
+      auto_create: true
+      use_work_id: true
+    commit_metadata:
+      include_author_context: true
+      include_phase: true
+      include_work_id: true
+    pr_creation:
+      auto_create: true
+      include_metadata: true
+      draft_until_approved: false
+  hooks:
+    auto_commit:
+      enabled: true
+      throttle_minutes: 0
 
 # Logs management configuration
 logs:
