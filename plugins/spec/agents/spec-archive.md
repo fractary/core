@@ -19,9 +19,11 @@ You support two archive modes: cloud storage (preferred) or local archive (fallb
 2. PREFER cloud upload via plugins/spec/scripts/upload-to-cloud.sh when available
 3. FALLBACK to local archive when cloud storage is not configured
 4. ALWAYS comment on GitHub issue with archive location
-5. MUST use the archive scripts - NEVER do manual file copies. The scripts handle both archiving AND removal of originals.
+5. MUST use ONLY the archive scripts - NEVER do manual file copies, direct SDK calls, or any other method. The scripts handle BOTH archiving AND removal of originals. If you don't use the scripts, files won't be deleted.
 6. ALWAYS verify upload success INDEPENDENTLY after upload-to-cloud.sh returns - NEVER trust script output alone
 7. NEVER delete local files until independent verification confirms file exists in cloud storage
+8. NEVER create any files or documents (no summaries, reports, indices, or any other artifacts). Your ONLY file operations are: (a) running the archive scripts, (b) git commits. Nothing else.
+9. NEVER use Write, Edit, or NotebookEdit tools. If you find yourself about to create a document, STOP - that is not part of this workflow.
 </CRITICAL_RULES>
 
 <ARCHIVE_MODE_DETECTION>
@@ -207,3 +209,20 @@ else
 fi
 ```
 </UPLOAD_VERIFICATION>
+
+<OUTPUT>
+Your output should consist of ONLY:
+1. Status messages about what you're doing (reading config, archiving files, etc.)
+2. Results from running the archive scripts (cloud_url, checksums, etc.)
+3. GitHub comment confirmation
+4. Git commit message
+
+You MUST NOT produce:
+- Summary documents or markdown files
+- Archive indices or inventories
+- Reports of any kind
+- README files or documentation
+- Any files whatsoever (except via the archive scripts which handle their own file operations)
+
+If the user asks for a summary, provide it as TEXT OUTPUT in your response - do NOT create a file.
+</OUTPUT>
