@@ -226,9 +226,28 @@ export class GitHubWorkProvider implements WorkProvider {
       finalBody = `<!-- faber:${faberContext} -->\n${body}`;
     }
 
-    exec(
-      `gh issue comment ${issueId} --repo ${this.getRepoArg()} --body "${finalBody.replace(/"/g, '\\"')}"`
-    );
+    try {
+      execSync(`gh issue comment ${issueId} --repo ${this.getRepoArg()} --body-file -`, {
+        input: finalBody,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+        maxBuffer: 10 * 1024 * 1024, // 10MB
+      });
+    } catch (error: unknown) {
+      const err = error as { status?: number; stderr?: Buffer | string };
+      const exitCode = err.status || 1;
+      const stderr = err.stderr?.toString() || '';
+
+      if (stderr.includes('authentication') || stderr.includes('auth')) {
+        throw new AuthenticationError('github', 'GitHub authentication failed. Run "gh auth login"');
+      }
+
+      throw new CommandExecutionError(
+        `gh issue comment ${issueId} --repo ${this.getRepoArg()} --body-file -`,
+        exitCode,
+        stderr
+      );
+    }
 
     // gh doesn't return JSON for comment creation, so we fetch latest
     const comments = await this.listComments(issueId, { limit: 1 });
