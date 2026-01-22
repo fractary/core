@@ -21,14 +21,19 @@ export {
 export {
   loadYamlConfig,
   writeYamlConfig,
+  injectDocumentationComments,
   findProjectRoot,
   configExists,
   getConfigPath,
   getCoreDir,
   substituteEnvVars,
   validateEnvVars,
+  // Documentation URL constants for config sections
+  PLUGIN_DOC_URLS,
+  CONFIG_GUIDE_URL,
   type CoreYamlConfig,
   type ConfigLoadOptions,
+  type WriteYamlConfigOptions,
   // Rename to avoid conflicts with runtime types from common/types.ts
   type WorkConfig as YamlWorkConfig,
   type RepoConfig as YamlRepoConfig,
