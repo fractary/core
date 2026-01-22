@@ -10,6 +10,30 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 
 /**
+ * Base URL for Fractary Core documentation on GitHub
+ */
+const GITHUB_DOCS_BASE_URL = 'https://github.com/fractary/core/blob/main';
+
+/**
+ * Documentation URLs for each configuration section
+ * These are injected as comments when writing config.yaml
+ */
+export const PLUGIN_DOC_URLS: Record<string, string> = {
+  work: `${GITHUB_DOCS_BASE_URL}/plugins/work/README.md`,
+  repo: `${GITHUB_DOCS_BASE_URL}/plugins/repo/README.md`,
+  logs: `${GITHUB_DOCS_BASE_URL}/plugins/logs/README.md`,
+  file: `${GITHUB_DOCS_BASE_URL}/plugins/file/README.md`,
+  spec: `${GITHUB_DOCS_BASE_URL}/plugins/spec/README.md`,
+  docs: `${GITHUB_DOCS_BASE_URL}/plugins/docs/README.md`,
+  codex: `${GITHUB_DOCS_BASE_URL}/docs/guides/configuration.md#codex-configuration`,
+};
+
+/**
+ * URL for the main configuration guide
+ */
+export const CONFIG_GUIDE_URL = `${GITHUB_DOCS_BASE_URL}/docs/guides/configuration.md`;
+
+/**
  * Work tracking configuration
  */
 export interface WorkConfig {
@@ -269,10 +293,72 @@ export function loadYamlConfig(options: ConfigLoadOptions = {}): CoreYamlConfig 
 }
 
 /**
- * Write unified configuration to `.fractary/core/config.yaml`
+ * Options for writing YAML configuration
+ */
+export interface WriteYamlConfigOptions {
+  /** Project root directory (auto-detected if not provided) */
+  projectRoot?: string;
+  /** Include documentation URL comments for each section (default: true) */
+  includeDocComments?: boolean;
+}
+
+/**
+ * Inject documentation URL comments into YAML content
+ *
+ * Adds a comment with the documentation URL above each plugin section.
+ * Also adds a header comment with the main configuration guide URL.
+ *
+ * @param yamlContent The raw YAML string
+ * @param config The configuration object (used to determine which sections exist)
+ * @returns YAML string with documentation comments injected
+ */
+export function injectDocumentationComments(
+  yamlContent: string,
+  config: CoreYamlConfig
+): string {
+  const lines = yamlContent.split('\n');
+  const result: string[] = [];
+
+  // Add header comment with main configuration guide
+  result.push('# Fractary Core Configuration');
+  result.push(`# Documentation: ${CONFIG_GUIDE_URL}`);
+  result.push('#');
+  result.push('');
+
+  // Get sections that actually exist in the config
+  const configSections = new Set(Object.keys(config));
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Check if this line starts a plugin section (top-level key, no indentation)
+    // Match pattern: "sectionName:" at the start of a line (no leading whitespace)
+    const sectionMatch = line.match(/^([a-z_]+):\s*$/);
+    if (sectionMatch) {
+      const sectionName = sectionMatch[1];
+
+      // Only add comment if section exists in config and has a documentation URL
+      if (configSections.has(sectionName) && PLUGIN_DOC_URLS[sectionName]) {
+        // Add a blank line before the comment (if not at start)
+        if (result.length > 0 && result[result.length - 1] !== '') {
+          result.push('');
+        }
+        // Add the documentation comment
+        result.push(`# ${sectionName} - ${PLUGIN_DOC_URLS[sectionName]}`);
+      }
+    }
+
+    result.push(line);
+  }
+
+  return result.join('\n');
+}
+
+/**
+ * Write unified configuration to `.fractary/config.yaml`
  *
  * @param config Configuration object to write
- * @param projectRoot Project root directory (auto-detected if not provided)
+ * @param options Write options (projectRoot, includeDocComments)
  *
  * @example
  * ```typescript
@@ -283,12 +369,25 @@ export function loadYamlConfig(options: ConfigLoadOptions = {}): CoreYamlConfig 
  *     handlers: { ... }
  *   }
  * });
+ *
+ * // Without documentation comments
+ * writeYamlConfig(config, { includeDocComments: false });
  * ```
  */
 export function writeYamlConfig(
   config: CoreYamlConfig,
-  projectRoot?: string
+  options: WriteYamlConfigOptions | string = {}
 ): void {
+  // Handle backward compatibility: if options is a string, treat it as projectRoot
+  const opts: WriteYamlConfigOptions = typeof options === 'string'
+    ? { projectRoot: options }
+    : options;
+
+  const {
+    projectRoot,
+    includeDocComments = true,
+  } = opts;
+
   const root = projectRoot || findProjectRoot();
   const fractaryDir = path.join(root, '.fractary');
   const configPath = path.join(fractaryDir, 'config.yaml');
@@ -299,12 +398,17 @@ export function writeYamlConfig(
   }
 
   // Convert to YAML with proper formatting
-  const yamlContent = yaml.dump(config, {
+  let yamlContent = yaml.dump(config, {
     indent: 2,
     lineWidth: 100,
     noRefs: true,
     sortKeys: false,
   });
+
+  // Inject documentation comments if enabled
+  if (includeDocComments) {
+    yamlContent = injectDocumentationComments(yamlContent, config);
+  }
 
   fs.writeFileSync(configPath, yamlContent, 'utf-8');
 }
