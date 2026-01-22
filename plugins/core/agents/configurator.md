@@ -35,10 +35,8 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 9. If config exists and not --force, operate in incremental mode
 10. ALWAYS present proposed changes BEFORE making modifications
 11. ALWAYS use AskUserQuestion for confirmation before applying changes (unless --yes)
-12. ALWAYS create timestamped backup before modifying existing config
-13. ALWAYS validate all inputs (--context, plugin names, handler names)
-14. ALWAYS support rollback on failure - restore from backup
-15. With --dry-run, show proposed changes without applying
+12. ALWAYS validate all inputs (--context, plugin names, handler names)
+13. With --dry-run, show proposed changes without applying
 16. With --validate-only, validate current config without changes
 17. ONLY modify config sections for plugins being configured - PRESERVE all other sections
 18. ALWAYS create/update `.fractary/.gitignore` with logs directory ignored
@@ -337,80 +335,6 @@ except yaml.YAMLError as e:
 
 </VALIDATION_FUNCTIONS>
 
-<BACKUP_OPERATIONS>
-
-## Backup Management
-
-### Backup Creation
-Before modifying existing configuration:
-
-```bash
-# Create backup directory
-mkdir -p .fractary/backups
-
-# Generate timestamp (cross-platform: Linux + macOS)
-TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-BACKUP_FILE=".fractary/backups/config-${TIMESTAMP}.yaml"
-
-# Create backup
-cp .fractary/config.yaml "$BACKUP_FILE"
-
-# Store backup path for rollback (agents are stateless - can't rely on variables)
-echo "$BACKUP_FILE" > .fractary/backups/.last-backup
-```
-
-### Backup Directory Structure
-```
-.fractary/
-  backups/
-    .last-backup              # Contains path to most recent backup for rollback
-    config-20260116-143022.yaml
-    config-20260115-092311.yaml
-    ...
-```
-
-### Backup Retention
-- Keep last 10 backups
-- After creating new backup, remove oldest if more than 10 exist:
-```bash
-# Portable version (works on macOS and Linux - xargs -r is GNU-specific)
-ls -1t .fractary/backups/config-*.yaml 2>/dev/null | tail -n +11 | while read -r file; do
-    rm -f "$file"
-done
-```
-
-### Rollback Procedure
-If configuration write or validation fails:
-
-1. Check if backup tracking file exists: `.fractary/backups/.last-backup`
-2. If exists, read the backup path and restore:
-   ```bash
-   # Read the backup path from tracking file
-   BACKUP_FILE=$(cat .fractary/backups/.last-backup 2>/dev/null)
-
-   # Restore from backup if file exists
-   if [ -n "$BACKUP_FILE" ] && [ -f "$BACKUP_FILE" ]; then
-       cp "$BACKUP_FILE" .fractary/config.yaml
-       echo "Restored from backup: $BACKUP_FILE"
-   else
-       # Fallback: use most recent backup
-       LATEST_BACKUP=$(ls -1t .fractary/backups/config-*.yaml 2>/dev/null | head -1)
-       if [ -n "$LATEST_BACKUP" ]; then
-           cp "$LATEST_BACKUP" .fractary/config.yaml
-           echo "Restored from latest backup: $LATEST_BACKUP"
-       else
-           echo "ERROR: No backup available for rollback"
-       fi
-   fi
-   ```
-3. Report rollback action to user
-4. Provide clear error message with recovery steps
-5. Clean up tracking file after successful rollback:
-   ```bash
-   rm -f .fractary/backups/.last-backup
-   ```
-
-</BACKUP_OPERATIONS>
 
 <GITIGNORE_MANAGEMENT>
 
@@ -424,12 +348,6 @@ The config process must ensure `.fractary/.gitignore` exists and contains approp
 ```
 # Logs plugin - session logs (may contain sensitive data)
 logs/
-```
-
-**Backups (always added):**
-```
-# Config backups
-backups/
 ```
 
 ### Gitignore Update Strategy
@@ -448,10 +366,6 @@ Use consistent section headers to identify which plugin added which entries.
 
 **Standard Format** (5 equals signs, start AND end markers):
 ```
-# ===== fractary-core (managed) =====
-backups/
-# ===== end fractary-core =====
-
 # ===== fractary-logs (managed) =====
 logs/
 # ===== end fractary-logs =====
@@ -489,10 +403,6 @@ def update_gitignore(plugins_to_configure, logs_path):
 
     # Determine entries to add
     entries_to_add = []
-
-    # Always ensure backups/ is ignored
-    if "backups/" not in existing_entries:
-        entries_to_add.append(("fractary-core", "backups/"))
 
     # If logs plugin is being configured, ensure logs path is ignored
     if "logs" in plugins_to_configure:
@@ -595,10 +505,6 @@ def update_gitignore_section(content, section, entry):
 After configuring logs plugin with default path `.fractary/logs`:
 
 ```gitignore
-# ===== fractary-core (managed) =====
-backups/
-# ===== end fractary-core =====
-
 # ===== fractary-logs (managed) =====
 logs/
 # ===== end fractary-logs =====
@@ -615,10 +521,6 @@ codex/cache/
 runs/
 faber/state/
 # ===== end fractary-faber =====
-
-# ===== fractary-core (managed) =====
-backups/
-# ===== end fractary-core =====
 
 # ===== fractary-logs (managed) =====
 logs/
@@ -878,7 +780,7 @@ For incremental mode only:
 2. Parse YAML content
 3. Store original configuration for comparison
 4. Validate existing config is well-formed
-5. If parse fails, offer to backup and recreate
+5. If parse fails, offer to recreate from scratch
 
 ### Step 5: Detect Platforms and Project Info
 
@@ -943,7 +845,7 @@ If file handler is S3 or cloud-based storage:
    # For subdomain-style names like "etl.corthion.ai"
    # Extract: project=corthion, sub-project=etl
    # Bucket format: {project}-{sub-project}-fractary-{env}
-   # Example: corthion-etl-fractary-dev
+   # Example: corthion-etl-fractary-test
    #
    # S3 Bucket Naming Requirements:
    # - 3-63 characters
@@ -960,9 +862,9 @@ If file handler is S3 or cloud-based storage:
        local repo_name="$1"  # e.g., "etl.corthion.ai"
        local env="$2"        # e.g., "dev", "staging", "prod"
 
-       # Default environment to "dev" if not provided
+       # Default environment to "test" if not provided
        if [ -z "$env" ]; then
-           env="dev"
+           env="test"
        fi
 
        # Step 1: Strip trailing dots
@@ -1077,12 +979,12 @@ If file handler is S3 or cloud-based storage:
    ```
 
    **Examples** (with env=dev):
-   - `etl.corthion.ai` → `corthion-etl-fractary-dev`
-   - `api.myapp.com` → `myapp-api-fractary-dev`
-   - `my-project` → `my-project-fractary-dev` (no subdomain, use simple pattern)
-   - `api.v2.myapp.com` → `myapp-api-v2-fractary-dev` (multiple subdomains combined)
-   - `api.myapp.co.uk` → `myapp-api-fractary-dev` (multi-part TLD stripped)
-   - `My_Project.App` → `app-my-project-fractary-dev` (sanitized: lowercase, underscores to hyphens)
+   - `etl.corthion.ai` → `corthion-etl-fractary-test`
+   - `api.myapp.com` → `myapp-api-fractary-test`
+   - `my-project` → `my-project-fractary-test` (no subdomain, use simple pattern)
+   - `api.v2.myapp.com` → `myapp-api-v2-fractary-test` (multiple subdomains combined)
+   - `api.myapp.co.uk` → `myapp-api-fractary-test` (multi-part TLD stripped)
+   - `My_Project.App` → `app-my-project-fractary-test` (sanitized: lowercase, underscores to hyphens)
 
 3. **Ask user to confirm or customize bucket name**:
    ```
@@ -1273,7 +1175,6 @@ Files to create/update:
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
-  - .fractary/backups/
   - docs/architecture/ADR/
   - docs/guides/
 
@@ -1286,7 +1187,6 @@ Plugins to configure:
   - docs
 
 .gitignore entries to add:
-  - backups/  (fractary-core)
   - logs/     (fractary-logs)
 
 Environment variables status:
@@ -1303,7 +1203,6 @@ Note: Fractary SDK auto-loads .env files, so tokens defined there work automatic
 === CONFIGURATION PREVIEW ===
 
 Mode: Incremental Update
-Backup will be created: .fractary/backups/config-YYYYMMDD-HHMMSS.yaml
 
 CONFIG SECTIONS:
 
@@ -1365,39 +1264,12 @@ Handle responses:
 - "Modify first" → Ask what to modify, return to Step 6/7
 - "Cancel" → Exit without changes
 
-### Step 10: Create Backup (If Modifying Existing)
+### Step 10: Apply Configuration Changes
 
-For incremental mode:
-
-```bash
-# Create backup directory
-mkdir -p .fractary/backups
-
-# Generate timestamp
-TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-BACKUP_FILE=".fractary/backups/config-${TIMESTAMP}.yaml"
-
-# Create backup
-cp .fractary/config.yaml "$BACKUP_FILE"
-
-# Store backup path for rollback (agents are stateless - variables don't persist)
-echo "$BACKUP_FILE" > .fractary/backups/.last-backup
-
-# Clean old backups (keep last 10) - portable version for macOS/Linux
-ls -1t .fractary/backups/config-*.yaml 2>/dev/null | tail -n +11 | while read -r file; do
-    rm -f "$file"
-done
-```
-
-The backup path is stored in `.fractary/backups/.last-backup` for rollback since agent variables don't persist between tool calls.
-
-### Step 11: Apply Configuration Changes
-
-**11a. Create directories:**
+**10a. Create directories:**
 ```bash
 mkdir -p .fractary/logs
 mkdir -p .fractary/specs
-mkdir -p .fractary/backups
 mkdir -p docs/architecture/ADR
 mkdir -p docs/guides
 mkdir -p docs/schema
@@ -1406,7 +1278,7 @@ mkdir -p docs/standards
 mkdir -p docs/operations/runbooks
 ```
 
-**11b. Write configuration (with section preservation):**
+**10b. Write configuration (with section preservation):**
 
 For **fresh setup** or **--force**:
 - Write complete configuration with all plugin sections
@@ -1447,7 +1319,6 @@ write_yaml(".fractary/config.yaml", merged)
    - Compare old `logs.storage.local_path` with new value
    - If changed: update gitignore entry from old path to new path
 4. Add required entries if missing:
-   - `backups/` (always, in `# ===== fractary-core (managed) =====` section)
    - `{logs_path}/` (if logs plugin configured, in `# ===== fractary-logs (managed) =====` section)
 5. Write updated .gitignore
 
@@ -1494,11 +1365,6 @@ migrate_old_markers() {
 
 # Run migration first
 migrate_old_markers "$GITIGNORE"
-
-# Add fractary-core section (backups)
-if ! grep -q "# ===== fractary-core (managed) =====" "$GITIGNORE"; then
-    update_managed_section "fractary-core" "backups/" "$GITIGNORE"
-fi
 
 # For logs path - handle both fresh setup and path changes
 LOGS_PATH="logs"  # Default, or extract from config: logs.storage.local_path minus ".fractary/"
@@ -1570,7 +1436,7 @@ else
 fi
 ```
 
-### Step 12: Validate Written Configuration
+### Step 11: Validate Written Configuration
 
 After writing, validate the configuration:
 
@@ -1582,12 +1448,10 @@ After writing, validate the configuration:
 **If validation fails:**
 ```
 1. Report specific validation error
-2. Restore from backup (if backup exists)
-3. Report rollback action
-4. Exit with error
+2. Exit with error and provide recovery steps
 ```
 
-### Step 13: Test Plugin Connections
+### Step 12: Test Plugin Connections
 
 Test connectivity for configured plugins.
 
@@ -1623,14 +1487,13 @@ aws s3 ls s3://{bucket-name}/ --max-items 1
 
 Report test results but don't fail on connection issues (user may not have all credentials yet).
 
-### Step 14: Return Success Summary with Next Steps
+### Step 13: Return Success Summary with Next Steps
 
 ```
 === CONFIGURATION COMPLETE ===
 
 Configuration: .fractary/config.yaml
 Mode: [Fresh Setup / Incremental Update]
-[Backup: .fractary/backups/config-YYYYMMDD-HHMMSS.yaml]
 
 Configured plugins:
   - work (github)
@@ -1642,8 +1505,8 @@ Configured plugins:
 
 Project: {org}/{project}
 Bucket: Auto-derived using parse_bucket_name() function
-  - Subdomain pattern: {project}-{sub-project}-fractary-{env} (e.g., corthion-etl-fractary-dev)
-  - Simple pattern: {project}-fractary-{env} (e.g., my-project-fractary-dev)
+  - Subdomain pattern: {project}-{sub-project}-fractary-{env} (e.g., corthion-etl-fractary-test)
+  - Simple pattern: {project}-fractary-{env} (e.g., my-project-fractary-test)
 
 Connection tests:
   - GitHub API: [Pass/Fail/Skipped]
@@ -1662,48 +1525,6 @@ Next steps:
 3. Test with: /fractary-work:issue-list
 4. For updates: /fractary-core:config --context "description of changes"
 ```
-
-### Step 15: Handle Errors with Rollback
-
-If any error occurs during Steps 10-13:
-
-1. **Identify error type** (see ERROR_HANDLING section)
-2. **Check for backup**: Read from `.fractary/backups/.last-backup`
-3. **Restore backup**:
-   ```bash
-   # Read backup path from tracking file (agents are stateless)
-   BACKUP_FILE=$(cat .fractary/backups/.last-backup 2>/dev/null)
-
-   # Restore from backup
-   if [ -n "$BACKUP_FILE" ] && [ -f "$BACKUP_FILE" ]; then
-       cp "$BACKUP_FILE" .fractary/config.yaml
-       echo "Restored from backup: $BACKUP_FILE"
-   else
-       # Fallback: use most recent backup
-       LATEST_BACKUP=$(ls -1t .fractary/backups/config-*.yaml 2>/dev/null | head -1)
-       if [ -n "$LATEST_BACKUP" ]; then
-           cp "$LATEST_BACKUP" .fractary/config.yaml
-           BACKUP_FILE="$LATEST_BACKUP"
-       fi
-   fi
-
-   # Clean up tracking file
-   rm -f .fractary/backups/.last-backup
-   ```
-4. **Report rollback**:
-   ```
-   === ERROR - ROLLED BACK ===
-
-   Error: [Specific error message]
-
-   Action taken:
-     - Configuration restored from backup
-     - Backup file: [path from $BACKUP_FILE]
-
-   Recovery steps:
-     1. [Specific steps based on error type]
-     2. Re-run: /fractary-core:config [with corrections]
-   ```
 
 </WORKFLOW>
 
@@ -1766,7 +1587,6 @@ Issue: [Specific YAML error]
 Line: [Line number if available]
 
 The configuration was not applied.
-[If backup exists: Restored from backup: .fractary/backups/config-YYYYMMDD-HHMMSS.yaml]
 
 To fix:
 1. Check the proposed changes for syntax errors
@@ -1806,27 +1626,11 @@ Please specify platform manually:
   /fractary-core:config --work-platform github --repo-platform github
 ```
 
-### Backup Creation Failed
-```
-Error: Could not create backup
-
-Reason: [Permission denied / Disk full / etc.]
-
-Configuration was NOT modified.
-
-To fix:
-1. Check .fractary/backups/ directory permissions
-2. Ensure disk has free space
-3. Re-run: /fractary-core:config
-```
-
 ### Configuration Write Failed
 ```
 Error: Could not write configuration
 
 Reason: [Permission denied / Disk full / etc.]
-
-[If backup exists: Previous configuration preserved]
 
 To fix:
 1. Check .fractary/ directory permissions
@@ -1896,7 +1700,6 @@ Detecting platforms...
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
-  - .fractary/backups/
   - docs/architecture/ADR/
   - docs/guides/
   - docs/schema/
@@ -1905,7 +1708,6 @@ Directories to create:
   - docs/operations/runbooks/
 
 .gitignore entries to add:
-  - backups/  (fractary-core)
   - logs/     (fractary-logs)
 
 Claude settings update:
@@ -1962,7 +1764,6 @@ Next steps:
 
 Mode: Incremental Update
 Context: "switch to jira for work tracking"
-Backup: .fractary/backups/config-20260116-143022.yaml (will be created)
 
 CONFIG SECTIONS:
 
@@ -2017,8 +1818,6 @@ New environment variables needed:
 [After user confirms]
 
 === CONFIGURATION UPDATED ===
-
-Backup created: .fractary/backups/config-20260116-143022.yaml
 
 Files updated:
   - .fractary/config.yaml (work section only)
@@ -2076,25 +1875,17 @@ Overall: VALID (with warnings)
 No changes made.
 ```
 
-### Error with Rollback Output
+### Error Output
 
 ```
-=== ERROR - CONFIGURATION ROLLED BACK ===
+=== ERROR - CONFIGURATION FAILED ===
 
 Error: YAML validation failed after write
 Details: Duplicate key "handlers" on line 45
 
-Action taken:
-  - Configuration restored from backup
-  - Backup file: .fractary/backups/config-20260116-143022.yaml
-
-Current state:
-  - .fractary/config.yaml contains previous (working) configuration
-
 Recovery steps:
   1. Review the changes you requested
   2. Re-run with corrected input
-  3. Or restore manually: cp .fractary/backups/config-20260116-143022.yaml .fractary/config.yaml
 ```
 
 </OUTPUTS>
@@ -2141,12 +1932,6 @@ work:
     close_on_merge: true
     comment_on_state_change: true
     link_pr_to_issue: true
-  hooks:
-    auto_comment:
-      enabled: true
-      throttle_minutes: 0
-      async: false
-      detailed_analysis: false
 
 # Repository management configuration
 repo:
@@ -2182,23 +1967,6 @@ repo:
       merge:
         strategy: squash
         delete_branch: true
-  faber_integration:
-    enabled: true
-    branch_creation:
-      auto_create: true
-      use_work_id: true
-    commit_metadata:
-      include_author_context: true
-      include_phase: true
-      include_work_id: true
-    pr_creation:
-      auto_create: true
-      include_metadata: true
-      draft_until_approved: false
-  hooks:
-    auto_commit:
-      enabled: true
-      throttle_minutes: 0
 
 # Logs management configuration
 logs:
@@ -2250,7 +2018,7 @@ file:
   sources:
     specs:
       type: s3
-      bucket: core-fractary-dev  # Auto-derived: {project}-{sub-project}-fractary-{env}
+      bucket: core-fractary-test  # Auto-derived: {project}-{sub-project}-fractary-{env}
       prefix: specs/
       region: us-east-1
       local:
@@ -2262,7 +2030,7 @@ file:
         profile: default
     logs:
       type: s3
-      bucket: core-fractary-dev  # Auto-derived: {project}-{sub-project}-fractary-{env}
+      bucket: core-fractary-test  # Auto-derived: {project}-{sub-project}-fractary-{env}
       prefix: logs/
       region: us-east-1
       local:
@@ -2311,55 +2079,8 @@ spec:
 docs:
   schema_version: "1.1"
   # Path to custom doc type templates (local project overrides)
-  # Falls back to core templates if not specified
+  # Core templates are built into the plugin and used as fallback
   custom_templates_path: .fractary/docs/templates/manifest.yaml
-  doc_types:
-    adr:
-      enabled: true
-      path: docs/architecture/ADR
-      auto_number: true
-      number_format: "%05d"
-      generate_on_architectural_decision: true
-      enforce_immutability: true
-    architecture:
-      enabled: true
-      path: docs/architecture
-      auto_update_index: true
-      types: [overview, component, diagram]
-    guide:
-      enabled: true
-      path: docs/guides
-      auto_update_index: true
-      audiences: [developer, user, admin, contributor]
-    schema:
-      enabled: true
-      path: docs/schema
-      dual_format: true
-      auto_update_index: true
-      generate_json: true
-    api:
-      enabled: true
-      path: docs/api
-      dual_format: true
-      auto_update_index: true
-      generate_openapi: true
-  output_paths:
-    documentation: docs
-    adrs: docs/architecture/ADR
-    architecture: docs/architecture
-    designs: docs/architecture/designs
-    guides: docs/guides
-    schemas: docs/schema
-    api_docs: docs/api
-    standards: docs/standards
-    runbooks: docs/operations/runbooks
-  validation:
-    lint_on_generate: true
-    check_links_on_generate: false
-    required_sections:
-      adr: [Status, Context, Decision, Consequences]
-      architecture: [Overview, Components, Patterns]
-      guide: [Purpose, Prerequisites, Steps]
 ```
 </EXAMPLE_CONFIG>
 
