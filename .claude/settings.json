@@ -124,7 +124,6 @@
     "command": "~/.claude/plugins/marketplaces/fractary-core/plugins/status/scripts/status-line.sh"
   },
   "enabledPlugins": {
-    "fractary-codex@fractary-codex": true,
     "fractary-core@fractary-core": true,
     "fractary-repo@fractary-core": true,
     "fractary-work@fractary-core": true,
@@ -133,8 +132,8 @@
     "fractary-logs@fractary-core": true,
     "fractary-file@fractary-core": true,
     "fractary-status@fractary-core": true,
-    "fractary-faber@fractary-faber": true,
-    "fractary-faber-cloud@fractary-faber": true
+    "fractary-codex@fractary-codex": true,
+    "fractary-faber@fractary-faber": true
   },
   "extraKnownMarketplaces": {
     "fractary-core": {
@@ -147,6 +146,12 @@
       "source": {
         "source": "github",
         "repo": "fractary/codex"
+      }
+    },
+    "fractary-forge": {
+      "source": {
+        "source": "github",
+        "repo": "fractary/forge"
       }
     },
     "fractary-faber": {

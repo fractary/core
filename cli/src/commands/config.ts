@@ -9,9 +9,18 @@
 import { Command } from 'commander';
 import { loadConfig, getConfigPath, configExists } from '../utils/config.js';
 import chalk from 'chalk';
-import { existsSync } from 'fs';
-import { validateEnvVars, findProjectRoot } from '@fractary/core/common/yaml-config';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { dirname } from 'path';
+import {
+  validateEnvVars,
+  findProjectRoot,
+  getDefaultConfig,
+  getMinimalConfig,
+  validateConfig,
+  type DefaultConfigOptions,
+} from '@fractary/core/config';
 import { redactConfig } from '@fractary/core/common/secrets';
+import * as yaml from 'js-yaml';
 
 /**
  * Validate configuration command
@@ -213,12 +222,133 @@ async function showCommand(): Promise<void> {
 }
 
 /**
+ * Init configuration command options
+ */
+interface InitOptions {
+  workPlatform?: 'github' | 'jira' | 'linear';
+  fileHandler?: 'local' | 's3';
+  owner?: string;
+  repo?: string;
+  s3Bucket?: string;
+  awsRegion?: string;
+  minimal?: boolean;
+  force?: boolean;
+}
+
+/**
+ * Initialize configuration command
+ */
+async function initCommand(options: InitOptions): Promise<void> {
+  try {
+    const projectRoot = findProjectRoot();
+    const configPath = getConfigPath(projectRoot);
+
+    console.log(chalk.blue('Initializing Fractary Core configuration\n'));
+
+    // Check if config already exists
+    if (existsSync(configPath) && !options.force) {
+      console.log(chalk.yellow('Configuration file already exists:'));
+      console.log(chalk.gray(`  ${configPath}\n`));
+      console.log(chalk.yellow('Use --force to overwrite.'));
+      process.exit(1);
+    }
+
+    // Build config options
+    const configOptions: DefaultConfigOptions = {
+      workPlatform: options.workPlatform || 'github',
+      repoPlatform: 'github',
+      fileHandler: options.fileHandler || 'local',
+      owner: options.owner,
+      repo: options.repo,
+      s3Bucket: options.s3Bucket,
+      awsRegion: options.awsRegion,
+    };
+
+    // Generate configuration
+    const config = options.minimal
+      ? getMinimalConfig(configOptions)
+      : getDefaultConfig(configOptions);
+
+    // Validate before writing
+    const validation = validateConfig(config);
+    if (!validation.valid) {
+      console.log(chalk.red('Generated configuration is invalid:\n'));
+      validation.errors.forEach((error) => {
+        console.log(chalk.red(`  ${error}`));
+      });
+      process.exit(1);
+    }
+
+    // Ensure directory exists
+    const configDir = dirname(configPath);
+    if (!existsSync(configDir)) {
+      mkdirSync(configDir, { recursive: true });
+    }
+
+    // Write configuration with YAML formatting
+    const yamlContent = yaml.dump(config, {
+      indent: 2,
+      lineWidth: 100,
+      noRefs: true,
+      sortKeys: false,
+    });
+
+    writeFileSync(configPath, yamlContent, 'utf-8');
+
+    console.log(chalk.green('Configuration created successfully:\n'));
+    console.log(chalk.gray(`  ${configPath}\n`));
+
+    // Show summary
+    console.log(chalk.bold('Configuration Summary:\n'));
+    console.log(chalk.gray(`  Version: ${config.version}`));
+    if (config.work) {
+      console.log(chalk.gray(`  Work platform: ${config.work.active_handler}`));
+    }
+    if (config.repo) {
+      console.log(chalk.gray(`  Repo platform: ${config.repo.active_handler}`));
+    }
+    if (config.file) {
+      const fileType = config.file.sources?.specs?.type || 'local';
+      console.log(chalk.gray(`  File storage: ${fileType}`));
+    }
+
+    if (validation.warnings.length > 0) {
+      console.log(chalk.yellow('\nWarnings:'));
+      validation.warnings.forEach((warning) => {
+        console.log(chalk.yellow(`  ${warning}`));
+      });
+    }
+
+    console.log(chalk.cyan('\nNext steps:'));
+    console.log(chalk.gray('  1. Review and customize the configuration'));
+    console.log(chalk.gray('  2. Set required environment variables (e.g., GITHUB_TOKEN)'));
+    console.log(chalk.gray('  3. Run `fractary config validate` to verify'));
+  } catch (error) {
+    console.error(chalk.red('Failed to initialize configuration:'), error);
+    process.exit(1);
+  }
+}
+
+/**
  * Register config command
  */
 export function registerConfigCommand(program: Command): void {
   const config = program
     .command('config')
     .description('Manage Fractary Core configuration');
+
+  config
+    .command('init')
+    .description('Initialize .fractary/config.yaml with defaults')
+    .option('--work-platform <platform>', 'Work tracking platform (github|jira|linear)', 'github')
+    .option('--file-handler <handler>', 'File storage handler (local|s3)', 'local')
+    .option('--owner <owner>', 'GitHub/GitLab owner/organization')
+    .option('--repo <repo>', 'Repository name')
+    .option('--s3-bucket <bucket>', 'S3 bucket name (if using S3)')
+    .option('--aws-region <region>', 'AWS region (if using S3)', 'us-east-1')
+    .option('--minimal', 'Create minimal config (work + repo only)')
+    .option('--force', 'Overwrite existing configuration')
+    .action(initCommand);
 
   config
     .command('validate')

@@ -72,7 +72,7 @@ A standalone Model Context Protocol server for AI agent integration:
 |------|---------|--------|---------|
 | **MCP Server** | [`@fractary/core-mcp`](./mcp/server/) | Ready | `npx @fractary/core-mcp` |
 
-The MCP server provides 81 tools across 6 modules for AI agents to interact with core operations.
+The MCP server provides 81 tools across 6 toolsets for AI agents to interact with core operations.
 
 **Quick example:**
 ```bash
@@ -197,25 +197,22 @@ core/
 
 ## Documentation
 
-### SDK Documentation
+**[Complete Documentation](./docs/README.md)** - Comprehensive documentation for all toolsets and interfaces.
 
-- [JavaScript SDK](./sdk/js/README.md) - Installation and API reference for JS/TS
-- [Python SDK](./sdk/py/README.md) - Installation and API reference for Python (planned)
+### By Interface
 
-### CLI Documentation
-
-- [CLI Reference](./cli/README.md) - Complete command reference and usage examples
-
-### MCP Server Documentation
-
-- [MCP Server Reference](./mcp/server/README.md) - Server setup and tool reference
+| Interface | Description | Link |
+|-----------|-------------|------|
+| **SDK** | TypeScript API reference | [SDK Documentation](./docs/sdk/js/README.md) |
+| **CLI** | Command-line reference | [CLI Documentation](./docs/cli/README.md) |
+| **MCP** | MCP Server tools | [MCP Documentation](./docs/mcp/server/README.md) |
+| **Plugins** | Claude Code plugins | [Plugin Documentation](./docs/plugins/README.md) |
 
 ### Guides
 
-- [API Reference](./docs/guides/api-reference.md) - Comprehensive API documentation
-- [Configuration Guide](./docs/guides/configuration.md) - Configuration options
+- [Configuration Guide](./docs/guides/configuration.md) - Unified `.fractary/config.yaml` reference
 - [Integration Guide](./docs/guides/integration.md) - How to integrate into your projects
-- [Troubleshooting Guide](./docs/guides/troubleshooting.md) - Common issues and solutions
+- [Troubleshooting](./docs/guides/troubleshooting.md) - Common issues and solutions
 
 ### Examples
 
@@ -250,9 +247,20 @@ npm run build
 npm test
 ```
 
-## Modules
+## Toolsets
 
-### Work Tracking
+Fractary Core is organized into 6 **toolsets** - functional areas that each contain related tools and operations:
+
+| Toolset | Description | Platforms |
+|---------|-------------|-----------|
+| **Work** | Work item and issue tracking | GitHub Issues, Jira, Linear |
+| **Repo** | Repository and Git operations | GitHub, GitLab, Bitbucket |
+| **Spec** | Technical specification management | Local storage |
+| **Logs** | Session and operational logging | Local storage |
+| **File** | File storage operations | Local, S3 |
+| **Docs** | Documentation management | Local storage |
+
+### Work Toolset
 
 Manage work items across GitHub Issues, Jira, and Linear:
 
@@ -261,7 +269,7 @@ Manage work items across GitHub Issues, Jira, and Linear:
 - Search and filter issues
 - Track issue state and assignments
 
-### Repository Management
+### Repo Toolset
 
 Git and platform operations:
 
@@ -272,7 +280,7 @@ Git and platform operations:
 - Worktree support
 - Multi-platform support (GitHub, GitLab, Bitbucket)
 
-### Specification Management
+### Spec Toolset
 
 Technical specification workflows:
 
@@ -281,7 +289,7 @@ Technical specification workflows:
 - Refinement and versioning
 - Specification search and indexing
 
-### Log Management
+### Logs Toolset
 
 Session and operation logging:
 
@@ -290,7 +298,7 @@ Session and operation logging:
 - Archive and export
 - Log type classification
 
-### File Storage
+### File Toolset
 
 File operations with validation:
 
@@ -299,7 +307,7 @@ File operations with validation:
 - Local and remote storage
 - File validation and safety checks
 
-### Documentation Management
+### Docs Toolset
 
 Documentation workflows:
 

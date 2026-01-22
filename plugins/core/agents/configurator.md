@@ -1890,222 +1890,47 @@ Recovery steps:
 
 </OUTPUTS>
 
-<EXAMPLE_CONFIG>
-The generated `.fractary/config.yaml` should follow this structure.
+<CONFIG_GENERATION>
+## Configuration Scaffolding
 
-**Note**: The example below shows S3 cloud storage with archive preference "Cloud (S3)".
-For "Local only" preference, file sources would use `type: local` and archive paths would be omitted.
-For "Both" preference, S3 sources would include `push.keep_local: true`.
+Use the CLI to generate default configuration:
 
-```yaml
-version: "2.0"
+```bash
+# Full configuration with all plugins
+fractary config init --owner <owner> --repo <repo>
 
-# Work tracking configuration
-work:
-  active_handler: github
-  handlers:
-    github:
-      owner: myorg
-      repo: my-project
-      token: ${GITHUB_TOKEN}
-      api_url: https://api.github.com
-      classification:
-        feature: [feature, enhancement, story, user-story]
-        bug: [bug, fix, defect, error]
-        chore: [chore, maintenance, docs, documentation, test, refactor]
-        patch: [hotfix, patch, urgent, critical, security]
-      states:
-        open: OPEN
-        in_progress: OPEN
-        in_review: OPEN
-        done: CLOSED
-        closed: CLOSED
-      labels:
-        prefix: faber-
-        in_progress: in-progress
-        in_review: in-review
-        completed: completed
-        error: faber-error
-  defaults:
-    auto_assign: false
-    auto_label: true
-    close_on_merge: true
-    comment_on_state_change: true
-    link_pr_to_issue: true
-  hooks:
-    auto_comment:
-      enabled: true
-      throttle_minutes: 0
-      async: false
-      detailed_analysis: false
+# Minimal configuration (work + repo only)
+fractary config init --minimal --owner <owner> --repo <repo>
 
-# Repository management configuration
-repo:
-  active_handler: github
-  handlers:
-    github:
-      token: ${GITHUB_TOKEN}
-      api_url: https://api.github.com
-  defaults:
-    default_branch: main
-    protected_branches: [main, master, production, staging]
-    branch_naming:
-      pattern: "{prefix}/{issue_id}-{slug}"
-      allowed_prefixes: [feat, fix, chore, hotfix, docs, test, refactor, style, perf]
-    commit_format: faber
-    require_signed_commits: false
-    merge_strategy: no-ff
-    auto_delete_merged_branches: false
-    remote:
-      name: origin
-      auto_set_upstream: true
-    push_sync_strategy: auto-merge
-    pull_sync_strategy: auto-merge-prefer-remote
-    pr:
-      template: standard
-      require_work_id: true
-      auto_link_issues: true
-      ci_polling:
-        enabled: true
-        interval_seconds: 60
-        timeout_seconds: 900
-        initial_delay_seconds: 10
-      merge:
-        strategy: squash
-        delete_branch: true
-  faber_integration:
-    enabled: true
-    branch_creation:
-      auto_create: true
-      use_work_id: true
-    commit_metadata:
-      include_author_context: true
-      include_phase: true
-      include_work_id: true
-    pr_creation:
-      auto_create: true
-      include_metadata: true
-      draft_until_approved: false
-  hooks:
-    auto_commit:
-      enabled: true
-      throttle_minutes: 0
+# With S3 file storage
+fractary config init --file-handler s3 --s3-bucket <bucket>
 
-# Logs management configuration
-logs:
-  schema_version: "2.0"
-  # Path to custom log type templates (local project overrides)
-  # Falls back to core templates if not specified
-  custom_templates_path: .fractary/logs/templates/manifest.yaml
-  storage:
-    local_path: .fractary/logs
-    cloud_archive_path: archive/logs/{year}/{month}/{issue_number}
-  retention:
-    default:
-      local_days: 30
-      cloud_days: forever
-      priority: medium
-      auto_archive: true
-      cleanup_after_archive: true
-    paths:
-      - pattern: sessions/*
-        log_type: session
-        local_days: 7
-        cloud_days: forever
-        priority: high
-        auto_archive: true
-        cleanup_after_archive: false
-  session_logging:
-    enabled: true
-    auto_capture: true
-    format: markdown
-    include_timestamps: true
-    redact_sensitive: true
-    auto_name_by_issue: true
-    redaction_patterns:
-      api_keys: true
-      jwt_tokens: true
-      passwords: true
-      credit_cards: true
-      email_addresses: false
-  auto_backup:
-    enabled: true
-    trigger_on_init: true
-    trigger_on_session_start: true
-    backup_older_than_days: 7
-    generate_summaries: true
-
-# File storage configuration
-file:
-  schema_version: "2.0"
-  sources:
-    specs:
-      type: s3
-      bucket: core-fractary-test  # Auto-derived: {project}-{sub-project}-fractary-{env}
-      prefix: specs/
-      region: us-east-1
-      local:
-        base_path: .fractary/specs
-      push:
-        compress: false
-        keep_local: true
-      auth:
-        profile: default
-    logs:
-      type: s3
-      bucket: core-fractary-test  # Auto-derived: {project}-{sub-project}-fractary-{env}
-      prefix: logs/
-      region: us-east-1
-      local:
-        base_path: .fractary/logs
-      push:
-        compress: true
-        keep_local: true
-      auth:
-        profile: default
-  global_settings:
-    retry_attempts: 3
-    retry_delay_ms: 1000
-    timeout_seconds: 300
-    verify_checksums: true
-    parallel_uploads: 4
-
-# Specification management configuration
-spec:
-  schema_version: "1.0"
-  storage:
-    local_path: .fractary/specs
-    cloud_archive_path: archive/specs/{year}/{spec_id}.md
-  naming:
-    issue_specs:
-      prefix: WORK
-      digits: 5
-      phase_format: numeric
-      phase_separator: "-"
-    standalone_specs:
-      prefix: SPEC
-      digits: 4
-      auto_increment: true
-  archive:
-    strategy: lifecycle
-    auto_archive_on:
-      issue_close: true
-      pr_merge: true
-      faber_release: true
-  integration:
-    work_plugin: fractary-work
-    file_plugin: fractary-file
-    link_to_issue: true
-    update_issue_on_create: true
-
-# Documentation management configuration
-docs:
-  schema_version: "1.1"
-  # Path to custom doc type templates (local project overrides)
-  # Core templates are built into the plugin and used as fallback
-  custom_templates_path: .fractary/docs/templates/manifest.yaml
+# With Jira work tracking
+fractary config init --work-platform jira
 ```
-</EXAMPLE_CONFIG>
+
+The CLI uses the SDK's `getDefaultConfig()` and `getMinimalConfig()` functions
+which provide canonical configuration templates.
+
+### Platform-Specific Adjustments
+
+After scaffolding, customize the config based on user requirements:
+
+- **GitHub**: Default settings work out of the box
+- **Jira**: Set `base_url`, `email`, `api_token`, `project_key`
+- **Linear**: Set `api_key`, `team_key`
+- **S3 storage**: Set `bucket`, `region`, `auth.profile`
+- **Local only**: Sources use `type: local` with `base_path`
+
+### Environment Variables
+
+Default configs use these placeholders:
+- `${GITHUB_TOKEN}` - GitHub personal access token
+- `${JIRA_BASE_URL}` - Jira instance URL
+- `${JIRA_EMAIL}` - Jira user email
+- `${JIRA_API_TOKEN}` - Jira API token
+- `${LINEAR_API_KEY}` - Linear API key
+</CONFIG_GENERATION>
 
 <MIGRATION_NOTES>
 This agent replaces the individual plugin init commands:
