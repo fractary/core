@@ -42,3 +42,25 @@ export {
   type PRMergeDefaults as YamlPRMergeDefaults,
   type FileSource as YamlFileSource,
 } from '../common/yaml-config';
+
+// Re-export default config generators
+export {
+  getDefaultConfig,
+  getMinimalConfig,
+  type DefaultConfigOptions,
+} from './defaults';
+
+// Re-export validation schemas and utilities
+export {
+  validateConfig,
+  CoreYamlConfigSchema,
+  WorkConfigSchema,
+  RepoConfigSchema,
+  LogsConfigSchema,
+  FileConfigSchema,
+  SpecConfigSchema,
+  DocsConfigSchema,
+  CodexConfigSchema,
+  type ValidationResult,
+  type ValidatedCoreYamlConfig,
+} from './schema';
