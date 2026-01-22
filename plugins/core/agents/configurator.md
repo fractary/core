@@ -1290,7 +1290,10 @@ Plugins to configure:
   - logs/     (fractary-logs)
 
 Environment variables status:
-  - GITHUB_TOKEN: [Present/Missing]
+  - .env file: [Found/Not found]
+  - GITHUB_TOKEN: [Present in .env / Present in environment / Missing]
+
+Note: Fractary SDK auto-loads .env files, so tokens defined there work automatically.
 
 [Show full proposed config.yaml content]
 ```
@@ -1332,7 +1335,10 @@ AFTER:
   - Adding (if missing): logs/
 
 Environment variables status:
-  - GITHUB_TOKEN: [Present/Missing]
+  - .env file: [Found/Not found]
+  - GITHUB_TOKEN: [Present in .env / Present in environment / Missing]
+
+Note: Fractary SDK auto-loads .env files, so tokens defined there work automatically.
 ```
 
 ### Step 9: Confirm Changes with User
@@ -1583,7 +1589,19 @@ After writing, validate the configuration:
 
 ### Step 13: Test Plugin Connections
 
-Test connectivity for configured plugins:
+Test connectivity for configured plugins.
+
+**Important**: The Fractary SDK now auto-loads `.env` files when `loadConfig()` is called. If a `.env` file exists with `GITHUB_TOKEN`, it will be available automatically. However, for shell-based tests (curl, aws cli), you need to source it first.
+
+**Check for .env file:**
+```bash
+# Check if .env exists and contains GITHUB_TOKEN
+if [ -f ".env" ] && grep -q "GITHUB_TOKEN" .env; then
+    echo ".env file found with GITHUB_TOKEN - SDK will auto-load this"
+    # Source for shell tests
+    set -a && source .env && set +a
+fi
+```
 
 **GitHub (work/repo):**
 ```bash
@@ -1631,12 +1649,16 @@ Connection tests:
   - GitHub API: [Pass/Fail/Skipped]
   - Git remote: [Pass/Fail/Skipped]
 
-Warnings:
+Environment (.env auto-loading):
+  - .env file: [Found with GITHUB_TOKEN / Found without GITHUB_TOKEN / Not found]
+  - Fractary SDK will auto-load .env when using work/repo commands
+
+Warnings (if any):
   - Missing env var: AWS_ACCESS_KEY_ID (required for S3)
 
 Next steps:
 1. Review configuration: cat .fractary/config.yaml
-2. Set missing environment variables
+2. [If .env not found] Create .env file with GITHUB_TOKEN=ghp_xxxx
 3. Test with: /fractary-work:issue-list
 4. For updates: /fractary-core:config --context "description of changes"
 ```
@@ -1761,9 +1783,17 @@ The following environment variables are referenced but not set:
 
 Configuration was created, but some features may not work.
 
-To set variables:
+To set variables (choose one method):
+
+Option 1: Create/update .env file (RECOMMENDED - auto-loaded by Fractary SDK)
+  echo "GITHUB_TOKEN=your_token_here" >> .env
+  echo "AWS_ACCESS_KEY_ID=your_key_here" >> .env
+
+Option 2: Export in shell (only for current session)
   export GITHUB_TOKEN=your_token_here
   export AWS_ACCESS_KEY_ID=your_key_here
+
+Note: Fractary SDK auto-loads .env files, so option 1 is preferred.
 ```
 
 ### Git Remote Detection Failed
@@ -1882,7 +1912,8 @@ Claude settings update:
   - .claude/settings.json: Add archive deny rules
 
 Environment variables:
-  - GITHUB_TOKEN: Present
+  - .env file: Found
+  - GITHUB_TOKEN: Present in .env (auto-loaded by SDK)
 
 Proposed configuration:
 ---

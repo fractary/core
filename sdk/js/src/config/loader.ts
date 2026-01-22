@@ -150,6 +150,8 @@ export interface LoadedConfig {
 export interface LoadConfigOptions extends ConfigLoadOptions {
   /** Skip creating token provider (useful for non-GitHub operations) */
   skipAuth?: boolean;
+  /** Skip auto-loading .env file (default: false - .env is loaded automatically) */
+  skipEnvLoad?: boolean;
 }
 
 /**
@@ -223,19 +225,21 @@ function extractGitHubConfig(config: CoreYamlConfig): ExtractedGitHubConfig | un
  * Load unified configuration with authentication
  *
  * This function:
- * 1. Loads and parses the YAML configuration
- * 2. Extracts GitHub configuration from handlers
- * 3. Creates a TokenProvider for authentication (if configured)
- * 4. Returns a unified config object
+ * 1. Auto-loads .env files (unless skipEnvLoad is true)
+ * 2. Loads and parses the YAML configuration
+ * 3. Extracts GitHub configuration from handlers
+ * 4. Creates a TokenProvider for authentication (if configured)
+ * 5. Returns a unified config object
  *
- * Note: dotenv should be imported at the entry point, so environment
- * variables are already loaded when this function is called.
+ * Environment variables from .env files are loaded automatically by default,
+ * so GITHUB_TOKEN and other secrets can be read from .env without manual sourcing.
  *
  * @param options Configuration loading options
  * @returns Loaded configuration with authentication
  *
  * @example
  * ```typescript
+ * // .env is loaded automatically - GITHUB_TOKEN will be available
  * const config = await loadConfig();
  *
  * if (config.tokenProvider) {
@@ -245,7 +249,12 @@ function extractGitHubConfig(config: CoreYamlConfig): ExtractedGitHubConfig | un
  * ```
  */
 export async function loadConfig(options: LoadConfigOptions = {}): Promise<LoadedConfig> {
-  const { skipAuth = false, ...yamlOptions } = options;
+  const { skipAuth = false, skipEnvLoad = false, ...yamlOptions } = options;
+
+  // Auto-load .env files by default (searches CWD and project root)
+  if (!skipEnvLoad) {
+    loadEnv({ cwd: yamlOptions.projectRoot });
+  }
 
   // Load raw YAML configuration
   const raw = loadYamlConfig(yamlOptions);

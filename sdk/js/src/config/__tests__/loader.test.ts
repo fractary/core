@@ -121,3 +121,43 @@ describe('isEnvLoaded', () => {
     expect(isEnvLoaded()).toBe(true);
   });
 });
+
+describe('loadConfig', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Reset env loaded state
+    loadEnv({ force: true });
+  });
+
+  it('should auto-load .env by default', async () => {
+    // Mock .env exists
+    mockedFs.existsSync.mockImplementation((p) => {
+      const pathStr = String(p);
+      return pathStr.endsWith('.env');
+    });
+
+    // Import loadConfig dynamically to avoid hoisting issues
+    const { loadConfig } = await import('../loader');
+
+    // Track if loadEnv was called
+    const initialCallCount = mockedDotenv.config.mock.calls.length;
+
+    await loadConfig();
+
+    // dotenv.config should have been called (loadEnv was invoked)
+    expect(mockedDotenv.config.mock.calls.length).toBeGreaterThan(initialCallCount);
+  });
+
+  it('should skip .env loading when skipEnvLoad is true', async () => {
+    mockedFs.existsSync.mockReturnValue(true);
+
+    const { loadConfig } = await import('../loader');
+
+    const initialCallCount = mockedDotenv.config.mock.calls.length;
+
+    await loadConfig({ skipEnvLoad: true });
+
+    // dotenv.config should NOT have been called again
+    expect(mockedDotenv.config.mock.calls.length).toBe(initialCallCount);
+  });
+});
