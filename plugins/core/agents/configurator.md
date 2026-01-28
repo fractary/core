@@ -28,7 +28,7 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 2. ALWAYS detect platforms and project info from git remote or ask user
 3. ALWAYS validate authentication before completing
 4. NEVER store tokens directly in config - use `${ENV_VAR}` syntax
-5. ALWAYS create required directories (.fractary/logs, .fractary/specs, docs/)
+5. ALWAYS create required directories (.fractary/logs, .fractary/specs)
 6. ALWAYS update `.claude/settings.json` to deny Read access to archive directories
 7. With --context, interpret as instructions for changes to apply
 8. If --force, overwrite existing config without prompting
@@ -1171,12 +1171,14 @@ Mode: Fresh Setup
 Files to create/update:
   - .fractary/config.yaml (create)
   - .fractary/.gitignore (create/update)
+  - .fractary/logs/templates/manifest.yaml (create if logs plugin)
+  - .fractary/docs/templates/manifest.yaml (create if docs plugin)
 
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
-  - docs/architecture/ADR/
-  - docs/guides/
+  - .fractary/logs/templates/ (if logs plugin)
+  - .fractary/docs/templates/ (if docs plugin)
 
 Plugins to configure:
   - work (github)
@@ -1268,17 +1270,123 @@ Handle responses:
 
 **10a. Create directories:**
 ```bash
+# Always create these core directories
 mkdir -p .fractary/logs
 mkdir -p .fractary/specs
-mkdir -p docs/architecture/ADR
-mkdir -p docs/guides
-mkdir -p docs/schema
-mkdir -p docs/api
-mkdir -p docs/standards
-mkdir -p docs/operations/runbooks
+
+# Create templates directories only if corresponding plugin is being configured
+if [[ "$plugins_to_configure" == *"logs"* ]]; then
+    mkdir -p .fractary/logs/templates
+fi
+if [[ "$plugins_to_configure" == *"docs"* ]]; then
+    mkdir -p .fractary/docs/templates
+fi
 ```
 
-**10b. Write configuration (with section preservation):**
+**10b. Create stub templates manifests (for configured plugins):**
+
+**For logs plugin** - Create `.fractary/logs/templates/manifest.yaml`:
+
+```yaml
+# Fractary Logs - Custom Log Types Manifest
+#
+# This file defines custom log types for your project.
+# Custom types are loaded in addition to the 9 core types bundled with Fractary.
+#
+# DOCUMENTATION:
+#   https://github.com/fractary/core/blob/main/plugins/logs/README.md
+#
+# CORE LOG TYPES (always available):
+#   audit, build, changelog, debug, deployment, operational, session, test, workflow
+#
+# QUICK START:
+#   1. Uncomment the example below and modify for your needs
+#   2. Create a directory for each type (e.g., .fractary/logs/templates/incident/)
+#   3. Add three files to each type directory:
+#      - type.yaml     (type definition: frontmatter, structure, status values)
+#      - template.md   (Mustache template for generating logs)
+#      - standards.md  (logging guidelines and examples)
+#
+# EXAMPLE:
+#   To create a custom "incident" log type:
+#
+#   .fractary/logs/templates/
+#   ├── manifest.yaml        (this file)
+#   └── incident/
+#       ├── type.yaml        (defines frontmatter, required sections, output path)
+#       ├── template.md      (Mustache template: {{title}}, {{severity}}, etc.)
+#       └── standards.md     (logging guidelines for incidents)
+
+version: "1.0"
+log_types: []
+
+# Uncomment and modify to add custom types:
+#
+# log_types:
+#   - id: incident
+#     display_name: Incident Log
+#     description: Production incidents, outages, and post-mortems
+#     path: ./incident
+#
+#   - id: migration
+#     display_name: Migration Log
+#     description: Database migrations, data transfers, schema changes
+#     path: ./migration
+```
+
+**For docs plugin** - Create `.fractary/docs/templates/manifest.yaml`:
+
+```yaml
+# Fractary Docs - Custom Document Types Manifest
+#
+# This file defines custom document types for your project.
+# Custom types are loaded in addition to the 11 core types bundled with Fractary.
+#
+# DOCUMENTATION:
+#   https://github.com/fractary/core/blob/main/plugins/docs/README.md#custom-project-types
+#
+# QUICK START:
+#   1. Uncomment the example below and modify for your needs
+#   2. Create a directory for each type (e.g., .fractary/docs/templates/runbook/)
+#   3. Add three files to each type directory:
+#      - type.yaml     (type definition: frontmatter, structure, status values)
+#      - template.md   (Mustache template for generating documents)
+#      - standards.md  (writing guidelines and examples)
+#
+# EXAMPLE:
+#   To create a custom "runbook" document type:
+#
+#   .fractary/docs/templates/
+#   ├── manifest.yaml        (this file)
+#   └── runbook/
+#       ├── type.yaml        (defines frontmatter, required sections, output path)
+#       ├── template.md      (Mustache template: {{title}}, {{description}}, etc.)
+#       └── standards.md     (writing guidelines for this doc type)
+
+version: "1.0"
+doc_types: []
+
+# Uncomment and modify to add custom types:
+#
+# doc_types:
+#   - id: runbook
+#     display_name: Runbook
+#     description: Operational runbooks for incident response
+#     path: ./runbook
+#
+#   - id: adr
+#     display_name: Custom ADR
+#     description: Override core ADR type with project-specific format
+#     path: ./adr
+```
+
+Only create these manifest files if:
+- The corresponding plugin (logs or docs) is being configured
+- The file does not already exist (preserve existing custom templates)
+
+**Important:** These manifest files should be committed to git so custom types are shared across the team.
+
+**10c. Write configuration (with section preservation):**
 
 For **fresh setup** or **--force**:
 - Write complete configuration with all plugin sections
@@ -1311,7 +1419,7 @@ for plugin in plugins_to_configure:
 write_yaml(".fractary/config.yaml", merged)
 ```
 
-**11c. Create/update .fractary/.gitignore:**
+**10d. Create/update .fractary/.gitignore:**
 
 1. Read existing `.fractary/.gitignore` if it exists
 2. Parse existing entries (preserve ALL existing entries from other plugins)
@@ -1391,7 +1499,7 @@ fi
 NOTE: Move existing logs from .fractary/logs/ to .fractary/session-logs/ if needed.
 ```
 
-**11d. Update Claude settings to hide archive directories:**
+**10e. Update Claude settings to hide archive directories:**
 
 Claude's search tools (Glob/Grep/Read) ignore .gitignore, so we must explicitly deny Read access to archive directories in `.claude/settings.json`.
 
@@ -1700,12 +1808,12 @@ Detecting platforms...
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
-  - docs/architecture/ADR/
-  - docs/guides/
-  - docs/schema/
-  - docs/api/
-  - docs/standards/
-  - docs/operations/runbooks/
+  - .fractary/logs/templates/
+  - .fractary/docs/templates/
+
+Files to create:
+  - .fractary/logs/templates/manifest.yaml (stub with examples)
+  - .fractary/docs/templates/manifest.yaml (stub with examples)
 
 .gitignore entries to add:
   - logs/     (fractary-logs)

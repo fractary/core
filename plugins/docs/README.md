@@ -729,29 +729,9 @@ docs:
   # When set, CLI/SDK will load custom types from this manifest
   # in addition to the core types bundled with Fractary
   custom_templates_path: .fractary/docs/templates/manifest.yaml
-
-  doc_types:
-    adr:
-      enabled: true
-      path: docs/architecture/ADR
-      auto_number: true
-    api:
-      enabled: true
-      path: docs/api
-      auto_update_index: true
-
-  output_paths:
-    documentation: docs
-    adrs: docs/architecture/ADR
-    api_docs: docs/api
-
-  validation:
-    lint_on_generate: true
-    check_links_on_generate: false
-    required_sections:
-      adr: [Status, Context, Decision, Consequences]
-      api: [Overview, Request, Response]
 ```
+
+**Note:** Document types, output paths, and validation rules are defined in `type.yaml` files within `templates/docs/{type}/` directories, not in config.yaml. The configuration only needs `schema_version` and optionally `custom_templates_path`.
 
 ### Custom Templates Path
 
