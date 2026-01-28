@@ -17,8 +17,7 @@
       "properties": {
         "local_path": {
           "type": "string",
-          "pattern": "^/",
-          "description": "Absolute path for local log storage"
+          "description": "Path for local log storage (relative to project root, e.g. .fractary/logs)"
         },
         "cloud_archive_path": {
           "type": "string",
@@ -31,15 +30,6 @@
         "cloud_summaries_path": {
           "type": "string",
           "description": "Cloud path template for AI summaries (supports {year})"
-        },
-        "provider": {
-          "type": "string",
-          "enum": ["s3", "r2", "gcs", "local"],
-          "description": "Cloud storage provider"
-        },
-        "bucket": {
-          "type": "string",
-          "description": "Cloud storage bucket name"
         },
         "limits": {
           "type": "object",
