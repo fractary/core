@@ -28,7 +28,7 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 2. ALWAYS detect platforms and project info from git remote or ask user
 3. ALWAYS validate authentication before completing
 4. NEVER store tokens directly in config - use `${ENV_VAR}` syntax
-5. ALWAYS create required directories (.fractary/logs, .fractary/specs, docs/)
+5. ALWAYS create required directories (.fractary/logs, .fractary/specs)
 6. ALWAYS update `.claude/settings.json` to deny Read access to archive directories
 7. With --context, interpret as instructions for changes to apply
 8. If --force, overwrite existing config without prompting
@@ -1175,8 +1175,6 @@ Files to create/update:
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
-  - docs/architecture/ADR/
-  - docs/guides/
 
 Plugins to configure:
   - work (github)
@@ -1270,12 +1268,6 @@ Handle responses:
 ```bash
 mkdir -p .fractary/logs
 mkdir -p .fractary/specs
-mkdir -p docs/architecture/ADR
-mkdir -p docs/guides
-mkdir -p docs/schema
-mkdir -p docs/api
-mkdir -p docs/standards
-mkdir -p docs/operations/runbooks
 ```
 
 **10b. Write configuration (with section preservation):**
@@ -1700,12 +1692,6 @@ Detecting platforms...
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
-  - docs/architecture/ADR/
-  - docs/guides/
-  - docs/schema/
-  - docs/api/
-  - docs/standards/
-  - docs/operations/runbooks/
 
 .gitignore entries to add:
   - logs/     (fractary-logs)
