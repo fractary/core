@@ -23,17 +23,10 @@ The plugin uses configuration from `.fractary/config.yaml`:
 ```yaml
 docs:
   schema_version: "1.1"
-  doc_types:
-    adr:
-      enabled: true
-      path: docs/architecture/ADR
-    api:
-      enabled: true
-      path: docs/api
-    guide:
-      enabled: true
-      path: docs/guides
+  custom_templates_path: .fractary/docs/templates/manifest.yaml  # optional
 ```
+
+**Note:** Document types are defined in `type.yaml` files within `templates/docs/{type}/` directories, not in config.yaml. Each type.yaml defines output paths, validation rules, and frontmatter requirements.
 
 ## Slash Commands
 

@@ -117,10 +117,7 @@ file:
 
 docs:
   schema_version: "1.1"
-  doc_types:
-    adr:
-      enabled: true
-      path: docs/architecture/ADR
+  custom_templates_path: .fractary/docs/templates/manifest.yaml  # optional
 ```
 
 ## Configuration by Interface
@@ -343,22 +340,16 @@ Documentation management configuration.
 
 | Setting | Description | Required |
 |---------|-------------|----------|
-| `storage.local_path` | Path for docs | No (default: /docs) |
-| `doc_types.<type>.enabled` | Enable document type | No |
-| `doc_types.<type>.path` | Path for type | No |
-| `defaults.format` | Default format | No (default: markdown) |
+| `schema_version` | Schema version | Yes |
+| `custom_templates_path` | Path to custom doc type manifest | No |
 
 ```yaml
 docs:
   schema_version: "1.1"
-  doc_types:
-    adr:
-      enabled: true
-      path: docs/architecture/ADR
-    api:
-      enabled: true
-      path: docs/api
+  custom_templates_path: .fractary/docs/templates/manifest.yaml  # optional
 ```
+
+**Note:** Document types, output paths, and validation rules are defined in `type.yaml` files within `templates/docs/{type}/` directories, not in config.yaml.
 
 ## Environment Variables
 
