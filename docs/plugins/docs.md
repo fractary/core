@@ -26,7 +26,7 @@ docs:
   custom_templates_path: .fractary/docs/templates/manifest.yaml  # optional
 ```
 
-**Note:** Document types are defined in `type.yaml` files within `templates/docs/{type}/` directories, not in config.yaml. Each type.yaml defines output paths, validation rules, and frontmatter requirements.
+**Note:** The 11 core document types are always available from `templates/docs/`. The `custom_templates_path` is only needed to add project-specific types or override core types. Each type is defined by `type.yaml`, `template.md`, and `standards.md` files.
 
 ## Slash Commands
 

@@ -1171,12 +1171,14 @@ Mode: Fresh Setup
 Files to create/update:
   - .fractary/config.yaml (create)
   - .fractary/.gitignore (create/update)
+  - .fractary/logs/templates/manifest.yaml (create if logs plugin)
   - .fractary/docs/templates/manifest.yaml (create if docs plugin)
 
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
-  - .fractary/docs/templates/
+  - .fractary/logs/templates/ (if logs plugin)
+  - .fractary/docs/templates/ (if docs plugin)
 
 Plugins to configure:
   - work (github)
@@ -1268,14 +1270,71 @@ Handle responses:
 
 **10a. Create directories:**
 ```bash
+# Always create these core directories
 mkdir -p .fractary/logs
 mkdir -p .fractary/specs
-mkdir -p .fractary/docs/templates
+
+# Create templates directories only if corresponding plugin is being configured
+if [[ "$plugins_to_configure" == *"logs"* ]]; then
+    mkdir -p .fractary/logs/templates
+fi
+if [[ "$plugins_to_configure" == *"docs"* ]]; then
+    mkdir -p .fractary/docs/templates
+fi
 ```
 
-**10b. Create stub docs templates manifest (if docs plugin configured):**
+**10b. Create stub templates manifests (for configured plugins):**
 
-Create `.fractary/docs/templates/manifest.yaml` with helpful comments and examples:
+**For logs plugin** - Create `.fractary/logs/templates/manifest.yaml`:
+
+```yaml
+# Fractary Logs - Custom Log Types Manifest
+#
+# This file defines custom log types for your project.
+# Custom types are loaded in addition to the 9 core types bundled with Fractary.
+#
+# DOCUMENTATION:
+#   https://github.com/fractary/core/blob/main/plugins/logs/README.md
+#
+# CORE LOG TYPES (always available):
+#   audit, build, changelog, debug, deployment, operational, session, test, workflow
+#
+# QUICK START:
+#   1. Uncomment the example below and modify for your needs
+#   2. Create a directory for each type (e.g., .fractary/logs/templates/incident/)
+#   3. Add three files to each type directory:
+#      - type.yaml     (type definition: frontmatter, structure, status values)
+#      - template.md   (Mustache template for generating logs)
+#      - standards.md  (logging guidelines and examples)
+#
+# EXAMPLE:
+#   To create a custom "incident" log type:
+#
+#   .fractary/logs/templates/
+#   ├── manifest.yaml        (this file)
+#   └── incident/
+#       ├── type.yaml        (defines frontmatter, required sections, output path)
+#       ├── template.md      (Mustache template: {{title}}, {{severity}}, etc.)
+#       └── standards.md     (logging guidelines for incidents)
+
+version: "1.0"
+log_types: []
+
+# Uncomment and modify to add custom types:
+#
+# log_types:
+#   - id: incident
+#     display_name: Incident Log
+#     description: Production incidents, outages, and post-mortems
+#     path: ./incident
+#
+#   - id: migration
+#     display_name: Migration Log
+#     description: Database migrations, data transfers, schema changes
+#     path: ./migration
+```
+
+**For docs plugin** - Create `.fractary/docs/templates/manifest.yaml`:
 
 ```yaml
 # Fractary Docs - Custom Document Types Manifest
@@ -1321,9 +1380,11 @@ doc_types: []
 #     path: ./adr
 ```
 
-Only create this file if:
-- The docs plugin is being configured
+Only create these manifest files if:
+- The corresponding plugin (logs or docs) is being configured
 - The file does not already exist (preserve existing custom templates)
+
+**Important:** These manifest files should be committed to git so custom types are shared across the team.
 
 **10c. Write configuration (with section preservation):**
 
@@ -1747,9 +1808,11 @@ Detecting platforms...
 Directories to create:
   - .fractary/logs/
   - .fractary/specs/
+  - .fractary/logs/templates/
   - .fractary/docs/templates/
 
 Files to create:
+  - .fractary/logs/templates/manifest.yaml (stub with examples)
   - .fractary/docs/templates/manifest.yaml (stub with examples)
 
 .gitignore entries to add:

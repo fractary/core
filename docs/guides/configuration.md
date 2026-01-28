@@ -120,6 +120,8 @@ docs:
   custom_templates_path: .fractary/docs/templates/manifest.yaml  # optional
 ```
 
+**Note:** The 11 core document types (adr, api, architecture, audit, changelog, dataset, etl, guides, infrastructure, standards, testing) are always available from `templates/docs/`. The `custom_templates_path` is only needed if you want to add project-specific types or override core types.
+
 ## Configuration by Interface
 
 ### SDK Configuration
