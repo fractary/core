@@ -43,6 +43,7 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 19. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
 20. MERGE new config sections with existing - never overwrite unrelated plugin sections
 21. NEVER create an "artifacts" source in the file section - only create "specs" and "logs" sources
+22. BUCKET CONFIG: S3 bucket, region, and auth MUST ONLY be in `file.sources` - NEVER duplicate in logs or spec sections
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -821,31 +822,15 @@ AskUserQuestion(
 
 If file handler is S3 or cloud-based storage:
 
-1. **Ask user for environment**:
-   ```
-   AskUserQuestion(
-     questions: [{
-       question: "Which environment is this configuration for?",
-       header: "Environment",
-       options: [
-         { label: "dev", description: "Development environment (Recommended for local work)" },
-         { label: "staging", description: "Staging/test environment" },
-         { label: "prod", description: "Production environment" }
-       ],
-       multiSelect: false
-     }]
-   )
-   ```
-
-2. **Auto-derive bucket name from project name**:
+1. **Auto-derive bucket name from project name**:
 
    Parse the repo name to extract project and sub-project:
 
    ```bash
    # For subdomain-style names like "etl.corthion.ai"
    # Extract: project=corthion, sub-project=etl
-   # Bucket format: {project}-{sub-project}-fractary-{env}
-   # Example: corthion-etl-fractary-test
+   # Bucket format: {project}-{sub-project}-fractary
+   # Example: corthion-etl-fractary
    #
    # S3 Bucket Naming Requirements:
    # - 3-63 characters
@@ -860,12 +845,6 @@ If file handler is S3 or cloud-based storage:
 
    parse_bucket_name() {
        local repo_name="$1"  # e.g., "etl.corthion.ai"
-       local env="$2"        # e.g., "dev", "staging", "prod"
-
-       # Default environment to "test" if not provided
-       if [ -z "$env" ]; then
-           env="test"
-       fi
 
        # Step 1: Strip trailing dots
        repo_name=$(echo "$repo_name" | sed 's/\.$//')
@@ -913,10 +892,10 @@ If file handler is S3 or cloud-based storage:
                project="$remaining"
            fi
 
-           bucket_name="${project}-${sub_project}-fractary-${env}"
+           bucket_name="${project}-${sub_project}-fractary"
        else
            # No dots - simple project name
-           bucket_name="${stripped_name}-fractary-${env}"
+           bucket_name="${stripped_name}-fractary"
        fi
 
        # Step 6: Sanitize for S3 compliance
@@ -978,15 +957,15 @@ If file handler is S3 or cloud-based storage:
    }
    ```
 
-   **Examples** (with env=dev):
-   - `etl.corthion.ai` → `corthion-etl-fractary-test`
-   - `api.myapp.com` → `myapp-api-fractary-test`
-   - `my-project` → `my-project-fractary-test` (no subdomain, use simple pattern)
-   - `api.v2.myapp.com` → `myapp-api-v2-fractary-test` (multiple subdomains combined)
-   - `api.myapp.co.uk` → `myapp-api-fractary-test` (multi-part TLD stripped)
-   - `My_Project.App` → `app-my-project-fractary-test` (sanitized: lowercase, underscores to hyphens)
+   **Examples**:
+   - `etl.corthion.ai` → `corthion-etl-fractary`
+   - `api.myapp.com` → `myapp-api-fractary`
+   - `my-project` → `my-project-fractary` (no subdomain, use simple pattern)
+   - `api.v2.myapp.com` → `myapp-api-v2-fractary` (multiple subdomains combined)
+   - `api.myapp.co.uk` → `myapp-api-fractary` (multi-part TLD stripped)
+   - `My_Project.App` → `app-my-project-fractary` (sanitized: lowercase, underscores to hyphens)
 
-3. **Ask user to confirm or customize bucket name**:
+2. **Ask user to confirm or customize bucket name**:
    ```
    AskUserQuestion(
      questions: [{
@@ -1001,7 +980,7 @@ If file handler is S3 or cloud-based storage:
    )
    ```
 
-4. **Ask about archive storage preference**:
+3. **Ask about archive storage preference**:
    ```
    AskUserQuestion(
      questions: [{
@@ -1017,12 +996,19 @@ If file handler is S3 or cloud-based storage:
    )
    ```
 
-5. **Apply archive storage preference to configuration**:
+4. **Apply archive storage preference to configuration**:
 
-   Based on the user's archive storage preference, configure the logs and spec plugins appropriately:
+   Based on the user's archive storage preference, configure the logs and spec plugins appropriately.
+
+   **CRITICAL: Bucket Configuration Location**
+   - S3 bucket, region, and auth details MUST ONLY be configured in `file.sources`
+   - The `logs` and `spec` sections MUST NOT contain bucket/region/auth settings
+   - The `logs` and `spec` sections only contain path information (local paths, relative cloud paths)
+   - This avoids duplication and ensures the `file` plugin is the single source of truth for cloud storage
 
    **Cloud (S3) selected:**
    ```yaml
+   # logs section: paths only, NO bucket/region/auth
    logs:
      storage:
        local_path: .fractary/logs
@@ -1032,6 +1018,7 @@ If file handler is S3 or cloud-based storage:
          auto_archive: true
          cleanup_after_archive: true  # Remove local after cloud upload
 
+   # spec section: paths only, NO bucket/region/auth
    spec:
      storage:
        local_path: .fractary/specs
@@ -1041,14 +1028,40 @@ If file handler is S3 or cloud-based storage:
          issue_close: true
          pr_merge: true
 
+   # file section: ALL S3 connection details go here
    file:
+     schema_version: "2.0"
      sources:
        specs:
          type: s3
-         # ... S3 config
+         bucket: {derived_bucket_name}
+         prefix: specs/
+         region: us-east-1
+         local:
+           base_path: .fractary/specs
+         push:
+           compress: false
+           keep_local: true
+         auth:
+           profile: default
        logs:
          type: s3
-         # ... S3 config
+         bucket: {derived_bucket_name}
+         prefix: logs/
+         region: us-east-1
+         local:
+           base_path: .fractary/logs
+         push:
+           compress: true
+           keep_local: true
+         auth:
+           profile: default
+     global_settings:
+       retry_attempts: 3
+       retry_delay_ms: 1000
+       timeout_seconds: 300
+       verify_checksums: true
+       parallel_uploads: 4
    ```
 
    **Local only selected:**
@@ -1056,29 +1069,36 @@ If file handler is S3 or cloud-based storage:
    logs:
      storage:
        local_path: .fractary/logs
-       # No cloud_archive_path
      retention:
        default:
-         auto_archive: false  # Archives stay local
+         auto_archive: false
          cleanup_after_archive: false
 
    spec:
      storage:
        local_path: .fractary/specs
-       # No cloud_archive_path
      archive:
        auto_archive_on:
          issue_close: false
          pr_merge: false
 
    file:
+     schema_version: "2.0"
      sources:
        specs:
          type: local
-         base_path: .fractary/specs
+         local:
+           base_path: .fractary/specs
        logs:
          type: local
-         base_path: .fractary/logs
+         local:
+           base_path: .fractary/logs
+     global_settings:
+       retry_attempts: 3
+       retry_delay_ms: 1000
+       timeout_seconds: 300
+       verify_checksums: true
+       parallel_uploads: 4
    ```
 
    **Both selected:**
@@ -1102,21 +1122,38 @@ If file handler is S3 or cloud-based storage:
          pr_merge: true
 
    file:
+     schema_version: "2.0"
      sources:
        specs:
          type: s3
-         # ... S3 config
+         bucket: {derived_bucket_name}
+         prefix: specs/
+         region: us-east-1
          local:
            base_path: .fractary/specs
          push:
-           keep_local: true  # Keep local copies
+           compress: false
+           keep_local: true
+         auth:
+           profile: default
        logs:
          type: s3
-         # ... S3 config
+         bucket: {derived_bucket_name}
+         prefix: logs/
+         region: us-east-1
          local:
            base_path: .fractary/logs
          push:
-           keep_local: true  # Keep local copies
+           compress: true
+           keep_local: true
+         auth:
+           profile: default
+     global_settings:
+       retry_attempts: 3
+       retry_delay_ms: 1000
+       timeout_seconds: 300
+       verify_checksums: true
+       parallel_uploads: 4
    ```
 
 ### Step 6: Interpret --context for Changes (Incremental Mode)
@@ -1505,8 +1542,8 @@ Configured plugins:
 
 Project: {org}/{project}
 Bucket: Auto-derived using parse_bucket_name() function
-  - Subdomain pattern: {project}-{sub-project}-fractary-{env} (e.g., corthion-etl-fractary-test)
-  - Simple pattern: {project}-fractary-{env} (e.g., my-project-fractary-test)
+  - Subdomain pattern: {project}-{sub-project}-fractary (e.g., corthion-etl-fractary)
+  - Simple pattern: {project}-fractary (e.g., my-project-fractary)
 
 Connection tests:
   - GitHub API: [Pass/Fail/Skipped]
