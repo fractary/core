@@ -175,12 +175,11 @@ function getDefaultLogsConfig(options: DefaultConfigOptions): LogsConfig {
   return {
     schema_version: '2.0',
     custom_templates_path: '.fractary/logs/templates/manifest.yaml',
-    paths: {
-      default: {
-        file_handler: 'logs',
-        write: '.fractary/logs',
-        archive: '.fractary/logs/archive',
-      },
+    storage: {
+      local_path: '.fractary/logs',
+      archive_path: '.fractary/logs/archive',
+      file_handler: 'logs',
+      ...(useS3 && { cloud_archive_path: 'logs/archive' }),
     },
     retention: {
       default: {
@@ -298,18 +297,13 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
 /**
  * Get default specification configuration
  */
-function getDefaultSpecConfig(options: DefaultConfigOptions): SpecConfig {
-  const { fileHandler = 'local' } = options;
-  const useS3 = fileHandler === 's3';
-
+function getDefaultSpecConfig(_options: DefaultConfigOptions): SpecConfig {
   return {
     schema_version: '1.0',
-    paths: {
-      default: {
-        file_handler: 'specs',
-        write: '.fractary/specs',
-        archive: '.fractary/specs/archive',
-      },
+    storage: {
+      local_path: '.fractary/specs',
+      archive_path: '.fractary/specs/archive',
+      file_handler: 'specs',
     },
     naming: {
       issue_specs: {

@@ -213,22 +213,22 @@ describe('getDefaultConfig', () => {
     it('uses local storage by default', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.sources?.specs?.type).toBe('local');
-      expect(config.file?.sources?.logs?.type).toBe('local');
+      expect(config.file?.handlers?.specs?.type).toBe('local');
+      expect(config.file?.handlers?.logs?.type).toBe('local');
     });
 
     it('configures local base paths', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.sources?.specs?.local?.base_path).toBe('.fractary/specs');
-      expect(config.file?.sources?.logs?.local?.base_path).toBe('.fractary/logs');
+      expect(config.file?.handlers?.specs?.local?.base_path).toBe('.fractary/specs');
+      expect(config.file?.handlers?.logs?.local?.base_path).toBe('.fractary/logs');
     });
 
     it('does not include S3-specific fields for local', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.sources?.specs?.bucket).toBeUndefined();
-      expect(config.file?.sources?.specs?.region).toBeUndefined();
+      expect(config.file?.handlers?.specs?.bucket).toBeUndefined();
+      expect(config.file?.handlers?.specs?.region).toBeUndefined();
     });
 
     it('includes global settings', () => {
@@ -247,9 +247,9 @@ describe('getDefaultConfig', () => {
         awsRegion: 'us-west-2',
       });
 
-      expect(config.file?.sources?.specs?.type).toBe('s3');
-      expect(config.file?.sources?.specs?.bucket).toBe('my-bucket');
-      expect(config.file?.sources?.specs?.region).toBe('us-west-2');
+      expect(config.file?.handlers?.specs?.type).toBe('s3');
+      expect(config.file?.handlers?.specs?.bucket).toBe('my-bucket');
+      expect(config.file?.handlers?.specs?.region).toBe('us-west-2');
     });
 
     it('includes S3 prefixes', () => {
@@ -258,8 +258,8 @@ describe('getDefaultConfig', () => {
         s3Bucket: 'my-bucket',
       });
 
-      expect(config.file?.sources?.specs?.prefix).toBe('specs/');
-      expect(config.file?.sources?.logs?.prefix).toBe('logs/');
+      expect(config.file?.handlers?.specs?.prefix).toBe('specs/');
+      expect(config.file?.handlers?.logs?.prefix).toBe('logs/');
     });
 
     it('includes push configuration for S3', () => {
@@ -268,8 +268,8 @@ describe('getDefaultConfig', () => {
         s3Bucket: 'my-bucket',
       });
 
-      expect(config.file?.sources?.specs?.push?.keep_local).toBe(true);
-      expect(config.file?.sources?.logs?.push?.compress).toBe(true);
+      expect(config.file?.handlers?.specs?.push?.keep_local).toBe(true);
+      expect(config.file?.handlers?.logs?.push?.compress).toBe(true);
     });
 
     it('includes auth configuration for S3', () => {
@@ -278,13 +278,13 @@ describe('getDefaultConfig', () => {
         s3Bucket: 'my-bucket',
       });
 
-      expect(config.file?.sources?.specs?.auth?.profile).toBe('default');
+      expect(config.file?.handlers?.specs?.auth?.profile).toBe('default');
     });
 
     it('falls back to local when s3 specified without bucket', () => {
       const config = getDefaultConfig({ fileHandler: 's3' });
 
-      expect(config.file?.sources?.specs?.type).toBe('local');
+      expect(config.file?.handlers?.specs?.type).toBe('local');
     });
 
     it('uses default region when not specified', () => {
@@ -293,7 +293,7 @@ describe('getDefaultConfig', () => {
         s3Bucket: 'my-bucket',
       });
 
-      expect(config.file?.sources?.specs?.region).toBe('us-east-1');
+      expect(config.file?.handlers?.specs?.region).toBe('us-east-1');
     });
   });
 
@@ -434,7 +434,7 @@ describe('DefaultConfigOptions', () => {
     const config = getDefaultConfig(options);
 
     expect(config.work?.active_handler).toBe('linear');
-    expect(config.file?.sources?.specs?.bucket).toBe('custom-bucket');
-    expect(config.file?.sources?.specs?.region).toBe('eu-west-1');
+    expect(config.file?.handlers?.specs?.bucket).toBe('custom-bucket');
+    expect(config.file?.handlers?.specs?.region).toBe('eu-west-1');
   });
 });
