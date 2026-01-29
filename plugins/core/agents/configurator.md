@@ -1208,6 +1208,7 @@ Mode: Fresh Setup
 Files to create/update:
   - .fractary/config.yaml (create)
   - .fractary/.gitignore (create/update)
+  - .env.example (create if not exists - template for credentials)
   - .fractary/logs/templates/manifest.yaml (create if logs plugin)
   - .fractary/docs/templates/manifest.yaml (create if docs plugin)
 
@@ -1318,6 +1319,111 @@ fi
 if [[ "$plugins_to_configure" == *"docs"* ]]; then
     mkdir -p .fractary/docs/templates
 fi
+```
+
+**10a-2. Create .env.example template (if it doesn't exist):**
+
+Create a `.env.example` file with placeholder values for all required credentials. This file should be committed to git as a template for team members.
+
+```bash
+ENV_EXAMPLE=".env.example"
+
+# Only create if it doesn't exist (don't overwrite user customizations)
+if [ ! -f "$ENV_EXAMPLE" ]; then
+    cat > "$ENV_EXAMPLE" << 'EOF'
+# Fractary Core Environment Variables
+# Copy this file to .env and fill in your values
+#
+# Multi-environment support:
+#   - .env              (development - default)
+#   - .env.staging      (staging credentials)
+#   - .env.prod         (production credentials)
+#   - .env.local        (local overrides, never committed)
+#
+# Usage:
+#   CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+#   Claude Code: Set FRACTARY_ENV=prod in .env.local for persistent default
+
+# === GitHub (required for work/repo plugins) ===
+GITHUB_TOKEN=ghp_your_personal_access_token
+
+# === AWS S3 (required if using S3 file storage) ===
+# Option 1: Explicit credentials
+AWS_ACCESS_KEY_ID=AKIA_your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+AWS_DEFAULT_REGION=us-east-1
+
+# Option 2: Use AWS profile instead (comment out explicit credentials above)
+# AWS_PROFILE=default
+
+# === Jira (if using Jira for work tracking) ===
+# JIRA_URL=https://your-domain.atlassian.net
+# JIRA_EMAIL=your-email@example.com
+# JIRA_TOKEN=your_jira_api_token
+# JIRA_PROJECT_KEY=PROJ
+
+# === Linear (if using Linear for work tracking) ===
+# LINEAR_API_KEY=lin_api_your_key
+# LINEAR_TEAM_KEY=TEAM
+EOF
+    echo "Created .env.example template"
+fi
+```
+
+**Content varies based on configured plugins:**
+- If work platform is GitHub: Include `GITHUB_TOKEN`
+- If work platform is Jira: Include `JIRA_*` variables
+- If work platform is Linear: Include `LINEAR_*` variables
+- If file handler is S3: Include `AWS_*` variables
+- If file handler is local: Omit AWS variables
+
+**10a-3. Verify .env files are in root .gitignore (CRITICAL):**
+
+**IMPORTANT:** This step prevents accidental credential commits. The root `.gitignore` MUST exclude `.env` files.
+
+```bash
+ROOT_GITIGNORE=".gitignore"
+
+# Check if .env patterns exist in root .gitignore
+if [ -f "$ROOT_GITIGNORE" ]; then
+    if ! grep -q "^\.env$" "$ROOT_GITIGNORE" 2>/dev/null; then
+        echo ""
+        echo "Adding .env patterns to root .gitignore..."
+        cat >> "$ROOT_GITIGNORE" << 'EOF'
+
+# Environment files - contain secrets, never commit
+# (keep .env.example as template)
+.env
+.env.*
+!.env.example
+EOF
+        echo "Added .env exclusion patterns to .gitignore"
+    fi
+else
+    # Create .gitignore with .env patterns
+    cat > "$ROOT_GITIGNORE" << 'EOF'
+# Environment files - contain secrets, never commit
+# (keep .env.example as template)
+.env
+.env.*
+!.env.example
+EOF
+    echo "Created .gitignore with .env exclusion patterns"
+fi
+```
+
+**Security verification output:**
+```
+=== SECURITY CHECK ===
+
+.gitignore verification:
+  ✓ .env excluded from version control
+  ✓ .env.* patterns excluded
+  ✓ .env.example allowed (template)
+
+WARNING: Before committing, verify:
+  - No .env files in git history (git log --all --full-history -- .env*)
+  - .env.example contains only placeholder values
 ```
 
 **10b. Create stub templates manifests (for configured plugins):**
@@ -1666,9 +1772,23 @@ Warnings (if any):
 
 Next steps:
 1. Review configuration: cat .fractary/config.yaml
-2. [If .env not found] Create .env file with GITHUB_TOKEN=ghp_xxxx
+2. [If .env not found] Create .env file with your credentials:
+   GITHUB_TOKEN=ghp_xxxx
+   AWS_ACCESS_KEY_ID=your_key (if using S3)
+   AWS_SECRET_ACCESS_KEY=your_secret (if using S3)
 3. Test with: /fractary-work:issue-list
 4. For updates: /fractary-core:config --context "description of changes"
+
+Multi-environment setup (optional):
+  For different credentials in dev/staging/prod, create:
+  - .env           (development - default)
+  - .env.staging   (staging credentials)
+  - .env.prod      (production credentials)
+
+  Then use: FRACTARY_ENV=prod fractary-core:work issue-list
+
+  Or set in .env.local to make prod the default for Claude Code sessions.
+  See: <MULTI_ENVIRONMENT_SETUP> section for details
 ```
 
 </WORKFLOW>
@@ -1759,6 +1879,14 @@ Option 2: Export in shell (only for current session)
   export AWS_ACCESS_KEY_ID=your_key_here
 
 Note: Fractary SDK auto-loads .env files, so option 1 is preferred.
+
+Multi-environment setup:
+  For different credentials per environment (dev/staging/prod):
+  - Create .env.staging, .env.prod files with environment-specific values
+  - CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+  - Claude Code: Set FRACTARY_ENV=prod in .env.local for persistent default
+  - The SDK loads: .env → .env.{FRACTARY_ENV} → .env.local (in order)
+  See <MULTI_ENVIRONMENT_SETUP> section for complete guide.
 ```
 
 ### Git Remote Detection Failed
@@ -1849,6 +1977,7 @@ Directories to create:
   - .fractary/docs/templates/
 
 Files to create:
+  - .env.example (template for credentials - commit to git)
   - .fractary/logs/templates/manifest.yaml (stub with examples)
   - .fractary/docs/templates/manifest.yaml (stub with examples)
 
@@ -1883,6 +2012,7 @@ work:
 Files created/updated:
   - .fractary/config.yaml
   - .fractary/.gitignore
+  - .env.example (template - commit to git)
   - .claude/settings.json (archive deny rules)
 
 Plugins configured:
@@ -1898,8 +2028,15 @@ Connection tests:
   - Git remote: Pass
 
 Next steps:
-1. Review: cat .fractary/config.yaml
-2. Test: /fractary-work:issue-list
+1. Create .env from template: cp .env.example .env
+2. Fill in your credentials in .env
+3. Review config: cat .fractary/config.yaml
+4. Test: /fractary-work:issue-list
+
+Multi-environment setup (optional):
+  Create .env.staging and .env.prod with environment-specific credentials.
+  CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+  Claude Code: Set FRACTARY_ENV=prod in .env.local
 ```
 
 ### Incremental Update Preview + Success
@@ -2034,6 +2171,254 @@ Recovery steps:
 ```
 
 </OUTPUTS>
+
+<MULTI_ENVIRONMENT_SETUP>
+
+## Multi-Environment Configuration
+
+Fractary Core supports different credentials for different environments (development, staging, prod) through the `FRACTARY_ENV` environment variable.
+
+### How It Works
+
+Set `FRACTARY_ENV` to load environment-specific `.env` files:
+
+```bash
+# Development (default)
+fractary-core:work issue-list
+
+# Staging
+FRACTARY_ENV=staging fractary-core:work issue-list
+
+# Production
+FRACTARY_ENV=prod fractary-core:work issue-list
+```
+
+### File Loading Order
+
+When `FRACTARY_ENV` is set, the SDK loads `.env` files in this order (later files override earlier):
+
+1. `.env` - Base configuration (always loaded if exists)
+2. `.env.{FRACTARY_ENV}` - Environment-specific overrides (e.g., `.env.prod`)
+3. `.env.local` - Local overrides (never committed, always loaded last)
+
+All files are optional. Missing files are silently skipped.
+
+### Setting FRACTARY_ENV in Different Contexts
+
+**1. Direct CLI Usage (terminal commands):**
+```bash
+# Per-command
+FRACTARY_ENV=prod fractary-core:work issue-list
+
+# For entire terminal session
+export FRACTARY_ENV=prod
+fractary-core:work issue-list
+fractary-core:repo pr-list
+```
+
+**2. Claude Code (plugins and agents):**
+
+Claude Code inherits environment variables from where it was launched. Options:
+
+**Option A: Set before launching Claude Code**
+```bash
+export FRACTARY_ENV=prod
+claude   # or however you start Claude Code
+```
+
+**Option B: Use .env.local for persistent default**
+
+Create `.env.local` in your project root to set a default environment:
+```bash
+# .env.local (always loaded last, overrides everything)
+FRACTARY_ENV=prod
+```
+
+This way, whenever you work in this project with Claude Code, it automatically uses prod credentials.
+
+**Option C: Project-level shell configuration**
+
+Add to your shell profile (`.bashrc`, `.zshrc`) or use direnv:
+```bash
+# .envrc (if using direnv)
+export FRACTARY_ENV=prod
+```
+
+**3. CI/CD Pipelines:**
+```yaml
+# GitHub Actions example
+jobs:
+  deploy:
+    env:
+      FRACTARY_ENV: prod
+      GITHUB_TOKEN: ${{ secrets.PROD_GITHUB_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+```
+
+### Recommended Setup
+
+Create separate `.env` files for each environment:
+
+```
+project/
+├── .env                  # Development defaults (git-ignored)
+├── .env.staging          # Staging credentials (git-ignored)
+├── .env.prod             # Production credentials (git-ignored)
+├── .env.local            # Personal overrides, can set FRACTARY_ENV (git-ignored)
+├── .env.example          # Template with placeholders (committed to git)
+└── .fractary/
+    └── config.yaml       # Single config using ${VAR} references
+```
+
+**.env.example** (commit this as a template):
+```bash
+# GitHub
+GITHUB_TOKEN=ghp_your_token_here
+
+# AWS (for S3 storage)
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_DEFAULT_REGION=us-east-1
+
+# Optional: AWS profile (alternative to explicit keys)
+# AWS_PROFILE=default
+```
+
+**.env** (development - git-ignored):
+```bash
+GITHUB_TOKEN=ghp_dev_token
+AWS_ACCESS_KEY_ID=AKIA_DEV_KEY
+AWS_SECRET_ACCESS_KEY=dev_secret
+AWS_DEFAULT_REGION=us-east-1
+```
+
+**.env.prod** (git-ignored):
+```bash
+GITHUB_TOKEN=ghp_prod_token
+AWS_ACCESS_KEY_ID=AKIA_PROD_KEY
+AWS_SECRET_ACCESS_KEY=prod_secret
+AWS_DEFAULT_REGION=us-east-1
+```
+
+**.env.local** (optional - for setting default environment):
+```bash
+# Uncomment to always use prod in this project
+# FRACTARY_ENV=prod
+```
+
+### config.yaml Stays The Same
+
+Your `.fractary/config.yaml` uses environment variable references that work across all environments:
+
+```yaml
+version: "2.0"
+
+work:
+  active_handler: github
+  handlers:
+    github:
+      owner: myorg
+      repo: myproject
+      token: ${GITHUB_TOKEN}
+
+file:
+  schema_version: "2.0"
+  sources:
+    specs:
+      type: s3
+      bucket: myproject-fractary
+      region: ${AWS_DEFAULT_REGION:-us-east-1}
+      auth:
+        accessKeyId: ${AWS_ACCESS_KEY_ID}
+        secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+```
+
+### Git Ignore Pattern
+
+Add all `.env` files except the example to `.gitignore`:
+
+```gitignore
+# Environment files (contain secrets)
+.env
+.env.local
+.env.staging
+.env.prod
+.env.*.local
+
+# Keep the example template
+!.env.example
+```
+
+### Best Practices
+
+1. **Never commit actual credentials** - Only commit `.env.example` with placeholder values
+2. **Use .env.local for personal overrides** - It's always loaded last and should never be committed
+3. **Different S3 buckets per environment** - Use separate buckets for dev/staging/prod data
+4. **AWS profiles as alternative** - Instead of explicit keys, you can use `AWS_PROFILE=prod` and configure profiles in `~/.aws/credentials`
+
+### Mid-Session Environment Switching (FABR Workflows)
+
+For workflows where you need to work across multiple environments within a single Claude session (like FABR's evaluate → release phases), use the `--env` flag on commands or the SDK's `switchEnv()` function.
+
+**Using --env flag on commands:**
+```bash
+# Deploy to test during evaluate phase
+/fractary-deploy:run --env test
+
+# Deploy to prod during release phase
+/fractary-deploy:run --env prod
+```
+
+**Using switchEnv() in code/agents:**
+```typescript
+import { switchEnv, getCurrentEnv, clearEnv } from '@fractary/core';
+
+// FABR Workflow Example
+
+// Frame & Architect phases - local development (default .env)
+console.log(getCurrentEnv()); // undefined
+
+// Build phase - still local
+// ... build and test locally ...
+
+// Evaluate phase - switch to test
+switchEnv('test');
+console.log(getCurrentEnv()); // 'test'
+// Now GITHUB_TOKEN, AWS_* etc. come from .env.test
+// ... deploy to test, run integration tests ...
+
+// Release phase - switch to prod
+switchEnv('prod');
+console.log(getCurrentEnv()); // 'prod'
+// Now credentials come from .env.prod
+// ... deploy to production ...
+
+// Optional: Clear and reset if needed
+clearEnv();  // Removes credential env vars
+```
+
+**How switchEnv() works:**
+
+1. Sets `process.env.FRACTARY_ENV` to the new environment
+2. Reloads environment files: `.env` → `.env.{newEnv}` → `.env.local`
+3. Updates `getCurrentEnv()` to return the new environment
+
+**Important:** Variables from the previous environment that aren't overwritten will persist. Use `clearEnv()` before `switchEnv()` if you need a clean slate.
+
+**Agent implementation pattern:**
+
+When building agents that accept `--env`, use this pattern:
+```typescript
+// In agent code
+const env = args.env || args.environment;
+if (env) {
+  switchEnv(env);
+}
+// ... rest of agent logic uses credentials from the specified environment
+```
+
+</MULTI_ENVIRONMENT_SETUP>
 
 <CONFIG_GENERATION>
 ## Configuration Scaffolding

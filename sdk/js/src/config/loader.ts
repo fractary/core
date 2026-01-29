@@ -24,29 +24,59 @@ import type { TokenProvider, GitHubConfig, GitHubAppConfig } from '../auth/types
 import { createTokenProvider } from '../auth';
 import { findProjectRoot } from '../common/yaml-config';
 
-/** Track whether loadEnv has been called */
+/**
+ * Track whether loadEnv has been called.
+ * Note: Module-level state is not thread-safe. For concurrent usage,
+ * call loadEnv() once during application initialization.
+ */
 let envLoaded = false;
 
 /**
- * Load environment variables from .env files
+ * Track the current environment name (value of FRACTARY_ENV when loadEnv was called).
+ * Note: Module-level state is not thread-safe.
+ */
+let currentEnv: string | undefined;
+
+/**
+ * Load environment variables from .env files with multi-environment support
  *
  * This function explicitly loads .env files - it must be called manually
  * rather than being a side effect of importing the module.
  *
- * Searches for .env files in the following order:
+ * ## Multi-Environment Support
+ *
+ * Set `FRACTARY_ENV` to load environment-specific .env files:
+ * - `FRACTARY_ENV=staging` loads `.env.staging`
+ * - `FRACTARY_ENV=production` loads `.env.production`
+ *
+ * Loading order (later files override earlier):
+ * 1. `.env` - Base configuration (always loaded if exists)
+ * 2. `.env.{FRACTARY_ENV}` - Environment-specific overrides
+ * 3. `.env.local` - Local overrides (never committed, always loaded last)
+ *
+ * All files are optional. Missing files are silently skipped.
+ *
+ * ## File Locations
+ *
+ * Searches for .env files in:
  * 1. Current working directory
  * 2. Project root (directory containing .fractary or .git)
  *
  * @param options Loading options
- * @returns true if .env was loaded, false if no .env file found
+ * @returns true if any .env file was loaded, false if no .env files found
  *
  * @example
  * ```typescript
  * import { loadEnv, loadConfig } from '@fractary/core';
  *
- * // Explicitly load .env before loading config
+ * // Load default .env
  * loadEnv();
- * const config = await loadConfig();
+ *
+ * // Or set environment before loading
+ * process.env.FRACTARY_ENV = 'production';
+ * loadEnv({ force: true });
+ *
+ * // From CLI: FRACTARY_ENV=production fractary-core:work issue-list
  * ```
  */
 export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolean {
@@ -57,28 +87,222 @@ export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolea
     return true;
   }
 
-  // Try loading from current working directory first
-  const cwdEnvPath = path.join(cwd, '.env');
-  if (fs.existsSync(cwdEnvPath)) {
-    dotenv.config({ path: cwdEnvPath });
-    envLoaded = true;
-    return true;
-  }
-
-  // Try loading from project root
+  // Determine project root
+  let projectRoot: string;
   try {
-    const projectRoot = findProjectRoot(cwd);
-    const rootEnvPath = path.join(projectRoot, '.env');
-    if (fs.existsSync(rootEnvPath)) {
-      dotenv.config({ path: rootEnvPath });
-      envLoaded = true;
-      return true;
-    }
+    projectRoot = findProjectRoot(cwd);
   } catch {
-    // findProjectRoot failed - that's okay
+    projectRoot = cwd;
   }
 
-  return false;
+  // Get the target environment from FRACTARY_ENV
+  const fractaryEnv = process.env.FRACTARY_ENV;
+  currentEnv = fractaryEnv;
+
+  // Build list of .env files to load (in order of priority, lowest first)
+  // Later files override earlier ones
+  const envFiles: string[] = [];
+
+  // 1. Base .env file (always loaded first if exists)
+  envFiles.push('.env');
+
+  // 2. Environment-specific file (e.g., .env.staging, .env.production)
+  if (fractaryEnv) {
+    envFiles.push(`.env.${fractaryEnv}`);
+  }
+
+  // 3. Local overrides (never committed, highest priority)
+  envFiles.push('.env.local');
+
+  let anyLoaded = false;
+
+  // Try loading from project root (preferred)
+  // Files are loaded in order: .env → .env.{FRACTARY_ENV} → .env.local
+  // Later files override earlier ones (override: true)
+  for (const envFile of envFiles) {
+    const envPath = path.join(projectRoot, envFile);
+    if (fs.existsSync(envPath)) {
+      dotenv.config({ path: envPath, override: true });
+      anyLoaded = true;
+    }
+  }
+
+  // If project root didn't have .env files, try cwd as fallback
+  if (!anyLoaded && cwd !== projectRoot) {
+    for (const envFile of envFiles) {
+      const envPath = path.join(cwd, envFile);
+      if (fs.existsSync(envPath)) {
+        dotenv.config({ path: envPath, override: true });
+        anyLoaded = true;
+      }
+    }
+  }
+
+  envLoaded = anyLoaded;
+  return anyLoaded;
+}
+
+/**
+ * Get the currently loaded environment name
+ *
+ * @returns The value of FRACTARY_ENV when loadEnv was called, or undefined
+ */
+export function getCurrentEnv(): string | undefined {
+  return currentEnv;
+}
+
+/**
+ * Switch to a different environment mid-session
+ *
+ * This function allows changing environments during a Claude session, which is
+ * useful for workflows like FABR where you move through phases that target
+ * different environments:
+ *
+ * - **Local/Dev**: Writing code, running local tests
+ * - **Test**: Deploying during evaluate phase
+ * - **Prod**: Deploying during release phase
+ *
+ * ## What It Does
+ *
+ * 1. Sets `process.env.FRACTARY_ENV` to the new environment
+ * 2. Reloads environment variables in order: `.env` → `.env.{newEnv}` → `.env.local`
+ * 3. Updates `getCurrentEnv()` to return the new environment
+ *
+ * ## Important Notes
+ *
+ * - Variables from the previous environment that aren't overwritten will persist
+ * - To start fresh, call `clearEnv()` before `switchEnv()`
+ * - The config.yaml is NOT reloaded automatically; credentials are resolved
+ *   from process.env when API calls are made
+ *
+ * @param envName The environment to switch to (e.g., 'test', 'staging', 'prod')
+ * @param options Optional settings
+ * @returns true if the environment was switched successfully
+ *
+ * @example
+ * ```typescript
+ * import { switchEnv, getCurrentEnv } from '@fractary/core';
+ *
+ * // FABR Workflow Example
+ *
+ * // Frame & Architect phases - local development
+ * console.log(getCurrentEnv()); // undefined or 'dev'
+ *
+ * // Build phase - still local
+ * // ... build and test locally ...
+ *
+ * // Evaluate phase - switch to test environment
+ * switchEnv('test');
+ * console.log(getCurrentEnv()); // 'test'
+ * // Now GITHUB_TOKEN, AWS_* etc. come from .env.test
+ * // ... deploy to test, run integration tests ...
+ *
+ * // Release phase - switch to production
+ * switchEnv('prod');
+ * console.log(getCurrentEnv()); // 'prod'
+ * // Now credentials come from .env.prod
+ * // ... deploy to production ...
+ * ```
+ */
+export function switchEnv(
+  envName: string,
+  options: { cwd?: string } = {}
+): boolean {
+  // Validate environment name
+  if (!envName || typeof envName !== 'string') {
+    console.warn('switchEnv: Invalid environment name provided');
+    return false;
+  }
+
+  // Sanitize: only allow alphanumeric, dash, underscore
+  if (!/^[a-zA-Z0-9_-]+$/.test(envName)) {
+    console.warn(`switchEnv: Invalid characters in environment name: ${envName}`);
+    return false;
+  }
+
+  // Set the new environment
+  process.env.FRACTARY_ENV = envName;
+
+  // Force reload environment variables
+  const result = loadEnv({ cwd: options.cwd, force: true });
+
+  if (result) {
+    console.log(`Switched to environment: ${envName}`);
+  } else {
+    console.warn(`Switched to environment '${envName}' but no .env.${envName} file found`);
+  }
+
+  return true;
+}
+
+/**
+ * Clear environment-specific variables and reset to base state
+ *
+ * This removes variables that were loaded from `.env.{FRACTARY_ENV}` files,
+ * leaving only system environment variables and base `.env` values.
+ *
+ * Useful before `switchEnv()` if you want to ensure no variables from the
+ * previous environment persist.
+ *
+ * ## State Reset Behavior
+ *
+ * After calling `clearEnv()`:
+ * - `getCurrentEnv()` returns `undefined`
+ * - `isEnvLoaded()` returns `false`
+ * - The next `loadEnv()` or `switchEnv()` call will reload from files
+ *
+ * Note: This only clears the specified variables from `process.env`.
+ * System environment variables (set outside Node.js) are not affected
+ * and may still be present.
+ *
+ * @param variablesToClear Optional list of specific variables to clear.
+ *                         If not provided, clears common Fractary variables.
+ *
+ * @example
+ * ```typescript
+ * // Clear before switching to ensure clean state
+ * clearEnv();
+ * switchEnv('prod');
+ *
+ * // Or clear specific variables
+ * clearEnv(['GITHUB_TOKEN', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']);
+ * ```
+ */
+export function clearEnv(variablesToClear?: string[]): void {
+  const defaultVars = [
+    'GITHUB_TOKEN',
+    'AWS_ACCESS_KEY_ID',
+    'AWS_SECRET_ACCESS_KEY',
+    'AWS_DEFAULT_REGION',
+    'AWS_PROFILE',
+    'JIRA_URL',
+    'JIRA_EMAIL',
+    'JIRA_TOKEN',
+    'JIRA_PROJECT_KEY',
+    'LINEAR_API_KEY',
+    'LINEAR_TEAM_KEY',
+  ];
+
+  // Validate input if provided
+  if (variablesToClear !== undefined) {
+    if (!Array.isArray(variablesToClear)) {
+      console.warn('clearEnv: variablesToClear must be an array of strings');
+      return;
+    }
+  }
+
+  const toClear = variablesToClear || defaultVars;
+
+  for (const varName of toClear) {
+    // Only process valid string variable names
+    if (typeof varName === 'string' && varName.length > 0) {
+      delete process.env[varName];
+    }
+  }
+
+  // Reset internal state
+  currentEnv = undefined;
+  envLoaded = false;
 }
 
 /**
