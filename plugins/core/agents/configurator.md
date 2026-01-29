@@ -1377,6 +1377,55 @@ fi
 - If file handler is S3: Include `AWS_*` variables
 - If file handler is local: Omit AWS variables
 
+**10a-3. Verify .env files are in root .gitignore (CRITICAL):**
+
+**IMPORTANT:** This step prevents accidental credential commits. The root `.gitignore` MUST exclude `.env` files.
+
+```bash
+ROOT_GITIGNORE=".gitignore"
+
+# Check if .env patterns exist in root .gitignore
+if [ -f "$ROOT_GITIGNORE" ]; then
+    if ! grep -q "^\.env$" "$ROOT_GITIGNORE" 2>/dev/null; then
+        echo ""
+        echo "Adding .env patterns to root .gitignore..."
+        cat >> "$ROOT_GITIGNORE" << 'EOF'
+
+# Environment files - contain secrets, never commit
+# (keep .env.example as template)
+.env
+.env.*
+!.env.example
+EOF
+        echo "Added .env exclusion patterns to .gitignore"
+    fi
+else
+    # Create .gitignore with .env patterns
+    cat > "$ROOT_GITIGNORE" << 'EOF'
+# Environment files - contain secrets, never commit
+# (keep .env.example as template)
+.env
+.env.*
+!.env.example
+EOF
+    echo "Created .gitignore with .env exclusion patterns"
+fi
+```
+
+**Security verification output:**
+```
+=== SECURITY CHECK ===
+
+.gitignore verification:
+  ✓ .env excluded from version control
+  ✓ .env.* patterns excluded
+  ✓ .env.example allowed (template)
+
+WARNING: Before committing, verify:
+  - No .env files in git history (git log --all --full-history -- .env*)
+  - .env.example contains only placeholder values
+```
+
 **10b. Create stub templates manifests (for configured plugins):**
 
 **For logs plugin** - Create `.fractary/logs/templates/manifest.yaml`:

@@ -24,10 +24,17 @@ import type { TokenProvider, GitHubConfig, GitHubAppConfig } from '../auth/types
 import { createTokenProvider } from '../auth';
 import { findProjectRoot } from '../common/yaml-config';
 
-/** Track whether loadEnv has been called */
+/**
+ * Track whether loadEnv has been called.
+ * Note: Module-level state is not thread-safe. For concurrent usage,
+ * call loadEnv() once during application initialization.
+ */
 let envLoaded = false;
 
-/** Track the current environment name */
+/**
+ * Track the current environment name (value of FRACTARY_ENV when loadEnv was called).
+ * Note: Module-level state is not thread-safe.
+ */
 let currentEnv: string | undefined;
 
 /**
@@ -110,12 +117,11 @@ export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolea
   let anyLoaded = false;
 
   // Try loading from project root (preferred)
+  // Files are loaded in order: .env → .env.{FRACTARY_ENV} → .env.local
+  // Later files override earlier ones (override: true)
   for (const envFile of envFiles) {
     const envPath = path.join(projectRoot, envFile);
     if (fs.existsSync(envPath)) {
-      // override: false means existing vars are NOT overwritten
-      // We load in reverse priority order so this works correctly
-      // Actually, we want later files to override, so we use override: true
       dotenv.config({ path: envPath, override: true });
       anyLoaded = true;
     }
@@ -266,10 +272,21 @@ export function clearEnv(variablesToClear?: string[]): void {
     'LINEAR_TEAM_KEY',
   ];
 
+  // Validate input if provided
+  if (variablesToClear !== undefined) {
+    if (!Array.isArray(variablesToClear)) {
+      console.warn('clearEnv: variablesToClear must be an array of strings');
+      return;
+    }
+  }
+
   const toClear = variablesToClear || defaultVars;
 
   for (const varName of toClear) {
-    delete process.env[varName];
+    // Only process valid string variable names
+    if (typeof varName === 'string' && varName.length > 0) {
+      delete process.env[varName];
+    }
   }
 
   // Reset internal state

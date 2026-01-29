@@ -226,12 +226,9 @@ Example: /fractary-core:switch-env prod
 ```
 Warning: .env.staging not found in project root
 
-Available environment files:
-  - .env
-  - .env.test
-  - .env.prod
-
 Switching anyway - will use .env and .env.local only.
+
+Tip: Use --list to see available environments.
 ```
 
 </OUTPUT_FORMATS>
