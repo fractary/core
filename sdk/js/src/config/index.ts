@@ -9,6 +9,8 @@ export {
   loadEnv,
   isEnvLoaded,
   getCurrentEnv,
+  switchEnv,
+  clearEnv,
   loadConfig,
   loadConfigSync,
   type LoadedConfig,

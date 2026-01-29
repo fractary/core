@@ -2,7 +2,7 @@
  * Unit tests for config loader
  */
 
-import { loadEnv, isEnvLoaded, getCurrentEnv } from '../loader';
+import { loadEnv, isEnvLoaded, getCurrentEnv, switchEnv, clearEnv } from '../loader';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -204,5 +204,124 @@ describe('isEnvLoaded', () => {
     loadEnv({ force: true });
 
     expect(isEnvLoaded()).toBe(true);
+  });
+});
+
+describe('switchEnv', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    delete process.env.FRACTARY_ENV;
+  });
+
+  it('should set FRACTARY_ENV and reload environment', () => {
+    const projectRoot = process.cwd();
+
+    mockedFs.existsSync.mockImplementation((p) => {
+      const pathStr = String(p);
+      return (
+        pathStr === path.join(projectRoot, '.env') ||
+        pathStr === path.join(projectRoot, '.env.test')
+      );
+    });
+
+    const result = switchEnv('test');
+
+    expect(result).toBe(true);
+    expect(process.env.FRACTARY_ENV).toBe('test');
+    expect(getCurrentEnv()).toBe('test');
+    expect(mockedDotenv.config).toHaveBeenCalledWith({
+      path: path.join(projectRoot, '.env.test'),
+      override: true,
+    });
+  });
+
+  it('should allow switching between environments (FABR workflow)', () => {
+    const projectRoot = process.cwd();
+
+    mockedFs.existsSync.mockImplementation((p) => {
+      const pathStr = String(p);
+      // Simulate having .env, .env.test, and .env.prod
+      return (
+        pathStr === path.join(projectRoot, '.env') ||
+        pathStr === path.join(projectRoot, '.env.test') ||
+        pathStr === path.join(projectRoot, '.env.prod')
+      );
+    });
+
+    // Start with test (evaluate phase)
+    switchEnv('test');
+    expect(getCurrentEnv()).toBe('test');
+
+    // Switch to prod (release phase)
+    switchEnv('prod');
+    expect(getCurrentEnv()).toBe('prod');
+    expect(process.env.FRACTARY_ENV).toBe('prod');
+  });
+
+  it('should reject invalid environment names', () => {
+    const result1 = switchEnv('');
+    expect(result1).toBe(false);
+
+    const result2 = switchEnv('test;rm -rf /');
+    expect(result2).toBe(false);
+
+    const result3 = switchEnv('test$(whoami)');
+    expect(result3).toBe(false);
+  });
+
+  it('should allow valid environment names with dashes and underscores', () => {
+    mockedFs.existsSync.mockReturnValue(true);
+
+    expect(switchEnv('my-test')).toBe(true);
+    expect(switchEnv('my_test')).toBe(true);
+    expect(switchEnv('test-2')).toBe(true);
+  });
+});
+
+describe('clearEnv', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should clear default Fractary environment variables', () => {
+    // Set some env vars
+    process.env.GITHUB_TOKEN = 'test-token';
+    process.env.AWS_ACCESS_KEY_ID = 'test-key';
+    process.env.AWS_SECRET_ACCESS_KEY = 'test-secret';
+
+    clearEnv();
+
+    expect(process.env.GITHUB_TOKEN).toBeUndefined();
+    expect(process.env.AWS_ACCESS_KEY_ID).toBeUndefined();
+    expect(process.env.AWS_SECRET_ACCESS_KEY).toBeUndefined();
+  });
+
+  it('should clear specific variables when provided', () => {
+    process.env.GITHUB_TOKEN = 'test-token';
+    process.env.CUSTOM_VAR = 'custom-value';
+    process.env.ANOTHER_VAR = 'another-value';
+
+    clearEnv(['CUSTOM_VAR', 'ANOTHER_VAR']);
+
+    // GITHUB_TOKEN should remain (not in the list)
+    expect(process.env.GITHUB_TOKEN).toBe('test-token');
+    expect(process.env.CUSTOM_VAR).toBeUndefined();
+    expect(process.env.ANOTHER_VAR).toBeUndefined();
+
+    // Cleanup
+    delete process.env.GITHUB_TOKEN;
+  });
+
+  it('should reset getCurrentEnv to undefined', () => {
+    mockedFs.existsSync.mockReturnValue(true);
+
+    // Load an environment first
+    process.env.FRACTARY_ENV = 'test';
+    loadEnv({ force: true });
+    expect(getCurrentEnv()).toBe('test');
+
+    // Clear should reset
+    clearEnv();
+    expect(getCurrentEnv()).toBeUndefined();
   });
 });

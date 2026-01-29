@@ -2308,6 +2308,67 @@ Add all `.env` files except the example to `.gitignore`:
 3. **Different S3 buckets per environment** - Use separate buckets for dev/staging/prod data
 4. **AWS profiles as alternative** - Instead of explicit keys, you can use `AWS_PROFILE=prod` and configure profiles in `~/.aws/credentials`
 
+### Mid-Session Environment Switching (FABR Workflows)
+
+For workflows where you need to work across multiple environments within a single Claude session (like FABR's evaluate → release phases), use the `--env` flag on commands or the SDK's `switchEnv()` function.
+
+**Using --env flag on commands:**
+```bash
+# Deploy to test during evaluate phase
+/fractary-deploy:run --env test
+
+# Deploy to prod during release phase
+/fractary-deploy:run --env prod
+```
+
+**Using switchEnv() in code/agents:**
+```typescript
+import { switchEnv, getCurrentEnv, clearEnv } from '@fractary/core';
+
+// FABR Workflow Example
+
+// Frame & Architect phases - local development (default .env)
+console.log(getCurrentEnv()); // undefined
+
+// Build phase - still local
+// ... build and test locally ...
+
+// Evaluate phase - switch to test
+switchEnv('test');
+console.log(getCurrentEnv()); // 'test'
+// Now GITHUB_TOKEN, AWS_* etc. come from .env.test
+// ... deploy to test, run integration tests ...
+
+// Release phase - switch to prod
+switchEnv('prod');
+console.log(getCurrentEnv()); // 'prod'
+// Now credentials come from .env.prod
+// ... deploy to production ...
+
+// Optional: Clear and reset if needed
+clearEnv();  // Removes credential env vars
+```
+
+**How switchEnv() works:**
+
+1. Sets `process.env.FRACTARY_ENV` to the new environment
+2. Reloads environment files: `.env` → `.env.{newEnv}` → `.env.local`
+3. Updates `getCurrentEnv()` to return the new environment
+
+**Important:** Variables from the previous environment that aren't overwritten will persist. Use `clearEnv()` before `switchEnv()` if you need a clean slate.
+
+**Agent implementation pattern:**
+
+When building agents that accept `--env`, use this pattern:
+```typescript
+// In agent code
+const env = args.env || args.environment;
+if (env) {
+  switchEnv(env);
+}
+// ... rest of agent logic uses credentials from the specified environment
+```
+
 </MULTI_ENVIRONMENT_SETUP>
 
 <CONFIG_GENERATION>

@@ -146,6 +146,138 @@ export function getCurrentEnv(): string | undefined {
 }
 
 /**
+ * Switch to a different environment mid-session
+ *
+ * This function allows changing environments during a Claude session, which is
+ * useful for workflows like FABR where you move through phases that target
+ * different environments:
+ *
+ * - **Local/Dev**: Writing code, running local tests
+ * - **Test**: Deploying during evaluate phase
+ * - **Prod**: Deploying during release phase
+ *
+ * ## What It Does
+ *
+ * 1. Sets `process.env.FRACTARY_ENV` to the new environment
+ * 2. Reloads environment variables in order: `.env` → `.env.{newEnv}` → `.env.local`
+ * 3. Updates `getCurrentEnv()` to return the new environment
+ *
+ * ## Important Notes
+ *
+ * - Variables from the previous environment that aren't overwritten will persist
+ * - To start fresh, call `clearEnv()` before `switchEnv()`
+ * - The config.yaml is NOT reloaded automatically; credentials are resolved
+ *   from process.env when API calls are made
+ *
+ * @param envName The environment to switch to (e.g., 'test', 'staging', 'prod')
+ * @param options Optional settings
+ * @returns true if the environment was switched successfully
+ *
+ * @example
+ * ```typescript
+ * import { switchEnv, getCurrentEnv } from '@fractary/core';
+ *
+ * // FABR Workflow Example
+ *
+ * // Frame & Architect phases - local development
+ * console.log(getCurrentEnv()); // undefined or 'dev'
+ *
+ * // Build phase - still local
+ * // ... build and test locally ...
+ *
+ * // Evaluate phase - switch to test environment
+ * switchEnv('test');
+ * console.log(getCurrentEnv()); // 'test'
+ * // Now GITHUB_TOKEN, AWS_* etc. come from .env.test
+ * // ... deploy to test, run integration tests ...
+ *
+ * // Release phase - switch to production
+ * switchEnv('prod');
+ * console.log(getCurrentEnv()); // 'prod'
+ * // Now credentials come from .env.prod
+ * // ... deploy to production ...
+ * ```
+ */
+export function switchEnv(
+  envName: string,
+  options: { cwd?: string } = {}
+): boolean {
+  // Validate environment name
+  if (!envName || typeof envName !== 'string') {
+    console.warn('switchEnv: Invalid environment name provided');
+    return false;
+  }
+
+  // Sanitize: only allow alphanumeric, dash, underscore
+  if (!/^[a-zA-Z0-9_-]+$/.test(envName)) {
+    console.warn(`switchEnv: Invalid characters in environment name: ${envName}`);
+    return false;
+  }
+
+  // Set the new environment
+  process.env.FRACTARY_ENV = envName;
+
+  // Force reload environment variables
+  const result = loadEnv({ cwd: options.cwd, force: true });
+
+  if (result) {
+    console.log(`Switched to environment: ${envName}`);
+  } else {
+    console.warn(`Switched to environment '${envName}' but no .env.${envName} file found`);
+  }
+
+  return true;
+}
+
+/**
+ * Clear environment-specific variables and reset to base state
+ *
+ * This removes variables that were loaded from `.env.{FRACTARY_ENV}` files,
+ * leaving only system environment variables and base `.env` values.
+ *
+ * Useful before `switchEnv()` if you want to ensure no variables from the
+ * previous environment persist.
+ *
+ * @param variablesToClear Optional list of specific variables to clear.
+ *                         If not provided, clears common Fractary variables.
+ *
+ * @example
+ * ```typescript
+ * // Clear before switching to ensure clean state
+ * clearEnv();
+ * switchEnv('prod');
+ *
+ * // Or clear specific variables
+ * clearEnv(['GITHUB_TOKEN', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']);
+ * ```
+ */
+export function clearEnv(variablesToClear?: string[]): void {
+  const defaultVars = [
+    'GITHUB_TOKEN',
+    'AWS_ACCESS_KEY_ID',
+    'AWS_SECRET_ACCESS_KEY',
+    'AWS_DEFAULT_REGION',
+    'AWS_PROFILE',
+    'JIRA_URL',
+    'JIRA_EMAIL',
+    'JIRA_TOKEN',
+    'JIRA_PROJECT_KEY',
+    'LINEAR_API_KEY',
+    'LINEAR_TEAM_KEY',
+  ];
+
+  const toClear = variablesToClear || defaultVars;
+
+  for (const varName of toClear) {
+    delete process.env[varName];
+  }
+
+  // Reset internal state
+  currentEnv = undefined;
+  envLoaded = false;
+}
+
+/**
  * Check if environment variables have been loaded
  *
  * @returns true if loadEnv() has been called successfully
