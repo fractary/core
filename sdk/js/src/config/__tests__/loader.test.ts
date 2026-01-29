@@ -120,28 +120,28 @@ describe('loadEnv', () => {
 
   describe('multi-environment support (FRACTARY_ENV)', () => {
     it('should load .env.{FRACTARY_ENV} when FRACTARY_ENV is set', () => {
-      process.env.FRACTARY_ENV = 'production';
+      process.env.FRACTARY_ENV = 'prod';
       const projectRoot = process.cwd();
 
       mockedFs.existsSync.mockImplementation((p) => {
         const pathStr = String(p);
-        // Both .env and .env.production exist
+        // Both .env and .env.prod exist
         return (
           pathStr === path.join(projectRoot, '.env') ||
-          pathStr === path.join(projectRoot, '.env.production')
+          pathStr === path.join(projectRoot, '.env.prod')
         );
       });
 
       const result = loadEnv({ force: true });
 
       expect(result).toBe(true);
-      // Should load .env first, then .env.production
+      // Should load .env first, then .env.prod
       expect(mockedDotenv.config).toHaveBeenCalledWith({
         path: path.join(projectRoot, '.env'),
         override: true,
       });
       expect(mockedDotenv.config).toHaveBeenCalledWith({
-        path: path.join(projectRoot, '.env.production'),
+        path: path.join(projectRoot, '.env.prod'),
         override: true,
       });
     });

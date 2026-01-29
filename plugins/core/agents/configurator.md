@@ -1337,10 +1337,12 @@ if [ ! -f "$ENV_EXAMPLE" ]; then
 # Multi-environment support:
 #   - .env              (development - default)
 #   - .env.staging      (staging credentials)
-#   - .env.production   (production credentials)
+#   - .env.prod         (production credentials)
 #   - .env.local        (local overrides, never committed)
 #
-# Usage: FRACTARY_ENV=production fractary-core:work issue-list
+# Usage:
+#   CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+#   Claude Code: Set FRACTARY_ENV=prod in .env.local for persistent default
 
 # === GitHub (required for work/repo plugins) ===
 GITHUB_TOKEN=ghp_your_personal_access_token
@@ -1732,10 +1734,11 @@ Multi-environment setup (optional):
   For different credentials in dev/staging/prod, create:
   - .env           (development - default)
   - .env.staging   (staging credentials)
-  - .env.production (production credentials)
+  - .env.prod      (production credentials)
 
-  Then use: FRACTARY_ENV=production fractary-core:work issue-list
+  Then use: FRACTARY_ENV=prod fractary-core:work issue-list
 
+  Or set in .env.local to make prod the default for Claude Code sessions.
   See: <MULTI_ENVIRONMENT_SETUP> section for details
 ```
 
@@ -1830,8 +1833,9 @@ Note: Fractary SDK auto-loads .env files, so option 1 is preferred.
 
 Multi-environment setup:
   For different credentials per environment (dev/staging/prod):
-  - Create .env.staging, .env.production files with environment-specific values
-  - Use: FRACTARY_ENV=production fractary-core:work issue-list
+  - Create .env.staging, .env.prod files with environment-specific values
+  - CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+  - Claude Code: Set FRACTARY_ENV=prod in .env.local for persistent default
   - The SDK loads: .env → .env.{FRACTARY_ENV} → .env.local (in order)
   See <MULTI_ENVIRONMENT_SETUP> section for complete guide.
 ```
@@ -1981,8 +1985,9 @@ Next steps:
 4. Test: /fractary-work:issue-list
 
 Multi-environment setup (optional):
-  Create .env.staging and .env.production with environment-specific credentials.
-  Use: FRACTARY_ENV=production fractary-core:work issue-list
+  Create .env.staging and .env.prod with environment-specific credentials.
+  CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+  Claude Code: Set FRACTARY_ENV=prod in .env.local
 ```
 
 ### Incremental Update Preview + Success
@@ -2122,7 +2127,7 @@ Recovery steps:
 
 ## Multi-Environment Configuration
 
-Fractary Core supports different credentials for different environments (development, staging, production) through the `FRACTARY_ENV` environment variable.
+Fractary Core supports different credentials for different environments (development, staging, prod) through the `FRACTARY_ENV` environment variable.
 
 ### How It Works
 
@@ -2136,7 +2141,7 @@ fractary-core:work issue-list
 FRACTARY_ENV=staging fractary-core:work issue-list
 
 # Production
-FRACTARY_ENV=production fractary-core:work issue-list
+FRACTARY_ENV=prod fractary-core:work issue-list
 ```
 
 ### File Loading Order
@@ -2144,10 +2149,63 @@ FRACTARY_ENV=production fractary-core:work issue-list
 When `FRACTARY_ENV` is set, the SDK loads `.env` files in this order (later files override earlier):
 
 1. `.env` - Base configuration (always loaded if exists)
-2. `.env.{FRACTARY_ENV}` - Environment-specific overrides (e.g., `.env.production`)
+2. `.env.{FRACTARY_ENV}` - Environment-specific overrides (e.g., `.env.prod`)
 3. `.env.local` - Local overrides (never committed, always loaded last)
 
 All files are optional. Missing files are silently skipped.
+
+### Setting FRACTARY_ENV in Different Contexts
+
+**1. Direct CLI Usage (terminal commands):**
+```bash
+# Per-command
+FRACTARY_ENV=prod fractary-core:work issue-list
+
+# For entire terminal session
+export FRACTARY_ENV=prod
+fractary-core:work issue-list
+fractary-core:repo pr-list
+```
+
+**2. Claude Code (plugins and agents):**
+
+Claude Code inherits environment variables from where it was launched. Options:
+
+**Option A: Set before launching Claude Code**
+```bash
+export FRACTARY_ENV=prod
+claude   # or however you start Claude Code
+```
+
+**Option B: Use .env.local for persistent default**
+
+Create `.env.local` in your project root to set a default environment:
+```bash
+# .env.local (always loaded last, overrides everything)
+FRACTARY_ENV=prod
+```
+
+This way, whenever you work in this project with Claude Code, it automatically uses prod credentials.
+
+**Option C: Project-level shell configuration**
+
+Add to your shell profile (`.bashrc`, `.zshrc`) or use direnv:
+```bash
+# .envrc (if using direnv)
+export FRACTARY_ENV=prod
+```
+
+**3. CI/CD Pipelines:**
+```yaml
+# GitHub Actions example
+jobs:
+  deploy:
+    env:
+      FRACTARY_ENV: prod
+      GITHUB_TOKEN: ${{ secrets.PROD_GITHUB_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+```
 
 ### Recommended Setup
 
@@ -2157,7 +2215,8 @@ Create separate `.env` files for each environment:
 project/
 ├── .env                  # Development defaults (git-ignored)
 ├── .env.staging          # Staging credentials (git-ignored)
-├── .env.production       # Production credentials (git-ignored)
+├── .env.prod             # Production credentials (git-ignored)
+├── .env.local            # Personal overrides, can set FRACTARY_ENV (git-ignored)
 ├── .env.example          # Template with placeholders (committed to git)
 └── .fractary/
     └── config.yaml       # Single config using ${VAR} references
@@ -2185,12 +2244,18 @@ AWS_SECRET_ACCESS_KEY=dev_secret
 AWS_DEFAULT_REGION=us-east-1
 ```
 
-**.env.production** (git-ignored):
+**.env.prod** (git-ignored):
 ```bash
 GITHUB_TOKEN=ghp_prod_token
 AWS_ACCESS_KEY_ID=AKIA_PROD_KEY
 AWS_SECRET_ACCESS_KEY=prod_secret
 AWS_DEFAULT_REGION=us-east-1
+```
+
+**.env.local** (optional - for setting default environment):
+```bash
+# Uncomment to always use prod in this project
+# FRACTARY_ENV=prod
 ```
 
 ### config.yaml Stays The Same
@@ -2220,34 +2285,6 @@ file:
         secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
 ```
 
-### Usage Patterns
-
-**In shell/terminal:**
-```bash
-# Use development credentials (default)
-fractary-core:work issue-list
-
-# Use production credentials
-FRACTARY_ENV=production fractary-core:work issue-list
-
-# Set for entire session
-export FRACTARY_ENV=production
-fractary-core:work issue-list
-fractary-core:repo pr-list
-```
-
-**In CI/CD:**
-```yaml
-# GitHub Actions example
-jobs:
-  deploy:
-    env:
-      FRACTARY_ENV: production
-      GITHUB_TOKEN: ${{ secrets.PROD_GITHUB_TOKEN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-```
-
 ### Git Ignore Pattern
 
 Add all `.env` files except the example to `.gitignore`:
@@ -2257,7 +2294,7 @@ Add all `.env` files except the example to `.gitignore`:
 .env
 .env.local
 .env.staging
-.env.production
+.env.prod
 .env.*.local
 
 # Keep the example template
@@ -2269,7 +2306,7 @@ Add all `.env` files except the example to `.gitignore`:
 1. **Never commit actual credentials** - Only commit `.env.example` with placeholder values
 2. **Use .env.local for personal overrides** - It's always loaded last and should never be committed
 3. **Different S3 buckets per environment** - Use separate buckets for dev/staging/prod data
-4. **AWS profiles as alternative** - Instead of explicit keys, you can use `AWS_PROFILE=production` and configure profiles in `~/.aws/credentials`
+4. **AWS profiles as alternative** - Instead of explicit keys, you can use `AWS_PROFILE=prod` and configure profiles in `~/.aws/credentials`
 
 </MULTI_ENVIRONMENT_SETUP>
 
