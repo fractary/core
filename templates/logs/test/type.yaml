@@ -73,5 +73,3 @@ test_type:
 retention:
   default_local_days: 7
   default_cloud_days: 14
-  auto_archive: true
-  cleanup_after_archive: true

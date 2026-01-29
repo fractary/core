@@ -16,9 +16,7 @@
     "default": {
       "local_days": 30,
       "cloud_days": "forever",
-      "priority": "medium",
-      "auto_archive": true,
-      "cleanup_after_archive": true
+      "priority": "medium"
     },
     "paths": [
       {
@@ -27,17 +25,10 @@
         "local_days": 7,
         "cloud_days": "forever",
         "priority": "high",
-        "auto_archive": true,
-        "cleanup_after_archive": false,
         "retention_exceptions": {
           "keep_if_linked_to_open_issue": true,
           "keep_if_referenced_in_docs": true,
           "keep_recent_n": 10
-        },
-        "archive_triggers": {
-          "age_days": 7,
-          "size_mb": null,
-          "status": ["stopped", "error"]
         },
         "validation": {
           "require_summary": true,
@@ -62,16 +53,9 @@
         "local_days": 3,
         "cloud_days": 30,
         "priority": "medium",
-        "auto_archive": true,
-        "cleanup_after_archive": true,
         "retention_exceptions": {
           "keep_if_linked_to_open_issue": true,
           "keep_recent_n": 5
-        },
-        "archive_triggers": {
-          "age_days": 3,
-          "size_mb": null,
-          "status": ["success", "failure", "cancelled"]
         },
         "validation": {
           "require_summary": true,
@@ -96,18 +80,11 @@
         "local_days": 30,
         "cloud_days": "forever",
         "priority": "critical",
-        "auto_archive": true,
-        "cleanup_after_archive": false,
         "retention_exceptions": {
           "keep_if_linked_to_open_issue": true,
           "keep_if_referenced_in_docs": true,
           "keep_recent_n": 20,
           "never_delete_production": true
-        },
-        "archive_triggers": {
-          "age_days": 30,
-          "size_mb": null,
-          "status": ["success", "failure", "rolled_back"]
         },
         "validation": {
           "require_summary": true,
@@ -133,16 +110,9 @@
         "local_days": 3,
         "cloud_days": 7,
         "priority": "low",
-        "auto_archive": true,
-        "cleanup_after_archive": true,
         "retention_exceptions": {
           "keep_if_linked_to_open_issue": true,
           "keep_recent_n": 3
-        },
-        "archive_triggers": {
-          "age_days": 3,
-          "size_mb": null,
-          "status": ["success", "failure"]
         },
         "validation": {
           "require_summary": false,
@@ -166,16 +136,9 @@
         "local_days": 7,
         "cloud_days": 30,
         "priority": "medium",
-        "auto_archive": true,
-        "cleanup_after_archive": true,
         "retention_exceptions": {
           "keep_if_linked_to_open_issue": true,
           "keep_recent_n": 5
-        },
-        "archive_triggers": {
-          "age_days": 7,
-          "size_mb": null,
-          "status": ["stopped", "error"]
         },
         "validation": {
           "require_summary": false,
@@ -199,18 +162,11 @@
         "local_days": 90,
         "cloud_days": "forever",
         "priority": "critical",
-        "auto_archive": true,
-        "cleanup_after_archive": false,
         "retention_exceptions": {
           "keep_if_referenced_in_docs": true,
           "keep_recent_n": 100,
           "never_delete_security_incidents": true,
           "never_delete_compliance_audits": true
-        },
-        "archive_triggers": {
-          "age_days": 90,
-          "size_mb": null,
-          "status": ["completed"]
         },
         "validation": {
           "require_summary": true,
@@ -234,15 +190,8 @@
         "local_days": 14,
         "cloud_days": 90,
         "priority": "medium",
-        "auto_archive": true,
-        "cleanup_after_archive": true,
         "retention_exceptions": {
           "keep_recent_n": 10
-        },
-        "archive_triggers": {
-          "age_days": 14,
-          "size_mb": null,
-          "status": ["completed"]
         },
         "validation": {
           "require_summary": false,
@@ -266,16 +215,9 @@
         "local_days": 7,
         "cloud_days": "forever",
         "priority": "high",
-        "auto_archive": true,
-        "cleanup_after_archive": false,
         "retention_exceptions": {
           "keep_if_linked_to_open_issue": true,
           "keep_recent_n": 20
-        },
-        "archive_triggers": {
-          "age_days": 7,
-          "size_mb": null,
-          "status": ["completed", "failed"]
         },
         "validation": {
           "require_summary": true,
@@ -299,16 +241,9 @@
         "local_days": 7,
         "cloud_days": "forever",
         "priority": "high",
-        "auto_archive": true,
-        "cleanup_after_archive": false,
         "retention_exceptions": {
           "keep_if_referenced_in_docs": true,
           "keep_recent_n": 50
-        },
-        "archive_triggers": {
-          "age_days": 7,
-          "size_mb": null,
-          "status": ["published"]
         },
         "validation": {
           "require_summary": false,
@@ -344,11 +279,6 @@
     "format": "markdown"
   },
   "archive": {
-    "auto_archive_on": {
-      "work_complete": true,
-      "issue_close": true,
-      "manual_trigger": true
-    },
     "compression": {
       "enabled": true,
       "format": "gzip",
@@ -388,8 +318,7 @@
       "comment_on_archive": true
     },
     "faber": {
-      "auto_capture": true,
-      "auto_archive_on_complete": true
+      "auto_capture": true
     }
   },
   "docs_integration": {

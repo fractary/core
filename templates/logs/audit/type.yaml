@@ -83,5 +83,3 @@ severity:
 retention:
   default_local_days: 90
   default_cloud_days: forever
-  auto_archive: true
-  cleanup_after_archive: false

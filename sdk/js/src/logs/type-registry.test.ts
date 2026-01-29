@@ -82,8 +82,6 @@ status:
 retention:
   default_local_days: 30
   default_cloud_days: 90
-  auto_archive: true
-  cleanup_after_archive: false
 `;
     fs.writeFileSync(path.join(typeDir, 'type.yaml'), typeYaml);
 

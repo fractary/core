@@ -67,5 +67,3 @@ status:
 retention:
   default_local_days: 7
   default_cloud_days: forever
-  auto_archive: true
-  cleanup_after_archive: true
