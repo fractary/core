@@ -49,6 +49,8 @@ coverage/
 .coverage
 *.cover
 
-# Environment
+# Environment - contain secrets, never commit
+# (keep .env.example as template for team members)
 .env
-.env.local
+.env.*
+!.env.example

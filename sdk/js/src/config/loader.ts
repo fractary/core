@@ -244,6 +244,17 @@ export function switchEnv(
  * Useful before `switchEnv()` if you want to ensure no variables from the
  * previous environment persist.
  *
+ * ## State Reset Behavior
+ *
+ * After calling `clearEnv()`:
+ * - `getCurrentEnv()` returns `undefined`
+ * - `isEnvLoaded()` returns `false`
+ * - The next `loadEnv()` or `switchEnv()` call will reload from files
+ *
+ * Note: This only clears the specified variables from `process.env`.
+ * System environment variables (set outside Node.js) are not affected
+ * and may still be present.
+ *
  * @param variablesToClear Optional list of specific variables to clear.
  *                         If not provided, clears common Fractary variables.
  *

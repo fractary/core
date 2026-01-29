@@ -324,4 +324,88 @@ describe('clearEnv', () => {
     clearEnv();
     expect(getCurrentEnv()).toBeUndefined();
   });
+
+  it('should reset isEnvLoaded to false', () => {
+    mockedFs.existsSync.mockReturnValue(true);
+
+    loadEnv({ force: true });
+    expect(isEnvLoaded()).toBe(true);
+
+    clearEnv();
+    expect(isEnvLoaded()).toBe(false);
+  });
+});
+
+describe('edge cases', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    delete process.env.FRACTARY_ENV;
+  });
+
+  it('should still work when FRACTARY_ENV file does not exist', () => {
+    const projectRoot = process.cwd();
+    process.env.FRACTARY_ENV = 'nonexistent';
+
+    // Only .env exists, not .env.nonexistent
+    mockedFs.existsSync.mockImplementation((p) => {
+      const pathStr = String(p);
+      return pathStr === path.join(projectRoot, '.env');
+    });
+
+    const result = loadEnv({ force: true });
+
+    expect(result).toBe(true);
+    expect(getCurrentEnv()).toBe('nonexistent');
+    // Should have loaded .env but not .env.nonexistent
+    expect(mockedDotenv.config).toHaveBeenCalledWith({
+      path: path.join(projectRoot, '.env'),
+      override: true,
+    });
+  });
+
+  it('should load all three files in correct order when all exist', () => {
+    const projectRoot = process.cwd();
+    process.env.FRACTARY_ENV = 'prod';
+
+    mockedFs.existsSync.mockImplementation((p) => {
+      const pathStr = String(p);
+      // All three files exist
+      return (
+        pathStr === path.join(projectRoot, '.env') ||
+        pathStr === path.join(projectRoot, '.env.prod') ||
+        pathStr === path.join(projectRoot, '.env.local')
+      );
+    });
+
+    loadEnv({ force: true });
+
+    const calls = mockedDotenv.config.mock.calls.map((c) => String(c[0]?.path || ''));
+
+    // Verify order: .env → .env.prod → .env.local
+    const envIndex = calls.findIndex((p) => p.endsWith('.env') && !p.includes('.prod') && !p.includes('.local'));
+    const prodIndex = calls.findIndex((p) => p.endsWith('.env.prod'));
+    const localIndex = calls.findIndex((p) => p.endsWith('.env.local'));
+
+    expect(envIndex).toBeGreaterThanOrEqual(0);
+    expect(prodIndex).toBeGreaterThan(envIndex);
+    expect(localIndex).toBeGreaterThan(prodIndex);
+  });
+
+  it('should allow loadEnv after clearEnv to reload files', () => {
+    mockedFs.existsSync.mockReturnValue(true);
+
+    // Initial load
+    loadEnv({ force: true });
+    expect(isEnvLoaded()).toBe(true);
+    const initialCallCount = mockedDotenv.config.mock.calls.length;
+
+    // Clear
+    clearEnv();
+    expect(isEnvLoaded()).toBe(false);
+
+    // Reload should work without force (since envLoaded is false)
+    loadEnv();
+    expect(isEnvLoaded()).toBe(true);
+    expect(mockedDotenv.config.mock.calls.length).toBeGreaterThan(initialCallCount);
+  });
 });
