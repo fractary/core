@@ -177,6 +177,7 @@ function getDefaultLogsConfig(options: DefaultConfigOptions): LogsConfig {
     custom_templates_path: '.fractary/logs/templates/manifest.yaml',
     storage: {
       local_path: '.fractary/logs',
+      local_archive_path: '.fractary/logs/archive',
       ...(useS3 && { cloud_archive_path: 'archive/logs/{year}/{month}/{issue_number}' }),
     },
     retention: {
@@ -307,6 +308,7 @@ function getDefaultSpecConfig(options: DefaultConfigOptions): SpecConfig {
     schema_version: '1.0',
     storage: {
       local_path: '.fractary/specs',
+      local_archive_path: '.fractary/specs/archive',
       ...(useS3 && { cloud_archive_path: 'archive/specs/{year}/{spec_id}.md' }),
     },
     naming: {

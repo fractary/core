@@ -39,7 +39,7 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 13. With --dry-run, show proposed changes without applying
 16. With --validate-only, validate current config without changes
 17. ONLY modify config sections for plugins being configured - PRESERVE all other sections
-18. ALWAYS create/update `.fractary/.gitignore` with logs directory ignored
+18. ALWAYS create/update `.fractary/.gitignore` with archive directories ignored (logs/archive/, specs/archive/)
 19. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
 20. MERGE new config sections with existing - never overwrite unrelated plugin sections
 21. NEVER create an "artifacts" source in the file section - only create "specs" and "logs" sources
@@ -347,8 +347,14 @@ The config process must ensure `.fractary/.gitignore` exists and contains approp
 
 **Logs Plugin:**
 ```
-# Logs plugin - session logs (may contain sensitive data)
-logs/
+# Logs plugin - archived logs (may contain sensitive data)
+logs/archive/
+```
+
+**Spec Plugin:**
+```
+# Spec plugin - archived specs
+specs/archive/
 ```
 
 ### Gitignore Update Strategy
@@ -368,8 +374,12 @@ Use consistent section headers to identify which plugin added which entries.
 **Standard Format** (5 equals signs, start AND end markers):
 ```
 # ===== fractary-logs (managed) =====
-logs/
+logs/archive/
 # ===== end fractary-logs =====
+
+# ===== fractary-spec (managed) =====
+specs/archive/
+# ===== end fractary-spec =====
 
 # ===== fractary-codex (managed) =====
 # (entries added by codex plugin)
@@ -387,7 +397,7 @@ logs/
 When updating `.fractary/.gitignore`:
 
 ```python
-def update_gitignore(plugins_to_configure, logs_path):
+def update_gitignore(plugins_to_configure, logs_archive_path, specs_archive_path):
     gitignore_path = ".fractary/.gitignore"
 
     # Read existing content (preserve everything)
@@ -405,11 +415,17 @@ def update_gitignore(plugins_to_configure, logs_path):
     # Determine entries to add
     entries_to_add = []
 
-    # If logs plugin is being configured, ensure logs path is ignored
+    # If logs plugin is being configured, ensure logs archive path is ignored
     if "logs" in plugins_to_configure:
-        logs_entry = f"{logs_path.replace('.fractary/', '')}/"  # e.g., "logs/"
+        logs_entry = f"{logs_archive_path.replace('.fractary/', '')}/"  # e.g., "logs/archive/"
         if logs_entry not in existing_entries:
             entries_to_add.append(("fractary-logs", logs_entry))
+
+    # If spec plugin is being configured, ensure specs archive path is ignored
+    if "spec" in plugins_to_configure:
+        specs_entry = f"{specs_archive_path.replace('.fractary/', '')}/"  # e.g., "specs/archive/"
+        if specs_entry not in existing_entries:
+            entries_to_add.append(("fractary-spec", specs_entry))
 
     # Build new content using standard section format
     if entries_to_add:
@@ -503,12 +519,16 @@ def update_gitignore_section(content, section, entry):
 
 ### Example .gitignore Output
 
-After configuring logs plugin with default path `.fractary/logs`:
+After configuring logs and spec plugins with default archive paths:
 
 ```gitignore
 # ===== fractary-logs (managed) =====
-logs/
+logs/archive/
 # ===== end fractary-logs =====
+
+# ===== fractary-spec (managed) =====
+specs/archive/
+# ===== end fractary-spec =====
 ```
 
 If codex and faber plugins were previously configured (preserved):
@@ -524,36 +544,40 @@ faber/state/
 # ===== end fractary-faber =====
 
 # ===== fractary-logs (managed) =====
-logs/
+logs/archive/
 # ===== end fractary-logs =====
+
+# ===== fractary-spec (managed) =====
+specs/archive/
+# ===== end fractary-spec =====
 ```
 
 ### Handling Path Changes
 
-When the logs path is changed (via `--context` or arguments), the gitignore MUST be updated:
+When the archive paths are changed (via `--context` or arguments), the gitignore MUST be updated:
 
-**Scenario**: User runs `/fractary-core:config --context "change logs directory to .fractary/session-logs"`
+**Scenario**: User runs `/fractary-core:config --context "change logs archive directory to .fractary/logs/old"`
 
 **Required Actions**:
-1. Detect that `logs.storage.local_path` is changing
+1. Detect that `logs.storage.local_archive_path` is changing
 2. Determine the old path (from existing config) and new path
 3. Update `.fractary/.gitignore`:
-   - Keep the `# === fractary-logs ===` section header
+   - Keep the `# ===== fractary-logs (managed) =====` section header
    - Replace the old entry with the new path
 4. Warn user about the change in preview
 
 **Implementation**:
 ```python
-def update_gitignore_for_path_change(old_logs_path, new_logs_path):
+def update_gitignore_for_path_change(old_archive_path, new_archive_path, section_name):
     """
-    Update .gitignore when logs path changes.
+    Update .gitignore when an archive path changes.
     """
     gitignore_path = ".fractary/.gitignore"
     content = read_file(gitignore_path)
 
-    # Extract relative path from .fractary/ (e.g., ".fractary/logs" -> "logs/")
-    old_entry = old_logs_path.replace('.fractary/', '') + '/'
-    new_entry = new_logs_path.replace('.fractary/', '') + '/'
+    # Extract relative path from .fractary/ (e.g., ".fractary/logs/archive" -> "logs/archive/")
+    old_entry = old_archive_path.replace('.fractary/', '') + '/'
+    new_entry = new_archive_path.replace('.fractary/', '') + '/'
 
     # Replace old entry with new entry
     if old_entry in content:
@@ -572,24 +596,24 @@ def update_gitignore_for_path_change(old_logs_path, new_logs_path):
 Mode: Incremental Update
 
 CHANGES to logs section:
-  logs.storage.local_path: .fractary/logs -> .fractary/session-logs
+  logs.storage.local_archive_path: .fractary/logs/archive -> .fractary/logs/old
 
 .gitignore update required:
-  - OLD: logs/
-  - NEW: session-logs/
+  - OLD: logs/archive/
+  - NEW: logs/old/
 
-WARNING: Ensure any existing logs in .fractary/logs/ are moved to the new location.
+WARNING: Ensure any existing archived logs in .fractary/logs/archive/ are moved to the new location.
 ```
 
 **If gitignore cannot be auto-updated** (e.g., old entry not found, complex formatting):
 ```
-WARNING: Logs path changed but .gitignore could not be auto-updated.
+WARNING: Archive path changed but .gitignore could not be auto-updated.
 
 Please manually update .fractary/.gitignore:
-  1. Remove or update the old entry: logs/
-  2. Add the new entry: session-logs/
+  1. Remove or update the old entry: logs/archive/
+  2. Add the new entry: logs/old/
 
-This ensures your session logs remain excluded from git.
+This ensures your archived logs remain excluded from git.
 ```
 
 </GITIGNORE_MANAGEMENT>
@@ -1227,7 +1251,8 @@ Plugins to configure:
   - docs
 
 .gitignore entries to add:
-  - logs/     (fractary-logs)
+  - logs/archive/     (fractary-logs)
+  - specs/archive/    (fractary-spec)
 
 Environment variables status:
   - .env file: [Found/Not found]
@@ -1271,7 +1296,7 @@ AFTER:
 
 .gitignore:
   - Existing entries: PRESERVED
-  - Adding (if missing): logs/
+  - Adding (if missing): logs/archive/, specs/archive/
 
 Environment variables status:
   - .env file: [Found/Not found]
@@ -1567,10 +1592,12 @@ write_yaml(".fractary/config.yaml", merged)
 1. Read existing `.fractary/.gitignore` if it exists
 2. Parse existing entries (preserve ALL existing entries from other plugins)
 3. **Detect path changes** (incremental mode):
-   - Compare old `logs.storage.local_path` with new value
+   - Compare old `logs.storage.local_archive_path` with new value
+   - Compare old `spec.storage.local_archive_path` with new value
    - If changed: update gitignore entry from old path to new path
 4. Add required entries if missing:
-   - `{logs_path}/` (if logs plugin configured, in `# ===== fractary-logs (managed) =====` section)
+   - `logs/archive/` (if logs plugin configured, in `# ===== fractary-logs (managed) =====` section)
+   - `specs/archive/` (if spec plugin configured, in `# ===== fractary-spec (managed) =====` section)
 5. Write updated .gitignore
 
 ```bash
@@ -1617,18 +1644,33 @@ migrate_old_markers() {
 # Run migration first
 migrate_old_markers "$GITIGNORE"
 
-# For logs path - handle both fresh setup and path changes
-LOGS_PATH="logs"  # Default, or extract from config: logs.storage.local_path minus ".fractary/"
+# For logs archive path - handle both fresh setup and path changes
+LOGS_ARCHIVE_PATH="logs/archive"  # Default, or extract from config: logs.storage.local_archive_path minus ".fractary/"
 
 # If path changed (incremental mode), update the entry
-if [ -n "$OLD_LOGS_PATH" ] && [ "$OLD_LOGS_PATH" != "$LOGS_PATH" ]; then
+if [ -n "$OLD_LOGS_ARCHIVE_PATH" ] && [ "$OLD_LOGS_ARCHIVE_PATH" != "$LOGS_ARCHIVE_PATH" ]; then
     # Update fractary-logs section with new path
-    update_managed_section "fractary-logs" "${LOGS_PATH}/" "$GITIGNORE"
-    echo "Updated .gitignore: ${OLD_LOGS_PATH}/ -> ${LOGS_PATH}/"
+    update_managed_section "fractary-logs" "${LOGS_ARCHIVE_PATH}/" "$GITIGNORE"
+    echo "Updated .gitignore: ${OLD_LOGS_ARCHIVE_PATH}/ -> ${LOGS_ARCHIVE_PATH}/"
 else
     # Fresh setup or no change - just ensure entry exists
     if ! grep -q "# ===== fractary-logs (managed) =====" "$GITIGNORE"; then
-        update_managed_section "fractary-logs" "${LOGS_PATH}/" "$GITIGNORE"
+        update_managed_section "fractary-logs" "${LOGS_ARCHIVE_PATH}/" "$GITIGNORE"
+    fi
+fi
+
+# For specs archive path - handle both fresh setup and path changes
+SPECS_ARCHIVE_PATH="specs/archive"  # Default, or extract from config: spec.storage.local_archive_path minus ".fractary/"
+
+# If path changed (incremental mode), update the entry
+if [ -n "$OLD_SPECS_ARCHIVE_PATH" ] && [ "$OLD_SPECS_ARCHIVE_PATH" != "$SPECS_ARCHIVE_PATH" ]; then
+    # Update fractary-spec section with new path
+    update_managed_section "fractary-spec" "${SPECS_ARCHIVE_PATH}/" "$GITIGNORE"
+    echo "Updated .gitignore: ${OLD_SPECS_ARCHIVE_PATH}/ -> ${SPECS_ARCHIVE_PATH}/"
+else
+    # Fresh setup or no change - just ensure entry exists
+    if ! grep -q "# ===== fractary-spec (managed) =====" "$GITIGNORE"; then
+        update_managed_section "fractary-spec" "${SPECS_ARCHIVE_PATH}/" "$GITIGNORE"
     fi
 fi
 ```
@@ -1636,10 +1678,10 @@ fi
 **Path Change Warning** (shown in preview):
 ```
 .gitignore will be updated:
-  - OLD entry: logs/
-  - NEW entry: session-logs/
+  - OLD entry: logs/archive/
+  - NEW entry: logs/old/
 
-NOTE: Move existing logs from .fractary/logs/ to .fractary/session-logs/ if needed.
+NOTE: Move existing archived logs from .fractary/logs/archive/ to .fractary/logs/old/ if needed.
 ```
 
 **10e. Update Claude settings to hide archive directories:**
@@ -1929,22 +1971,22 @@ To fix:
 
 ### Gitignore Update Failed (Path Change)
 ```
-Warning: Logs path changed but .gitignore could not be auto-updated
+Warning: Archive path changed but .gitignore could not be auto-updated
 
 Configuration updated successfully, but .gitignore needs manual attention.
 
 Path change detected:
-  OLD: .fractary/logs/
-  NEW: .fractary/session-logs/
+  OLD: .fractary/logs/archive/
+  NEW: .fractary/logs/old/
 
 Please manually update .fractary/.gitignore:
-  1. Find the line: logs/
-  2. Change it to: session-logs/
+  1. Find the line: logs/archive/
+  2. Change it to: logs/old/
 
-This ensures your session logs remain excluded from git commits.
+This ensures your archived logs remain excluded from git commits.
 
-Additionally, if you have existing logs:
-  - Move files from .fractary/logs/ to .fractary/session-logs/
+Additionally, if you have existing archived logs:
+  - Move files from .fractary/logs/archive/ to .fractary/logs/old/
   - Or leave them if you want to preserve the old location
 ```
 
@@ -1982,7 +2024,8 @@ Files to create:
   - .fractary/docs/templates/manifest.yaml (stub with examples)
 
 .gitignore entries to add:
-  - logs/     (fractary-logs)
+  - logs/archive/     (fractary-logs)
+  - specs/archive/    (fractary-spec)
 
 Claude settings update:
   - .claude/settings.json: Add archive deny rules
