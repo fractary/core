@@ -139,8 +139,6 @@ function createLogsTypeInfoCommand(): Command {
               ? {
                   default_local_days: type.retention.defaultLocalDays,
                   default_cloud_days: type.retention.defaultCloudDays,
-                  auto_archive: type.retention.autoArchive,
-                  cleanup_after_archive: type.retention.cleanupAfterArchive,
                 }
               : undefined,
           };

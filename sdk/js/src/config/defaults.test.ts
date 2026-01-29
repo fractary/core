@@ -357,7 +357,6 @@ describe('getDefaultConfig', () => {
       const archive = config.spec?.archive;
 
       expect(archive?.strategy).toBe('lifecycle');
-      expect(archive?.auto_archive_on?.issue_close).toBe(true);
     });
   });
 

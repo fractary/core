@@ -20,11 +20,6 @@
   },
   "archive": {
     "strategy": "lifecycle",
-    "auto_archive_on": {
-      "issue_close": true,
-      "pr_merge": true,
-      "faber_release": true
-    },
     "pre_archive": {
       "check_docs_updated": "warn",
       "prompt_user": true,

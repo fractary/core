@@ -68,5 +68,3 @@ change_type:
 retention:
   default_local_days: forever
   default_cloud_days: forever
-  auto_archive: false
-  cleanup_after_archive: false

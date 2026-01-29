@@ -187,8 +187,6 @@ function getDefaultLogsConfig(options: DefaultConfigOptions): LogsConfig {
         local_days: 30,
         ...(useS3 && { cloud_days: 'forever' }),
         priority: 'medium',
-        auto_archive: useS3,
-        cleanup_after_archive: useS3,
       },
       paths: [
         {
@@ -197,8 +195,6 @@ function getDefaultLogsConfig(options: DefaultConfigOptions): LogsConfig {
           local_days: 7,
           ...(useS3 && { cloud_days: 'forever' }),
           priority: 'high',
-          auto_archive: useS3,
-          cleanup_after_archive: false,
         },
       ],
     },
@@ -330,11 +326,6 @@ function getDefaultSpecConfig(options: DefaultConfigOptions): SpecConfig {
     },
     archive: {
       strategy: 'lifecycle',
-      auto_archive_on: {
-        issue_close: true,
-        pr_merge: true,
-        faber_release: true,
-      },
     },
     integration: {
       work_plugin: 'fractary-work',

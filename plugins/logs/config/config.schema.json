@@ -81,14 +81,6 @@
               "type": "string",
               "enum": ["critical", "high", "medium", "low"],
               "description": "Retention priority level"
-            },
-            "auto_archive": {
-              "type": "boolean",
-              "description": "Enable automatic archival for this log type"
-            },
-            "cleanup_after_archive": {
-              "type": "boolean",
-              "description": "Remove from local storage after successful archival"
             }
           }
         },
@@ -125,14 +117,6 @@
                 "enum": ["critical", "high", "medium", "low"],
                 "description": "Retention priority level"
               },
-              "auto_archive": {
-                "type": "boolean",
-                "description": "Enable automatic archival for this log type"
-              },
-              "cleanup_after_archive": {
-                "type": "boolean",
-                "description": "Remove from local storage after successful archival"
-              },
               "retention_exceptions": {
                 "type": "object",
                 "description": "Special rules to prevent deletion",
@@ -161,30 +145,6 @@
                   "never_delete_compliance_audits": {
                     "type": "boolean",
                     "description": "Never delete compliance audit logs"
-                  }
-                }
-              },
-              "archive_triggers": {
-                "type": "object",
-                "description": "Conditions that trigger automatic archival",
-                "properties": {
-                  "age_days": {
-                    "type": "number",
-                    "minimum": 1,
-                    "description": "Archive when log reaches this age in days"
-                  },
-                  "size_mb": {
-                    "type": ["number", "null"],
-                    "minimum": 0.1,
-                    "description": "Archive when log exceeds this size in MB (null = no size trigger)"
-                  },
-                  "status": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "enum": ["stopped", "error", "success", "failure", "cancelled", "rolled_back"]
-                    },
-                    "description": "Archive when log has one of these status values"
                   }
                 }
               },
@@ -326,14 +286,6 @@
     "archive": {
       "type": "object",
       "properties": {
-        "auto_archive_on": {
-          "type": "object",
-          "properties": {
-            "work_complete": {"type": "boolean"},
-            "issue_close": {"type": "boolean"},
-            "manual_trigger": {"type": "boolean"}
-          }
-        },
         "compression": {
           "type": "object",
           "properties": {
@@ -413,8 +365,7 @@
         "faber": {
           "type": "object",
           "properties": {
-            "auto_capture": {"type": "boolean"},
-            "auto_archive_on_complete": {"type": "boolean"}
+            "auto_capture": {"type": "boolean"}
           }
         }
       }

@@ -71,8 +71,6 @@ export interface LogTypeDefinition {
   retention?: {
     defaultLocalDays: number | 'forever';
     defaultCloudDays: number | 'forever';
-    autoArchive: boolean;
-    cleanupAfterArchive: boolean;
   };
 
   /** Documentation standards (markdown content) */
@@ -142,8 +140,6 @@ interface RawLogTypeYaml {
   retention?: {
     default_local_days: number | 'forever';
     default_cloud_days: number | 'forever';
-    auto_archive: boolean;
-    cleanup_after_archive: boolean;
   };
 }
 
@@ -258,8 +254,6 @@ function convertYamlToLogType(
       ? {
           defaultLocalDays: raw.retention.default_local_days,
           defaultCloudDays: raw.retention.default_cloud_days,
-          autoArchive: raw.retention.auto_archive,
-          cleanupAfterArchive: raw.retention.cleanup_after_archive,
         }
       : undefined,
     standards,
