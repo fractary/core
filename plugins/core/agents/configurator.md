@@ -559,7 +559,7 @@ When the archive paths are changed (via `--context` or arguments), the gitignore
 **Scenario**: User runs `/fractary-core:config --context "change logs archive directory to .fractary/logs/old"`
 
 **Required Actions**:
-1. Detect that `logs.paths.default.archive_local` is changing
+1. Detect that `logs.paths.default.archive` is changing
 2. Determine the old path (from existing config) and new path
 3. Update `.fractary/.gitignore`:
    - Keep the `# ===== fractary-logs (managed) =====` section header
@@ -596,7 +596,7 @@ def update_gitignore_for_path_change(old_archive_path, new_archive_path, section
 Mode: Incremental Update
 
 CHANGES to logs section:
-  logs.paths.default.archive_local: .fractary/logs/archive -> .fractary/logs/old
+  logs.paths.default.archive: .fractary/logs/archive -> .fractary/logs/old
 
 .gitignore update required:
   - OLD: logs/archive/
@@ -718,7 +718,7 @@ logs:
   paths:
     default:
       source: logs
-      write_local: .fractary/logs
+      write: .fractary/logs
   # ... new logs config ...
 ```
 
@@ -1038,11 +1038,9 @@ If file handler is S3 or cloud-based storage:
    logs:
      paths:
        default:
-         source: logs  # references file.sources.logs
-         write_local: .fractary/logs
-         archive_local: .fractary/logs/archive
-         write_cloud: logs
-         archive_cloud: archive/logs
+         source: logs  # references file.sources.logs (S3 backend)
+         write: .fractary/logs
+         archive: .fractary/logs/archive
      retention:
        default:
          auto_archive: true
@@ -1052,11 +1050,9 @@ If file handler is S3 or cloud-based storage:
    spec:
      paths:
        default:
-         source: specs  # references file.sources.specs
-         write_local: .fractary/specs
-         archive_local: .fractary/specs/archive
-         write_cloud: specs
-         archive_cloud: archive/specs
+         source: specs  # references file.sources.specs (S3 backend)
+         write: .fractary/specs
+         archive: .fractary/specs/archive
      archive:
        auto_archive_on:
          issue_close: true
@@ -1103,9 +1099,9 @@ If file handler is S3 or cloud-based storage:
    logs:
      paths:
        default:
-         source: logs  # references file.sources.logs
-         write_local: .fractary/logs
-         archive_local: .fractary/logs/archive
+         source: logs  # references file.sources.logs (local backend)
+         write: .fractary/logs
+         archive: .fractary/logs/archive
      retention:
        default:
          auto_archive: false
@@ -1114,9 +1110,9 @@ If file handler is S3 or cloud-based storage:
    spec:
      paths:
        default:
-         source: specs  # references file.sources.specs
-         write_local: .fractary/specs
-         archive_local: .fractary/specs/archive
+         source: specs  # references file.sources.specs (local backend)
+         write: .fractary/specs
+         archive: .fractary/specs/archive
      archive:
        auto_archive_on:
          issue_close: false
@@ -1146,11 +1142,9 @@ If file handler is S3 or cloud-based storage:
    logs:
      paths:
        default:
-         source: logs  # references file.sources.logs
-         write_local: .fractary/logs
-         archive_local: .fractary/logs/archive
-         write_cloud: logs
-         archive_cloud: archive/logs
+         source: logs  # references file.sources.logs (S3 backend)
+         write: .fractary/logs
+         archive: .fractary/logs/archive
      retention:
        default:
          auto_archive: true
@@ -1159,11 +1153,9 @@ If file handler is S3 or cloud-based storage:
    spec:
      paths:
        default:
-         source: specs  # references file.sources.specs
-         write_local: .fractary/specs
-         archive_local: .fractary/specs/archive
-         write_cloud: specs
-         archive_cloud: archive/specs
+         source: specs  # references file.sources.specs (S3 backend)
+         write: .fractary/specs
+         archive: .fractary/specs/archive
      archive:
        auto_archive_on:
          issue_close: true
@@ -1311,17 +1303,15 @@ BEFORE:
     paths:
       default:
         source: logs
-        write_local: .fractary/logs
+        write: .fractary/logs
 
 AFTER:
   logs:
     paths:
       default:
         source: logs
-        write_local: .fractary/logs
-        archive_local: .fractary/logs/archive
-        write_cloud: logs
-        archive_cloud: archive/logs
+        write: .fractary/logs
+        archive: .fractary/logs/archive
     # ... additional config ...
 
 .gitignore:
@@ -1622,8 +1612,8 @@ write_yaml(".fractary/config.yaml", merged)
 1. Read existing `.fractary/.gitignore` if it exists
 2. Parse existing entries (preserve ALL existing entries from other plugins)
 3. **Detect path changes** (incremental mode):
-   - Compare old `logs.paths.default.archive_local` with new value
-   - Compare old `spec.paths.default.archive_local` with new value
+   - Compare old `logs.paths.default.archive` with new value
+   - Compare old `spec.paths.default.archive` with new value
    - If changed: update gitignore entry from old path to new path
 4. Add required entries if missing:
    - `logs/archive/` (if logs plugin configured, in `# ===== fractary-logs (managed) =====` section)
@@ -1675,7 +1665,7 @@ migrate_old_markers() {
 migrate_old_markers "$GITIGNORE"
 
 # For logs archive path - handle both fresh setup and path changes
-LOGS_ARCHIVE_PATH="logs/archive"  # Default, or extract from config: logs.paths.default.archive_local minus ".fractary/"
+LOGS_ARCHIVE_PATH="logs/archive"  # Default, or extract from config: logs.paths.default.archive minus ".fractary/"
 
 # If path changed (incremental mode), update the entry
 if [ -n "$OLD_LOGS_ARCHIVE_PATH" ] && [ "$OLD_LOGS_ARCHIVE_PATH" != "$LOGS_ARCHIVE_PATH" ]; then
@@ -1690,7 +1680,7 @@ else
 fi
 
 # For specs archive path - handle both fresh setup and path changes
-SPECS_ARCHIVE_PATH="specs/archive"  # Default, or extract from config: spec.paths.default.archive_local minus ".fractary/"
+SPECS_ARCHIVE_PATH="specs/archive"  # Default, or extract from config: spec.paths.default.archive minus ".fractary/"
 
 # If path changed (incremental mode), update the entry
 if [ -n "$OLD_SPECS_ARCHIVE_PATH" ] && [ "$OLD_SPECS_ARCHIVE_PATH" != "$SPECS_ARCHIVE_PATH" ]; then

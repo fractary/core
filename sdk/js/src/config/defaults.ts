@@ -178,10 +178,8 @@ function getDefaultLogsConfig(options: DefaultConfigOptions): LogsConfig {
     paths: {
       default: {
         source: 'logs',
-        write_local: '.fractary/logs',
-        archive_local: '.fractary/logs/archive',
-        ...(useS3 && { write_cloud: 'logs' }),
-        ...(useS3 && { archive_cloud: 'archive/logs' }),
+        write: '.fractary/logs',
+        archive: '.fractary/logs/archive',
       },
     },
     retention: {
@@ -313,10 +311,8 @@ function getDefaultSpecConfig(options: DefaultConfigOptions): SpecConfig {
     paths: {
       default: {
         source: 'specs',
-        write_local: '.fractary/specs',
-        archive_local: '.fractary/specs/archive',
-        ...(useS3 && { write_cloud: 'specs' }),
-        ...(useS3 && { archive_cloud: 'archive/specs' }),
+        write: '.fractary/specs',
+        archive: '.fractary/specs/archive',
       },
     },
     naming: {
