@@ -1208,6 +1208,7 @@ Mode: Fresh Setup
 Files to create/update:
   - .fractary/config.yaml (create)
   - .fractary/.gitignore (create/update)
+  - .env.example (create if not exists - template for credentials)
   - .fractary/logs/templates/manifest.yaml (create if logs plugin)
   - .fractary/docs/templates/manifest.yaml (create if docs plugin)
 
@@ -1319,6 +1320,60 @@ if [[ "$plugins_to_configure" == *"docs"* ]]; then
     mkdir -p .fractary/docs/templates
 fi
 ```
+
+**10a-2. Create .env.example template (if it doesn't exist):**
+
+Create a `.env.example` file with placeholder values for all required credentials. This file should be committed to git as a template for team members.
+
+```bash
+ENV_EXAMPLE=".env.example"
+
+# Only create if it doesn't exist (don't overwrite user customizations)
+if [ ! -f "$ENV_EXAMPLE" ]; then
+    cat > "$ENV_EXAMPLE" << 'EOF'
+# Fractary Core Environment Variables
+# Copy this file to .env and fill in your values
+#
+# Multi-environment support:
+#   - .env              (development - default)
+#   - .env.staging      (staging credentials)
+#   - .env.production   (production credentials)
+#   - .env.local        (local overrides, never committed)
+#
+# Usage: FRACTARY_ENV=production fractary-core:work issue-list
+
+# === GitHub (required for work/repo plugins) ===
+GITHUB_TOKEN=ghp_your_personal_access_token
+
+# === AWS S3 (required if using S3 file storage) ===
+# Option 1: Explicit credentials
+AWS_ACCESS_KEY_ID=AKIA_your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+AWS_DEFAULT_REGION=us-east-1
+
+# Option 2: Use AWS profile instead (comment out explicit credentials above)
+# AWS_PROFILE=default
+
+# === Jira (if using Jira for work tracking) ===
+# JIRA_URL=https://your-domain.atlassian.net
+# JIRA_EMAIL=your-email@example.com
+# JIRA_TOKEN=your_jira_api_token
+# JIRA_PROJECT_KEY=PROJ
+
+# === Linear (if using Linear for work tracking) ===
+# LINEAR_API_KEY=lin_api_your_key
+# LINEAR_TEAM_KEY=TEAM
+EOF
+    echo "Created .env.example template"
+fi
+```
+
+**Content varies based on configured plugins:**
+- If work platform is GitHub: Include `GITHUB_TOKEN`
+- If work platform is Jira: Include `JIRA_*` variables
+- If work platform is Linear: Include `LINEAR_*` variables
+- If file handler is S3: Include `AWS_*` variables
+- If file handler is local: Omit AWS variables
 
 **10b. Create stub templates manifests (for configured plugins):**
 
@@ -1666,9 +1721,22 @@ Warnings (if any):
 
 Next steps:
 1. Review configuration: cat .fractary/config.yaml
-2. [If .env not found] Create .env file with GITHUB_TOKEN=ghp_xxxx
+2. [If .env not found] Create .env file with your credentials:
+   GITHUB_TOKEN=ghp_xxxx
+   AWS_ACCESS_KEY_ID=your_key (if using S3)
+   AWS_SECRET_ACCESS_KEY=your_secret (if using S3)
 3. Test with: /fractary-work:issue-list
 4. For updates: /fractary-core:config --context "description of changes"
+
+Multi-environment setup (optional):
+  For different credentials in dev/staging/prod, create:
+  - .env           (development - default)
+  - .env.staging   (staging credentials)
+  - .env.production (production credentials)
+
+  Then use: FRACTARY_ENV=production fractary-core:work issue-list
+
+  See: <MULTI_ENVIRONMENT_SETUP> section for details
 ```
 
 </WORKFLOW>
@@ -1759,6 +1827,13 @@ Option 2: Export in shell (only for current session)
   export AWS_ACCESS_KEY_ID=your_key_here
 
 Note: Fractary SDK auto-loads .env files, so option 1 is preferred.
+
+Multi-environment setup:
+  For different credentials per environment (dev/staging/prod):
+  - Create .env.staging, .env.production files with environment-specific values
+  - Use: FRACTARY_ENV=production fractary-core:work issue-list
+  - The SDK loads: .env → .env.{FRACTARY_ENV} → .env.local (in order)
+  See <MULTI_ENVIRONMENT_SETUP> section for complete guide.
 ```
 
 ### Git Remote Detection Failed
@@ -1849,6 +1924,7 @@ Directories to create:
   - .fractary/docs/templates/
 
 Files to create:
+  - .env.example (template for credentials - commit to git)
   - .fractary/logs/templates/manifest.yaml (stub with examples)
   - .fractary/docs/templates/manifest.yaml (stub with examples)
 
@@ -1883,6 +1959,7 @@ work:
 Files created/updated:
   - .fractary/config.yaml
   - .fractary/.gitignore
+  - .env.example (template - commit to git)
   - .claude/settings.json (archive deny rules)
 
 Plugins configured:
@@ -1898,8 +1975,14 @@ Connection tests:
   - Git remote: Pass
 
 Next steps:
-1. Review: cat .fractary/config.yaml
-2. Test: /fractary-work:issue-list
+1. Create .env from template: cp .env.example .env
+2. Fill in your credentials in .env
+3. Review config: cat .fractary/config.yaml
+4. Test: /fractary-work:issue-list
+
+Multi-environment setup (optional):
+  Create .env.staging and .env.production with environment-specific credentials.
+  Use: FRACTARY_ENV=production fractary-core:work issue-list
 ```
 
 ### Incremental Update Preview + Success
@@ -2034,6 +2117,161 @@ Recovery steps:
 ```
 
 </OUTPUTS>
+
+<MULTI_ENVIRONMENT_SETUP>
+
+## Multi-Environment Configuration
+
+Fractary Core supports different credentials for different environments (development, staging, production) through the `FRACTARY_ENV` environment variable.
+
+### How It Works
+
+Set `FRACTARY_ENV` to load environment-specific `.env` files:
+
+```bash
+# Development (default)
+fractary-core:work issue-list
+
+# Staging
+FRACTARY_ENV=staging fractary-core:work issue-list
+
+# Production
+FRACTARY_ENV=production fractary-core:work issue-list
+```
+
+### File Loading Order
+
+When `FRACTARY_ENV` is set, the SDK loads `.env` files in this order (later files override earlier):
+
+1. `.env` - Base configuration (always loaded if exists)
+2. `.env.{FRACTARY_ENV}` - Environment-specific overrides (e.g., `.env.production`)
+3. `.env.local` - Local overrides (never committed, always loaded last)
+
+All files are optional. Missing files are silently skipped.
+
+### Recommended Setup
+
+Create separate `.env` files for each environment:
+
+```
+project/
+├── .env                  # Development defaults (git-ignored)
+├── .env.staging          # Staging credentials (git-ignored)
+├── .env.production       # Production credentials (git-ignored)
+├── .env.example          # Template with placeholders (committed to git)
+└── .fractary/
+    └── config.yaml       # Single config using ${VAR} references
+```
+
+**.env.example** (commit this as a template):
+```bash
+# GitHub
+GITHUB_TOKEN=ghp_your_token_here
+
+# AWS (for S3 storage)
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_DEFAULT_REGION=us-east-1
+
+# Optional: AWS profile (alternative to explicit keys)
+# AWS_PROFILE=default
+```
+
+**.env** (development - git-ignored):
+```bash
+GITHUB_TOKEN=ghp_dev_token
+AWS_ACCESS_KEY_ID=AKIA_DEV_KEY
+AWS_SECRET_ACCESS_KEY=dev_secret
+AWS_DEFAULT_REGION=us-east-1
+```
+
+**.env.production** (git-ignored):
+```bash
+GITHUB_TOKEN=ghp_prod_token
+AWS_ACCESS_KEY_ID=AKIA_PROD_KEY
+AWS_SECRET_ACCESS_KEY=prod_secret
+AWS_DEFAULT_REGION=us-east-1
+```
+
+### config.yaml Stays The Same
+
+Your `.fractary/config.yaml` uses environment variable references that work across all environments:
+
+```yaml
+version: "2.0"
+
+work:
+  active_handler: github
+  handlers:
+    github:
+      owner: myorg
+      repo: myproject
+      token: ${GITHUB_TOKEN}
+
+file:
+  schema_version: "2.0"
+  sources:
+    specs:
+      type: s3
+      bucket: myproject-fractary
+      region: ${AWS_DEFAULT_REGION:-us-east-1}
+      auth:
+        accessKeyId: ${AWS_ACCESS_KEY_ID}
+        secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+```
+
+### Usage Patterns
+
+**In shell/terminal:**
+```bash
+# Use development credentials (default)
+fractary-core:work issue-list
+
+# Use production credentials
+FRACTARY_ENV=production fractary-core:work issue-list
+
+# Set for entire session
+export FRACTARY_ENV=production
+fractary-core:work issue-list
+fractary-core:repo pr-list
+```
+
+**In CI/CD:**
+```yaml
+# GitHub Actions example
+jobs:
+  deploy:
+    env:
+      FRACTARY_ENV: production
+      GITHUB_TOKEN: ${{ secrets.PROD_GITHUB_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+```
+
+### Git Ignore Pattern
+
+Add all `.env` files except the example to `.gitignore`:
+
+```gitignore
+# Environment files (contain secrets)
+.env
+.env.local
+.env.staging
+.env.production
+.env.*.local
+
+# Keep the example template
+!.env.example
+```
+
+### Best Practices
+
+1. **Never commit actual credentials** - Only commit `.env.example` with placeholder values
+2. **Use .env.local for personal overrides** - It's always loaded last and should never be committed
+3. **Different S3 buckets per environment** - Use separate buckets for dev/staging/prod data
+4. **AWS profiles as alternative** - Instead of explicit keys, you can use `AWS_PROFILE=production` and configure profiles in `~/.aws/credentials`
+
+</MULTI_ENVIRONMENT_SETUP>
 
 <CONFIG_GENERATION>
 ## Configuration Scaffolding

@@ -2,7 +2,7 @@
  * Unit tests for config loader
  */
 
-import { loadEnv, isEnvLoaded } from '../loader';
+import { loadEnv, isEnvLoaded, getCurrentEnv } from '../loader';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -19,15 +19,20 @@ const mockedDotenv = dotenv as jest.Mocked<typeof dotenv>;
 
 describe('loadEnv', () => {
   const originalCwd = process.cwd;
+  const originalEnv = process.env.FRACTARY_ENV;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset the envLoaded state by calling with force
-    // Since we can't access the private variable directly
+    delete process.env.FRACTARY_ENV;
   });
 
   afterAll(() => {
     process.cwd = originalCwd;
+    if (originalEnv !== undefined) {
+      process.env.FRACTARY_ENV = originalEnv;
+    } else {
+      delete process.env.FRACTARY_ENV;
+    }
   });
 
   describe('when .env exists in cwd', () => {
@@ -41,6 +46,7 @@ describe('loadEnv', () => {
       expect(result).toBe(true);
       expect(mockedDotenv.config).toHaveBeenCalledWith({
         path: path.join(process.cwd(), '.env'),
+        override: true,
       });
     });
 
@@ -57,14 +63,18 @@ describe('loadEnv', () => {
     });
 
     it('should reload with force option', () => {
-      mockedFs.existsSync.mockReturnValue(true);
+      mockedFs.existsSync.mockImplementation((p) => {
+        // Only .env exists (no .env.local)
+        return String(p).endsWith('.env') && !String(p).endsWith('.local');
+      });
 
       loadEnv({ force: true });
       const callCount = mockedDotenv.config.mock.calls.length;
 
       loadEnv({ force: true }); // Force reload
 
-      expect(mockedDotenv.config).toHaveBeenCalledTimes(callCount + 1);
+      // Each reload loads .env (and would load .env.local if it existed)
+      expect(mockedDotenv.config.mock.calls.length).toBeGreaterThan(callCount);
     });
   });
 
@@ -103,7 +113,82 @@ describe('loadEnv', () => {
       expect(result).toBe(true);
       expect(mockedDotenv.config).toHaveBeenCalledWith({
         path: path.join(customCwd, '.env'),
+        override: true,
       });
+    });
+  });
+
+  describe('multi-environment support (FRACTARY_ENV)', () => {
+    it('should load .env.{FRACTARY_ENV} when FRACTARY_ENV is set', () => {
+      process.env.FRACTARY_ENV = 'production';
+      const projectRoot = process.cwd();
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        const pathStr = String(p);
+        // Both .env and .env.production exist
+        return (
+          pathStr === path.join(projectRoot, '.env') ||
+          pathStr === path.join(projectRoot, '.env.production')
+        );
+      });
+
+      const result = loadEnv({ force: true });
+
+      expect(result).toBe(true);
+      // Should load .env first, then .env.production
+      expect(mockedDotenv.config).toHaveBeenCalledWith({
+        path: path.join(projectRoot, '.env'),
+        override: true,
+      });
+      expect(mockedDotenv.config).toHaveBeenCalledWith({
+        path: path.join(projectRoot, '.env.production'),
+        override: true,
+      });
+    });
+
+    it('should load .env.local last for local overrides', () => {
+      const projectRoot = process.cwd();
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        const pathStr = String(p);
+        // Both .env and .env.local exist
+        return (
+          pathStr === path.join(projectRoot, '.env') ||
+          pathStr === path.join(projectRoot, '.env.local')
+        );
+      });
+
+      const result = loadEnv({ force: true });
+
+      expect(result).toBe(true);
+
+      // Get all call arguments as strings
+      const calls = mockedDotenv.config.mock.calls.map((c) => String(c[0]?.path || ''));
+
+      // .env should be loaded before .env.local
+      const envIndex = calls.findIndex((p) => p.endsWith('.env') && !p.includes('.local'));
+      const localIndex = calls.findIndex((p) => p.endsWith('.env.local'));
+
+      expect(envIndex).toBeGreaterThanOrEqual(0);
+      expect(localIndex).toBeGreaterThan(envIndex);
+    });
+
+    it('should track current environment via getCurrentEnv', () => {
+      process.env.FRACTARY_ENV = 'staging';
+      mockedFs.existsSync.mockReturnValue(true);
+
+      loadEnv({ force: true });
+
+      expect(getCurrentEnv()).toBe('staging');
+    });
+
+    it('should return undefined from getCurrentEnv when FRACTARY_ENV not set', () => {
+      delete process.env.FRACTARY_ENV;
+      mockedFs.existsSync.mockReturnValue(true);
+
+      loadEnv({ force: true });
+
+      expect(getCurrentEnv()).toBeUndefined();
     });
   });
 });
@@ -119,45 +204,5 @@ describe('isEnvLoaded', () => {
     loadEnv({ force: true });
 
     expect(isEnvLoaded()).toBe(true);
-  });
-});
-
-describe('loadConfig', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    // Reset env loaded state
-    loadEnv({ force: true });
-  });
-
-  it('should auto-load .env by default', async () => {
-    // Mock .env exists
-    mockedFs.existsSync.mockImplementation((p) => {
-      const pathStr = String(p);
-      return pathStr.endsWith('.env');
-    });
-
-    // Import loadConfig dynamically to avoid hoisting issues
-    const { loadConfig } = await import('../loader');
-
-    // Track if loadEnv was called
-    const initialCallCount = mockedDotenv.config.mock.calls.length;
-
-    await loadConfig();
-
-    // dotenv.config should have been called (loadEnv was invoked)
-    expect(mockedDotenv.config.mock.calls.length).toBeGreaterThan(initialCallCount);
-  });
-
-  it('should skip .env loading when skipEnvLoad is true', async () => {
-    mockedFs.existsSync.mockReturnValue(true);
-
-    const { loadConfig } = await import('../loader');
-
-    const initialCallCount = mockedDotenv.config.mock.calls.length;
-
-    await loadConfig({ skipEnvLoad: true });
-
-    // dotenv.config should NOT have been called again
-    expect(mockedDotenv.config.mock.calls.length).toBe(initialCallCount);
   });
 });

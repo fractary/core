@@ -8,6 +8,7 @@
 export {
   loadEnv,
   isEnvLoaded,
+  getCurrentEnv,
   loadConfig,
   loadConfigSync,
   type LoadedConfig,
