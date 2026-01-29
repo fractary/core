@@ -177,7 +177,7 @@ function getDefaultLogsConfig(options: DefaultConfigOptions): LogsConfig {
     custom_templates_path: '.fractary/logs/templates/manifest.yaml',
     paths: {
       default: {
-        source: 'logs',
+        file_handler: 'logs',
         write: '.fractary/logs',
         archive: '.fractary/logs/archive',
       },
@@ -229,7 +229,7 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
   if (fileHandler === 's3' && s3Bucket) {
     return {
       schema_version: '2.0',
-      sources: {
+      handlers: {
         specs: {
           type: 's3',
           bucket: s3Bucket,
@@ -275,7 +275,7 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
 
   return {
     schema_version: '2.0',
-    sources: {
+    handlers: {
       specs: {
         type: 'local',
         local: {
@@ -310,7 +310,7 @@ function getDefaultSpecConfig(options: DefaultConfigOptions): SpecConfig {
     schema_version: '1.0',
     paths: {
       default: {
-        source: 'specs',
+        file_handler: 'specs',
         write: '.fractary/specs',
         archive: '.fractary/specs/archive',
       },

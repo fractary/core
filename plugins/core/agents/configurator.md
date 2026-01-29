@@ -42,8 +42,8 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 18. ALWAYS create/update `.fractary/.gitignore` with archive directories ignored (logs/archive/, specs/archive/)
 19. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
 20. MERGE new config sections with existing - never overwrite unrelated plugin sections
-21. NEVER create an "artifacts" source in the file section - only create "specs" and "logs" sources
-22. BUCKET CONFIG: S3 bucket, region, and auth MUST ONLY be in `file.sources` - NEVER duplicate in logs or spec sections
+21. NEVER create an "artifacts" handler in the file section - only create "specs" and "logs" handlers
+22. BUCKET CONFIG: S3 bucket, region, and auth MUST ONLY be in `file.handlers` - NEVER duplicate in logs or spec sections
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -717,7 +717,7 @@ logs:
   schema_version: "2.0"
   paths:
     default:
-      source: logs
+      file_handler: logs
       write: .fractary/logs
   # ... new logs config ...
 ```
@@ -1027,18 +1027,18 @@ If file handler is S3 or cloud-based storage:
    Based on the user's archive storage preference, configure the logs and spec plugins appropriately.
 
    **CRITICAL: Bucket Configuration Location**
-   - S3 bucket, region, and auth details MUST ONLY be configured in `file.sources`
+   - S3 bucket, region, and auth details MUST ONLY be configured in `file.handlers`
    - The `logs` and `spec` sections MUST NOT contain bucket/region/auth settings
    - The `logs` and `spec` sections only contain path information (local paths, relative cloud paths)
    - This avoids duplication and ensures the `file` plugin is the single source of truth for cloud storage
 
    **Cloud (S3) selected:**
    ```yaml
-   # logs section: paths reference file.sources for storage handler
+   # logs section: paths reference file.handlers for storage
    logs:
      paths:
        default:
-         source: logs  # references file.sources.logs (S3 backend)
+         file_handler: logs  # references file.handlers.logs (S3 backend)
          write: .fractary/logs
          archive: .fractary/logs/archive
      retention:
@@ -1046,11 +1046,11 @@ If file handler is S3 or cloud-based storage:
          auto_archive: true
          cleanup_after_archive: true  # Remove local after cloud upload
 
-   # spec section: paths reference file.sources for storage handler
+   # spec section: paths reference file.handlers for storage
    spec:
      paths:
        default:
-         source: specs  # references file.sources.specs (S3 backend)
+         file_handler: specs  # references file.handlers.specs (S3 backend)
          write: .fractary/specs
          archive: .fractary/specs/archive
      archive:
@@ -1061,7 +1061,7 @@ If file handler is S3 or cloud-based storage:
    # file section: ALL S3 connection details go here
    file:
      schema_version: "2.0"
-     sources:
+     handlers:
        specs:
          type: s3
          bucket: {derived_bucket_name}
@@ -1099,7 +1099,7 @@ If file handler is S3 or cloud-based storage:
    logs:
      paths:
        default:
-         source: logs  # references file.sources.logs (local backend)
+         file_handler: logs  # references file.handlers.logs (local backend)
          write: .fractary/logs
          archive: .fractary/logs/archive
      retention:
@@ -1110,7 +1110,7 @@ If file handler is S3 or cloud-based storage:
    spec:
      paths:
        default:
-         source: specs  # references file.sources.specs (local backend)
+         file_handler: specs  # references file.handlers.specs (local backend)
          write: .fractary/specs
          archive: .fractary/specs/archive
      archive:
@@ -1120,7 +1120,7 @@ If file handler is S3 or cloud-based storage:
 
    file:
      schema_version: "2.0"
-     sources:
+     handlers:
        specs:
          type: local
          local:
@@ -1142,7 +1142,7 @@ If file handler is S3 or cloud-based storage:
    logs:
      paths:
        default:
-         source: logs  # references file.sources.logs (S3 backend)
+         file_handler: logs  # references file.handlers.logs (S3 backend)
          write: .fractary/logs
          archive: .fractary/logs/archive
      retention:
@@ -1153,7 +1153,7 @@ If file handler is S3 or cloud-based storage:
    spec:
      paths:
        default:
-         source: specs  # references file.sources.specs (S3 backend)
+         file_handler: specs  # references file.handlers.specs (S3 backend)
          write: .fractary/specs
          archive: .fractary/specs/archive
      archive:
@@ -1163,7 +1163,7 @@ If file handler is S3 or cloud-based storage:
 
    file:
      schema_version: "2.0"
-     sources:
+     handlers:
        specs:
          type: s3
          bucket: {derived_bucket_name}
@@ -1302,14 +1302,14 @@ BEFORE:
   logs:
     paths:
       default:
-        source: logs
+        file_handler: logs
         write: .fractary/logs
 
 AFTER:
   logs:
     paths:
       default:
-        source: logs
+        file_handler: logs
         write: .fractary/logs
         archive: .fractary/logs/archive
     # ... additional config ...
@@ -2213,7 +2213,7 @@ Validation results:
   - Handler references: Pass
   - Environment variables:
     - GITHUB_TOKEN: Present
-    - AWS_ACCESS_KEY_ID: Missing (used by file.sources.specs)
+    - AWS_ACCESS_KEY_ID: Missing (used by file.handlers.specs)
 
 Overall: VALID (with warnings)
 
@@ -2387,7 +2387,7 @@ work:
 
 file:
   schema_version: "2.0"
-  sources:
+  handlers:
     specs:
       type: s3
       bucket: myproject-fractary
