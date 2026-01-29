@@ -145,12 +145,11 @@ export interface FileSource {
  */
 export interface FileConfig {
   schema_version: string;
-  // v2.0 sources-based config
-  sources?: Record<string, FileSource>;
+  // v2.0 handlers-based config (named file handlers like 'logs', 'specs')
+  handlers?: Record<string, FileSource>;
   global_settings?: Record<string, any>;
-  // v1.0 handler-based config (deprecated)
+  // v1.0 config (deprecated) - used active_handler to select from handlers
   active_handler?: string;
-  handlers?: Record<string, any>;
 }
 
 /**
