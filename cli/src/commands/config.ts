@@ -308,7 +308,7 @@ async function initCommand(options: InitOptions): Promise<void> {
       console.log(chalk.gray(`  Repo platform: ${config.repo.active_handler}`));
     }
     if (config.file) {
-      const fileType = config.file.sources?.specs?.type || 'local';
+      const fileType = config.file.handlers?.specs?.type || 'local';
       console.log(chalk.gray(`  File storage: ${fileType}`));
     }
 
