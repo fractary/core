@@ -672,10 +672,15 @@ export async function handleRepoPrMerge(
       return errorResult(`Invalid strategy: ${params.strategy}. Must be 'merge', 'squash', or 'rebase'`);
     }
 
+    // Apply defaults from config if parameters are not explicitly provided
+    const mergeDefaults = config.repo?.prMergeDefaults;
+    const strategy = params.strategy ?? mergeDefaults?.strategy;
+    const deleteBranch = params.delete_branch ?? mergeDefaults?.deleteBranch;
+
     const manager = new RepoManager(config.repo);
     const pr = await manager.mergePR(params.number, {
-      strategy: isValidMergeStrategy(params.strategy) ? params.strategy : undefined,
-      deleteBranch: params.delete_branch,
+      strategy: isValidMergeStrategy(strategy) ? strategy : undefined,
+      deleteBranch,
     });
     return successResult(pr);
   } catch (error: unknown) {
