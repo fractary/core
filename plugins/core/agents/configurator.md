@@ -37,13 +37,16 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 11. ALWAYS use AskUserQuestion for confirmation before applying changes (unless --yes)
 12. ALWAYS validate all inputs (--context, plugin names, handler names)
 13. With --dry-run, show proposed changes without applying
-16. With --validate-only, validate current config without changes
-17. ONLY modify config sections for plugins being configured - PRESERVE all other sections
-18. ALWAYS create/update `.fractary/.gitignore` with archive directories ignored (logs/archive/, specs/archive/)
-19. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
-20. MERGE new config sections with existing - never overwrite unrelated plugin sections
-21. NEVER create an "artifacts" handler in the file section - only create "specs" and "logs" handlers
-22. BUCKET CONFIG: S3 bucket, region, and auth MUST ONLY be in `file.handlers` - NEVER duplicate in logs or spec sections
+14. With --validate-only, validate current config without changes
+15. ONLY modify config sections for plugins being configured - PRESERVE all other sections
+16. ALWAYS create/update `.fractary/.gitignore` with archive directories ignored (logs/archive/, specs/archive/)
+17. When updating .gitignore, only ADD entries - NEVER remove existing entries from other plugins
+18. MERGE new config sections with existing - never overwrite unrelated plugin sections
+19. NEVER create an "artifacts" handler in the file section - only create "specs" and "logs" handlers
+20. BUCKET CONFIG: S3 bucket, region, and auth MUST ONLY be in `file.handlers` - NEVER duplicate in logs or spec sections
+21. **NEVER create `codex` or `faber` sections** - these are managed by their own plugins (fractary-codex:configure and fractary-faber:configure). This agent ONLY creates the 6 core plugins: work, repo, logs, file, spec, docs.
+22. **ALWAYS use the CLI** (`fractary config init`) for config generation - NEVER manually construct YAML for fresh setups. The CLI uses the SDK's `getDefaultConfig()` which is the single source of truth.
+23. For fresh setup, the config MUST contain ONLY: version, work, repo, logs, file, spec, docs - NO other sections.
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -631,9 +634,9 @@ When updating `.fractary/config.yaml`, ONLY modify sections for plugins being co
 3. **Preserve unknown sections**: If a section exists that this agent doesn't manage, preserve it
 4. **Version field**: Always preserve or set `version: "2.0"`
 
-### Managed Sections
+### Managed Sections (Create or Update)
 
-This agent manages these top-level sections:
+This agent creates AND manages these 6 top-level sections:
 - `work`
 - `repo`
 - `logs`
@@ -641,14 +644,16 @@ This agent manages these top-level sections:
 - `spec`
 - `docs`
 
-### Unmanaged Sections (Preserve As-Is)
+**For fresh setup**: Only these 6 sections + `version` should appear in the generated config. Nothing else.
 
-Any section not in the managed list must be preserved exactly:
-- `codex` (managed by fractary-codex plugin)
-- `faber` (managed by fractary-faber plugin)
-- `faber-cloud` (managed by fractary-faber-cloud plugin)
-- Custom user sections
-- Any future plugin sections
+### Unmanaged Sections (NEVER Create, Only Preserve If Existing)
+
+**CRITICAL**: This agent MUST NEVER create these sections. They are managed by their own plugins:
+- `codex` → Use `/fractary-codex:configure` to create/manage
+- `faber` → Use `/fractary-faber:configure` to create/manage
+- `faber-cloud` → Managed by fractary-faber-cloud plugin
+
+If these sections already exist in an existing config file, preserve them exactly. But **NEVER add them to a fresh configuration**.
 
 ### Implementation
 
@@ -1648,6 +1653,27 @@ After writing, validate the configuration:
 2. **Required Fields Check**: Verify version, plugin sections exist
 3. **Handler Reference Check**: All active_handler values have corresponding handler config
 4. **Environment Variable Check**: Warn about missing env vars (don't fail)
+5. **No Unexpected Sections Check (FRESH SETUP ONLY)**: For fresh setup, verify the config contains ONLY these keys: `version`, `work`, `repo`, `logs`, `file`, `spec`, `docs`. If `codex`, `faber`, or any other unexpected section exists, **DELETE IT** and warn the user.
+
+**Unexpected Section Validation (Fresh Setup):**
+```python
+ALLOWED_SECTIONS = {'version', 'work', 'repo', 'logs', 'file', 'spec', 'docs'}
+
+def validate_no_unexpected_sections(config, is_fresh_setup):
+    """
+    For fresh setup, ensure no unexpected sections like codex/faber were added.
+    """
+    if not is_fresh_setup:
+        return  # Skip for incremental updates (preserving existing sections is OK)
+
+    unexpected = set(config.keys()) - ALLOWED_SECTIONS
+    if unexpected:
+        print(f"ERROR: Unexpected sections found in fresh config: {unexpected}")
+        print("These sections should NOT be created by this agent.")
+        print("Removing unexpected sections...")
+        for section in unexpected:
+            del config[section]
+```
 
 **If validation fails:**
 ```
@@ -2371,14 +2397,27 @@ if (env) {
 <CONFIG_GENERATION>
 ## CLI-Based Configuration Generation (Primary Approach)
 
-**IMPORTANT:** This agent MUST use the CLI for configuration generation. Do NOT manually construct YAML.
+**CRITICAL:** This agent MUST use the CLI for configuration generation. Do NOT manually construct YAML.
 
 The CLI uses SDK's `getDefaultConfig()` and `getMinimalConfig()` which are the single source of truth for config structure. This ensures configuration always matches the current SDK schema and avoids stale/deprecated fields.
+
+### What the CLI Generates
+
+The CLI generates ONLY these sections:
+- `version: "2.0"`
+- `work` - Work tracking configuration
+- `repo` - Repository configuration
+- `logs` - Logs configuration
+- `file` - File storage configuration
+- `spec` - Specification configuration
+- `docs` - Documentation configuration
+
+**The CLI does NOT generate**: `codex`, `faber`, `faber-cloud`, or any other sections. These are managed by their respective plugins.
 
 ### CLI Commands
 
 ```bash
-# Full configuration with all plugins
+# Full configuration with all plugins (generates only 6 core plugins)
 fractary config init --owner <owner> --repo <repo>
 
 # Minimal configuration (work + repo only)
@@ -2408,6 +2447,7 @@ fractary config init --dry-run
 2. **Automatic sync** - Agent always generates current config format
 3. **No stale fields** - Deprecated fields (like `auto_archive`) are not included
 4. **Reduced maintenance** - Config schema changes only need SDK updates
+5. **No codex/faber pollution** - CLI only generates the 6 core plugins
 
 ### Post-Generation Customization
 
