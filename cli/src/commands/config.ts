@@ -286,12 +286,18 @@ async function initCommand(options: InitOptions): Promise<void> {
     }
 
     // Write configuration with YAML formatting
-    const yamlContent = yaml.dump(config, {
+    let yamlContent = yaml.dump(config, {
       indent: 2,
       lineWidth: 100,
       noRefs: true,
       sortKeys: false,
     });
+
+    // Add helpful comments for merge options
+    yamlContent = yamlContent.replace(
+      /(\s+strategy: (?:squash|merge|rebase))/,
+      '$1  # options: squash, merge, rebase'
+    );
 
     writeFileSync(configPath, yamlContent, 'utf-8');
 
