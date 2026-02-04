@@ -11,6 +11,14 @@ import { sanitizeSecrets } from '@fractary/core/common/secrets';
  * This is a flattened view of the SDK's handler-based configuration,
  * designed for simpler tool access patterns.
  */
+/**
+ * PR merge defaults configuration
+ */
+export interface PrMergeDefaults {
+  strategy?: 'merge' | 'squash' | 'rebase';
+  deleteBranch?: boolean;
+}
+
 export interface Config {
   work?: {
     platform: 'github' | 'jira' | 'linear';
@@ -25,6 +33,7 @@ export interface Config {
     repo?: string;
     token?: string;
     defaultBranch?: string;
+    prMergeDefaults?: PrMergeDefaults;
   };
   spec?: {
     localPath?: string;
@@ -138,12 +147,17 @@ function convertToMcpConfig(sdkConfig: LoadedConfig): Config {
   if (sdkConfig.repo) {
     const activeHandler = sdkConfig.repo.active_handler as 'github' | 'gitlab' | 'bitbucket';
     const handlerConfig = sdkConfig.repo.handlers?.[activeHandler] || {};
+    const prMergeConfig = sdkConfig.repo.defaults?.pr?.merge;
     config.repo = {
       platform: activeHandler,
       owner: handlerConfig.owner,
       repo: handlerConfig.repo,
       token: handlerConfig.token,
       defaultBranch: sdkConfig.repo.defaults?.default_branch,
+      prMergeDefaults: prMergeConfig ? {
+        strategy: prMergeConfig.strategy,
+        deleteBranch: prMergeConfig.delete_branch,
+      } : undefined,
     };
   }
 
