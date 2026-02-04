@@ -360,12 +360,12 @@ function getDefaultDocsConfig(): DocsConfig {
 export function getDefaultConfig(options: DefaultConfigOptions = {}): CoreYamlConfig {
   return {
     version: '2.0',
-    work: getDefaultWorkConfig(options),
     repo: getDefaultRepoConfig(options),
-    logs: getDefaultLogsConfig(options),
+    work: getDefaultWorkConfig(options),
     file: getDefaultFileConfig(options),
-    spec: getDefaultSpecConfig(options),
     docs: getDefaultDocsConfig(),
+    spec: getDefaultSpecConfig(options),
+    logs: getDefaultLogsConfig(options),
   };
 }
 
@@ -387,7 +387,7 @@ export function getDefaultConfig(options: DefaultConfigOptions = {}): CoreYamlCo
 export function getMinimalConfig(options: DefaultConfigOptions = {}): CoreYamlConfig {
   return {
     version: '2.0',
-    work: getDefaultWorkConfig(options),
     repo: getDefaultRepoConfig(options),
+    work: getDefaultWorkConfig(options),
   };
 }

@@ -1022,179 +1022,59 @@ If file handler is S3 or cloud-based storage:
    )
    ```
 
-4. **Apply archive storage preference to configuration**:
+4. **Generate configuration using CLI**:
 
-   Based on the user's archive storage preference, configure the logs and spec plugins appropriately.
+   **CRITICAL: Use CLI for configuration generation - do NOT manually construct YAML.**
 
-   **CRITICAL: Bucket Configuration Location**
-   - S3 bucket, region, and auth details MUST ONLY be configured in `file.handlers`
-   - The `logs` and `spec` sections MUST NOT contain bucket/region/auth settings
-   - The `logs` and `spec` sections only contain path information (local paths, relative cloud paths)
-   - This avoids duplication and ensures the `file` plugin is the single source of truth for cloud storage
+   The CLI uses the SDK's `getDefaultConfig()` which is the single source of truth for config structure.
+   This ensures configuration always matches the current SDK schema.
+
+   Based on the user's archive storage preference, run the appropriate CLI command:
 
    **Cloud (S3) selected:**
-   ```yaml
-   # logs section: paths reference file.handlers for storage
-   logs:
-     paths:
-       default:
-         file_handler: logs  # references file.handlers.logs (S3 backend)
-         write: .fractary/logs
-         archive: .fractary/logs/archive
-     retention:
-       default:
-         auto_archive: true
-         cleanup_after_archive: true  # Remove local after cloud upload
-
-   # spec section: paths reference file.handlers for storage
-   spec:
-     paths:
-       default:
-         file_handler: specs  # references file.handlers.specs (S3 backend)
-         write: .fractary/specs
-         archive: .fractary/specs/archive
-     archive:
-       auto_archive_on:
-         issue_close: true
-         pr_merge: true
-
-   # file section: ALL S3 connection details go here
-   file:
-     schema_version: "2.0"
-     handlers:
-       specs:
-         type: s3
-         bucket: {derived_bucket_name}
-         prefix: specs/
-         region: us-east-1
-         local:
-           base_path: .fractary/specs
-         push:
-           compress: false
-           keep_local: true
-         auth:
-           profile: default
-       logs:
-         type: s3
-         bucket: {derived_bucket_name}
-         prefix: logs/
-         region: us-east-1
-         local:
-           base_path: .fractary/logs
-         push:
-           compress: true
-           keep_local: true
-         auth:
-           profile: default
-     global_settings:
-       retry_attempts: 3
-       retry_delay_ms: 1000
-       timeout_seconds: 300
-       verify_checksums: true
-       parallel_uploads: 4
+   ```bash
+   fractary config init \
+     --work-platform {work_platform} \
+     --file-handler s3 \
+     --owner {owner} \
+     --repo {repo} \
+     --s3-bucket {derived_bucket_name} \
+     --aws-region us-east-1 \
+     --force
    ```
 
    **Local only selected:**
-   ```yaml
-   logs:
-     paths:
-       default:
-         file_handler: logs  # references file.handlers.logs (local backend)
-         write: .fractary/logs
-         archive: .fractary/logs/archive
-     retention:
-       default:
-         auto_archive: false
-         cleanup_after_archive: false
-
-   spec:
-     paths:
-       default:
-         file_handler: specs  # references file.handlers.specs (local backend)
-         write: .fractary/specs
-         archive: .fractary/specs/archive
-     archive:
-       auto_archive_on:
-         issue_close: false
-         pr_merge: false
-
-   file:
-     schema_version: "2.0"
-     handlers:
-       specs:
-         type: local
-         local:
-           base_path: .fractary/specs
-       logs:
-         type: local
-         local:
-           base_path: .fractary/logs
-     global_settings:
-       retry_attempts: 3
-       retry_delay_ms: 1000
-       timeout_seconds: 300
-       verify_checksums: true
-       parallel_uploads: 4
+   ```bash
+   fractary config init \
+     --work-platform {work_platform} \
+     --file-handler local \
+     --owner {owner} \
+     --repo {repo} \
+     --force
    ```
 
-   **Both selected:**
-   ```yaml
-   logs:
-     paths:
-       default:
-         file_handler: logs  # references file.handlers.logs (S3 backend)
-         write: .fractary/logs
-         archive: .fractary/logs/archive
-     retention:
-       default:
-         auto_archive: true
-         cleanup_after_archive: false  # Keep local copies after cloud upload
-
-   spec:
-     paths:
-       default:
-         file_handler: specs  # references file.handlers.specs (S3 backend)
-         write: .fractary/specs
-         archive: .fractary/specs/archive
-     archive:
-       auto_archive_on:
-         issue_close: true
-         pr_merge: true
-
-   file:
-     schema_version: "2.0"
-     handlers:
-       specs:
-         type: s3
-         bucket: {derived_bucket_name}
-         prefix: specs/
-         region: us-east-1
-         local:
-           base_path: .fractary/specs
-         push:
-           compress: false
-           keep_local: true
-         auth:
-           profile: default
-       logs:
-         type: s3
-         bucket: {derived_bucket_name}
-         prefix: logs/
-         region: us-east-1
-         local:
-           base_path: .fractary/logs
-         push:
-           compress: true
-           keep_local: true
-         auth:
-           profile: default
-     global_settings:
-       retry_attempts: 3
-       retry_delay_ms: 1000
-       timeout_seconds: 300
-       verify_checksums: true
-       parallel_uploads: 4
+   **Both (S3 + local copies) selected:**
+   ```bash
+   fractary config init \
+     --work-platform {work_platform} \
+     --file-handler s3 \
+     --owner {owner} \
+     --repo {repo} \
+     --s3-bucket {derived_bucket_name} \
+     --aws-region us-east-1 \
+     --force
    ```
+   Note: The CLI generates config with `keep_local: true` by default for S3 handlers.
+
+   **Parameter mapping:**
+   - `{work_platform}`: github | jira | linear (from Step 3)
+   - `{owner}`, `{repo}`: from Step 2 auto-detection or user input
+   - `{derived_bucket_name}`: from bucket name derivation (Step 5b.1-2)
+
+   **Why CLI instead of hardcoded YAML:**
+   - SDK's `getDefaultConfig()` is the canonical source for config structure
+   - Automatically includes correct field names (no stale `auto_archive` etc.)
+   - Config schema changes only need SDK updates, not agent updates
 
 ### Step 6: Interpret --context for Changes (Incremental Mode)
 
@@ -1223,19 +1103,30 @@ AskUserQuestion(
 )
 ```
 
-### Step 7: Build Proposed Configuration
+### Step 7: Generate Configuration via CLI
 
 **Fresh Setup Mode:**
-Build complete configuration with all plugin sections based on:
-- Auto-detected or user-selected platforms
-- Default values for all settings
-- Required directories and paths
+Use CLI to generate complete configuration:
+
+```bash
+fractary config init \
+  --work-platform {detected_or_selected} \
+  --file-handler {selected_handler} \
+  --owner {owner} \
+  --repo {repo} \
+  [--s3-bucket {bucket} --aws-region {region}] \
+  --force
+```
+
+The CLI uses SDK's `getDefaultConfig()` which is the canonical source for config structure.
+This ensures the generated config always has the correct schema and field names.
 
 **Incremental Mode:**
-Build updated configuration by:
-- Starting with existing config
-- Applying changes from --context interpretation
-- Preserving unchanged sections
+For incremental updates, the agent should:
+1. Read existing config with `fractary config show` or by reading `.fractary/config.yaml`
+2. Identify which sections need modification based on `--context`
+3. Use Edit tool to update only the specific sections in `.fractary/config.yaml`
+4. Preserve all unrelated sections (especially plugin sections not managed by this agent)
 
 ### Step 8: Generate Change Preview
 
@@ -2054,19 +1945,13 @@ Environment variables:
   - .env file: Found
   - GITHUB_TOKEN: Present in .env (auto-loaded by SDK)
 
-Proposed configuration:
----
-version: "2.0"
+Configuration will be generated via CLI:
+  Command: fractary config init --work-platform github --file-handler local --owner fractary --repo core --force
 
-work:
-  active_handler: github
-  handlers:
-    github:
-      owner: fractary
-      repo: core
-      token: ${GITHUB_TOKEN}
-...
----
+  The CLI uses SDK's getDefaultConfig() which is the canonical source for config structure.
+
+To preview: fractary config init --work-platform github --file-handler local --owner fractary --repo core --dry-run
+To view after creation: cat .fractary/config.yaml
 
 [After user confirms]
 
@@ -2484,9 +2369,13 @@ if (env) {
 </MULTI_ENVIRONMENT_SETUP>
 
 <CONFIG_GENERATION>
-## Configuration Scaffolding
+## CLI-Based Configuration Generation (Primary Approach)
 
-Use the CLI to generate default configuration:
+**IMPORTANT:** This agent MUST use the CLI for configuration generation. Do NOT manually construct YAML.
+
+The CLI uses SDK's `getDefaultConfig()` and `getMinimalConfig()` which are the single source of truth for config structure. This ensures configuration always matches the current SDK schema and avoids stale/deprecated fields.
+
+### CLI Commands
 
 ```bash
 # Full configuration with all plugins
@@ -2495,25 +2384,40 @@ fractary config init --owner <owner> --repo <repo>
 # Minimal configuration (work + repo only)
 fractary config init --minimal --owner <owner> --repo <repo>
 
-# With S3 file storage
-fractary config init --file-handler s3 --s3-bucket <bucket>
+# With specific work platform
+fractary config init --work-platform github --owner <owner> --repo <repo>
+fractary config init --work-platform jira --owner <owner> --repo <repo>
+fractary config init --work-platform linear --owner <owner> --repo <repo>
 
-# With Jira work tracking
-fractary config init --work-platform jira
+# With S3 file storage
+fractary config init --file-handler s3 --s3-bucket <bucket> --aws-region <region>
+
+# With local file storage (default)
+fractary config init --file-handler local
+
+# Overwrite existing config
+fractary config init --force
+
+# Preview without writing
+fractary config init --dry-run
 ```
 
-The CLI uses the SDK's `getDefaultConfig()` and `getMinimalConfig()` functions
-which provide canonical configuration templates.
+### Why CLI Instead of Hardcoded YAML
 
-### Platform-Specific Adjustments
+1. **Single source of truth** - SDK's `getDefaultConfig()` is canonical
+2. **Automatic sync** - Agent always generates current config format
+3. **No stale fields** - Deprecated fields (like `auto_archive`) are not included
+4. **Reduced maintenance** - Config schema changes only need SDK updates
 
-After scaffolding, customize the config based on user requirements:
+### Post-Generation Customization
+
+After CLI scaffolding, the agent may need to customize specific fields:
 
 - **GitHub**: Default settings work out of the box
 - **Jira**: Set `base_url`, `email`, `api_token`, `project_key`
 - **Linear**: Set `api_key`, `team_key`
-- **S3 storage**: Set `bucket`, `region`, `auth.profile`
-- **Local only**: Sources use `type: local` with `base_path`
+- **S3 storage**: Bucket and region set via CLI flags
+- **Local only**: Default handler is local
 
 ### Environment Variables
 
