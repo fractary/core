@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:commit-push-pr-merge
-allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*), Bash(fractary-core repo pr-merge:*), Bash(gh pr view:*), Bash(gh api:*), Bash(fractary-core repo pull:*)
+allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*), Bash(fractary-core repo pr-merge:*), Bash(gh pr view:*), Bash(gh api:*), Bash(fractary-core repo pull:*), Bash(git checkout:*)
 description: Commit, push, create PR, merge, and cleanup branch
 model: claude-haiku-4-5
 argument-hint: '[--squash|--merge|--rebase] [--wait-for-checks] [--context "<text>"]'
