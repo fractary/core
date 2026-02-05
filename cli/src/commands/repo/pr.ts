@@ -7,19 +7,8 @@ import chalk from 'chalk';
 import { getRepoManager } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
 
-export function createPRCommands(): Command {
-  const pr = new Command('pr').description('Pull request operations');
-
-  pr.addCommand(createPRCreateCommand());
-  pr.addCommand(createPRListCommand());
-  pr.addCommand(createPRMergeCommand());
-  pr.addCommand(createPRReviewCommand());
-
-  return pr;
-}
-
-function createPRCreateCommand(): Command {
-  return new Command('create')
+export function createPRCreateCommand(): Command {
+  return new Command('pr-create')
     .description('Create a new pull request')
     .requiredOption('--title <title>', 'PR title')
     .option('--body <body>', 'PR body/description')
@@ -54,8 +43,8 @@ function createPRCreateCommand(): Command {
     });
 }
 
-function createPRListCommand(): Command {
-  return new Command('list')
+export function createPRListCommand(): Command {
+  return new Command('pr-list')
     .description('List pull requests')
     .option('--state <state>', 'Filter by state (open, closed, all)', 'open')
     .option('--author <username>', 'Filter by author')
@@ -92,8 +81,8 @@ function createPRListCommand(): Command {
     });
 }
 
-function createPRMergeCommand(): Command {
-  return new Command('merge')
+export function createPRMergeCommand(): Command {
+  return new Command('pr-merge')
     .description('Merge a pull request')
     .argument('<number>', 'PR number')
     .option('--strategy <strategy>', 'Merge strategy (merge, squash, rebase)', 'merge')
@@ -122,8 +111,8 @@ function createPRMergeCommand(): Command {
     });
 }
 
-function createPRReviewCommand(): Command {
-  return new Command('review')
+export function createPRReviewCommand(): Command {
+  return new Command('pr-review')
     .description('Review a pull request')
     .argument('<number>', 'PR number')
     .option('--approve', 'Approve the PR')

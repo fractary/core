@@ -1,8 +1,9 @@
 ---
-allowed-tools: Bash(gh pr create:*), Bash(git diff:*), Bash(git log:*), Bash(git branch:*)
+name: fractary-repo:pr-create
+allowed-tools: Bash(fractary-core repo pr-create:*)
 description: Create pull requests
 model: claude-haiku-4-5
-argument-hint: '[--title "<title>"] [--body "<body>"] [--draft] [--base <branch>] [--context "<text>"]'
+argument-hint: '[--title "<title>"] [--body "<body>"] [--draft] [--base <branch>] [--json] [--context "<text>"]'
 ---
 
 ## Context
@@ -14,17 +15,16 @@ argument-hint: '[--title "<title>"] [--body "<body>"] [--draft] [--base <branch>
 
 ## Your task
 
-Create a pull request using `gh pr create`.
+Create a pull request using `fractary-core repo pr-create`.
 
 If title not provided in arguments:
 - Generate from first commit message or branch name
-- Example: "feat/123-add-oauth" → "Add OAuth"
+- Example: "feat/123-add-oauth" -> "Add OAuth"
 
 If body not provided in arguments:
 - Generate from commit history and diff summary
 - Include key changes and files modified
-- Format as a clear PR description
 
-Use `gh pr create --title "..." --body "..." [--draft] [--base ...]`
+Execute: `fractary-core repo pr-create --title "..." --body "..." [--draft] [--base ...]`
 
 You have the capability to call multiple tools in a single response. Execute the PR creation in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.

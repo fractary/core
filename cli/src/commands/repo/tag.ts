@@ -7,18 +7,8 @@ import chalk from 'chalk';
 import { getRepoManager } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
 
-export function createTagCommands(): Command {
-  const tag = new Command('tag').description('Tag operations');
-
-  tag.addCommand(createTagCreateCommand());
-  tag.addCommand(createTagPushCommand());
-  tag.addCommand(createTagListCommand());
-
-  return tag;
-}
-
-function createTagCreateCommand(): Command {
-  return new Command('create')
+export function createTagCreateCommand(): Command {
+  return new Command('tag-create')
     .description('Create a new tag')
     .argument('<name>', 'Tag name')
     .option('--message <msg>', 'Tag message (creates annotated tag)')
@@ -53,8 +43,8 @@ function createTagCreateCommand(): Command {
     });
 }
 
-function createTagPushCommand(): Command {
-  return new Command('push')
+export function createTagPushCommand(): Command {
+  return new Command('tag-push')
     .description('Push tag(s) to remote')
     .argument('<name>', 'Tag name or "all" for all tags')
     .option('--remote <name>', 'Remote name', 'origin')
@@ -90,8 +80,8 @@ function createTagPushCommand(): Command {
     });
 }
 
-function createTagListCommand(): Command {
-  return new Command('list')
+export function createTagListCommand(): Command {
+  return new Command('tag-list')
     .description('List tags')
     .option('--pattern <pattern>', 'Filter by pattern')
     .option('--latest <n>', 'Show only latest N tags')

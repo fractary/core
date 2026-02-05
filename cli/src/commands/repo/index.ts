@@ -1,15 +1,22 @@
 /**
  * Repo subcommand - Repository operations
  *
- * Provides branch, commit, pr, tag, and worktree operations via @fractary/core RepoManager.
+ * Commands use dashes to mirror plugin naming:
+ * CLI: fractary-core repo branch-create
+ * Plugin: /fractary-repo:branch-create
  */
 
 import { Command } from 'commander';
-import { createBranchCommands } from './branch';
+import { createBranchCreateCommand, createBranchDeleteCommand, createBranchListCommand } from './branch';
 import { createCommitCommand } from './commit';
-import { createPRCommands } from './pr';
-import { createTagCommands } from './tag';
-import { createWorktreeCommands } from './worktree';
+import { createPRCreateCommand, createPRListCommand, createPRMergeCommand, createPRReviewCommand } from './pr';
+import { createTagCreateCommand, createTagPushCommand, createTagListCommand } from './tag';
+import {
+  createWorktreeCreateCommand,
+  createWorktreeListCommand,
+  createWorktreeRemoveCommand,
+  createWorktreeCleanupCommand,
+} from './worktree';
 import { createStatusCommand, createPushCommand, createPullCommand } from './status';
 
 /**
@@ -18,14 +25,32 @@ import { createStatusCommand, createPushCommand, createPullCommand } from './sta
 export function createRepoCommand(): Command {
   const repo = new Command('repo').description('Repository operations');
 
-  // Add all command groups
-  repo.addCommand(createBranchCommands());
-  repo.addCommand(createCommitCommand());
-  repo.addCommand(createPRCommands());
-  repo.addCommand(createTagCommands());
-  repo.addCommand(createWorktreeCommands());
+  // Branch operations (flat with dashes)
+  repo.addCommand(createBranchCreateCommand());
+  repo.addCommand(createBranchDeleteCommand());
+  repo.addCommand(createBranchListCommand());
 
-  // Add standalone commands
+  // Commit
+  repo.addCommand(createCommitCommand());
+
+  // PR operations (flat with dashes)
+  repo.addCommand(createPRCreateCommand());
+  repo.addCommand(createPRListCommand());
+  repo.addCommand(createPRMergeCommand());
+  repo.addCommand(createPRReviewCommand());
+
+  // Tag operations (flat with dashes)
+  repo.addCommand(createTagCreateCommand());
+  repo.addCommand(createTagPushCommand());
+  repo.addCommand(createTagListCommand());
+
+  // Worktree operations (flat with dashes)
+  repo.addCommand(createWorktreeCreateCommand());
+  repo.addCommand(createWorktreeListCommand());
+  repo.addCommand(createWorktreeRemoveCommand());
+  repo.addCommand(createWorktreeCleanupCommand());
+
+  // Standalone commands
   repo.addCommand(createStatusCommand());
   repo.addCommand(createPushCommand());
   repo.addCommand(createPullCommand());

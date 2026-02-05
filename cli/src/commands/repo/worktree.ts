@@ -7,23 +7,14 @@ import chalk from 'chalk';
 import { getRepoManager } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
 
-export function createWorktreeCommands(): Command {
-  const worktree = new Command('worktree').description('Worktree operations');
-
-  worktree.addCommand(createWorktreeCreateCommand());
-  worktree.addCommand(createWorktreeListCommand());
-  worktree.addCommand(createWorktreeRemoveCommand());
-  worktree.addCommand(createWorktreeCleanupCommand());
-
-  return worktree;
-}
-
-function createWorktreeCreateCommand(): Command {
-  return new Command('create')
+export function createWorktreeCreateCommand(): Command {
+  return new Command('worktree-create')
     .description('Create a new worktree')
     .argument('<branch>', 'Branch name')
     .option('--path <path>', 'Worktree path')
     .option('--work-id <id>', 'Work item ID')
+    .option('--base <branch>', 'Base branch to create from')
+    .option('--no-checkout', 'Skip checking out files')
     .option('--json', 'Output as JSON')
     .action(async (branch: string, options) => {
       try {
@@ -33,6 +24,7 @@ function createWorktreeCreateCommand(): Command {
           branch,
           path: options.path || `.worktrees/${branch}`,
           workId: options.workId,
+          baseBranch: options.base,
         });
 
         if (options.json) {
@@ -47,8 +39,8 @@ function createWorktreeCreateCommand(): Command {
     });
 }
 
-function createWorktreeListCommand(): Command {
-  return new Command('list')
+export function createWorktreeListCommand(): Command {
+  return new Command('worktree-list')
     .description('List worktrees')
     .option('--json', 'Output as JSON')
     .action(async (options) => {
@@ -74,8 +66,8 @@ function createWorktreeListCommand(): Command {
     });
 }
 
-function createWorktreeRemoveCommand(): Command {
-  return new Command('remove')
+export function createWorktreeRemoveCommand(): Command {
+  return new Command('worktree-remove')
     .description('Remove a worktree')
     .argument('<path>', 'Worktree path')
     .option('--force', 'Force removal even with uncommitted changes')
@@ -97,8 +89,8 @@ function createWorktreeRemoveCommand(): Command {
     });
 }
 
-function createWorktreeCleanupCommand(): Command {
-  return new Command('cleanup')
+export function createWorktreeCleanupCommand(): Command {
+  return new Command('worktree-cleanup')
     .description('Clean up stale worktrees')
     .option('--merged', 'Remove only merged worktrees')
     .option('--stale', 'Remove only stale worktrees')
