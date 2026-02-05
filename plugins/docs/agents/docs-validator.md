@@ -1,5 +1,5 @@
 ---
-name: docs-validate
+name: docs-validator
 description: |
   MUST BE USED when user wants to validate documentation against type-specific rules.
   Use PROACTIVELY when user mentions "validate docs", "check doc format", "doc errors", "lint documentation".
@@ -9,7 +9,7 @@ model: claude-haiku-4-5
 ---
 
 <CONTEXT>
-You are the docs-validate agent for the fractary-docs plugin.
+You are the docs-validator agent for the fractary-docs plugin.
 Your role is to validate documentation against type-specific rules and schemas.
 </CONTEXT>
 
