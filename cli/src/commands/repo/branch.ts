@@ -7,18 +7,8 @@ import chalk from 'chalk';
 import { getRepoManager } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
 
-export function createBranchCommands(): Command {
-  const branch = new Command('branch').description('Branch operations');
-
-  branch.addCommand(createBranchCreateCommand());
-  branch.addCommand(createBranchDeleteCommand());
-  branch.addCommand(createBranchListCommand());
-
-  return branch;
-}
-
-function createBranchCreateCommand(): Command {
-  return new Command('create')
+export function createBranchCreateCommand(): Command {
+  return new Command('branch-create')
     .description('Create a new branch')
     .argument('<name>', 'Branch name')
     .option('--base <branch>', 'Base branch')
@@ -46,8 +36,8 @@ function createBranchCreateCommand(): Command {
     });
 }
 
-function createBranchDeleteCommand(): Command {
-  return new Command('delete')
+export function createBranchDeleteCommand(): Command {
+  return new Command('branch-delete')
     .description('Delete a branch')
     .argument('<name>', 'Branch name')
     .option('--location <where>', 'Delete location: local|remote|both', 'local')
@@ -92,8 +82,8 @@ function createBranchDeleteCommand(): Command {
     });
 }
 
-function createBranchListCommand(): Command {
-  return new Command('list')
+export function createBranchListCommand(): Command {
+  return new Command('branch-list')
     .description('List branches')
     .option('--merged', 'Show only merged branches')
     .option('--stale', 'Show only stale branches')

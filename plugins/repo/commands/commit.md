@@ -1,7 +1,7 @@
 ---
 name: fractary-repo:commit
-allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
-description: Commit, push, and open a PR
+allowed-tools: Bash(fractary-core repo commit:*)
+description: Create a git commit
 model: claude-haiku-4-5
 argument-hint: '[--context "<text>"]'
 ---
@@ -15,6 +15,11 @@ argument-hint: '[--context "<text>"]'
 
 ## Your task
 
-Based on the above changes, create a single git commit.
+Based on the above changes, create a single git commit using `fractary-core repo commit`.
 
-You have the capability to call multiple tools in a single response. Stage and create the commit using a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+1. Analyze the diff to determine an appropriate commit message and type
+2. Stage and commit: `fractary-core repo commit --message "..." --type <type> --all`
+
+Valid types: feat, fix, chore, docs, style, refactor, test, build
+
+You have the capability to call multiple tools in a single response. Execute the commit in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
