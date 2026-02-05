@@ -303,7 +303,7 @@ function createIssueClassifyCommand(): Command {
         const issue = await workManager.fetchIssue(parseInt(number, 10));
 
         // Use SDK's classification method
-        const result = workManager.classifyWorkType(issue);
+        const result = await workManager.classifyWorkType(issue);
 
         if (options.json) {
           console.log(
