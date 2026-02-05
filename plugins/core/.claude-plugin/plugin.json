@@ -1,6 +1,6 @@
 {
   "name": "fractary-core",
-  "version": "3.4.2",
+  "version": "3.4.3",
   "description": "Core initialization and configuration for Fractary plugins",
   "commands": [
     "./commands/configure.md",
