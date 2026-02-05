@@ -12,6 +12,7 @@ import {
   IssueUpdateOptions,
   IssueFilters,
   WorkType,
+  ClassifyResult,
   Comment,
   Label,
   Milestone,
@@ -261,45 +262,123 @@ export class WorkManager {
   // =========================================================================
 
   /**
-   * Classify the type of work based on issue metadata
+   * Label-based scoring configuration for classification
    */
-  async classifyWorkType(issue: Issue): Promise<WorkType> {
-    const labels = issue.labels.map(l => l.name.toLowerCase());
-    const title = issue.title.toLowerCase();
-    const body = issue.body.toLowerCase();
+  private static readonly LABEL_SCORES: Record<string, { type: WorkType; score: number }> = {
+    bug: { type: 'bug', score: 0.95 },
+    defect: { type: 'bug', score: 0.95 },
+    regression: { type: 'bug', score: 0.9 },
+    enhancement: { type: 'feature', score: 0.9 },
+    feature: { type: 'feature', score: 0.95 },
+    'new feature': { type: 'feature', score: 0.95 },
+    chore: { type: 'chore', score: 0.9 },
+    maintenance: { type: 'chore', score: 0.85 },
+    dependencies: { type: 'chore', score: 0.8 },
+    hotfix: { type: 'patch', score: 0.95 },
+    urgent: { type: 'patch', score: 0.7 },
+    security: { type: 'patch', score: 0.85 },
+    critical: { type: 'patch', score: 0.8 },
+    infrastructure: { type: 'infrastructure', score: 0.9 },
+    infra: { type: 'infrastructure', score: 0.9 },
+    api: { type: 'api', score: 0.9 },
+  };
 
-    // Check labels first
-    if (labels.some(l => l.includes('bug') || l.includes('defect'))) {
-      return 'bug';
-    }
-    if (labels.some(l => l.includes('feature') || l.includes('enhancement'))) {
-      return 'feature';
-    }
-    if (labels.some(l => l.includes('chore') || l.includes('maintenance'))) {
-      return 'chore';
-    }
-    if (labels.some(l => l.includes('patch') || l.includes('hotfix'))) {
-      return 'patch';
-    }
-    if (labels.some(l => l.includes('infrastructure') || l.includes('infra'))) {
-      return 'infrastructure';
-    }
-    if (labels.some(l => l.includes('api'))) {
-      return 'api';
+  /**
+   * Keyword groups for title-based classification
+   */
+  private static readonly KEYWORDS = {
+    bug: ['fix', 'bug', 'error', 'crash', 'broken', 'issue', 'problem'],
+    feature: ['add', 'implement', 'new', 'create', 'feature', 'support'],
+    chore: ['update', 'upgrade', 'refactor', 'clean', 'remove', 'deprecate', 'migrate'],
+    patch: ['hotfix', 'urgent', 'critical', 'security'],
+  };
+
+  /**
+   * Classify the type of work based on issue metadata with confidence scoring
+   *
+   * Uses a multi-signal approach:
+   * 1. Labels (highest priority) - direct mapping with high confidence
+   * 2. Title keywords - pattern matching with moderate confidence
+   *
+   * @param issue - The issue to classify
+   * @returns Classification result with work type, confidence score, and signals
+   */
+  classifyWorkType(issue: Issue): ClassifyResult {
+    const title = (issue.title || '').toLowerCase();
+    const labels = (issue.labels || []).map((l) => l.name.toLowerCase());
+
+    const signals = {
+      labels: labels,
+      title_keywords: [] as string[],
+      has_bug_markers: false,
+    };
+
+    // Check labels first (highest priority)
+    for (const label of labels) {
+      const match = WorkManager.LABEL_SCORES[label];
+      if (match) {
+        return {
+          work_type: match.type,
+          confidence: match.score,
+          signals,
+        };
+      }
     }
 
-    // Check title/body keywords
-    if (title.includes('bug') || title.includes('fix') || body.includes('regression')) {
-      return 'bug';
-    }
-    if (title.includes('add') || title.includes('implement') || title.includes('feature')) {
-      return 'feature';
-    }
-    if (title.includes('refactor') || title.includes('cleanup') || title.includes('chore')) {
-      return 'chore';
+    // Check for patch markers (highest urgency)
+    for (const keyword of WorkManager.KEYWORDS.patch) {
+      if (title.includes(keyword)) {
+        signals.title_keywords.push(keyword);
+        return {
+          work_type: 'patch',
+          confidence: 0.85,
+          signals,
+        };
+      }
     }
 
-    // Default to feature
-    return 'feature';
+    // Check for bug markers
+    for (const keyword of WorkManager.KEYWORDS.bug) {
+      if (title.includes(keyword)) {
+        signals.title_keywords.push(keyword);
+        signals.has_bug_markers = true;
+        return {
+          work_type: 'bug',
+          confidence: 0.75,
+          signals,
+        };
+      }
+    }
+
+    // Check for chore markers
+    for (const keyword of WorkManager.KEYWORDS.chore) {
+      if (title.includes(keyword)) {
+        signals.title_keywords.push(keyword);
+        return {
+          work_type: 'chore',
+          confidence: 0.65,
+          signals,
+        };
+      }
+    }
+
+    // Check for feature markers
+    for (const keyword of WorkManager.KEYWORDS.feature) {
+      if (title.includes(keyword)) {
+        signals.title_keywords.push(keyword);
+        return {
+          work_type: 'feature',
+          confidence: 0.7,
+          signals,
+        };
+      }
+    }
+
+    // Default to feature with low confidence
+    return {
+      work_type: 'feature',
+      confidence: 0.5,
+      signals,
+    };
   }
 }

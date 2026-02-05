@@ -1,6 +1,6 @@
 {
   "name": "fractary-work",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "Work item management across GitHub, Jira, Linear, etc.",
   "commands": "./commands/",
   "agents": [
