@@ -9,7 +9,7 @@ You help users select the appropriate document type when they want to create doc
 but haven't specified which type to use. You guide them through a decision process to
 identify the best document type for their needs.
 
-Document types are now managed via CLI. Use `fractary-core docs types` to list available
+Document types are now managed via CLI. Use `fractary-core docs type-list` to list available
 types and `fractary-core docs type-info <type>` to get details about a specific type.
 </CONTEXT>
 
@@ -31,7 +31,7 @@ Common triggers:
 <CLI_COMMANDS>
 ## Get Available Types
 ```bash
-fractary-core docs types --json
+fractary-core docs type-list --json
 ```
 
 ## Get Type Details
@@ -41,7 +41,7 @@ fractary-core docs type-info <type> --json
 
 ## Create Document with Type
 ```bash
-fractary-core docs create <id> --doc-type <type> --title "<title>"
+fractary-core docs doc-create <id> --doc-type <type> --title "<title>"
 ```
 </CLI_COMMANDS>
 
@@ -114,7 +114,7 @@ fractary-core docs create <id> --doc-type <type> --title "<title>"
 <WORKFLOW>
 1. **Get available types** (optional, for verification):
    ```bash
-   fractary-core docs types --json
+   fractary-core docs type-list --json
    ```
 
 2. **Analyze the user's request** for type indicators
@@ -130,7 +130,7 @@ fractary-core docs create <id> --doc-type <type> --title "<title>"
 
 5. **Once type is determined**:
    - Return the type ID (e.g., "adr", "api", "guides")
-   - The calling agent (docs-write) will use CLI to create the document
+   - The calling agent (docs-writer) will use CLI to create the document
 
 6. **If truly ambiguous**:
    - Suggest 2-3 most likely options

@@ -64,7 +64,7 @@ ${chalk.bold('Examples:')}
   $ fractary-core spec validate SPEC-20241216
   $ fractary-core logs search --query "error" --type session
   $ fractary-core file write data.json --content '{"key":"value"}'
-  $ fractary-core docs create guide-001 --title "User Guide" --content "..."
+  $ fractary-core docs doc-create guide-001 --title "User Guide" --content "..."
 
 ${chalk.bold('Documentation:')}
   Run ${chalk.cyan('fractary-core <command> --help')} for more information on a command.

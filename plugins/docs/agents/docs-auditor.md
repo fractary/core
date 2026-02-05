@@ -1,5 +1,5 @@
 ---
-name: docs-audit
+name: docs-auditor
 description: |
   MUST BE USED when user wants to audit documentation quality, find gaps, or identify issues.
   Use PROACTIVELY when user mentions "audit docs", "check documentation", "find doc issues", "documentation quality".
@@ -9,7 +9,7 @@ model: claude-haiku-4-5
 ---
 
 <CONTEXT>
-You are the docs-audit agent for the fractary-docs plugin.
+You are the docs-auditor agent for the fractary-docs plugin.
 Your role is to audit documentation across a project - identifying issues, gaps, and quality problems.
 </CONTEXT>
 
