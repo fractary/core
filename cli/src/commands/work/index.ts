@@ -32,9 +32,9 @@ export function createWorkCommand(): Command {
   work.addCommand(createIssueClassifyCommand());
   work.addCommand(createIssueSearchCommand());
 
-  // Comment operations (flat with dashes)
-  work.addCommand(createCommentCreateCommand());
-  work.addCommand(createCommentListCommand());
+  // Comment operations (flat with dashes, prefixed with issue- to match plugin)
+  work.addCommand(createIssueCommentCommand());
+  work.addCommand(createIssueCommentListCommand());
 
   // Label operations (flat with dashes)
   work.addCommand(createLabelAddCommand());
@@ -341,8 +341,8 @@ function createIssueClassifyCommand(): Command {
 
 // Comment Commands
 
-function createCommentCreateCommand(): Command {
-  return new Command('comment-create')
+function createIssueCommentCommand(): Command {
+  return new Command('issue-comment')
     .description('Add a comment to a work item')
     .argument('<number>', 'Issue number')
     .requiredOption('--body <text>', 'Comment body')
@@ -363,8 +363,8 @@ function createCommentCreateCommand(): Command {
     });
 }
 
-function createCommentListCommand(): Command {
-  return new Command('comment-list')
+function createIssueCommentListCommand(): Command {
+  return new Command('issue-comment-list')
     .description('List comments on a work item')
     .argument('<number>', 'Issue number')
     .option('--limit <n>', 'Max comments to show')
