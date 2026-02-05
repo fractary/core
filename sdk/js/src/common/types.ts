@@ -88,6 +88,30 @@ export interface IssueFilters {
 
 export type WorkType = 'feature' | 'bug' | 'chore' | 'patch' | 'infrastructure' | 'api';
 
+/**
+ * Result of work type classification with confidence scoring
+ */
+export interface ClassifyResult {
+  /** The classified work type */
+  work_type: WorkType;
+  /** Confidence score between 0 and 1 */
+  confidence: number;
+  /** Signals used to make the classification */
+  signals: ClassifySignals;
+}
+
+/**
+ * Signals extracted during classification
+ */
+export interface ClassifySignals {
+  /** Labels found on the issue */
+  labels: string[];
+  /** Keywords found in the title */
+  title_keywords: string[];
+  /** Whether bug-related markers were found */
+  has_bug_markers: boolean;
+}
+
 export interface Label {
   name: string;
   color?: string;

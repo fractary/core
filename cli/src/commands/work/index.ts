@@ -302,7 +302,8 @@ function createIssueClassifyCommand(): Command {
         const workManager = await getWorkManager();
         const issue = await workManager.fetchIssue(parseInt(number, 10));
 
-        const result = classifyWorkType(issue);
+        // Use SDK's classification method
+        const result = workManager.classifyWorkType(issue);
 
         if (options.json) {
           console.log(
@@ -559,119 +560,6 @@ function createConfigureCommand(): Command {
 }
 
 // Helper Functions
-
-/**
- * Classify work type based on issue signals
- */
-interface ClassifyResult {
-  work_type: 'feature' | 'bug' | 'chore' | 'patch';
-  confidence: number;
-  signals: {
-    labels: string[];
-    title_keywords: string[];
-    has_bug_markers: boolean;
-  };
-}
-
-interface IssueForClassification {
-  title?: string;
-  labels?: Array<{ name: string } | string>;
-  body?: string;
-}
-
-function classifyWorkType(issue: IssueForClassification): ClassifyResult {
-  const title = (issue.title || '').toLowerCase();
-  const labels = (issue.labels || []).map((l) =>
-    typeof l === 'string' ? l.toLowerCase() : l.name.toLowerCase()
-  );
-
-  const signals = {
-    labels: labels,
-    title_keywords: [] as string[],
-    has_bug_markers: false,
-  };
-
-  // Label-based classification (highest priority)
-  const labelScores: Record<string, { type: ClassifyResult['work_type']; score: number }> = {
-    bug: { type: 'bug', score: 0.95 },
-    defect: { type: 'bug', score: 0.95 },
-    regression: { type: 'bug', score: 0.9 },
-    enhancement: { type: 'feature', score: 0.9 },
-    feature: { type: 'feature', score: 0.95 },
-    'new feature': { type: 'feature', score: 0.95 },
-    chore: { type: 'chore', score: 0.9 },
-    maintenance: { type: 'chore', score: 0.85 },
-    dependencies: { type: 'chore', score: 0.8 },
-    hotfix: { type: 'patch', score: 0.95 },
-    urgent: { type: 'patch', score: 0.7 },
-    security: { type: 'patch', score: 0.85 },
-    critical: { type: 'patch', score: 0.8 },
-  };
-
-  // Check labels first
-  for (const label of labels) {
-    if (labelScores[label]) {
-      return {
-        work_type: labelScores[label].type,
-        confidence: labelScores[label].score,
-        signals,
-      };
-    }
-  }
-
-  // Title keyword analysis
-  const bugKeywords = ['fix', 'bug', 'error', 'crash', 'broken', 'issue', 'problem'];
-  const featureKeywords = ['add', 'implement', 'new', 'create', 'feature', 'support'];
-  const choreKeywords = ['update', 'upgrade', 'refactor', 'clean', 'remove', 'deprecate', 'migrate'];
-  const patchKeywords = ['hotfix', 'urgent', 'critical', 'security'];
-
-  let workType: ClassifyResult['work_type'] = 'feature';
-  let confidence = 0.5;
-
-  // Check for patch markers (highest urgency)
-  for (const keyword of patchKeywords) {
-    if (title.includes(keyword)) {
-      signals.title_keywords.push(keyword);
-      workType = 'patch';
-      confidence = 0.85;
-      return { work_type: workType, confidence, signals };
-    }
-  }
-
-  // Check for bug markers
-  for (const keyword of bugKeywords) {
-    if (title.includes(keyword)) {
-      signals.title_keywords.push(keyword);
-      signals.has_bug_markers = true;
-      workType = 'bug';
-      confidence = 0.75;
-    }
-  }
-
-  // Check for feature markers
-  if (workType !== 'bug') {
-    for (const keyword of featureKeywords) {
-      if (title.includes(keyword)) {
-        signals.title_keywords.push(keyword);
-        workType = 'feature';
-        confidence = 0.7;
-      }
-    }
-  }
-
-  // Check for chore markers
-  if (workType === 'feature') {
-    for (const keyword of choreKeywords) {
-      if (title.includes(keyword)) {
-        signals.title_keywords.push(keyword);
-        workType = 'chore';
-        confidence = 0.65;
-      }
-    }
-  }
-
-  return { work_type: workType, confidence, signals };
-}
 
 /**
  * Detect platform from git remote URL
