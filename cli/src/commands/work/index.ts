@@ -14,47 +14,35 @@ import { loadConfig, writeConfig, getConfigPath, type CoreConfig } from '../../u
 
 /**
  * Create the work command tree
+ *
+ * Commands use dashes to mirror plugin naming:
+ * CLI: fractary-core work issue-create
+ * Plugin: /fractary-work:issue-create
  */
 export function createWorkCommand(): Command {
   const work = new Command('work').description('Work item tracking operations');
 
-  // Issue operations
-  const issue = new Command('issue').description('Issue operations');
+  // Issue operations (flat with dashes)
+  work.addCommand(createIssueFetchCommand());
+  work.addCommand(createIssueCreateCommand());
+  work.addCommand(createIssueUpdateCommand());
+  work.addCommand(createIssueCloseCommand());
+  work.addCommand(createIssueReopenCommand());
+  work.addCommand(createIssueAssignCommand());
+  work.addCommand(createIssueClassifyCommand());
+  work.addCommand(createIssueSearchCommand());
 
-  issue.addCommand(createIssueFetchCommand());
-  issue.addCommand(createIssueCreateCommand());
-  issue.addCommand(createIssueUpdateCommand());
-  issue.addCommand(createIssueCloseCommand());
-  issue.addCommand(createIssueReopenCommand());
-  issue.addCommand(createIssueAssignCommand());
-  issue.addCommand(createIssueClassifyCommand());
-  issue.addCommand(createIssueSearchCommand());
+  // Comment operations (flat with dashes, prefixed with issue- to match plugin)
+  work.addCommand(createIssueCommentCommand());
+  work.addCommand(createIssueCommentListCommand());
 
-  // Comment operations
-  const comment = new Command('comment').description('Comment operations');
+  // Label operations (flat with dashes)
+  work.addCommand(createLabelAddCommand());
+  work.addCommand(createLabelRemoveCommand());
+  work.addCommand(createLabelListCommand());
 
-  comment.addCommand(createCommentCreateCommand());
-  comment.addCommand(createCommentListCommand());
-
-  // Label operations
-  const label = new Command('label').description('Label operations');
-
-  label.addCommand(createLabelAddCommand());
-  label.addCommand(createLabelRemoveCommand());
-  label.addCommand(createLabelListCommand());
-
-  // Milestone operations
-  const milestone = new Command('milestone').description('Milestone operations');
-
-  milestone.addCommand(createMilestoneCreateCommand());
-  milestone.addCommand(createMilestoneListCommand());
-  milestone.addCommand(createMilestoneSetCommand());
-
-  work.addCommand(issue);
-  work.addCommand(comment);
-  work.addCommand(label);
-  work.addCommand(milestone);
-  work.addCommand(createInitCommand());
+  // Configuration
+  work.addCommand(createConfigureCommand());
 
   return work;
 }
@@ -62,7 +50,7 @@ export function createWorkCommand(): Command {
 // Issue Commands
 
 function createIssueFetchCommand(): Command {
-  return new Command('fetch')
+  return new Command('issue-fetch')
     .description('Fetch a work item by ID')
     .argument('<number>', 'Issue number')
     .option('--json', 'Output as JSON')
@@ -99,7 +87,7 @@ function createIssueFetchCommand(): Command {
 }
 
 function createIssueCreateCommand(): Command {
-  return new Command('create')
+  return new Command('issue-create')
     .description('Create a new work item')
     .requiredOption('--title <title>', 'Issue title')
     .option('--body <body>', 'Issue body')
@@ -128,7 +116,7 @@ function createIssueCreateCommand(): Command {
 }
 
 function createIssueUpdateCommand(): Command {
-  return new Command('update')
+  return new Command('issue-update')
     .description('Update a work item')
     .argument('<number>', 'Issue number')
     .option('--title <title>', 'New title')
@@ -156,7 +144,7 @@ function createIssueUpdateCommand(): Command {
 }
 
 function createIssueCloseCommand(): Command {
-  return new Command('close')
+  return new Command('issue-close')
     .description('Close a work item')
     .argument('<number>', 'Issue number')
     .option('--comment <text>', 'Add closing comment')
@@ -184,7 +172,7 @@ function createIssueCloseCommand(): Command {
 }
 
 function createIssueReopenCommand(): Command {
-  return new Command('reopen')
+  return new Command('issue-reopen')
     .description('Reopen a closed work item')
     .argument('<number>', 'Issue number')
     .option('--comment <text>', 'Add comment when reopening')
@@ -225,7 +213,7 @@ function createIssueReopenCommand(): Command {
 }
 
 function createIssueAssignCommand(): Command {
-  return new Command('assign')
+  return new Command('issue-assign')
     .description('Assign or unassign a work item')
     .argument('<number>', 'Issue number')
     .option('--user <username>', 'User to assign (use @me for self, omit to unassign)')
@@ -270,7 +258,7 @@ function createIssueAssignCommand(): Command {
 }
 
 function createIssueSearchCommand(): Command {
-  return new Command('search')
+  return new Command('issue-search')
     .description('Search work items')
     .requiredOption('--query <query>', 'Search query')
     .option('--state <state>', 'Filter by state (open, closed, all)', 'open')
@@ -305,7 +293,7 @@ function createIssueSearchCommand(): Command {
 }
 
 function createIssueClassifyCommand(): Command {
-  return new Command('classify')
+  return new Command('issue-classify')
     .description('Classify work item type (feature, bug, chore, patch)')
     .argument('<number>', 'Issue number')
     .option('--json', 'Output as JSON')
@@ -353,8 +341,8 @@ function createIssueClassifyCommand(): Command {
 
 // Comment Commands
 
-function createCommentCreateCommand(): Command {
-  return new Command('create')
+function createIssueCommentCommand(): Command {
+  return new Command('issue-comment')
     .description('Add a comment to a work item')
     .argument('<number>', 'Issue number')
     .requiredOption('--body <text>', 'Comment body')
@@ -375,8 +363,8 @@ function createCommentCreateCommand(): Command {
     });
 }
 
-function createCommentListCommand(): Command {
-  return new Command('list')
+function createIssueCommentListCommand(): Command {
+  return new Command('issue-comment-list')
     .description('List comments on a work item')
     .argument('<number>', 'Issue number')
     .option('--limit <n>', 'Max comments to show')
@@ -411,7 +399,7 @@ function createCommentListCommand(): Command {
 // Label Commands
 
 function createLabelAddCommand(): Command {
-  return new Command('add')
+  return new Command('label-add')
     .description('Add labels to a work item')
     .argument('<number>', 'Issue number')
     .requiredOption('--labels <labels>', 'Comma-separated labels to add')
@@ -434,7 +422,7 @@ function createLabelAddCommand(): Command {
 }
 
 function createLabelRemoveCommand(): Command {
-  return new Command('remove')
+  return new Command('label-remove')
     .description('Remove labels from a work item')
     .argument('<number>', 'Issue number')
     .requiredOption('--labels <labels>', 'Comma-separated labels to remove')
@@ -457,7 +445,7 @@ function createLabelRemoveCommand(): Command {
 }
 
 function createLabelListCommand(): Command {
-  return new Command('list')
+  return new Command('label-list')
     .description('List all available labels or labels on an issue')
     .option('--issue <number>', 'Show labels for specific issue')
     .option('--json', 'Output as JSON')
@@ -503,99 +491,21 @@ function createLabelListCommand(): Command {
     });
 }
 
-// Milestone Commands
-
-function createMilestoneCreateCommand(): Command {
-  return new Command('create')
-    .description('Create a new milestone')
-    .requiredOption('--title <title>', 'Milestone title')
-    .option('--description <desc>', 'Milestone description')
-    .option('--due-on <date>', 'Due date (YYYY-MM-DD)')
-    .option('--json', 'Output as JSON')
-    .action(async (options) => {
-      try {
-        const workManager = await getWorkManager();
-        const milestone = await workManager.createMilestone({
-          title: options.title,
-          description: options.description,
-          due_on: options.dueOn,
-        });
-
-        if (options.json) {
-          console.log(JSON.stringify({ status: 'success', data: milestone }, null, 2));
-        } else {
-          console.log(chalk.green(`✓ Created milestone: ${milestone.title}`));
-        }
-      } catch (error) {
-        handleError(error, options);
-      }
-    });
-}
-
-function createMilestoneListCommand(): Command {
-  return new Command('list')
-    .description('List milestones')
-    .option('--state <state>', 'Filter by state (open, closed, all)', 'open')
-    .option('--json', 'Output as JSON')
-    .action(async (options) => {
-      try {
-        const workManager = await getWorkManager();
-        const milestones = await workManager.listMilestones(options.state || 'all');
-
-        if (options.json) {
-          console.log(JSON.stringify({ status: 'success', data: milestones }, null, 2));
-        } else {
-          if (milestones.length === 0) {
-            console.log(chalk.yellow('No milestones'));
-          } else {
-            milestones.forEach((milestone: any) => {
-              console.log(`  • ${milestone.title} [${milestone.state}]`);
-            });
-          }
-        }
-      } catch (error) {
-        handleError(error, options);
-      }
-    });
-}
-
-function createMilestoneSetCommand(): Command {
-  return new Command('set')
-    .description('Set milestone for a work item')
-    .argument('<number>', 'Issue number')
-    .requiredOption('--milestone <title>', 'Milestone title')
-    .option('--json', 'Output as JSON')
-    .action(async (number: string, options) => {
-      try {
-        const workManager = await getWorkManager();
-        const issue = await workManager.setMilestone(parseInt(number, 10), options.milestone);
-
-        if (options.json) {
-          console.log(JSON.stringify({ status: 'success', data: issue }, null, 2));
-        } else {
-          console.log(chalk.green(`✓ Set milestone for issue #${number}`));
-        }
-      } catch (error) {
-        handleError(error, options);
-      }
-    });
-}
-
-// Init Command
+// Configure Command
 
 /**
- * Work init config (internal, converted to SDK's YAML format)
+ * Work config (internal, converted to SDK's YAML format)
  */
-interface WorkInitConfig {
+interface WorkConfig {
   platform: string;
   owner?: string;
   repo?: string;
   project?: string;
 }
 
-function createInitCommand(): Command {
-  return new Command('init')
-    .description('Initialize work tracking configuration')
+function createConfigureCommand(): Command {
+  return new Command('configure')
+    .description('Configure work tracking settings')
     .option('--platform <name>', 'Platform (github, gitlab, bitbucket, jira, linear)')
     .option('--project <name>', 'Project name (for Jira/Linear)')
     .option('--yes', 'Skip confirmation prompts')
@@ -611,11 +521,11 @@ function createInitCommand(): Command {
           }
         }
 
-        const initConfig = await buildWorkInitConfig(platform, {
+        const workConfig = await buildWorkConfig(platform, {
           project: options.project,
         });
 
-        const configPath = await writeWorkConfig(initConfig);
+        const configPath = await writeWorkConfiguration(workConfig);
 
         if (options.json) {
           console.log(
@@ -623,11 +533,11 @@ function createInitCommand(): Command {
               {
                 status: 'success',
                 data: {
-                  platform: initConfig.platform,
+                  platform: workConfig.platform,
                   configPath,
-                  owner: initConfig.owner,
-                  repo: initConfig.repo,
-                  project: initConfig.project,
+                  owner: workConfig.owner,
+                  repo: workConfig.repo,
+                  project: workConfig.project,
                 },
               },
               null,
@@ -635,10 +545,10 @@ function createInitCommand(): Command {
             )
           );
         } else {
-          console.log(chalk.green(`✓ Work tracking initialized`));
-          console.log(chalk.gray(`Platform: ${initConfig.platform}`));
-          if (initConfig.owner && initConfig.repo) {
-            console.log(chalk.gray(`Repository: ${initConfig.owner}/${initConfig.repo}`));
+          console.log(chalk.green(`✓ Work tracking configured`));
+          console.log(chalk.gray(`Platform: ${workConfig.platform}`));
+          if (workConfig.owner && workConfig.repo) {
+            console.log(chalk.gray(`Repository: ${workConfig.owner}/${workConfig.repo}`));
           }
           console.log(chalk.gray(`Config: ${configPath}`));
         }
@@ -814,13 +724,13 @@ function parseGitRemote(url: string): { owner: string; name: string } | null {
 }
 
 /**
- * Build work init configuration (internal format)
+ * Build work configuration (internal format)
  */
-async function buildWorkInitConfig(
+async function buildWorkConfig(
   platform: string,
   options: { project?: string }
-): Promise<WorkInitConfig> {
-  const config: WorkInitConfig = {
+): Promise<WorkConfig> {
+  const config: WorkConfig = {
     platform,
   };
 
@@ -851,10 +761,10 @@ async function buildWorkInitConfig(
 /**
  * Write work configuration to SDK's YAML config file
  *
- * Converts the internal WorkInitConfig to the SDK's handler-based YAML format
+ * Converts the internal WorkConfig to the SDK's handler-based YAML format
  * and merges it with any existing configuration.
  */
-async function writeWorkConfig(initConfig: WorkInitConfig): Promise<string> {
+async function writeWorkConfiguration(workConfig: WorkConfig): Promise<string> {
   // Load existing config or create new with explicit error handling
   let existingConfig: CoreConfig;
   try {
@@ -870,31 +780,31 @@ async function writeWorkConfig(initConfig: WorkInitConfig): Promise<string> {
   // Build handler config for the platform
   const handlerConfig: Record<string, unknown> = {};
 
-  if (initConfig.owner) {
-    handlerConfig.owner = initConfig.owner;
+  if (workConfig.owner) {
+    handlerConfig.owner = workConfig.owner;
   }
-  if (initConfig.repo) {
-    handlerConfig.repo = initConfig.repo;
+  if (workConfig.repo) {
+    handlerConfig.repo = workConfig.repo;
   }
-  if (initConfig.project) {
-    handlerConfig.project = initConfig.project;
+  if (workConfig.project) {
+    handlerConfig.project = workConfig.project;
   }
 
   // Use environment variable reference for token (best practice)
-  const tokenEnvVar = getTokenEnvVar(initConfig.platform);
+  const tokenEnvVar = getTokenEnvVar(workConfig.platform);
   if (tokenEnvVar) {
     handlerConfig.token = `\${${tokenEnvVar}}`;
   }
 
   // Build the work section in SDK's handler-based format
   const existingHandlers = (existingConfig.work?.handlers || {}) as Record<string, Record<string, unknown>>;
-  const existingPlatformConfig = existingHandlers[initConfig.platform] || {};
+  const existingPlatformConfig = existingHandlers[workConfig.platform] || {};
 
-  const workConfig = {
-    active_handler: initConfig.platform,
+  const workSection = {
+    active_handler: workConfig.platform,
     handlers: {
       ...existingHandlers,
-      [initConfig.platform]: {
+      [workConfig.platform]: {
         ...existingPlatformConfig,
         ...handlerConfig,
       },
@@ -904,7 +814,7 @@ async function writeWorkConfig(initConfig: WorkInitConfig): Promise<string> {
   // Merge with existing config
   const mergedConfig: CoreConfig = {
     ...existingConfig,
-    work: workConfig as CoreConfig['work'],
+    work: workSection as CoreConfig['work'],
   };
 
   // Write using SDK's YAML config writer
