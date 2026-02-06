@@ -1,27 +1,23 @@
 ---
-name: delete
+name: fractary-file:delete
+allowed-tools: Bash(fractary-core file delete:*)
 description: Delete a file from storage
-arguments:
-  - name: path
-    description: Remote path to delete
-    required: true
-  - name: source
-    description: Named source from config (e.g., specs, logs)
-    required: false
-  - name: context
-    description: Additional instructions for the agent
-    required: false
-invocation: file delete <path> [--source <name>] [--context "<text>"]
+model: claude-haiku-4-5
+argument-hint: '<path> [--source <name>] [--json] [--context "<text>"]'
 ---
 
-Delete a file from configured storage.
+## Your task
 
-## Examples
+Delete a file from storage using the CLI command `fractary-core file delete`.
 
-```bash
-# Delete from default storage
-file delete docs/old-file.txt
+Parse arguments:
+- path (required): Remote storage path to delete
+- --source: Named source from config (e.g., specs, logs)
+- --json: Output as JSON for structured data
 
-# Delete from specific source
-file delete archive/SPEC-001.md --source specs
-```
+Examples:
+- `fractary-core file delete docs/old-file.txt`
+- `fractary-core file delete archive/SPEC-001.md --source specs`
+- `fractary-core file delete temp/data.json --json`
+
+You have the capability to call multiple tools in a single response. Execute the delete operation in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
