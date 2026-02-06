@@ -1,17 +1,27 @@
 ---
 name: fractary-logs:search
-description: Search logs - delegates to fractary-logs:logs-search agent
-allowed-tools: Task(fractary-logs:logs-search)
+allowed-tools: Bash(fractary-core logs search:*)
+description: Search logs
 model: claude-haiku-4-5
-argument-hint: '"<query>" [--issue <number>] [--type <type>] [--since <date>] [--context "<text>"]'
+argument-hint: '--query "<text>" [--type <type>] [--issue <number>] [--regex] [--limit <n>] [--json] [--context "<text>"]'
 ---
 
-Use **Task** tool with `fractary-logs:logs-search` agent to search across logs.
+## Your task
 
-```
-Task(
-  subagent_type="fractary-logs:logs-search",
-  description="Search logs",
-  prompt="Search across logs: $ARGUMENTS"
-)
-```
+Search logs using the CLI command `fractary-core logs search`.
+
+Parse arguments:
+- --query (required): Search query text
+- --type: Filter by log type (session, build, deployment, test, debug, audit, operational, workflow, changelog)
+- --issue: Filter by issue number
+- --regex: Use regex for search
+- --limit: Limit results (default: 10)
+- --json: Output as JSON for structured data
+
+Examples:
+- `fractary-core logs search --query "error" --json`
+- `fractary-core logs search --query "timeout" --type build --json`
+- `fractary-core logs search --query "deploy.*fail" --regex --issue 42 --json`
+- `fractary-core logs search --query "memory leak" --limit 5 --json`
+
+You have the capability to call multiple tools in a single response. Execute the search operation in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.

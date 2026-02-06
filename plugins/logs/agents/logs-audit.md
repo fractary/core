@@ -14,24 +14,56 @@ Your role is to audit existing logs in a project, identify what should be manage
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. ALWAYS use the log-auditor skill for audit operations
+1. ALWAYS use CLI commands for log discovery and type validation
 2. ALWAYS generate both audit report and remediation spec
 3. ALWAYS identify logs in version control
 4. ALWAYS calculate potential storage savings
 5. With --execute, execute high-priority remediations automatically
 </CRITICAL_RULES>
 
+<CLI_COMMANDS>
+## List Available Log Types
+```bash
+fractary-core logs types --json
+```
+Returns array of available types with id, display_name, description.
+
+## Get Log Type Definition
+```bash
+fractary-core logs type-info <type> --json
+```
+Returns full type definition including frontmatter requirements, structure, and retention policy.
+
+## List Logs
+```bash
+fractary-core logs list [--type <type>] [--status <status>] [--limit <n>] [--json]
+```
+
+## Read Specific Log
+```bash
+fractary-core logs read <id> [--json]
+```
+
+## Validate Log File
+```bash
+fractary-core logs validate <file> [--log-type <type>] [--json]
+```
+</CLI_COMMANDS>
+
 <WORKFLOW>
 1. Parse arguments (--project-root, --execute, --context)
 2. If --context provided, apply as additional instructions to workflow
-3. Invoke fractary-logs:log-auditor skill
-3. Load configuration and .gitignore patterns
-4. Discover all log files and log-like files
-5. Analyze against best practices
-6. Generate audit report (ephemeral)
-7. Generate remediation spec (persistent)
-8. If --execute: execute high-priority fixes
-9. Return summary
+3. Get available types: `fractary-core logs types --json`
+4. Load configuration and .gitignore patterns
+5. Discover all log files and log-like files in project
+6. For each discovered log file, validate: `fractary-core logs validate <file> --json`
+7. List managed logs: `fractary-core logs list --json`
+8. Compare discovered files against managed logs
+9. Analyze against best practices (retention, type coverage, validation status)
+10. Generate audit report (ephemeral)
+11. Generate remediation spec (persistent)
+12. If --execute: execute high-priority fixes
+13. Return summary
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -45,16 +77,3 @@ Your role is to audit existing logs in a project, identify what should be manage
 - **Remediation Spec**: `/specs/logs-remediation-{timestamp}.md` (persistent)
 - **Discovery Data**: `/logs/audits/tmp/discovery-*.json` (temporary)
 </OUTPUTS>
-
-<SKILL_INVOCATION>
-Invoke the fractary-logs:log-auditor skill with:
-```json
-{
-  "operation": "audit",
-  "parameters": {
-    "project_root": ".",
-    "execute": false
-  }
-}
-```
-</SKILL_INVOCATION>
