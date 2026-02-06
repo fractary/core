@@ -1,6 +1,6 @@
 # Logs Toolset - MCP Tools Reference
 
-MCP tools reference for the Logs toolset. Tools for session and operational logging.
+MCP tools reference for the Logs toolset. 5 tools for session and operational logging.
 
 ## Tool Naming Convention
 
@@ -10,9 +10,9 @@ fractary_logs_{action}
 
 ## Log Tools
 
-### fractary_logs_write
+### fractary_logs_capture
 
-Write a new log entry.
+Capture a log entry (session, build, deployment, etc.).
 
 **Parameters:**
 | Parameter | Type | Required | Description |
@@ -20,8 +20,8 @@ Write a new log entry.
 | `type` | string | Yes | Log type: `session`, `build`, `deployment`, `test`, `debug`, `audit`, `operational`, `workflow` |
 | `title` | string | Yes | Log title |
 | `content` | string | Yes | Log content |
-| `issueNumber` | number | No | Associated issue number |
-| `metadata` | object | No | Additional metadata |
+| `issue_number` | number | No | Issue number to associate with this log |
+| `metadata` | object | No | Additional metadata for the log entry |
 
 **Example:**
 ```json
@@ -29,7 +29,11 @@ Write a new log entry.
   "type": "session",
   "title": "Feature Development Session",
   "content": "Session transcript...",
-  "issueNumber": 123
+  "issue_number": 123,
+  "metadata": {
+    "model": "claude-3.5-sonnet",
+    "duration": 3600
+  }
 }
 ```
 
@@ -48,17 +52,17 @@ Write a new log entry.
 
 ### fractary_logs_read
 
-Read a log entry.
+Read a specific log entry.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `logId` | string | Yes | Log ID or path |
+| `log_id` | string | Yes | Log entry ID or path |
 
 **Example:**
 ```json
 {
-  "logId": "LOG-20240115-001"
+  "log_id": "LOG-20240115-001"
 }
 ```
 
@@ -72,52 +76,33 @@ Read a log entry.
     "title": "Feature Development Session",
     "content": "Session transcript...",
     "metadata": {
-      "issueNumber": 123,
+      "issue_number": 123,
       "duration": 3600
     }
   }
 }
 ```
 
-### fractary_logs_list
-
-List log entries.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `type` | string | No | Filter by log type |
-| `issueNumber` | number | No | Filter by issue |
-| `since` | string | No | Logs since date (ISO 8601) |
-| `until` | string | No | Logs until date |
-| `limit` | number | No | Maximum results |
-
-**Example:**
-```json
-{
-  "type": "session",
-  "issueNumber": 123
-}
-```
-
 ### fractary_logs_search
 
-Search logs.
+Search log entries.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `query` | string | Yes | Search query |
-| `type` | string | No | Filter by log type |
-| `issueNumber` | number | No | Filter by issue |
-| `since` | string | No | Start date |
-| `until` | string | No | End date |
+| `type` | string | No | Filter by log type: `session`, `build`, `deployment`, `test`, `debug`, `audit`, `operational`, `workflow` |
+| `issue_number` | number | No | Filter by issue number |
+| `since` | string | No | Start date (ISO 8601 format) |
+| `until` | string | No | End date (ISO 8601 format) |
+| `regex` | boolean | No | Use regex for query matching |
 
 **Example:**
 ```json
 {
   "query": "authentication error",
-  "type": "session"
+  "type": "session",
+  "regex": false
 }
 ```
 
@@ -127,7 +112,7 @@ Search logs.
   "success": true,
   "data": [
     {
-      "logId": "LOG-20240115-001",
+      "log_id": "LOG-20240115-001",
       "title": "Feature Development Session",
       "matches": [
         {
@@ -142,26 +127,27 @@ Search logs.
 }
 ```
 
-## Capture Tools
+### fractary_logs_list
 
-### fractary_logs_capture_start
-
-Start session capture.
+List log entries.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `issueNumber` | number | No | Associated issue |
-| `title` | string | No | Session title |
-| `redactSensitive` | boolean | No | Redact sensitive data |
-| `model` | string | No | AI model being used |
+| `type` | string | No | Filter by log type: `session`, `build`, `deployment`, `test`, `debug`, `audit`, `operational`, `workflow` |
+| `status` | string | No | Filter by log status: `active`, `completed`, `stopped`, `success`, `failure`, `error` |
+| `issue_number` | number | No | Filter by issue number |
+| `since` | string | No | Start date (ISO 8601 format) |
+| `until` | string | No | End date (ISO 8601 format) |
+| `limit` | number | No | Maximum number of results |
 
 **Example:**
 ```json
 {
-  "issueNumber": 123,
-  "redactSensitive": true,
-  "model": "claude-3.5-sonnet"
+  "type": "session",
+  "status": "completed",
+  "issue_number": 123,
+  "limit": 10
 }
 ```
 
@@ -169,96 +155,33 @@ Start session capture.
 ```json
 {
   "success": true,
-  "data": {
-    "sessionId": "SESSION-20240115-001",
-    "status": "started",
-    "startedAt": "2024-01-15T10:30:00Z"
-  }
+  "data": [
+    {
+      "id": "LOG-20240115-001",
+      "type": "session",
+      "title": "Feature Development Session",
+      "status": "completed",
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  ]
 }
 ```
-
-### fractary_logs_capture_stop
-
-Stop active session capture.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `summary` | string | No | Session summary |
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "sessionId": "SESSION-20240115-001",
-    "status": "completed",
-    "path": ".fractary/logs/session/SESSION-20240115-001.md",
-    "duration": 3600,
-    "startedAt": "2024-01-15T10:30:00Z",
-    "completedAt": "2024-01-15T11:30:00Z"
-  }
-}
-```
-
-### fractary_logs_capture_status
-
-Get capture status.
-
-**Parameters:** None
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "active": true,
-    "sessionId": "SESSION-20240115-001",
-    "issueNumber": 123,
-    "startedAt": "2024-01-15T10:30:00Z",
-    "duration": 1800
-  }
-}
-```
-
-## Archive Tools
 
 ### fractary_logs_archive
 
-Archive logs.
+Archive old log entries.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `issueNumber` | number | No | Archive logs for issue |
-| `olderThan` | number | No | Archive logs older than days |
-| `type` | string | No | Archive specific type |
+| `max_age_days` | number | No | Archive logs older than this many days |
+| `compress` | boolean | No | Compress archived logs |
 
 **Example:**
 ```json
 {
-  "issueNumber": 123
-}
-```
-
-## Cleanup Tools
-
-### fractary_logs_cleanup
-
-Clean up old logs.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `olderThan` | number | No | Delete logs older than days |
-| `type` | string | No | Clean specific type |
-| `dryRun` | boolean | No | Preview without deleting |
-
-**Example:**
-```json
-{
-  "olderThan": 90,
-  "dryRun": true
+  "max_age_days": 90,
+  "compress": true
 }
 ```
 
@@ -267,58 +190,9 @@ Clean up old logs.
 {
   "success": true,
   "data": {
-    "dryRun": true,
-    "count": 15,
-    "size": "2.3 MB",
-    "logs": [
-      { "id": "LOG-20231015-001", "type": "session" },
-      { "id": "LOG-20231020-003", "type": "build" }
-    ]
-  }
-}
-```
-
-## Analyze Tools
-
-### fractary_logs_analyze
-
-Analyze logs for patterns.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `type` | string | No | Log type to analyze |
-| `issueNumber` | number | No | Analyze logs for issue |
-| `since` | string | No | Start date |
-| `report` | string | No | Report type: `summary`, `errors`, `time`, `full` |
-
-**Example:**
-```json
-{
-  "issueNumber": 123,
-  "report": "time"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "issueNumber": 123,
-    "totalSessions": 5,
-    "totalDuration": 31500,
-    "byPhase": {
-      "frame": 2700,
-      "architect": 5400,
-      "build": 18900,
-      "evaluate": 4500
-    },
-    "byDate": {
-      "2024-01-10": 9000,
-      "2024-01-11": 13500,
-      "2024-01-12": 9000
-    }
+    "archived": 15,
+    "compressed": true,
+    "size": "2.3 MB"
   }
 }
 ```
@@ -327,16 +201,30 @@ Analyze logs for patterns.
 
 | Tool | Description |
 |------|-------------|
-| `fractary_logs_write` | Write a log entry |
-| `fractary_logs_read` | Read a log entry |
+| `fractary_logs_capture` | Capture a log entry (session, build, deployment, etc.) |
+| `fractary_logs_read` | Read a specific log entry |
+| `fractary_logs_search` | Search log entries |
 | `fractary_logs_list` | List log entries |
-| `fractary_logs_search` | Search logs |
-| `fractary_logs_capture_start` | Start session capture |
-| `fractary_logs_capture_stop` | Stop session capture |
-| `fractary_logs_capture_status` | Get capture status |
-| `fractary_logs_archive` | Archive logs |
-| `fractary_logs_cleanup` | Clean up old logs |
-| `fractary_logs_analyze` | Analyze logs |
+| `fractary_logs_archive` | Archive old log entries |
+
+## Error Responses
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Log entry LOG-INVALID not found"
+  }
+}
+```
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| `NOT_FOUND` | Log entry not found |
+| `VALIDATION_ERROR` | Invalid parameters |
 
 ## Other Interfaces
 

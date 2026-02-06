@@ -1,12 +1,12 @@
-# Fractary Work Plugin v2.0
+# Fractary Work Plugin v3.0
 
 Universal work item management across GitHub Issues, Jira Cloud, and Linear.
 
 ## Overview
 
-The **Fractary Work Plugin** provides a unified interface for managing issues, tickets, and work items across multiple project management platforms. It abstracts platform-specific differences through a handler pattern, enabling seamless multi-platform support.
+The **Fractary Work Plugin** provides a unified interface for managing issues, tickets, and work items across multiple project management platforms. It uses an agents + commands + skills pattern with MCP-first architecture, abstracting platform-specific differences through handler skills.
 
-**Version:** 2.0.0
+**Version:** 3.0.8
 **Status:** Production Ready
 **Platforms:** GitHub Issues ✅ | Jira Cloud ✅ | Linear ✅
 
@@ -29,48 +29,38 @@ The **Fractary Work Plugin** provides a unified interface for managing issues, t
 
 ## Architecture
 
-### 3-Layer Design
+### Agents + Commands + Skills (MCP-First)
 
 ```
-Layer 1: FABER Workflow Phases / Commands
+Layer 1: Commands (User Interface)
+   /fractary-work:issue, /fractary-work:comment, etc.
    ↓
-Layer 2: work-manager Agent (Pure Router)
+Layer 2: Agents (Orchestration)
+   issue-refine, issue-bulk-creator
    ↓
-Layer 3: Focused Skills (11 skills)
+Layer 3: Skills (Platform Abstraction)
+   Handler skills + shared utilities
    ↓
-Layer 4: Handler Skills (Platform Abstraction)
-   ↓
-Layer 5: Scripts (Deterministic Operations)
+Layer 4: Scripts (Deterministic Operations)
 ```
 
 **Benefits:**
-- Skills focus on single operations (issue-fetcher, state-manager, etc.)
-- Handlers centralize platform-specific logic
-- Scripts execute outside LLM context (55-60% context reduction)
+- Agents handle orchestration and decision-making
+- Commands provide user-facing entry points
+- Handler skills centralize platform-specific logic
+- Scripts execute outside LLM context for efficiency
 
 ### Components
 
-#### Agent (1)
+#### Agents (2)
 
-**`work-manager`** - Pure JSON router
-- Parses operation requests
-- Routes to appropriate focused skill
-- Returns normalized responses
-- Never executes operations directly
+- **`issue-refine`** - Refine and improve issue content
+- **`issue-bulk-creator`** - Create multiple issues in batch
 
-#### Focused Skills (11)
+#### Commands (8)
 
-1. **issue-fetcher** - Retrieve issue details
-2. **issue-classifier** - Determine work type (/bug, /feature, /chore, /patch)
-3. **issue-creator** - Create new issues
-4. **issue-updater** - Update title/description
-5. **state-manager** - Lifecycle state changes (CRITICAL for Release phase)
-6. **comment-creator** - Post comments with FABER metadata
-7. **label-manager** - Add/remove labels
-8. **issue-assigner** - Assign/unassign users
-9. **issue-linker** - Create relationships between issues
-10. **milestone-manager** - Manage milestones/sprints/cycles
-11. **issue-searcher** - Query and list issues
+- `issue-comment`, `issue-create-bulk`, `issue-create`, `issue-fetch`
+- `issue-list`, `issue-refine`, `issue-search`, `issue-update`
 
 #### Handler Skills (3)
 
@@ -78,15 +68,10 @@ Layer 5: Scripts (Deterministic Operations)
 - **handler-work-tracker-jira** - Jira Cloud adapter (REST API v3)
 - **handler-work-tracker-linear** - Linear adapter (GraphQL)
 
-Each handler implements **18 scripts** for complete operation coverage.
+#### Utility Skills
 
-#### Utility Library
-
-**work-common** - Shared utilities
-- `config-loader.sh` - Load/validate configuration
-- `markdown-to-adf.sh` - Markdown → ADF for Jira
-- `jira-auth.sh` - Jira authentication helper
-- `jql-builder.sh` - JQL query builder
+- **work-common** - Shared utilities (config loading, format conversion)
+- **work-initializer** - Plugin initialization
 
 ## Prerequisites
 
@@ -135,44 +120,33 @@ export LINEAR_API_KEY="lin_api_xxxxxxxxxxxxxxxxxxxx"  # For Linear
 
 Create `.fractary/config.yaml`:
 
-```json
-{
-  "version": "1.0",
-  "project": {
-    "issue_system": "github",
-    "repository": "owner/repo"
-  },
-  "handlers": {
-    "work-tracker": {
-      "active": "github",
-      "github": {
-        "owner": "myorg",
-        "repo": "my-project",
-        "classification": {
-          "feature": ["feature", "enhancement"],
-          "bug": ["bug", "fix"],
-          "chore": ["chore", "maintenance", "docs"],
-          "patch": ["hotfix", "patch", "urgent"]
-        },
-        "states": {
-          "open": "OPEN",
-          "in_progress": "OPEN",
-          "in_review": "OPEN",
-          "done": "CLOSED",
-          "closed": "CLOSED"
-        },
-        "labels": {
-          "prefix": "faber-",
-          "in_progress": "in-progress",
-          "completed": "completed"
-        }
-      }
-    }
-  }
-}
+```yaml
+work:
+  schema_version: "3.0"
+  handlers:
+    work-tracker:
+      active: github
+      github:
+        owner: myorg
+        repo: my-project
+        classification:
+          feature: [feature, enhancement]
+          bug: [bug, fix]
+          chore: [chore, maintenance, docs]
+          patch: [hotfix, patch, urgent]
+        states:
+          open: OPEN
+          in_progress: OPEN
+          in_review: OPEN
+          done: CLOSED
+          closed: CLOSED
+        labels:
+          prefix: "faber-"
+          in_progress: in-progress
+          completed: completed
 ```
 
-**Template:** See `config/config.example.json` for complete configuration with all platforms.
+**Template:** See `config/` directory for complete configuration examples with all platforms.
 
 ## Commands
 
@@ -180,11 +154,9 @@ The work plugin provides user-facing commands for common operations:
 
 ### Setup
 
-- **`/fractary-work:init`** - Interactive setup wizard
+- **`fractary-core:config-init`** - Initialize unified configuration
   ```bash
-  /fractary-work:init                    # Interactive mode
-  /fractary-work:init --platform github  # Specify platform
-  /fractary-work:init --force            # Reconfigure
+  fractary-core:config-init              # Interactive mode
   ```
 
 ### Issue Management
@@ -261,7 +233,7 @@ This argument is always optional and appears as the final argument. When provide
 /fractary-work:issue-search "auth" --context "Focus on security-related issues"
 ```
 
-See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+Context arguments follow the `--context` flag pattern as described above.
 
 ## Session Tracking
 
@@ -361,7 +333,7 @@ _🤖 Auto-generated work update • Branch: `feat/123-add-auth` • 2025-11-12 
 
 ### Protocol: JSON Request/Response
 
-Work manager v2.0 uses structured JSON for all operations:
+The work plugin uses structured JSON for all operations:
 
 ```bash
 claude --agent work-manager '{
@@ -484,7 +456,7 @@ The work plugin integrates with all FABER workflow phases:
 - **Post comment** with test results
 
 ### Release Phase (CRITICAL)
-- **Close issue** (v2.0 fix - actually closes!)
+- **Close issue**
 - **Remove label** "faber-in-progress"
 - **Add label** "faber-completed"
 - **Post comment** with PR link and deployment info
@@ -494,42 +466,35 @@ The work plugin integrates with all FABER workflow phases:
 ```
 work/
 ├── .claude-plugin/
-│   └── plugin.json                              # Plugin manifest
+│   └── plugin.json                              # Plugin manifest (v3.0.8)
+├── README.md                                    # This file
 ├── agents/
-│   └── work-manager.md                          # Pure routing agent (574 lines)
-├── skills/
-│   ├── issue-fetcher/SKILL.md                   # Fetch operations
-│   ├── issue-classifier/SKILL.md                # Classification
-│   ├── issue-creator/SKILL.md                   # Create operations
-│   ├── issue-updater/SKILL.md                   # Update operations
-│   ├── state-manager/SKILL.md                   # State changes (CRITICAL)
-│   ├── comment-creator/SKILL.md                 # Comments
-│   ├── label-manager/SKILL.md                   # Labels
-│   ├── issue-assigner/SKILL.md                  # Assignments
-│   ├── issue-linker/SKILL.md                    # Relationships
-│   ├── milestone-manager/SKILL.md               # Milestones
-│   ├── issue-searcher/SKILL.md                  # Query/search
-│   ├── work-common/                             # Shared utilities
-│   │   ├── SKILL.md
-│   │   └── scripts/ (7 scripts)
-│   ├── handler-work-tracker-github/             # GitHub adapter
-│   │   ├── SKILL.md                             # Handler documentation (426 lines)
-│   │   ├── scripts/ (18 scripts)
-│   │   └── docs/github-api.md
-│   ├── handler-work-tracker-jira/               # Jira adapter
-│   │   ├── SKILL.md                             # Handler documentation (271 lines)
-│   │   ├── scripts/ (18 scripts)
-│   │   └── docs/jira-api.md
-│   └── handler-work-tracker-linear/             # Linear adapter
-│       ├── SKILL.md                             # Handler documentation
-│       ├── scripts/ (18 scripts)
-│       └── docs/linear-api.md
-├── config/
-│   └── config.example.json                      # Configuration template (224 lines)
-├── docs/
-│   ├── MIGRATION-v1-to-v2.md                    # Migration guide
-│   └── TESTING.md                               # Testing guide
-└── README.md                                    # This file
+│   ├── issue-bulk-creator.md                    # Bulk issue creation agent
+│   └── issue-refine.md                          # Issue refinement agent
+├── archived/                                    # Archived legacy components
+│   ├── README.md
+│   ├── agents/                                  # Old agents (v2.0)
+│   └── skills/                                  # Old focused skills (v2.0)
+├── commands/
+│   ├── issue-comment.md                         # Comment management
+│   ├── issue-create-bulk.md                     # Bulk issue creation
+│   ├── issue-create.md                          # Issue creation
+│   ├── issue-fetch.md                           # Fetch issue details
+│   ├── issue-list.md                            # List issues
+│   ├── issue-refine.md                          # Refine issue content
+│   ├── issue-search.md                          # Search issues
+│   └── issue-update.md                          # Update issues
+├── config/                                      # Configuration templates
+├── docs/                                        # Documentation
+├── scripts/
+│   ├── generate-session-summary.sh              # Session summary generation
+│   └── process-comment-queue.sh                 # Comment queue processing
+└── skills/
+    ├── handler-work-tracker-github/             # GitHub adapter
+    ├── handler-work-tracker-jira/               # Jira adapter
+    ├── handler-work-tracker-linear/             # Linear adapter
+    ├── work-common/                             # Shared utilities
+    └── work-initializer/                        # Plugin initialization
 ```
 
 ## Platform Comparison
@@ -573,10 +538,14 @@ To add support for a new platform:
 
 ## Migration from v1.x
 
-**Breaking Changes:**
+**Breaking Changes in v2.0:**
 - String protocol → JSON protocol
-- Monolithic skill → 11 focused skills
+- Monolithic skill → focused skills
 - Configuration moved to `.fractary/config.yaml`
+
+**Breaking Changes in v3.0:**
+- Focused skills consolidated; old skills moved to `archived/`
+- Agent-based orchestration with MCP-first architecture
 
 See `docs/MIGRATION-v1-to-v2.md` for detailed migration guide.
 
@@ -620,13 +589,14 @@ See `docs/TESTING.md` for:
 ## Statistics
 
 **Total Implementation:**
-- **15 Skills:** 11 focused + 3 handlers + 1 utilities
-- **54 Scripts:** 18 × 3 handlers
-- **~8,000 Lines:** Total implementation
+- **2 Agents:** issue-refine, issue-bulk-creator
+- **8 Commands:** Full issue management interface
+- **5 Skills:** 3 handlers + work-common + work-initializer
 - **3 Platforms:** GitHub, Jira, Linear with 100% parity
 
 ## Version History
 
+- **v3.0.8** (Current) - MCP-first architecture with agents + commands + skills
 - **v2.0.0** (2025-10-29) - Full rewrite with Linear support, 100% feature parity
 - **v1.0.0** (2025-10-22) - Initial MVP with GitHub support
 

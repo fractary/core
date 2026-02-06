@@ -6,7 +6,9 @@
 > **New Features**: Automatic cloud backup after 7 days, AI-powered session summaries
 > **Recommended**: Production-ready for log retention and knowledge management
 
-Operational log management for Claude Code development sessions, including session capture, automatic cloud backup, AI-powered summaries, search, and analysis.
+**Version**: 4.1.0
+
+Operational log management for Claude Code development sessions, including session capture, automatic cloud backup, AI-powered summaries, search, and analysis. Uses agents + commands + skills pattern with MCP-first architecture.
 
 ## Overview
 
@@ -22,14 +24,20 @@ The fractary-logs plugin provides comprehensive logging infrastructure for devel
 
 ## Architecture
 
+The plugin uses agents + commands + skills pattern with MCP-first architecture:
+
 ```
 fractary-logs
-├── log-manager (agent)          # Orchestrates all log operations
-├── log-capturer (skill)         # Capture sessions
-├── log-archiver (skill)         # Archive with hybrid retention
-├── log-summarizer (skill)       # Generate AI-powered summaries (NEW)
-├── log-searcher (skill)         # Search local + cloud
-└── log-analyzer (skill)         # Extract insights
+├── agents/
+│   ├── logs-analyze.md          # Analysis orchestration
+│   ├── logs-audit.md            # Log auditing
+│   ├── logs-cleanup.md          # Cleanup operations
+│   └── logs-log.md              # Log entry creation
+├── commands/ (15 commands)      # User-facing entry points
+├── skills/
+│   ├── log-type-selector/       # Type selection
+│   └── workflow-event-emitter/  # Workflow event handling
+└── scripts/                     # Deterministic operations
 ```
 
 ## Key Features
@@ -128,10 +136,10 @@ Logs and summaries are stored in separate, configurable paths:
 ### 1. Initialize
 
 ```bash
-/fractary-logs:init
+fractary-core:config-init
 ```
 
-Creates configuration and log directories.
+Creates unified `.fractary/config.yaml` with all plugin configurations including logs.
 
 ### 2. Capture Session
 
@@ -182,7 +190,7 @@ Archive logs for completed issue to cloud.
 
 ### Configuration
 
-- `/fractary-logs:init` - Initialize configuration
+- `fractary-core:config-init` - Initialize unified configuration
 
 ## Global Arguments
 
@@ -207,7 +215,7 @@ This argument is always optional and appears as the final argument. When provide
 /fractary-logs:analyze errors --context "Prioritize authentication-related errors"
 ```
 
-See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+Context arguments follow the `--context` flag pattern as described above.
 
 ## Features
 
@@ -572,19 +580,47 @@ Auto-capture during FABER:
 - Continues through all phases
 - Archives when work completes
 
-## Directory Structure
+## Plugin Directory Structure
 
 ```
-/logs/
+plugins/logs/
+├── .claude-plugin/
+│   └── plugin.json              # Plugin manifest (v4.1.0)
+├── README.md
+├── STATUS.md                    # Release status
+├── agents/
+│   ├── logs-analyze.md          # Analysis agent
+│   ├── logs-audit.md            # Audit agent
+│   ├── logs-cleanup.md          # Cleanup agent
+│   └── logs-log.md              # Logging agent
+├── archived/                    # Archived legacy components
+│   ├── README.md
+│   ├── agents/                  # Old agents (v2.0-v3.0)
+│   ├── skills/                  # Old skills (v2.0-v3.0)
+│   └── types-v2/                # Old type definitions
+├── commands/                    # 15 user-facing commands
+├── config/                      # Configuration templates
+├── docs/                        # Documentation
+├── scripts/
+│   ├── archive-local.sh         # Local archival
+│   ├── collect-logs.sh          # Log collection
+│   ├── compress-logs.sh         # Log compression
+│   ├── config-loader.sh         # Configuration loading
+│   ├── prepare-upload-metadata.sh # Upload preparation
+│   └── upload-to-cloud.sh       # Cloud upload
+└── skills/
+    ├── log-type-selector/       # Log type selection
+    └── workflow-event-emitter/  # Workflow events
+```
+
+### Log Storage Structure
+
+```
+.fractary/logs/
 ├── sessions/                 # Session logs
-│   ├── session-123-2025-01-15.md
-│   └── session-124-2025-01-16.md
 ├── builds/                   # Build logs
-│   └── 123-build.log
 ├── deployments/              # Deployment logs
-│   └── 123-deploy.log
 └── debug/                    # Debug logs
-    └── 123-debug.log
 ```
 
 ## Best Practices
@@ -706,10 +742,8 @@ All scripts in `skills/*/scripts/` can be extended or replaced:
 
 ## Documentation
 
-- [Session Logging Guide](skills/log-capturer/docs/session-logging-guide.md)
-- [Archive Process](skills/log-archiver/docs/archive-process.md)
-- [Search Syntax](skills/log-searcher/docs/search-syntax.md)
-- [Analysis Types](skills/log-analyzer/docs/analysis-types.md)
+- See `docs/` directory for detailed guides
+- See `commands/` directory for command reference
 
 ## License
 

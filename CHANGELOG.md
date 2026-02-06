@@ -65,7 +65,7 @@ The most significant change in v2.0 is the introduction of a **unified YAML conf
 - Per-plugin initialization commands
 
 **After (v2.0):**
-- Single config file: `.fractary/core/config.yaml`
+- Single config file: `.fractary/config.yaml` (also supports deprecated `.fractary/core/config.yaml`)
 - YAML format only (JSON no longer supported)
 - Unified init command: `fractary-core:init`
 - Handler pattern for multi-platform support
@@ -113,7 +113,7 @@ See the [Migration Guide](docs/guides/configuration.md#migration-guide) for deta
   - `${VAR_NAME}` - Required variable
   - `${VAR_NAME:-default}` - With fallback default
 - **Config Validation**: Automatic validation on load with detailed error messages
-- **Comprehensive Example**: `.fractary/core/config.example.yaml` with 700+ lines documenting all options
+- **Comprehensive Example**: `.fractary/config.example.yaml` with 700+ lines documenting all options
 
 #### Documentation
 - Complete **Configuration Guide** with v2.0 examples
@@ -127,7 +127,7 @@ See the [Migration Guide](docs/guides/configuration.md#migration-guide) for deta
 - **Old**: `.fractary/plugins/{name}/config.json` (per plugin)
 - **New**: `.fractary/core/config.yaml` (unified)
 
-⚠️ **Important**: Config is at `.fractary/core/config.yaml` (inside `core/` directory), NOT `.fractary/core.yaml`
+⚠️ **Important**: Preferred config location is `.fractary/config.yaml`. The legacy path `.fractary/core/config.yaml` is still supported but deprecated.
 
 #### Configuration Format
 - **Old**: JSON with flat structure

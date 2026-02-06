@@ -1,6 +1,6 @@
 # fractary-core (Python)
 
-> **⚠️ Alpha Release (v0.1.0)** - This is an early-stage release with limited platform support. Only GitHub is currently implemented for work tracking. Repository providers are not yet implemented.
+> **⚠️ Alpha Release (v0.1.2)** - This is an early-stage release with limited platform support. Only GitHub is currently implemented for work tracking. Repository providers are not yet implemented.
 
 Core primitives for FABER workflows providing framework-agnostic abstractions for:
 
@@ -125,6 +125,8 @@ logs.end_workflow(status="completed", summary={"total_phases": 5})
 
 ### File Storage
 
+> **Note:** `FileManager` is not exported from the top-level `fractary_core` package. You must import it directly from its submodule (e.g., `from fractary_core.file import FileManager`).
+
 ```python
 from fractary_core.file import FileManager
 
@@ -142,6 +144,8 @@ file_list = await files.list("documents/")
 ```
 
 ### Documentation
+
+> **Note:** `DocsManager` is not exported from the top-level `fractary_core` package. You must import it directly from its submodule (e.g., `from fractary_core.docs import DocsManager`).
 
 ```python
 from fractary_core.docs import DocsManager

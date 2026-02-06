@@ -46,20 +46,20 @@ The CLI provides command-line access to all operations.
 
 ```bash
 # Fetch an issue
-fractary-core work issue fetch 123
+fractary-core work issue-fetch 123
 
 # Create a branch
-fractary-core repo branch create feature/my-feature
+fractary-core repo branch-create feature/my-feature
 
 # Validate a specification
-fractary-core spec validate SPEC-20240101
+fractary-core spec spec-validate-check SPEC-20240101
 ```
 
 **[CLI Documentation](/docs/cli/README.md)** - Command structure and reference
 
 ### 3. MCP Server
 
-The MCP (Model Context Protocol) Server exposes 81 tools for AI agent integration.
+The MCP (Model Context Protocol) Server exposes 80 tools for AI agent integration.
 
 ```json
 {
@@ -111,7 +111,7 @@ Claude Code plugins provide agents, slash commands, and tools for enhanced workf
 ### For Contributors
 
 - **[Development Standards](/docs/standards/config-management-standards.md)** - Configuration management standards
-- **[Plugin Development](/docs/plugin-development/context-argument-standard.md)** - Creating new plugins
+- **[Plugin Development](/docs/guides/new-claude-plugin-framework.md)** - Creating new plugins
 
 ## Getting Started
 
@@ -171,6 +171,6 @@ See the [Configuration Guide](/docs/guides/configuration.md) for complete option
 |------|---------|---------|
 | **Toolset** | Conceptual grouping | "The Work toolset handles issue tracking" |
 | **Module** | SDK | `import { WorkManager } from '@fractary/core/work'` |
-| **Command group** | CLI | `fractary-core work issue create` |
+| **Command group** | CLI | `fractary-core work issue-create` |
 | **Tool** | MCP Server | `fractary_work_issue_create` |
 | **Plugin** | Claude Code | `fractary-work` plugin |

@@ -109,12 +109,15 @@ Agents handle complex, multi-step tasks autonomously:
 | `/commit` | Create a commit |
 | `/commit-push` | Commit and push |
 | `/commit-push-pr` | Commit, push, and create PR |
+| `/commit-push-pr-merge` | Full workflow: commit, push, PR, merge |
 | `/pr-create` | Create a pull request |
 | `/pr-merge` | Merge a pull request |
 | `/pr-review` | Review a pull request |
 | `/pull` | Pull from remote |
 | `/worktree-create` | Create a git worktree |
 | `/worktree-list` | List worktrees |
+| `/worktree-remove` | Remove a git worktree |
+| `/worktree-prune` | Clean up stale worktrees |
 
 ### Spec Plugin Commands
 
@@ -194,7 +197,7 @@ Claude: /spec-validate SPEC-20240101
 
 ## Plugin Development
 
-For creating new plugins, see the [Plugin Development Guide](/docs/plugin-development/context-argument-standard.md).
+For creating new plugins, see the [Plugin Development Guide](/docs/guides/new-claude-plugin-framework.md).
 
 ## Other Interfaces
 

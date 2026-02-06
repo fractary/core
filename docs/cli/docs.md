@@ -1,373 +1,396 @@
-# Docs Toolset - CLI Reference
+# Docs Module - CLI Reference
 
-Command-line reference for the Docs toolset. Documentation management.
+Command-line reference for the Docs module. Documentation management with type-aware creation, validation, and archival.
 
 ## Command Structure
 
 ```bash
-fractary-core docs <action> [options]
+fractary-core docs <command> [arguments] [options]
 ```
+
+All commands use dash-separated names (e.g., `doc-create`, `doc-search`).
 
 ## Document Commands
 
-### docs create
+### docs doc-create
 
 Create a new document.
 
 ```bash
-fractary-core docs create <id> [options]
+fractary-core docs doc-create <id> [options]
 ```
 
 **Arguments:**
-- `id` - Unique document identifier
+- `id` - Document ID
 
 **Options:**
-- `--title <text>` - Document title (required)
-- `--content <text>` - Document content
-- `--file <path>` - Read content from file
-- `--format <format>` - Format: `markdown`, `html`, `text`
-- `--type <type>` - Document type: `adr`, `api`, `guide`, `readme`
+- `--title <title>` - Document title (required)
+- `--content <text>` - Document content (required)
+- `--format <format>` - Document format: `markdown`, `html`, `pdf`, `text` (default: `markdown`)
+- `--doc-type <type>` - Document type (e.g., `adr`, `api`, `architecture`)
 - `--tags <tags>` - Comma-separated tags
-- `--author <name>` - Author name
+- `--category <category>` - Document category
+- `--description <desc>` - Document description
+- `--status <status>` - Document status
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # Create markdown document
-fractary-core docs create user-guide \
+fractary-core docs doc-create user-guide \
   --title "User Guide" \
   --content "# User Guide\n\nWelcome..."
 
-# Create from file
-fractary-core docs create api-spec \
-  --title "API Specification" \
-  --file ./api-docs.md \
-  --type api
-
-# Create ADR
-fractary-core docs create adr-001 \
+# Create ADR with type
+fractary-core docs doc-create adr-001 \
   --title "Use PostgreSQL for primary database" \
-  --type adr \
-  --tags "architecture,database"
+  --content "## Context\n\n..." \
+  --doc-type adr \
+  --tags "architecture,database" \
+  --category architecture
 ```
 
-### docs get
+### docs doc-get
 
 Get a document.
 
 ```bash
-fractary-core docs get <id> [options]
+fractary-core docs doc-get <id> [options]
 ```
 
 **Arguments:**
 - `id` - Document ID
 
 **Options:**
-- `--format <type>` - Output format: `raw`, `json`
+- `--json` - Output as JSON
 
-**Example:**
+**Examples:**
 ```bash
-fractary-core docs get user-guide --format raw
+# Get document (prints content)
+fractary-core docs doc-get user-guide
+
+# Get as JSON
+fractary-core docs doc-get user-guide --json
 ```
 
-### docs update
-
-Update a document.
-
-```bash
-fractary-core docs update <id> [options]
-```
-
-**Arguments:**
-- `id` - Document ID
-
-**Options:**
-- `--title <text>` - New title
-- `--content <text>` - New content
-- `--file <path>` - Read content from file
-- `--status <status>` - Status: `draft`, `review`, `published`, `archived`
-- `--add-tags <tags>` - Add tags
-- `--remove-tags <tags>` - Remove tags
-
-**Example:**
-```bash
-fractary-core docs update user-guide \
-  --status published \
-  --add-tags "v1.0"
-```
-
-### docs delete
-
-Delete a document.
-
-```bash
-fractary-core docs delete <id> [options]
-```
-
-**Options:**
-- `--force` - Skip confirmation
-
-### docs list
+### docs doc-list
 
 List documents.
 
 ```bash
-fractary-core docs list [options]
+fractary-core docs doc-list [options]
 ```
 
 **Options:**
-- `--type <type>` - Filter by type
-- `--tags <tags>` - Filter by tags
-- `--author <name>` - Filter by author
-- `--status <status>` - Filter by status
-- `--format <type>` - Output format
+- `--category <category>` - Filter by category
+- `--tags <tags>` - Filter by tags (comma-separated)
+- `--format <format>` - Filter by format
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # List all documents
-fractary-core docs list
+fractary-core docs doc-list
 
 # List API documentation
-fractary-core docs list --type api
+fractary-core docs doc-list --category api
 
 # List by tags
-fractary-core docs list --tags "guide,user"
+fractary-core docs doc-list --tags "guide,user"
+
+# List markdown docs as JSON
+fractary-core docs doc-list --format markdown --json
 ```
 
-**Output:**
-```
-ID              TITLE                    TYPE      STATUS     UPDATED
-user-guide      User Guide               guide     published  2024-01-15
-api-auth        Authentication API       api       draft      2024-01-14
-adr-001         Use PostgreSQL           adr       accepted   2024-01-10
-getting-started Getting Started          guide     published  2024-01-08
+### docs doc-update
+
+Update a document.
+
+```bash
+fractary-core docs doc-update <id> [options]
 ```
 
-## Search Commands
+**Arguments:**
+- `id` - Document ID
 
-### docs search
+**Options:**
+- `--content <text>` - New content (required)
+- `--title <title>` - New title
+- `--tags <tags>` - New tags (comma-separated)
+- `--category <category>` - New category
+- `--description <desc>` - New description
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Update content
+fractary-core docs doc-update user-guide \
+  --content "# Updated User Guide\n\n..."
+
+# Update with new title and tags
+fractary-core docs doc-update user-guide \
+  --content "..." \
+  --title "User Guide v2" \
+  --tags "guide,v2"
+```
+
+### docs doc-delete
+
+Delete a document.
+
+```bash
+fractary-core docs doc-delete <id> [options]
+```
+
+**Arguments:**
+- `id` - Document ID
+
+**Options:**
+- `--json` - Output as JSON
+
+**Example:**
+```bash
+fractary-core docs doc-delete old-draft
+```
+
+### docs doc-search
 
 Search documents.
 
 ```bash
-fractary-core docs search <query> [options]
+fractary-core docs doc-search [options]
 ```
-
-**Arguments:**
-- `query` - Search query
 
 **Options:**
-- `--type <type>` - Filter by type
-- `--tags <tags>` - Filter by tags
-- `--format <type>` - Output format
+- `--text <query>` - Search text in content and title
+- `--tags <tags>` - Filter by tags (comma-separated)
+- `--author <author>` - Filter by author
+- `--category <category>` - Filter by category
+- `--doc-type <type>` - Filter by document type
+- `--limit <n>` - Limit results (default: `10`)
+- `--json` - Output as JSON
 
-**Example:**
+**Examples:**
 ```bash
-fractary-core docs search "authentication"
+# Search by text
+fractary-core docs doc-search --text "authentication"
+
+# Search by type and category
+fractary-core docs doc-search --doc-type adr --category architecture
+
+# Combined search
+fractary-core docs doc-search --text "API" --tags "v2" --limit 5
 ```
 
-**Output:**
-```
-Search Results for "authentication"
-===================================
+## Archive and Validation Commands
 
-api-auth (API Documentation)
-  "...implements JWT authentication for secure access..."
+### docs doc-archive
 
-user-guide (Guide)
-  "...users can configure authentication settings..."
-
-adr-003 (ADR)
-  "...decided to use OAuth2 for authentication..."
-```
-
-## Validation Commands
-
-### docs validate
-
-Validate a document.
+Archive a document using its type's configured archive source.
 
 ```bash
-fractary-core docs validate <id> [options]
+fractary-core docs doc-archive <id> [options]
 ```
 
 **Arguments:**
 - `id` - Document ID
 
 **Options:**
-- `--strict` - Fail on warnings
-- `--format <type>` - Output format
+- `--source <name>` - Override archive source (default: from type config)
+- `--json` - Output as JSON
 
-**Example:**
+The document type must have archival enabled in its configuration. The command uploads the document to the configured archive source, verifies the checksum, and optionally deletes the original based on type settings.
+
+**Examples:**
 ```bash
-fractary-core docs validate api-auth
+# Archive document using type defaults
+fractary-core docs doc-archive adr-001
+
+# Archive to specific source
+fractary-core docs doc-archive adr-001 --source s3-archive
 ```
 
-**Output:**
-```
-Validation Results for api-auth
-===============================
+### docs doc-refine-scan
 
-Status: VALID (with warnings)
-
-Checks:
-  ✓ Has title
-  ✓ Has content
-  ✓ Valid format
-  ⚠ Missing description metadata
-  ⚠ No version specified
-
-Warnings:
-  - Consider adding a description for better discoverability
-  - Consider adding version for API documentation
-```
-
-### docs validate-all
-
-Validate all documents.
+Scan a document for gaps and generate refinement questions.
 
 ```bash
-fractary-core docs validate-all [options]
-```
-
-**Options:**
-- `--type <type>` - Validate specific type
-- `--fail-fast` - Stop on first failure
-- `--report <file>` - Save report to file
-
-## Audit Commands
-
-### docs audit
-
-Audit documentation quality.
-
-```bash
-fractary-core docs audit [options]
-```
-
-**Options:**
-- `--report <type>` - Report type: `summary`, `gaps`, `quality`, `full`
-
-**Example:**
-```bash
-fractary-core docs audit --report gaps
-```
-
-**Output:**
-```
-Documentation Gaps Report
-=========================
-
-Missing Documentation:
-  - src/auth/ has no README
-  - src/api/handlers/ has no documentation
-  - 5 exported functions lack JSDoc comments
-
-Incomplete Documentation:
-  - api-auth: Missing error handling section
-  - user-guide: Setup section is outdated
-
-Recommendations:
-  - Add README to src/auth/
-  - Document API handlers
-  - Update user-guide setup section
-```
-
-### docs check-consistency
-
-Check if documentation matches code.
-
-```bash
-fractary-core docs check-consistency [options]
-```
-
-**Options:**
-- `--source <dir>` - Source directory to check
-- `--types <types>` - Document types to check
-
-**Example:**
-```bash
-fractary-core docs check-consistency --source src/
-```
-
-**Output:**
-```
-Consistency Check Results
-=========================
-
-Outdated Documentation:
-  api-auth.md
-    - Function 'authenticate()' signature changed
-    - New parameter 'refreshToken' not documented
-
-  user-guide.md
-    - References removed config option 'legacyMode'
-
-Up-to-date: 8 documents
-Outdated: 2 documents
-Missing: 1 document
-```
-
-## Export Commands
-
-### docs export
-
-Export a document to another format.
-
-```bash
-fractary-core docs export <id> [options]
+fractary-core docs doc-refine-scan <id> [options]
 ```
 
 **Arguments:**
 - `id` - Document ID
 
 **Options:**
-- `--format <format>` - Target format: `html`, `pdf`, `text`
-- `--output <file>` - Output file path
+- `--json` - Output as JSON
+
+Checks for missing required sections, placeholder/vague content (TBD, TODO, FIXME), empty sections, and unchecked acceptance criteria.
+
+**Examples:**
+```bash
+fractary-core docs doc-refine-scan user-guide
+```
+
+**Output:**
+```
+Found 3 potential gap(s):
+
+  Q1 [high] Required section "Context" is missing. What content should it contain?
+  Q2 [medium] Section "Implementation" contains placeholder text ("TBD"). What specific content should replace it?
+  Q3 [high] Section "Testing" appears to be empty or very brief. What details should be added?
+```
+
+### docs doc-validate-fulfillment
+
+Validate whether implementation fulfills the document's requirements.
+
+```bash
+fractary-core docs doc-validate-fulfillment <id> [options]
+```
+
+**Arguments:**
+- `id` - Document ID
+
+**Options:**
+- `--json` - Output as JSON
+
+The document type must have fulfillment validation enabled. Checks acceptance criteria completion, files modified section, testing section, and documentation update timestamps.
 
 **Example:**
 ```bash
-# Export to HTML
-fractary-core docs export user-guide --format html --output user-guide.html
-
-# Export to PDF
-fractary-core docs export api-auth --format pdf --output api-docs.pdf
+fractary-core docs doc-validate-fulfillment feature-spec-001
 ```
 
-## Write Commands
+**Output:**
+```
+Fulfillment: PARTIAL (50%)
 
-### docs write
+  ! acceptance_criteria: 3/5 criteria met (2 remaining)
+  + files_modified: Files to Modify section has content
+  ! tests_added: Testing section is missing or empty
+  ! docs_updated: No updatedAt timestamp found
+```
 
-Write documentation with AI assistance.
+## Type Commands
+
+### docs type-list
+
+List available document types.
 
 ```bash
-fractary-core docs write [options]
+fractary-core docs type-list [options]
 ```
 
 **Options:**
-- `--type <type>` - Document type
-- `--title <text>` - Document title
-- `--context <text>` - Additional context
-- `--source <path>` - Source code/files to document
+- `--json` - Output as JSON
 
 **Example:**
 ```bash
-fractary-core docs write \
-  --type api \
-  --title "User API" \
-  --source src/api/user/
+fractary-core docs type-list
 ```
 
-## Environment Variables
+**Output:**
+```
+Available Document Types:
+
+  adr
+    Architecture Decision Record
+    Records architectural decisions and their context
+    Output: docs/decisions
+
+  api
+    API Documentation
+    API endpoint and interface documentation
+    Output: docs/api
+
+  architecture
+    Architecture Document
+    System architecture documentation
+    Output: docs/architecture
+
+Total: 3 types
+```
+
+### docs type-info
+
+Get detailed information about a document type.
 
 ```bash
-# Docs directory
-export FRACTARY_DOCS_DIRECTORY=./docs
+fractary-core docs type-info <type> [options]
+```
 
-# Default format
-export FRACTARY_DOCS_FORMAT=markdown
+**Arguments:**
+- `type` - Document type ID (e.g., `adr`, `api`, `architecture`)
 
-# Default tags
-export FRACTARY_DOCS_DEFAULT_TAGS=project
+**Options:**
+- `--json` - Output as JSON
+- `--template` - Show the document template
+- `--standards` - Show the documentation standards
+
+**Examples:**
+```bash
+# Show type info
+fractary-core docs type-info adr
+
+# Show template content
+fractary-core docs type-info adr --template
+
+# Show standards
+fractary-core docs type-info adr --standards
+```
+
+**Output:**
+```
+Architecture Decision Record (adr)
+
+Records architectural decisions and their context
+
+File Naming:
+  Pattern: {number}-{slug}.md
+  Auto-number: ADR-NNNN
+
+Output Path:
+  docs/decisions
+
+Frontmatter Fields:
+  Required: title, date, status
+  Optional: deciders, tags
+
+Required Sections:
+  - Context
+  - Decision
+  - Consequences
+
+Status Values:
+  proposed, accepted, deprecated, superseded (default: proposed)
+
+Use --template to see the document template
+Use --standards to see the documentation standards
+```
+
+## JSON Output
+
+All commands support `--json` for structured output:
+
+```bash
+fractary-core docs doc-get user-guide --json
+```
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "user-guide",
+    "content": "# User Guide\n\nWelcome...",
+    "format": "markdown",
+    "metadata": {
+      "title": "User Guide",
+      "category": "guides",
+      "tags": ["guide", "user"]
+    },
+    "path": "docs/guides/user-guide.md"
+  }
+}
 ```
 
 ## Other Interfaces

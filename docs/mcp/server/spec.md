@@ -1,6 +1,6 @@
 # Spec Toolset - MCP Tools Reference
 
-MCP tools reference for the Spec toolset. Tools for technical specification management.
+MCP tools reference for the Spec toolset. 5 tools for technical specification management.
 
 ## Tool Naming Convention
 
@@ -12,23 +12,23 @@ fractary_spec_{action}
 
 ### fractary_spec_create
 
-Create a new specification.
+Create a new specification document.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `title` | string | Yes | Specification title |
-| `workId` | string | No | Associated work item ID |
-| `workType` | string | No | Work type: `feature`, `bug`, `infrastructure`, `api` |
-| `template` | string | No | Template: `basic`, `feature`, `bug`, `infrastructure`, `api` |
+| `title` | string | Yes | Title of the specification |
+| `template` | string | No | Template type: `basic`, `feature`, `bug`, `infrastructure`, `api` |
+| `work_id` | string | No | Work item ID to link to this spec |
+| `context` | string | No | Context or background information for the specification |
 
 **Example:**
 ```json
 {
   "title": "API Authentication Design",
-  "workType": "feature",
   "template": "api",
-  "workId": "123"
+  "work_id": "123",
+  "context": "Users need secure token-based access to the REST API"
 }
 ```
 
@@ -46,19 +46,19 @@ Create a new specification.
 }
 ```
 
-### fractary_spec_get
+### fractary_spec_read
 
-Get a specification by ID.
+Read a specification document.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `specId` | string | Yes | Specification ID or path |
+| `spec_id` | string | Yes | Specification ID or path to read |
 
 **Example:**
 ```json
 {
-  "specId": "SPEC-20240115"
+  "spec_id": "SPEC-20240115"
 }
 ```
 
@@ -79,44 +79,24 @@ Get a specification by ID.
 }
 ```
 
-### fractary_spec_update
+### fractary_spec_list
 
-Update a specification.
+List specification documents.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `specId` | string | Yes | Specification ID or path |
-| `title` | string | No | New title |
-| `content` | string | No | New content |
-| `status` | string | No | Status: `draft`, `review`, `approved`, `archived` |
+| `work_id` | string | No | Filter by work item ID |
+| `status` | string | No | Filter by specification status |
+| `template` | string | No | Filter by template type: `basic`, `feature`, `bug`, `infrastructure`, `api` |
 
 **Example:**
 ```json
 {
-  "specId": "SPEC-20240115",
-  "status": "review"
+  "status": "draft",
+  "template": "feature"
 }
 ```
-
-### fractary_spec_delete
-
-Delete a specification.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `specId` | string | Yes | Specification ID or path |
-
-### fractary_spec_list
-
-List specifications.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `workType` | string | No | Filter by work type |
-| `status` | string | No | Filter by status |
 
 **Response:**
 ```json
@@ -126,34 +106,32 @@ List specifications.
     {
       "id": "SPEC-20240115",
       "title": "API Authentication Design",
-      "workType": "feature",
+      "template": "api",
       "status": "draft"
     },
     {
       "id": "SPEC-20240110",
       "title": "Database Migration",
-      "workType": "infrastructure",
+      "template": "infrastructure",
       "status": "approved"
     }
   ]
 }
 ```
 
-## Validation Tools
-
 ### fractary_spec_validate
 
-Validate a specification.
+Validate a specification document.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `specId` | string | Yes | Specification ID or path |
+| `spec_id` | string | Yes | Specification ID or path to validate |
 
 **Example:**
 ```json
 {
-  "specId": "SPEC-20240115"
+  "spec_id": "SPEC-20240115"
 }
 ```
 
@@ -177,16 +155,23 @@ Validate a specification.
 }
 ```
 
-## Refinement Tools
-
 ### fractary_spec_refine
 
-Get refinement questions for a specification.
+Refine a specification with feedback.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `specId` | string | Yes | Specification ID or path |
+| `spec_id` | string | Yes | Specification ID or path to refine |
+| `feedback` | string | No | Feedback or refinement instructions |
+
+**Example:**
+```json
+{
+  "spec_id": "SPEC-20240115",
+  "feedback": "Needs more detail on error handling and rate limiting"
+}
+```
 
 **Response:**
 ```json
@@ -211,38 +196,15 @@ Get refinement questions for a specification.
 }
 ```
 
-## Archive Tools
-
-### fractary_spec_archive
-
-Archive a completed specification.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `specId` | string | Yes | Specification ID or path |
-| `reason` | string | No | Archive reason |
-
-**Example:**
-```json
-{
-  "specId": "SPEC-20240115",
-  "reason": "Feature completed and released"
-}
-```
-
 ## Tool Summary
 
 | Tool | Description |
 |------|-------------|
-| `fractary_spec_create` | Create a specification |
-| `fractary_spec_get` | Get a specification |
-| `fractary_spec_update` | Update a specification |
-| `fractary_spec_delete` | Delete a specification |
-| `fractary_spec_list` | List specifications |
-| `fractary_spec_validate` | Validate a specification |
-| `fractary_spec_refine` | Get refinement questions |
-| `fractary_spec_archive` | Archive a specification |
+| `fractary_spec_create` | Create a new specification document |
+| `fractary_spec_read` | Read a specification document |
+| `fractary_spec_list` | List specification documents |
+| `fractary_spec_validate` | Validate a specification document |
+| `fractary_spec_refine` | Refine a specification with feedback |
 
 ## Error Responses
 
