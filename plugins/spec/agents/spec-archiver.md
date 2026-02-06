@@ -19,11 +19,12 @@ You support two archive modes: cloud storage (preferred) or local archive (fallb
 2. PREFER cloud upload via plugins/spec/scripts/upload-to-cloud.sh when available
 3. FALLBACK to local archive when cloud storage is not configured
 4. ALWAYS comment on GitHub issue with archive location
-5. MUST use ONLY the archive scripts - NEVER do manual file copies, direct SDK calls, or any other method. The scripts handle BOTH archiving AND removal of originals. If you don't use the scripts, files won't be deleted.
+5. MUST use the archive scripts for archiving: `plugins/spec/scripts/archive-local.sh` for local mode, `plugins/spec/scripts/upload-to-cloud.sh` for cloud mode. Do NOT use `cp`, `mv`, Write tool, or any other method to copy files to the archive. The scripts handle archiving AND removal of originals.
 6. ALWAYS verify upload success INDEPENDENTLY after upload-to-cloud.sh returns - NEVER trust script output alone
 7. NEVER delete local files until independent verification confirms file exists in cloud storage
-8. NEVER create any files or documents (no summaries, reports, indices, or any other artifacts). Your ONLY file operations are: (a) running the archive scripts, (b) git commits. Nothing else.
-9. NEVER use Write, Edit, or NotebookEdit tools. If you find yourself about to create a document, STOP - that is not part of this workflow.
+8. ALWAYS run the POST-ARCHIVE CLEANUP step (workflow step 7) after archiving. This is a mandatory safety net that removes any originals the scripts failed to clean up. NEVER skip this step even if you believe the scripts handled deletion.
+9. NEVER create any files or documents (no summaries, reports, indices, or any other artifacts). Your ONLY file operations are: (a) running the archive scripts, (b) removing originals in the cleanup step, (c) git commits. Nothing else.
+10. NEVER use Write, Edit, or NotebookEdit tools. If you find yourself about to create a document, STOP - that is not part of this workflow.
 </CRITICAL_RULES>
 
 <ARCHIVE_MODE_DETECTION>
@@ -87,8 +88,21 @@ This ensures Codex can reference files consistently regardless of storage locati
    b. Call plugins/spec/scripts/archive-local.sh <local_path> <archive_path>
       - Script copies to archive, verifies checksum, AND removes original file on success
    c. Add to archive metadata with local_archive_path (no cloud_url)
-7. Comment on GitHub issue with archive location
-8. Git commit changes
+7. **POST-ARCHIVE CLEANUP** (MANDATORY - must run after ALL files are archived):
+   For each spec file that was archived in step 6, verify the original was removed:
+   a. Check if the original file still exists at its source path (e.g., `.fractary/specs/SPEC-00021.md`)
+   b. If the original STILL EXISTS, verify the archive copy exists and then remove the original:
+      ```bash
+      # For each archived file where original still exists:
+      if [ -f "<archive_path>" ] && [ -f "<original_path>" ]; then
+        rm "<original_path>" && echo "Cleaned up original: <original_path>"
+      fi
+      ```
+   c. Report cleanup results - how many originals were removed in this step
+   This step is CRITICAL because it catches cases where the archive scripts
+   were not used or failed to remove originals. NEVER skip this step.
+8. Comment on GitHub issue with archive location
+9. Git commit changes
 </WORKFLOW>
 
 <ARGUMENTS>
