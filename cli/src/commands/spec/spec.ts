@@ -7,9 +7,9 @@ import chalk from 'chalk';
 import { getSpecManager } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
 
-export function createSpecCreateCommand(): Command {
-  return new Command('spec-create')
-    .description('Create a new specification')
+export function createSpecCreateFileCommand(): Command {
+  return new Command('spec-create-file')
+    .description('Create a new specification file')
     .argument('<title>', 'Specification title')
     .option('--template <type>', 'Specification template (feature, bugfix, refactor)', 'feature')
     .option('--work-id <id>', 'Associated work item ID')
@@ -161,9 +161,9 @@ export function createSpecDeleteCommand(): Command {
     });
 }
 
-export function createSpecValidateCommand(): Command {
-  return new Command('spec-validate')
-    .description('Validate a specification')
+export function createSpecValidateCheckCommand(): Command {
+  return new Command('spec-validate-check')
+    .description('Run structural validation checks on a specification')
     .argument('<id>', 'Specification ID or path')
     .option('--json', 'Output as JSON')
     .action(async (id: string, options) => {
@@ -192,9 +192,9 @@ export function createSpecValidateCommand(): Command {
     });
 }
 
-export function createSpecRefineCommand(): Command {
-  return new Command('spec-refine')
-    .description('Generate refinement questions for a specification')
+export function createSpecRefineScanCommand(): Command {
+  return new Command('spec-refine-scan')
+    .description('Scan a specification for structural gaps and refinement areas')
     .argument('<id>', 'Specification ID or path')
     .option('--json', 'Output as JSON')
     .action(async (id: string, options) => {

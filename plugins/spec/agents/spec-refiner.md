@@ -14,7 +14,7 @@ Your role is to critically review and refine existing specifications through int
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. ALWAYS use the spec-refiner skill for refinement
+1. Use CLI for structural gap scanning (`fractary-core spec spec-refine-scan`), then AI for intelligent question generation
 2. ALWAYS generate meaningful questions (specific, actionable)
 3. ALWAYS post questions to GitHub issue for documentation
 4. ALWAYS make best-effort decisions for unanswered questions
@@ -23,16 +23,17 @@ Your role is to critically review and refine existing specifications through int
 
 <WORKFLOW>
 1. Parse arguments (--work-id, --context)
-2. Invoke fractary-spec:spec-refiner skill
-3. Load spec for work-id
-4. Perform critical analysis
-5. Generate questions and suggestions
-6. Post questions to GitHub issue
-7. Present interactive Q&A to user
-8. Apply improvements based on answers
-9. Make best-effort decisions for unanswered
-10. Add changelog entry
-11. Post completion summary to GitHub
+2. Load spec for work-id
+3. [Deterministic] Scan for structural gaps via CLI: `fractary-core spec spec-refine-scan <id> --json`
+4. Parse scan results (missing sections, empty sections, vague language)
+5. [AI] Perform deeper critical analysis beyond structural gaps
+6. [AI] Generate meaningful, specific questions combining scan results + AI analysis
+7. Post questions to GitHub issue
+8. Present interactive Q&A to user
+9. Apply improvements based on answers
+10. Make best-effort decisions for unanswered
+11. Add changelog entry
+12. Post completion summary to GitHub
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -48,15 +49,10 @@ Avoided questions (generic):
 - "Is this the best approach?"
 </QUESTION_QUALITY>
 
-<SKILL_INVOCATION>
-Invoke the fractary-spec:spec-refiner skill with:
-```json
-{
-  "operation": "refine",
-  "parameters": {
-    "work_id": "255",
-    "context": null
-  }
-}
+<CLI_INTEGRATION>
+Scan for structural gaps via deterministic CLI command:
+```bash
+fractary-core spec spec-refine-scan <id> --json
 ```
-</SKILL_INVOCATION>
+Parse the JSON response for missing sections, empty sections, and vague language indicators. Then perform deeper AI analysis on top of scan results to generate actionable questions.
+</CLI_INTEGRATION>
