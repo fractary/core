@@ -81,3 +81,34 @@ doc_types:
     description: Test plans, test results, and QA documentation
     path: ./testing
     url: ${base_url}/testing/type.yaml
+
+  # Specification types (formerly in the spec plugin)
+  - id: spec-basic
+    display_name: Basic Specification
+    description: Minimal specification for simple tasks and quick changes
+    path: ./spec-basic
+    url: ${base_url}/spec-basic/type.yaml
+
+  - id: spec-feature
+    display_name: Feature Specification
+    description: Comprehensive specification for new feature development
+    path: ./spec-feature
+    url: ${base_url}/spec-feature/type.yaml
+
+  - id: spec-bug
+    display_name: Bug Fix Specification
+    description: Specification for bug investigation and fix
+    path: ./spec-bug
+    url: ${base_url}/spec-bug/type.yaml
+
+  - id: spec-api
+    display_name: API Specification
+    description: Specification for API design and implementation
+    path: ./spec-api
+    url: ${base_url}/spec-api/type.yaml
+
+  - id: spec-infrastructure
+    display_name: Infrastructure Specification
+    description: Specification for infrastructure and DevOps changes
+    path: ./spec-infrastructure
+    url: ${base_url}/spec-infrastructure/type.yaml

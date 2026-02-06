@@ -13,7 +13,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import { DocType } from './types';
+import {
+  DocType,
+  DocTypeArchiveConfig,
+  DocTypeWorkLinkingConfig,
+  DocTypeRefinementConfig,
+  DocTypeFulfillmentConfig,
+} from './types';
 
 /**
  * Raw YAML structure (snake_case)
@@ -49,6 +55,33 @@ interface RawDocTypeYaml {
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
     entry_template?: string;
+  };
+  archive?: {
+    enabled: boolean;
+    source: string;
+    trigger: 'manual' | 'on_status_change' | 'on_work_complete';
+    trigger_statuses?: string[];
+    verify_checksum?: boolean;
+    delete_original?: boolean;
+    retention_days?: number | 'forever';
+  };
+  work_linking?: {
+    enabled: boolean;
+    comment_on_create?: boolean;
+    comment_on_archive?: boolean;
+    require_closed_for_archive?: boolean;
+  };
+  refinement?: {
+    enabled: boolean;
+    post_questions_to_work_item?: boolean;
+    maintain_changelog?: boolean;
+  };
+  fulfillment?: {
+    enabled: boolean;
+    check_acceptance_criteria?: boolean;
+    check_files_modified?: boolean;
+    check_tests_added?: boolean;
+    check_docs_updated?: boolean;
   };
 }
 
@@ -163,6 +196,41 @@ function convertYamlToDocType(
         }
       : undefined,
     standards,
+    archive: raw.archive
+      ? {
+          enabled: raw.archive.enabled,
+          source: raw.archive.source,
+          trigger: raw.archive.trigger,
+          triggerStatuses: raw.archive.trigger_statuses,
+          verifyChecksum: raw.archive.verify_checksum,
+          deleteOriginal: raw.archive.delete_original,
+          retentionDays: raw.archive.retention_days,
+        } as DocTypeArchiveConfig
+      : undefined,
+    workLinking: raw.work_linking
+      ? {
+          enabled: raw.work_linking.enabled,
+          commentOnCreate: raw.work_linking.comment_on_create,
+          commentOnArchive: raw.work_linking.comment_on_archive,
+          requireClosedForArchive: raw.work_linking.require_closed_for_archive,
+        } as DocTypeWorkLinkingConfig
+      : undefined,
+    refinement: raw.refinement
+      ? {
+          enabled: raw.refinement.enabled,
+          postQuestionsToWorkItem: raw.refinement.post_questions_to_work_item,
+          maintainChangelog: raw.refinement.maintain_changelog,
+        } as DocTypeRefinementConfig
+      : undefined,
+    fulfillment: raw.fulfillment
+      ? {
+          enabled: raw.fulfillment.enabled,
+          checkAcceptanceCriteria: raw.fulfillment.check_acceptance_criteria,
+          checkFilesModified: raw.fulfillment.check_files_modified,
+          checkTestsAdded: raw.fulfillment.check_tests_added,
+          checkDocsUpdated: raw.fulfillment.check_docs_updated,
+        } as DocTypeFulfillmentConfig
+      : undefined,
   };
 }
 
