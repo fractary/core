@@ -3,7 +3,7 @@ name: repo-manager
 description: Universal source control agent - routes repository operations to specialized skills
 tools: Bash, Skill
 color: orange
-model: claude-opus-4-5
+model: claude-opus-4-6
 color: orange
 ---
 

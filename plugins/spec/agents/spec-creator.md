@@ -5,7 +5,7 @@ description: |
   Use PROACTIVELY when user mentions "create spec", "write spec", "document requirements".
   Triggers: create spec, generate spec, write specification
 color: orange
-model: claude-opus-4-5
+model: claude-opus-4-6
 ---
 
 <CONTEXT>

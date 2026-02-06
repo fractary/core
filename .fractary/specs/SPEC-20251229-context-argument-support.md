@@ -4,7 +4,7 @@ title: Universal --context Argument Support for Fractary Core Plugins
 type: feature
 status: draft
 created: 2025-12-29
-author: claude-opus-4-5
+author: claude-opus-4-6
 validated: false
 source: conversation
 related_docs:

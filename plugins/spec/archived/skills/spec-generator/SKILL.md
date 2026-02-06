@@ -1,7 +1,7 @@
 ---
 name: spec-generator
 description: Generates implementation specifications from conversation context optionally enriched with GitHub issue data
-model: claude-opus-4-5
+model: claude-opus-4-6
 ---
 
 # Spec Generator Skill

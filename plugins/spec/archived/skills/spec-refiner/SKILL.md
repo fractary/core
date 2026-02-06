@@ -1,7 +1,7 @@
 ---
 name: spec-refiner
 description: Critically reviews specifications, generates clarifying questions and improvement suggestions, and applies refinements based on user feedback
-model: claude-opus-4-5
+model: claude-opus-4-6
 ---
 
 # Spec Refiner Skill

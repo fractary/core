@@ -6,7 +6,7 @@ title: Plugin v3.0 Migration Plan
 type: infrastructure
 status: draft
 created: 2025-12-18
-author: claude-opus-4-5
+author: claude-opus-4-6
 validated: false
 source: conversation
 related_docs:
