@@ -1,13 +1,19 @@
 {
   "name": "fractary-core",
-  "version": "3.4.3",
-  "description": "Core initialization and configuration for Fractary plugins",
+  "version": "3.5.0",
+  "description": "Core configuration and environment management for Fractary plugins",
   "commands": [
     "./commands/configure.md",
-    "./commands/switch-env.md"
+    "./commands/config-update.md",
+    "./commands/validate.md",
+    "./commands/show.md",
+    "./commands/env-switch.md",
+    "./commands/env-list.md",
+    "./commands/env-show.md"
   ],
   "agents": [
-    "./agents/configurator.md",
-    "./agents/switch-env.md"
+    "./agents/configure-agent.md",
+    "./agents/config-update-agent.md",
+    "./agents/config-env-switch-agent.md"
   ]
 }

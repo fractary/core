@@ -29,7 +29,7 @@ const program = new Command();
 
 program
   .name('fractary-core')
-  .description('CLI for Fractary Core SDK - work, repo, spec, logs, file, docs')
+  .description('CLI for Fractary Core SDK - config, work, repo, spec, logs, file, docs')
   .version(packageJson.version);
 
 // Add all command trees
@@ -48,7 +48,7 @@ program.addHelpText(
   'after',
   `
 ${chalk.bold('Commands:')}
-  config      Manage configuration (validate, show)
+  config      Manage configuration (configure, validate, show, env-switch, env-list, env-show)
   work        Work item tracking (issues, comments, labels, milestones)
   repo        Repository operations (branches, commits, PRs, tags, worktrees)
   spec        Specification management (create, validate, refine)
@@ -57,8 +57,11 @@ ${chalk.bold('Commands:')}
   docs        Documentation management (create, search, export)
 
 ${chalk.bold('Examples:')}
+  $ fractary-core config configure --work-platform github --file-handler local
   $ fractary-core config validate
   $ fractary-core config show
+  $ fractary-core config env-switch prod
+  $ fractary-core config env-list
   $ fractary-core work issue fetch 123
   $ fractary-core repo commit --message "Add feature" --type feat
   $ fractary-core spec validate SPEC-20241216

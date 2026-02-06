@@ -83,13 +83,28 @@ describe('config command', () => {
 
       const configCmd = program.commands.find((cmd) => cmd.name() === 'config');
       expect(configCmd).toBeDefined();
-      expect(configCmd?.commands.length).toBe(2);
+      expect(configCmd?.commands.length).toBe(7);
+
+      const configureCmd = configCmd?.commands.find((cmd) => cmd.name() === 'configure');
+      expect(configureCmd).toBeDefined();
 
       const validateCmd = configCmd?.commands.find((cmd) => cmd.name() === 'validate');
       expect(validateCmd).toBeDefined();
 
       const showCmd = configCmd?.commands.find((cmd) => cmd.name() === 'show');
       expect(showCmd).toBeDefined();
+
+      const envSwitchCmd = configCmd?.commands.find((cmd) => cmd.name() === 'env-switch');
+      expect(envSwitchCmd).toBeDefined();
+
+      const envListCmd = configCmd?.commands.find((cmd) => cmd.name() === 'env-list');
+      expect(envListCmd).toBeDefined();
+
+      const envShowCmd = configCmd?.commands.find((cmd) => cmd.name() === 'env-show');
+      expect(envShowCmd).toBeDefined();
+
+      const envClearCmd = configCmd?.commands.find((cmd) => cmd.name() === 'env-clear');
+      expect(envClearCmd).toBeDefined();
     });
   });
 

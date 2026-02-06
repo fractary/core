@@ -12,25 +12,30 @@ All plugins share a common configuration approach to ensure:
 
 ## Agent Naming Convention
 
-All configuration agents are named `configurator`:
-- `fractary-core:configurator` - Core plugin configuration
+Configuration agents are named to match their corresponding CLI commands:
+- `fractary-core:configure-agent` - Core plugin configuration (fresh setup)
+- `fractary-core:config-update-agent` - Core plugin incremental updates
+- `fractary-core:config-env-switch-agent` - Environment switching
 - `fractary-faber:configurator` - FABER workflow configuration
 - `fractary-codex:configurator` - Codex plugin configuration
 
-### Migration from config-manager
+### Migration History
 
-The agents were renamed from `config-manager` to `configurator` for consistency. If you have scripts or documentation referencing the old names:
+The core agents were renamed from `configurator` to operation-specific names for alignment with the CLI:
 
 | Old Name | New Name |
 |----------|----------|
-| `fractary-core:config-manager` | `fractary-core:configurator` |
-| `fractary-faber:config-manager` | `fractary-faber:configurator` |
-| `fractary-codex:config-manager` | `fractary-codex:configurator` |
+| `fractary-core:configurator` | `fractary-core:configure-agent` (fresh setup) |
+| `fractary-core:configurator` | `fractary-core:config-update-agent` (incremental) |
+| `fractary-core:switch-env` | `fractary-core:config-env-switch-agent` |
 
-The commands remain unchanged:
-- `/fractary-core:configure`
-- `/fractary-faber:configure`
-- `/fractary-codex:configure`
+The core configure command remains `/fractary-core:configure`. Additional commands added:
+- `/fractary-core:config-update` - Incremental updates
+- `/fractary-core:validate` - Validate configuration
+- `/fractary-core:show` - Show configuration
+- `/fractary-core:env-switch` - Switch environment
+- `/fractary-core:env-list` - List environments
+- `/fractary-core:env-show` - Show environment status
 
 ## Gitignore Section Markers
 
@@ -208,7 +213,10 @@ If configuration write or validation fails:
 
 ## Cross-Reference
 
-- Core configurator: `core/plugins/core/agents/configurator.md`
+- Core configure agent: `core/plugins/core/agents/configure-agent.md`
+- Core config-update agent: `core/plugins/core/agents/config-update-agent.md`
+- Core env-switch agent: `core/plugins/core/agents/config-env-switch-agent.md`
+- Core archived configurator: `core/plugins/core/archived/agents/configurator.md`
 - Faber configurator: `faber/plugins/faber/agents/configurator.md`
 - Codex configurator: `codex/plugins/codex/agents/configurator.md`
 - Codex gitignore utils: `codex/cli/src/config/gitignore-utils.ts`
