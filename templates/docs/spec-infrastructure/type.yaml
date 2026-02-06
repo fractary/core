@@ -1,0 +1,102 @@
+id: spec-infrastructure
+display_name: Infrastructure Specification
+description: Specification for infrastructure and DevOps changes
+
+output_path: specs
+
+file_naming:
+  pattern: "WORK-{work_id}-{slug}.md"
+  auto_number: false
+  slug_source: title
+  slug_max_length: 50
+
+frontmatter:
+  required_fields:
+    - title
+    - fractary_doc_type
+    - status
+    - date
+  optional_fields:
+    - work_id
+    - work_type
+    - source
+    - validation_status
+    - tags
+    - author
+    - related
+    - changelog
+  defaults:
+    fractary_doc_type: spec-infrastructure
+    status: draft
+    source: conversation
+    validation_status: not_validated
+
+structure:
+  required_sections:
+    - Objective
+    - Current State
+    - Proposed Changes
+    - Security Considerations
+    - Rollback Plan
+    - Verification
+  optional_sections:
+    - Monitoring & Alerts
+    - Capacity Planning
+    - Cost Impact
+    - Dependencies
+    - References
+  section_order:
+    - Objective
+    - Current State
+    - Proposed Changes
+    - Security Considerations
+    - Monitoring & Alerts
+    - Capacity Planning
+    - Cost Impact
+    - Rollback Plan
+    - Verification
+    - Dependencies
+    - References
+
+status:
+  allowed_values:
+    - draft
+    - review
+    - approved
+    - in-progress
+    - completed
+    - archived
+  default: draft
+
+index_config:
+  index_file: specs/README.md
+  sort_by: date
+  sort_order: desc
+  entry_template: "- [**{{work_id}}**: {{title}}]({{relative_path}}) — {{status}}"
+
+archive:
+  enabled: true
+  source: archive
+  trigger: on_status_change
+  trigger_statuses:
+    - archived
+  verify_checksum: true
+  delete_original: true
+
+work_linking:
+  enabled: true
+  comment_on_create: true
+  comment_on_archive: true
+  require_closed_for_archive: true
+
+refinement:
+  enabled: true
+  post_questions_to_work_item: true
+  maintain_changelog: true
+
+fulfillment:
+  enabled: true
+  check_acceptance_criteria: false
+  check_files_modified: true
+  check_tests_added: false
+  check_docs_updated: true

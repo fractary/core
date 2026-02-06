@@ -239,4 +239,143 @@ export interface DocType {
    * Documentation standards (markdown content)
    */
   standards?: string;
+
+  /**
+   * Archive configuration (opt-in per type).
+   * Delegates file operations to the file plugin's named sources.
+   */
+  archive?: DocTypeArchiveConfig;
+
+  /**
+   * Work-linking configuration (opt-in per type).
+   * Links documents to external work items (GitHub issues, etc.).
+   */
+  workLinking?: DocTypeWorkLinkingConfig;
+
+  /**
+   * Refinement configuration (opt-in per type).
+   * Enables gap scanning, question generation, and iterative improvement.
+   */
+  refinement?: DocTypeRefinementConfig;
+
+  /**
+   * Fulfillment validation configuration (opt-in per type).
+   * Validates whether external implementation matches the document's requirements.
+   */
+  fulfillment?: DocTypeFulfillmentConfig;
+}
+
+// ============================================================================
+// Doc Type Opt-In Configuration Blocks
+// ============================================================================
+
+/**
+ * Archive configuration for a doc type
+ */
+export interface DocTypeArchiveConfig {
+  /** Enable archival for this doc type */
+  enabled: boolean;
+  /** Named file source from .fractary/config.yaml (e.g., 'archive') */
+  source: string;
+  /** What triggers archival */
+  trigger: 'manual' | 'on_status_change' | 'on_work_complete';
+  /** Status value(s) that trigger archival when trigger is on_status_change */
+  triggerStatuses?: string[];
+  /** Verify checksum after archive copy */
+  verifyChecksum?: boolean;
+  /** Delete original after successful archive */
+  deleteOriginal?: boolean;
+  /** Retention policy */
+  retentionDays?: number | 'forever';
+}
+
+/**
+ * Work-linking configuration for a doc type
+ */
+export interface DocTypeWorkLinkingConfig {
+  /** Enable work-linking for this doc type */
+  enabled: boolean;
+  /** Comment on work item when document is created */
+  commentOnCreate?: boolean;
+  /** Comment on work item when document is archived */
+  commentOnArchive?: boolean;
+  /** Require work item to be closed before archiving */
+  requireClosedForArchive?: boolean;
+}
+
+/**
+ * Refinement configuration for a doc type
+ */
+export interface DocTypeRefinementConfig {
+  /** Enable refinement for this doc type */
+  enabled: boolean;
+  /** Post refinement questions to linked work item */
+  postQuestionsToWorkItem?: boolean;
+  /** Maintain a changelog of refinements in the document */
+  maintainChangelog?: boolean;
+}
+
+/**
+ * Fulfillment validation configuration for a doc type
+ */
+export interface DocTypeFulfillmentConfig {
+  /** Enable fulfillment validation for this doc type */
+  enabled: boolean;
+  /** Check acceptance criteria checkboxes */
+  checkAcceptanceCriteria?: boolean;
+  /** Check whether expected files were modified */
+  checkFilesModified?: boolean;
+  /** Check whether tests were added */
+  checkTestsAdded?: boolean;
+  /** Check whether docs were updated */
+  checkDocsUpdated?: boolean;
+}
+
+// ============================================================================
+// Operation Result Types
+// ============================================================================
+
+/**
+ * Result of a document archive operation
+ */
+export interface DocArchiveResult {
+  success: boolean;
+  sourcePath: string;
+  archivePath: string;
+  checksum?: string;
+  originalDeleted: boolean;
+}
+
+/**
+ * Result of a document refinement scan
+ */
+export interface DocRefineResult {
+  questionsGenerated: number;
+  categories: string[];
+  questions: DocRefinementQuestion[];
+}
+
+/**
+ * A refinement question for a document
+ */
+export interface DocRefinementQuestion {
+  id: string;
+  question: string;
+  category: string;
+  priority: 'high' | 'medium' | 'low';
+  /** The document section this question relates to */
+  section?: string;
+}
+
+/**
+ * Result of fulfillment validation
+ */
+export interface DocFulfillmentResult {
+  status: 'pass' | 'partial' | 'fail';
+  score: number;
+  checks: Record<string, {
+    status: 'pass' | 'warn' | 'fail';
+    detail: string;
+  }>;
+  suggestions?: string[];
 }

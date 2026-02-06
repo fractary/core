@@ -1,11 +1,13 @@
 {
   "name": "fractary-docs",
-  "version": "3.2.0",
-  "description": "Documentation system with per-type skills for Claude auto-discovery.",
+  "version": "4.0.0",
+  "description": "Documentation system with per-type skills, archival, refinement, fulfillment validation, and work-linking.",
   "commands": "./commands/",
   "agents": [
+    "./agents/docs-archiver.md",
     "./agents/docs-auditor.md",
     "./agents/docs-consistency-checker.md",
+    "./agents/docs-refiner.md",
     "./agents/docs-validator.md",
     "./agents/docs-writer.md"
   ],

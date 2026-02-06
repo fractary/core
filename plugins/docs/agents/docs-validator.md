@@ -49,7 +49,34 @@ Your role is to validate documentation against type-specific rules and schemas.
 - Schema: JSON schema validation (if dual-format type)
 - Markdown: Formatting issues
 - Type-Specific: Rules from validation-rules.md
+- Fulfillment: Implementation validation (opt-in per type, see below)
 </VALIDATION_CHECKS>
+
+<FULFILLMENT_VALIDATION>
+After structural and quality validation, check if the doc type has fulfillment validation enabled.
+
+**When to run:** Only when the doc type's `fulfillment.enabled` is true (typically spec-* types).
+
+**How to check:**
+```bash
+fractary-core docs doc-validate-fulfillment <id> --json
+```
+
+**What it checks (configured per type):**
+- `check_acceptance_criteria`: Are acceptance criteria checkboxes checked off?
+- `check_files_modified`: Is the "Files to Modify" section populated?
+- `check_tests_added`: Is the "Testing" section populated?
+- `check_docs_updated`: Has the document been recently updated?
+
+**Include in report:**
+- Fulfillment score (0-100%)
+- Status: pass / partial / fail
+- Per-check details
+- Suggestions for incomplete items
+
+**NOTE:** Fulfillment validation is OPTIONAL and only runs for types that enable it.
+Types like ADRs, guides, and changelogs will NOT have fulfillment checks.
+</FULFILLMENT_VALIDATION>
 
 <SKILL_LOADING>
 Load validation rules from the appropriate skill directory: skills/doc-type-{doc_type}/

@@ -149,6 +149,13 @@ Core types:
 - infrastructure - Infrastructure Documentation
 - standards - Standards & Conventions
 - testing - Testing Documentation
+
+Specification types:
+- spec-basic - Basic Specification (simple tasks)
+- spec-feature - Feature Specification (new features)
+- spec-bug - Bug Fix Specification (bug investigation and fix)
+- spec-api - API Specification (API design and implementation)
+- spec-infrastructure - Infrastructure Specification (DevOps changes)
 </DOC_TYPES>
 
 <TYPE_SELECTION>
@@ -170,7 +177,42 @@ If doc_type is not specified or unclear:
 - Describing infrastructure? → infrastructure
 - Defining standards/rules? → standards
 - Documenting tests? → testing
+- Creating a spec for a new feature? → spec-feature
+- Creating a spec for a bug fix? → spec-bug
+- Creating a spec for API work? → spec-api
+- Creating a spec for infrastructure? → spec-infrastructure
+- Creating a simple/minimal spec? → spec-basic
 </TYPE_SELECTION>
+
+<WORK_LINKING>
+After creating a document, check if work-linking applies:
+
+1. Check if the doc type has `work_linking.enabled` (via type-info --json)
+2. Check if the document has `work_id` in frontmatter
+
+**Auto-detect work_id:**
+- From explicit --work-id flag or frontmatter
+- From git branch name: `feat/123-name` → work_id=123
+  ```bash
+  git branch --show-current
+  ```
+  Parse issue number from branch prefix (feat/, fix/, chore/, etc.)
+
+**If work-linked AND `work_linking.comment_on_create`:**
+1. Fetch issue context for enrichment:
+   ```bash
+   gh issue view <work_id> --json title,body,labels
+   ```
+2. Use issue context to enrich document content during creation
+3. After creation, comment on the work item:
+   ```bash
+   gh issue comment <work_id> --body "Specification created: <title>
+   - **Type**: <docType>
+   - **Path**: <path>"
+   ```
+
+**NOTE:** Work-linking is OPTIONAL. Types without `work_linking` config are unaffected.
+</WORK_LINKING>
 
 <OUTPUT>
 Return write result with:

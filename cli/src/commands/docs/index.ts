@@ -7,7 +7,7 @@
  */
 
 import { Command } from 'commander';
-import { createDocCreateCommand, createDocGetCommand, createDocListCommand, createDocUpdateCommand, createDocDeleteCommand, createDocSearchCommand } from './doc';
+import { createDocCreateCommand, createDocGetCommand, createDocListCommand, createDocUpdateCommand, createDocDeleteCommand, createDocSearchCommand, createDocArchiveCommand, createDocRefineScanCommand, createDocValidateFulfillmentCommand } from './doc';
 import { createTypeListCommand, createTypeInfoCommand } from './type';
 
 /**
@@ -23,6 +23,11 @@ export function createDocsCommand(): Command {
   docs.addCommand(createDocUpdateCommand());
   docs.addCommand(createDocDeleteCommand());
   docs.addCommand(createDocSearchCommand());
+
+  // Archive, refinement, and fulfillment operations
+  docs.addCommand(createDocArchiveCommand());
+  docs.addCommand(createDocRefineScanCommand());
+  docs.addCommand(createDocValidateFulfillmentCommand());
 
   // Type operations (flat with dashes)
   docs.addCommand(createTypeListCommand());
