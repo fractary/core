@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Configuration constants
-# NOTE: This script is deprecated. Use fractary-core:configure instead.
+# NOTE: This script is deprecated. Use fractary-core:config-init instead.
 CONFIG_DIR=".fractary/work"
 CONFIG_FILE=".fractary/config.yaml"
 TEMPLATE_FILE="$PLUGIN_ROOT/config/config.example.json"

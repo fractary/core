@@ -30,22 +30,22 @@ Initialize configuration using the configure command:
 
 ```bash
 # Interactive configuration
-fractary-core:configure
+fractary-core:config-init
 
 # Configure specific toolsets
-fractary-core:configure --plugins work,repo
+fractary-core:config-init --plugins work,repo
 
 # Specify platforms
-fractary-core:configure \
+fractary-core:config-init \
   --work-platform github \
   --repo-platform github \
   --file-handler local
 
 # Preview changes without applying
-fractary-core:configure --dry-run
+fractary-core:config-init --dry-run
 
 # Validate existing configuration
-fractary-core:configure --validate-only
+fractary-core:config-validate
 ```
 
 ## Configuration File
@@ -211,7 +211,7 @@ See the [MCP Documentation](/docs/mcp/server/README.md) for complete reference.
 Plugins read configuration from `.fractary/config.yaml`. Initialize with:
 
 ```bash
-fractary-core:configure
+fractary-core:config-init
 ```
 
 See the [Plugin Documentation](/docs/plugins/README.md) for plugin-specific details.
@@ -404,7 +404,7 @@ fractary-core --config .fractary/staging.yaml work issue list
 
 ```bash
 # Validate configuration
-fractary-core:configure --validate-only
+fractary-core:config-validate
 
 # Show current configuration (secrets redacted)
 fractary-core config show
@@ -418,8 +418,8 @@ fractary-core config test
 Update configuration using natural language:
 
 ```bash
-fractary-core:configure --context "switch to jira for work tracking"
-fractary-core:configure --context "enable S3 storage for file toolset"
+fractary-core:config-update --context "switch to jira for work tracking"
+fractary-core:config-update --context "enable S3 storage for file toolset"
 ```
 
 ## Best Practices
@@ -427,7 +427,7 @@ fractary-core:configure --context "enable S3 storage for file toolset"
 1. **Never commit secrets** - Use environment variables for tokens
 2. **Commit example config** - Include `.fractary/config.example.yaml` with placeholders
 3. **Use different configs per environment** - Separate staging and production
-4. **Validate before deployment** - Run `fractary-core:configure --validate-only`
+4. **Validate before deployment** - Run `fractary-core:config-validate`
 5. **Document required variables** - List environment variables in your README
 
 ## Migration from v1.x
@@ -439,7 +439,7 @@ fractary-core:configure --context "enable S3 storage for file toolset"
 | Config files | Multiple per-plugin | Single unified file |
 | Format | JSON | YAML only |
 | Location | `.fractary/plugins/<plugin>/config.json` | `.fractary/config.yaml` |
-| Init command | Per-plugin (`fractary-work:init`) | Unified (`fractary-core:configure`) |
+| Init command | Per-plugin (`fractary-work:init`) | Unified (`fractary-core:config-init`) |
 | Platform switching | Reconfigure | `active_handler` setting |
 
 ### Migration Steps
@@ -457,12 +457,12 @@ fractary-core:configure --context "enable S3 storage for file toolset"
 
 3. **Initialize new configuration**
    ```bash
-   fractary-core:configure
+   fractary-core:config-init
    ```
 
 4. **Validate and test**
    ```bash
-   fractary-core:configure --validate-only
+   fractary-core:config-validate
    fractary-core work issue list
    ```
 
@@ -470,12 +470,12 @@ fractary-core:configure --context "enable S3 storage for file toolset"
 
 | Deprecated | Replacement |
 |------------|-------------|
-| `fractary-work:init` | `fractary-core:configure --plugins work` |
-| `fractary-repo:init` | `fractary-core:configure --plugins repo` |
-| `fractary-logs:init` | `fractary-core:configure --plugins logs` |
-| `fractary-file:init` | `fractary-core:configure --plugins file` |
-| `fractary-spec:init` | `fractary-core:configure --plugins spec` |
-| `fractary-core:init` | `fractary-core:configure` |
+| `fractary-work:init` | `fractary-core:config-init --plugins work` |
+| `fractary-repo:init` | `fractary-core:config-init --plugins repo` |
+| `fractary-logs:init` | `fractary-core:config-init --plugins logs` |
+| `fractary-file:init` | `fractary-core:config-init --plugins file` |
+| `fractary-spec:init` | `fractary-core:config-init --plugins spec` |
+| `fractary-core:init` | `fractary-core:config-init` |
 
 ## Related Documentation
 

@@ -48,13 +48,13 @@ Add plugins to your settings:
 Plugins read configuration from `.fractary/config.yaml`. Initialize with:
 
 ```bash
-fractary-core:configure
+fractary-core:config-init
 ```
 
 Or configure specific plugins:
 
 ```bash
-fractary-core:configure --plugins work,repo
+fractary-core:config-init --plugins work,repo
 ```
 
 See the [Configuration Guide](/docs/guides/configuration.md) for complete options.

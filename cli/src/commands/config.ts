@@ -1,22 +1,31 @@
 /**
- * Config command - Validate and display Fractary Core configuration
+ * Config command - Manage Fractary Core configuration
  *
  * Commands:
+ * - configure: Initialize .fractary/config.yaml with defaults
  * - validate: Validate .fractary/core/config.yaml
  * - show: Display config (redacted)
+ * - env-switch: Switch active environment
+ * - env-list: List available environments
+ * - env-show: Show current environment status
+ * - env-clear: Clear environment credentials
  */
 
 import { Command } from 'commander';
 import { loadConfig, getConfigPath, configExists } from '../utils/config.js';
 import chalk from 'chalk';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { dirname } from 'path';
+import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'fs';
+import { dirname, join } from 'path';
 import {
   validateEnvVars,
   findProjectRoot,
   getDefaultConfig,
   getMinimalConfig,
   validateConfig,
+  loadEnv,
+  getCurrentEnv,
+  switchEnv,
+  clearEnv,
   type DefaultConfigOptions,
 } from '@fractary/core/config';
 import { redactConfig } from '@fractary/core/common/secrets';
@@ -37,7 +46,7 @@ async function validateCommand(options: { verbose?: boolean }): Promise<void> {
     if (!existsSync(configPath)) {
       console.log(chalk.red('❌ Configuration file not found'));
       console.log(chalk.yellow('\nTo create a configuration file, run:'));
-      console.log(chalk.cyan('  fractary-core:configure'));
+      console.log(chalk.cyan('  fractary-core config configure'));
       process.exit(1);
     }
 
@@ -200,7 +209,7 @@ async function showCommand(): Promise<void> {
     if (!existsSync(configPath)) {
       console.log(chalk.red('❌ Configuration file not found'));
       console.log(chalk.yellow('\nTo create a configuration file, run:'));
-      console.log(chalk.cyan('  fractary-core:configure'));
+      console.log(chalk.cyan('  fractary-core config configure'));
       process.exit(1);
     }
 
@@ -222,9 +231,9 @@ async function showCommand(): Promise<void> {
 }
 
 /**
- * Init configuration command options
+ * Configure command options
  */
-interface InitOptions {
+interface ConfigureOptions {
   workPlatform?: 'github' | 'jira' | 'linear';
   fileHandler?: 'local' | 's3';
   owner?: string;
@@ -236,14 +245,14 @@ interface InitOptions {
 }
 
 /**
- * Initialize configuration command
+ * Configure (initialize) configuration command
  */
-async function initCommand(options: InitOptions): Promise<void> {
+async function configureCommand(options: ConfigureOptions): Promise<void> {
   try {
     const projectRoot = findProjectRoot();
     const configPath = getConfigPath(projectRoot);
 
-    console.log(chalk.blue('Initializing Fractary Core configuration\n'));
+    console.log(chalk.blue('Configuring Fractary Core\n'));
 
     // Check if config already exists
     if (existsSync(configPath) && !options.force) {
@@ -301,7 +310,7 @@ async function initCommand(options: InitOptions): Promise<void> {
 
     writeFileSync(configPath, yamlContent, 'utf-8');
 
-    console.log(chalk.green('Configuration created successfully:\n'));
+    console.log(chalk.green('Configuration created/updated successfully:\n'));
     console.log(chalk.gray(`  ${configPath}\n`));
 
     // Show summary
@@ -328,9 +337,184 @@ async function initCommand(options: InitOptions): Promise<void> {
     console.log(chalk.cyan('\nNext steps:'));
     console.log(chalk.gray('  1. Review and customize the configuration'));
     console.log(chalk.gray('  2. Set required environment variables (e.g., GITHUB_TOKEN)'));
-    console.log(chalk.gray('  3. Run `fractary config validate` to verify'));
+    console.log(chalk.gray('  3. Run `fractary-core config validate` to verify'));
   } catch (error) {
-    console.error(chalk.red('Failed to initialize configuration:'), error);
+    console.error(chalk.red('Failed to configure:'), error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Environment switch command
+ */
+async function envSwitchCommand(envName: string, options: { clear?: boolean }): Promise<void> {
+  try {
+    if (!envName) {
+      console.error(chalk.red('Error: Environment name is required'));
+      console.log(chalk.gray('\nUsage: fractary-core config env-switch <name>'));
+      console.log(chalk.gray('Example: fractary-core config env-switch prod'));
+      process.exit(1);
+    }
+
+    // Validate environment name
+    if (!/^[a-zA-Z0-9_-]+$/.test(envName)) {
+      console.error(chalk.red(`Error: Invalid environment name '${envName}'`));
+      console.log(chalk.gray('\nEnvironment names can only contain letters, numbers, dashes, and underscores.'));
+      process.exit(1);
+    }
+
+    // Clear credentials first if requested
+    if (options.clear) {
+      console.log(chalk.yellow('Clearing previous environment credentials...'));
+      clearEnv();
+    }
+
+    // Check if .env.{envName} exists
+    const projectRoot = findProjectRoot();
+    const envFilePath = join(projectRoot, `.env.${envName}`);
+    if (!existsSync(envFilePath)) {
+      console.log(chalk.yellow(`Warning: .env.${envName} not found in project root`));
+      console.log(chalk.gray('Will load: .env → .env.local (if exists)\n'));
+    }
+
+    // Perform the switch
+    const success = switchEnv(envName);
+
+    if (success) {
+      console.log(chalk.green(`\nEnvironment switched to: ${envName}`));
+      console.log(chalk.gray(`FRACTARY_ENV=${envName}`));
+    } else {
+      console.error(chalk.red('Failed to switch environment'));
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error(chalk.red('Failed to switch environment:'), error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Environment list command
+ */
+async function envListCommand(): Promise<void> {
+  try {
+    const projectRoot = findProjectRoot();
+    const currentEnvName = getCurrentEnv() || process.env.FRACTARY_ENV;
+
+    console.log(chalk.blue('Available environments:\n'));
+
+    // Scan for .env files
+    const files = readdirSync(projectRoot).filter(
+      (f) => f.startsWith('.env') && f !== '.env.example' && f !== '.env.local'
+    );
+
+    const envs: { name: string; file: string; exists: boolean }[] = [];
+
+    // Always show base .env
+    envs.push({
+      name: '(default)',
+      file: '.env',
+      exists: existsSync(join(projectRoot, '.env')),
+    });
+
+    // Find named environments
+    for (const file of files) {
+      if (file === '.env') continue;
+      const envName = file.replace('.env.', '');
+      envs.push({
+        name: envName,
+        file: file,
+        exists: true,
+      });
+    }
+
+    // Display
+    console.log(chalk.gray('  Name            File                Status'));
+    console.log(chalk.gray('  ──────────────────────────────────────────────'));
+
+    for (const env of envs) {
+      const isCurrent = env.name === currentEnvName || (env.name === '(default)' && !currentEnvName);
+      const marker = isCurrent ? chalk.green(' *') : '  ';
+      const status = env.exists ? chalk.green('exists') : chalk.red('not found');
+      const name = env.name.padEnd(16);
+      const file = env.file.padEnd(20);
+      console.log(`${marker}${name}${file}${status}`);
+    }
+
+    console.log();
+    console.log(chalk.gray(`Current environment: ${currentEnvName || '(default)'}`));
+    console.log(chalk.gray('\nSwitch with: fractary-core config env-switch <name>'));
+  } catch (error) {
+    console.error(chalk.red('Failed to list environments:'), error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Environment show command
+ */
+async function envShowCommand(): Promise<void> {
+  try {
+    const currentEnvName = getCurrentEnv() || process.env.FRACTARY_ENV;
+
+    console.log(chalk.blue('Current environment status:\n'));
+    console.log(chalk.gray(`  FRACTARY_ENV: ${currentEnvName || '(not set - using default)'}`));
+    console.log();
+
+    // Show credential status (masked)
+    const credVars = [
+      'GITHUB_TOKEN',
+      'AWS_ACCESS_KEY_ID',
+      'AWS_SECRET_ACCESS_KEY',
+      'AWS_DEFAULT_REGION',
+      'JIRA_URL',
+      'JIRA_EMAIL',
+      'JIRA_TOKEN',
+      'LINEAR_API_KEY',
+    ];
+
+    console.log(chalk.gray('  Credential status:'));
+    for (const varName of credVars) {
+      const value = process.env[varName];
+      if (value) {
+        // Mask the value
+        let masked: string;
+        if (varName.includes('SECRET') || varName.includes('TOKEN') || varName.includes('KEY')) {
+          masked = chalk.green('set');
+        } else {
+          masked = value.length > 8 ? value.slice(0, 4) + '****' : chalk.green('set');
+        }
+        console.log(chalk.gray(`    ${varName.padEnd(28)}`) + chalk.green('✓ ') + masked);
+      } else {
+        console.log(chalk.gray(`    ${varName.padEnd(28)}`) + chalk.red('✗ not set'));
+      }
+    }
+
+    console.log();
+    console.log(chalk.gray('Switch with: fractary-core config env-switch <name>'));
+    console.log(chalk.gray('List available: fractary-core config env-list'));
+  } catch (error) {
+    console.error(chalk.red('Failed to show environment:'), error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Environment clear command
+ */
+async function envClearCommand(options: { vars?: string }): Promise<void> {
+  try {
+    if (options.vars) {
+      const varList = options.vars.split(',').map((v) => v.trim());
+      clearEnv(varList);
+      console.log(chalk.green(`Cleared ${varList.length} environment variable(s)`));
+    } else {
+      clearEnv();
+      console.log(chalk.green('Cleared all Fractary environment credentials'));
+    }
+    console.log(chalk.gray('\nCurrent environment reset to default.'));
+  } catch (error) {
+    console.error(chalk.red('Failed to clear environment:'), error);
     process.exit(1);
   }
 }
@@ -344,8 +528,8 @@ export function registerConfigCommand(program: Command): void {
     .description('Manage Fractary Core configuration');
 
   config
-    .command('init')
-    .description('Initialize .fractary/config.yaml with defaults')
+    .command('configure')
+    .description('Initialize or update .fractary/config.yaml')
     .option('--work-platform <platform>', 'Work tracking platform (github|jira|linear)', 'github')
     .option('--file-handler <handler>', 'File storage handler (local|s3)', 'local')
     .option('--owner <owner>', 'GitHub/GitLab owner/organization')
@@ -354,7 +538,7 @@ export function registerConfigCommand(program: Command): void {
     .option('--aws-region <region>', 'AWS region (if using S3)', 'us-east-1')
     .option('--minimal', 'Create minimal config (work + repo only)')
     .option('--force', 'Overwrite existing configuration')
-    .action(initCommand);
+    .action(configureCommand);
 
   config
     .command('validate')
@@ -366,4 +550,27 @@ export function registerConfigCommand(program: Command): void {
     .command('show')
     .description('Display configuration (with sensitive values redacted)')
     .action(showCommand);
+
+  config
+    .command('env-switch')
+    .description('Switch to a different environment')
+    .argument('<name>', 'Environment name (e.g., test, staging, prod)')
+    .option('--clear', 'Clear credentials before switching')
+    .action(envSwitchCommand);
+
+  config
+    .command('env-list')
+    .description('List available environments')
+    .action(envListCommand);
+
+  config
+    .command('env-show')
+    .description('Show current environment status')
+    .action(envShowCommand);
+
+  config
+    .command('env-clear')
+    .description('Clear environment credentials')
+    .option('--vars <vars>', 'Comma-separated list of specific variables to clear')
+    .action(envClearCommand);
 }
