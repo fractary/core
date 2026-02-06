@@ -33,7 +33,7 @@ work:
 Initialize with:
 
 ```bash
-fractary-core:configure --plugins work
+fractary-core:config-init --plugins work
 ```
 
 ## Slash Commands

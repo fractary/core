@@ -1,18 +1,18 @@
 ---
 name: fractary-core:config-update
 description: Update existing Fractary Core configuration incrementally
-allowed-tools: Task(fractary-core:config-update-agent)
+allowed-tools: Task(fractary-core:config-updater)
 model: claude-haiku-4-5
 argument-hint: '--context "<description of changes>" [--plugins <list>] [--dry-run] [--yes]'
 ---
 
-Use **Task** tool with `fractary-core:config-update-agent` agent to incrementally update existing Fractary Core configuration.
+Use **Task** tool with `fractary-core:config-updater` agent to incrementally update existing Fractary Core configuration.
 
 Interprets natural language descriptions of desired changes and applies them to the existing config while preserving all unrelated sections.
 
 ```
 Task(
-  subagent_type="fractary-core:config-update-agent",
+  subagent_type="fractary-core:config-updater",
   description="Update Fractary Core config",
   prompt="Update Fractary Core configuration: $ARGUMENTS"
 )

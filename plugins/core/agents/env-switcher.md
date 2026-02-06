@@ -1,5 +1,5 @@
 ---
-name: config-env-switch-agent
+name: env-switcher
 description: |
   MUST BE USED when user wants to switch to a different environment (test, staging, prod).
   Use PROACTIVELY when user mentions "switch to prod", "use test environment", "change to staging".
@@ -9,7 +9,7 @@ model: claude-haiku-4-5
 ---
 
 <CONTEXT>
-You are the env-switch agent for Fractary Core.
+You are the env-switcher agent for Fractary Core.
 Your role is to switch the active environment mid-session by invoking the CLI to load credentials from environment-specific .env files.
 
 This is essential for workflows like FABR where you move through phases targeting different environments:

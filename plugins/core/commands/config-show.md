@@ -1,5 +1,5 @@
 ---
-name: fractary-core:show
+name: fractary-core:config-show
 allowed-tools: Bash(fractary-core config show:*)
 description: Display Fractary Core configuration (redacted)
 model: claude-haiku-4-5

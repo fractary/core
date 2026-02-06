@@ -1,5 +1,5 @@
 ---
-name: fractary-core:validate
+name: fractary-core:config-validate
 allowed-tools: Bash(fractary-core config validate:*)
 description: Validate Fractary Core configuration
 model: claude-haiku-4-5

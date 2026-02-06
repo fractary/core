@@ -440,7 +440,7 @@ Understand time spent by issue, type, day of week.
 
 Initialize the unified configuration:
 ```bash
-fractary-core:configure
+fractary-core:config-init
 ```
 
 This creates `.fractary/config.yaml` with all plugin configurations including:

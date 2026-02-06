@@ -3,17 +3,17 @@
   "version": "3.5.0",
   "description": "Core configuration and environment management for Fractary plugins",
   "commands": [
-    "./commands/configure.md",
+    "./commands/config-init.md",
     "./commands/config-update.md",
-    "./commands/validate.md",
-    "./commands/show.md",
+    "./commands/config-validate.md",
+    "./commands/config-show.md",
     "./commands/env-switch.md",
     "./commands/env-list.md",
     "./commands/env-show.md"
   ],
   "agents": [
-    "./agents/configure-agent.md",
-    "./agents/config-update-agent.md",
-    "./agents/config-env-switch-agent.md"
+    "./agents/config-initializer.md",
+    "./agents/config-updater.md",
+    "./agents/env-switcher.md"
   ]
 }

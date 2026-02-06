@@ -87,7 +87,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     echo "Error: Configuration file not found" >&2
     echo "  Tried: $PROJECT_ROOT/.fractary/config.yaml" >&2
     echo "  Tried: $PROJECT_ROOT/.fractary/core/config.yaml" >&2
-    echo "  Run: fractary-core:configure" >&2
+    echo "  Run: fractary-core:config-init" >&2
     exit 3
 fi
 

@@ -394,7 +394,7 @@ This prevents Claude's search tools (Glob/Grep/Read) from accessing archived con
 
 Initialize the unified configuration:
 ```bash
-fractary-core:configure
+fractary-core:config-init
 ```
 
 This creates `.fractary/config.yaml` with all plugin configurations including:

@@ -278,7 +278,7 @@ work:
       token: ${GITHUB_TOKEN}
 ```
 
-Initialize with: `fractary-core:configure`
+Initialize with: `fractary-core:config-init`
 
 ## CI/CD Integration
 

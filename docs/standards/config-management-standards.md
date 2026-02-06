@@ -12,27 +12,28 @@ All plugins share a common configuration approach to ensure:
 
 ## Agent Naming Convention
 
-Configuration agents are named to match their corresponding CLI commands:
-- `fractary-core:configure-agent` - Core plugin configuration (fresh setup)
-- `fractary-core:config-update-agent` - Core plugin incremental updates
-- `fractary-core:config-env-switch-agent` - Environment switching
+Configuration agents use noun forms of their corresponding command verbs:
+- `fractary-core:config-initializer` - Core plugin configuration (fresh setup)
+- `fractary-core:config-updater` - Core plugin incremental updates
+- `fractary-core:env-switcher` - Environment switching
 - `fractary-faber:configurator` - FABER workflow configuration
 - `fractary-codex:configurator` - Codex plugin configuration
 
 ### Migration History
 
-The core agents were renamed from `configurator` to operation-specific names for alignment with the CLI:
+The core agents were renamed from `configurator` to operation-specific noun-form names for alignment with the CLI:
 
 | Old Name | New Name |
 |----------|----------|
-| `fractary-core:configurator` | `fractary-core:configure-agent` (fresh setup) |
-| `fractary-core:configurator` | `fractary-core:config-update-agent` (incremental) |
-| `fractary-core:switch-env` | `fractary-core:config-env-switch-agent` |
+| `fractary-core:configurator` | `fractary-core:config-initializer` (fresh setup) |
+| `fractary-core:configurator` | `fractary-core:config-updater` (incremental) |
+| `fractary-core:switch-env` | `fractary-core:env-switcher` |
 
-The core configure command remains `/fractary-core:configure`. Additional commands added:
+Core plugin commands:
+- `/fractary-core:config-init` - Initialize configuration
 - `/fractary-core:config-update` - Incremental updates
-- `/fractary-core:validate` - Validate configuration
-- `/fractary-core:show` - Show configuration
+- `/fractary-core:config-validate` - Validate configuration
+- `/fractary-core:config-show` - Show configuration
 - `/fractary-core:env-switch` - Switch environment
 - `/fractary-core:env-list` - List environments
 - `/fractary-core:env-show` - Show environment status
@@ -181,7 +182,9 @@ When updating configuration:
 
 | Plugin | Command |
 |--------|---------|
-| Core | `/fractary-core:configure` |
+| Core (init) | `/fractary-core:config-init` |
+| Core (update) | `/fractary-core:config-update` |
+| Core (validate) | `/fractary-core:config-validate` |
 | Faber | `/fractary-faber:configure` |
 | Codex | `/fractary-codex:configure` |
 
@@ -189,7 +192,6 @@ All commands support:
 - `--context "<text>"` - Natural language description of changes
 - `--force` - Skip confirmation prompts
 - `--dry-run` - Preview changes without applying (core only)
-- `--validate-only` - Validate current config (core only)
 
 ## Error Handling
 
@@ -213,9 +215,9 @@ If configuration write or validation fails:
 
 ## Cross-Reference
 
-- Core configure agent: `core/plugins/core/agents/configure-agent.md`
-- Core config-update agent: `core/plugins/core/agents/config-update-agent.md`
-- Core env-switch agent: `core/plugins/core/agents/config-env-switch-agent.md`
+- Core config-initializer: `core/plugins/core/agents/config-initializer.md`
+- Core config-updater: `core/plugins/core/agents/config-updater.md`
+- Core env-switcher: `core/plugins/core/agents/env-switcher.md`
 - Core archived configurator: `core/plugins/core/archived/agents/configurator.md`
 - Faber configurator: `faber/plugins/faber/agents/configurator.md`
 - Codex configurator: `codex/plugins/codex/agents/configurator.md`
