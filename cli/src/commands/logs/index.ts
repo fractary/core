@@ -2,6 +2,25 @@
  * Logs subcommand - Log management
  *
  * Provides capture, write, search, list, archive operations via @fractary/core LogManager.
+ *
+ * Commands mirror plugin naming for alignment:
+ *   CLI: fractary-core logs write      Plugin: /fractary-logs:write
+ *   CLI: fractary-core logs read       Plugin: /fractary-logs:read
+ *   CLI: fractary-core logs list       Plugin: /fractary-logs:list
+ *   CLI: fractary-core logs delete     Plugin: /fractary-logs:delete
+ *   CLI: fractary-core logs search     Plugin: /fractary-logs:search
+ *   CLI: fractary-core logs capture    Plugin: /fractary-logs:capture
+ *   CLI: fractary-core logs stop       Plugin: /fractary-logs:stop
+ *   CLI: fractary-core logs archive    Plugin: /fractary-logs:archive
+ *   CLI: fractary-core logs types      Plugin: /fractary-logs:types
+ *   CLI: fractary-core logs type-info  Plugin: /fractary-logs:type-info
+ *   CLI: fractary-core logs validate   Plugin: /fractary-logs:validate
+ *
+ * Agent-backed commands (no direct CLI equivalent):
+ *   /fractary-logs:log      -> logs-log agent (orchestrates type selection + write)
+ *   /fractary-logs:analyze  -> logs-analyze agent (AI pattern analysis)
+ *   /fractary-logs:audit    -> logs-audit agent (AI compliance analysis)
+ *   /fractary-logs:cleanup  -> logs-cleanup agent (composite archive + delete)
  */
 
 import { Command } from 'commander';
@@ -16,14 +35,16 @@ import { getTypeColor } from './utils';
 export function createLogsCommand(): Command {
   const logs = new Command('logs').description('Log management');
 
-  // Type management commands (new)
+  // Type management commands
   logs.addCommand(createLogsTypesCommand());
   logs.addCommand(createLogsTypeInfoCommand());
   logs.addCommand(createLogsValidateCommand());
 
-  // Existing commands
+  // Session capture commands
   logs.addCommand(createLogsCaptureCommand());
   logs.addCommand(createLogsStopCommand());
+
+  // CRUD commands
   logs.addCommand(createLogsWriteCommand());
   logs.addCommand(createLogsReadCommand());
   logs.addCommand(createLogsSearchCommand());
