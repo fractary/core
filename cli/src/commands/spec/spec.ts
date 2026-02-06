@@ -7,8 +7,7 @@ import chalk from 'chalk';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { execFileSync } from 'child_process';
-import { getSpecManager } from '../../sdk/factory';
+import { getSpecManager, getFileManagerForSource } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
 
 export function createSpecCreateFileCommand(): Command {
@@ -280,12 +279,7 @@ export function createSpecArchiveCommand(): Command {
               ['s3', 'r2', 'gcs'].includes(specsSource.type) &&
               specsSource.bucket
             ) {
-              const storageScript = path.resolve(
-                'plugins/file/skills/file-manager/scripts/storage.mjs'
-              );
-              if (fs.existsSync(storageScript)) {
-                archiveMode = 'cloud';
-              }
+              archiveMode = 'cloud';
             }
           } catch {
             // Config not available, use local mode
@@ -309,19 +303,36 @@ export function createSpecArchiveCommand(): Command {
 
           try {
             if (archiveMode === 'cloud') {
-              // Cloud archive: use upload-to-cloud.sh (calls SDK storage)
+              // Cloud archive: upload via SDK FileManager
               const cloudPath = `archive/specs/${filename}`;
-              const scriptPath = path.resolve(
-                'plugins/spec/scripts/upload-to-cloud.sh'
-              );
+              const content = fs.readFileSync(specPath, 'utf-8');
+              const checksum = crypto.createHash('sha256').update(content).digest('hex');
+              const fileSize = Buffer.byteLength(content, 'utf-8');
 
-              const result = execFileSync(scriptPath, [specPath, cloudPath], {
-                encoding: 'utf-8',
-                timeout: 60000,
+              const fileManager = await getFileManagerForSource('specs');
+              const cloudUrl = await fileManager.write(cloudPath, content);
+
+              // Verify upload independently
+              const exists = await fileManager.exists(cloudPath);
+              if (!exists) {
+                throw new Error(
+                  'Upload verification failed: file not found in cloud storage after upload'
+                );
+              }
+
+              // Verified in cloud - safe to remove original
+              fs.unlinkSync(specPath);
+
+              results.push({
+                filename,
+                source_path: specPath,
+                cloud_url: cloudUrl,
+                cloud_path: cloudPath,
+                size_bytes: fileSize,
+                checksum: `sha256:${checksum}`,
+                archived_at: new Date().toISOString(),
+                archive_mode: 'cloud',
               });
-
-              const parsed = JSON.parse(result.trim());
-              results.push(parsed);
             } else {
               // Local archive: copy, verify checksum, delete original
               const specsDir = path.dirname(specPath);
