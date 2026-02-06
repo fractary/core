@@ -4,10 +4,15 @@
   "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
   "commands": "./commands/",
   "agents": [
-    "./agents/spec-archive.md",
-    "./agents/spec-create.md",
-    "./agents/spec-refine.md",
-    "./agents/spec-validate.md"
+    "./agents/spec-creator.md",
+    "./agents/spec-getter.md",
+    "./agents/spec-lister.md",
+    "./agents/spec-updater.md",
+    "./agents/spec-deleter.md",
+    "./agents/spec-validator.md",
+    "./agents/spec-refiner.md",
+    "./agents/spec-archiver.md",
+    "./agents/template-lister.md"
   ],
   "skills": "./skills/"
 }
