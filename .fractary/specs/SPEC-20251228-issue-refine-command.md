@@ -75,7 +75,7 @@ GitHub CLI (gh issue view/edit/comment)
 name: fractary-work:issue-refine
 description: Refine issue requirements through clarifying questions
 allowed-tools: Task(fractary-work:issue-refine-agent)
-model: claude-opus-4-5
+model: claude-opus-4-6
 argument-hint: '<number> [--prompt "<focus>"]'
 ---
 ```
@@ -84,7 +84,7 @@ argument-hint: '<number> [--prompt "<focus>"]'
 **Location**: `/plugins/work/agents/issue-refine.md`
 **Size**: ~450-500 lines
 **Purpose**: Main refinement logic
-**Model**: claude-opus-4-5 (requires reasoning for question generation)
+**Model**: claude-opus-4-6 (requires reasoning for question generation)
 **Allowed Tools**: Bash(gh issue *), AskUserQuestion(*)
 
 **Agent Structure**:

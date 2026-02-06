@@ -5,7 +5,7 @@ description: |
   Use PROACTIVELY when user mentions "refine spec", "improve spec", "review specification".
   Triggers: refine, improve, review, clarify spec
 color: orange
-model: claude-opus-4-5
+model: claude-opus-4-6
 ---
 
 <CONTEXT>

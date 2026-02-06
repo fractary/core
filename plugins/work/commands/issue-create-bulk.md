@@ -2,7 +2,7 @@
 name: fractary-work:issue-create-bulk
 description: Create multiple issues at once using AI analysis
 allowed-tools: Task(fractary-work:issue-bulk-creator)
-model: claude-opus-4-5
+model: claude-opus-4-6
 argument-hint: '[--context <description>] [--type <type>] [--label <label>] [--template <name>] [--assignee <user>]'
 ---
 

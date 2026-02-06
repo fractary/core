@@ -2,7 +2,7 @@
 name: fractary-repo:pr-review
 description: Review pull requests - delegates to fractary-repo:pr-review-agent
 allowed-tools: Task(fractary-repo:pr-review-agent)
-model: claude-opus-4-5
+model: claude-opus-4-6
 argument-hint: '<pr_number> [--approve|--request-changes|--comment] [--body "<text>"] [--context "<text>"]'
 ---
 
