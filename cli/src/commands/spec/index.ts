@@ -7,7 +7,7 @@
  */
 
 import { Command } from 'commander';
-import { createSpecCreateFileCommand, createSpecGetCommand, createSpecListCommand, createSpecUpdateCommand, createSpecDeleteCommand, createSpecValidateCheckCommand, createSpecRefineScanCommand } from './spec';
+import { createSpecCreateFileCommand, createSpecGetCommand, createSpecListCommand, createSpecUpdateCommand, createSpecDeleteCommand, createSpecValidateCheckCommand, createSpecRefineScanCommand, createSpecArchiveCommand } from './spec';
 import { createTemplateListCommand } from './template';
 
 /**
@@ -24,6 +24,7 @@ export function createSpecCommand(): Command {
   spec.addCommand(createSpecDeleteCommand());
   spec.addCommand(createSpecValidateCheckCommand());
   spec.addCommand(createSpecRefineScanCommand());
+  spec.addCommand(createSpecArchiveCommand());
 
   // Template operations (flat with dashes)
   spec.addCommand(createTemplateListCommand());

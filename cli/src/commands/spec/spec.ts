@@ -4,7 +4,10 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getSpecManager } from '../../sdk/factory';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as crypto from 'crypto';
+import { getSpecManager, getFileManagerForSource } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
 
 export function createSpecCreateFileCommand(): Command {
@@ -214,6 +217,198 @@ export function createSpecRefineScanCommand(): Command {
               console.log(chalk.gray(`   Category: ${question.category}`));
             });
           }
+        }
+      } catch (error) {
+        handleError(error, options);
+      }
+    });
+}
+
+function computeFileChecksum(filePath: string): string {
+  const content = fs.readFileSync(filePath);
+  return crypto.createHash('sha256').update(content).digest('hex');
+}
+
+export function createSpecArchiveCommand(): Command {
+  return new Command('spec-archive')
+    .description('Archive specifications for a completed issue (copy to archive, verify, remove originals)')
+    .argument('<issue_number>', 'GitHub issue number')
+    .option('--local', 'Force local archive mode (skip cloud storage)')
+    .option('--json', 'Output as JSON')
+    .action(async (issueNumber: string, options) => {
+      try {
+        const specManager = await getSpecManager();
+
+        // Find specs matching this issue by filename pattern
+        const allSpecs = specManager.listSpecs();
+        const paddedIssue = issueNumber.padStart(5, '0');
+        const matchingSpecs = allSpecs.filter((spec: any) => {
+          const filename = path.basename(spec.path);
+          return filename.startsWith(`SPEC-${paddedIssue}`) ||
+                 filename.startsWith(`WORK-${paddedIssue}`);
+        });
+
+        if (matchingSpecs.length === 0) {
+          if (options.json) {
+            console.error(
+              JSON.stringify(
+                {
+                  status: 'error',
+                  error: { code: 'NO_SPECS_FOUND', message: `No specifications found for issue ${issueNumber}` },
+                },
+                null,
+                2
+              )
+            );
+          } else {
+            console.error(chalk.red(`No specifications found for issue ${issueNumber}`));
+          }
+          process.exit(3);
+        }
+
+        // Determine archive mode
+        let archiveMode: 'local' | 'cloud' = 'local';
+
+        if (!options.local) {
+          try {
+            const { loadFileConfig } = await import('@fractary/core/common/config');
+            const fileConfig = loadFileConfig();
+            const specsSource = fileConfig?.sources?.specs;
+            if (
+              specsSource &&
+              ['s3', 'r2', 'gcs'].includes(specsSource.type) &&
+              specsSource.bucket
+            ) {
+              archiveMode = 'cloud';
+            }
+          } catch {
+            // Config not available, use local mode
+          }
+        }
+
+        if (!options.json) {
+          console.log(
+            chalk.gray(
+              `Archiving ${matchingSpecs.length} spec(s) for issue ${issueNumber} (${archiveMode} mode)`
+            )
+          );
+        }
+
+        const results: any[] = [];
+        const errors: Array<{ filename: string; error: string }> = [];
+
+        for (const spec of matchingSpecs) {
+          const filename = path.basename(spec.path);
+          const specPath = spec.path;
+
+          try {
+            if (archiveMode === 'cloud') {
+              // Cloud archive: upload via SDK FileManager
+              const cloudPath = `archive/specs/${filename}`;
+              const content = fs.readFileSync(specPath, 'utf-8');
+              const checksum = crypto.createHash('sha256').update(content).digest('hex');
+              const fileSize = Buffer.byteLength(content, 'utf-8');
+
+              const fileManager = await getFileManagerForSource('specs');
+              const cloudUrl = await fileManager.write(cloudPath, content);
+
+              // Verify upload independently
+              const exists = await fileManager.exists(cloudPath);
+              if (!exists) {
+                throw new Error(
+                  'Upload verification failed: file not found in cloud storage after upload'
+                );
+              }
+
+              // Verified in cloud - safe to remove original
+              fs.unlinkSync(specPath);
+
+              results.push({
+                filename,
+                source_path: specPath,
+                cloud_url: cloudUrl,
+                cloud_path: cloudPath,
+                size_bytes: fileSize,
+                checksum: `sha256:${checksum}`,
+                archived_at: new Date().toISOString(),
+                archive_mode: 'cloud',
+              });
+            } else {
+              // Local archive: copy, verify checksum, delete original
+              const specsDir = path.dirname(specPath);
+              const archiveDir = path.join(specsDir, 'archive');
+              const archivePath = path.join(archiveDir, filename);
+
+              const checksum = computeFileChecksum(specPath);
+              const fileSize = fs.statSync(specPath).size;
+
+              fs.mkdirSync(archiveDir, { recursive: true });
+              fs.copyFileSync(specPath, archivePath);
+
+              const archiveChecksum = computeFileChecksum(archivePath);
+              if (checksum !== archiveChecksum) {
+                fs.unlinkSync(archivePath);
+                throw new Error(
+                  'Checksum mismatch after copy - archive removed, original preserved'
+                );
+              }
+
+              // Checksum verified - safe to remove original
+              fs.unlinkSync(specPath);
+
+              results.push({
+                filename,
+                source_path: specPath,
+                archive_path: archivePath,
+                size_bytes: fileSize,
+                checksum: `sha256:${checksum}`,
+                archived_at: new Date().toISOString(),
+                archive_mode: 'local',
+              });
+            }
+
+            if (!options.json) {
+              console.log(chalk.green(`  ✓ ${filename}`));
+            }
+          } catch (err: any) {
+            errors.push({ filename, error: err.message || String(err) });
+            if (!options.json) {
+              console.error(chalk.red(`  ✗ ${filename}: ${err.message || err}`));
+            }
+          }
+        }
+
+        if (options.json) {
+          console.log(
+            JSON.stringify(
+              {
+                status:
+                  errors.length === 0
+                    ? 'success'
+                    : results.length > 0
+                      ? 'partial'
+                      : 'error',
+                data: {
+                  archived: results,
+                  errors: errors.length > 0 ? errors : undefined,
+                  summary: {
+                    total: matchingSpecs.length,
+                    archived: results.length,
+                    failed: errors.length,
+                    archive_mode: archiveMode,
+                  },
+                },
+              },
+              null,
+              2
+            )
+          );
+        } else {
+          console.log('');
+          console.log(
+            `${chalk.green(String(results.length))} archived, ` +
+              `${errors.length > 0 ? chalk.red(String(errors.length)) : '0'} failed`
+          );
         }
       } catch (error) {
         handleError(error, options);
