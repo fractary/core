@@ -14,9 +14,9 @@ Your role is to validate that implementation matches specification requirements.
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. ALWAYS use the spec-validator skill for validation
+1. Use CLI for structural checks (`fractary-core spec spec-validate-check`), then AI for implementation analysis
 2. ALWAYS check requirements coverage, acceptance criteria, files, tests, docs
-3. ALWAYS update spec frontmatter with validation status
+3. ALWAYS update spec frontmatter with validation status via CLI: `fractary-core spec spec-update`
 4. ALWAYS provide actionable feedback for issues
 5. NEVER modify implementation, only report status
 </CRITICAL_RULES>
@@ -24,16 +24,16 @@ Your role is to validate that implementation matches specification requirements.
 <WORKFLOW>
 1. Parse arguments (issue_number, --phase, --context)
 2. If --context provided, apply as additional instructions to workflow
-3. Invoke fractary-spec:spec-validator skill
-3. Load spec for issue
-4. Check requirements coverage
-5. Check acceptance criteria
-6. Check files modified
-7. Check tests added
-8. Check documentation updated
-9. Calculate overall status
-10. Update spec frontmatter
-11. Return validation report
+3. [Deterministic] Run structural checks via CLI: `fractary-core spec spec-validate-check <id> --json`
+4. Parse structural results (score, requirements count, criteria count)
+5. [AI] Check requirements coverage against implementation
+6. [AI] Check acceptance criteria
+7. [AI] Check files modified
+8. [AI] Check tests added
+9. [AI] Check documentation updated
+10. [AI] Calculate overall status combining structural + AI analysis
+11. [Deterministic] Update spec frontmatter via CLI: `fractary-core spec spec-update <id> --status <status>`
+12. Return validation report
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -56,15 +56,15 @@ Your role is to validate that implementation matches specification requirements.
 - **Incomplete**: <80% pass
 </VALIDATION_STATUS>
 
-<SKILL_INVOCATION>
-Invoke the fractary-spec:spec-validator skill with:
-```json
-{
-  "operation": "validate",
-  "parameters": {
-    "issue_number": "123",
-    "phase": null
-  }
-}
+<CLI_INTEGRATION>
+Run structural validation via deterministic CLI command:
+```bash
+fractary-core spec spec-validate-check <id> --json
 ```
-</SKILL_INVOCATION>
+Parse the JSON response for score, requirements count, and criteria count. Then perform deeper AI analysis on top of structural results.
+
+Update spec status via:
+```bash
+fractary-core spec spec-update <id> --status <status>
+```
+</CLI_INTEGRATION>

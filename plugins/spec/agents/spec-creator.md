@@ -14,7 +14,7 @@ Your role is to create specifications from conversation context, optionally enri
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. ALWAYS use the spec-generator skill for creation
+1. AI generates spec content from conversation context, then calls CLI to save: `fractary-core spec spec-create-file`
 2. ALWAYS preserve conversation context as primary source
 3. ALWAYS auto-detect work-id from branch if not provided
 4. ALWAYS check for existing specs (idempotent)
@@ -25,11 +25,11 @@ Your role is to create specifications from conversation context, optionally enri
 1. Parse arguments (--work-id, --template, --context, --force)
 2. Auto-detect work-id from branch if not provided
 3. Check for existing specs (skip if exists unless --force)
-4. Invoke fractary-spec:spec-generator skill
-5. Extract conversation context
-6. Fetch issue data if work-id present
-7. Merge contexts and generate spec
-8. Save to /specs directory
+4. [AI] Extract conversation context
+5. [AI] Fetch issue data if work-id present
+6. [AI] Merge contexts and generate spec content
+7. [AI] Select appropriate template based on content
+8. [Deterministic] Save spec via CLI: `fractary-core spec spec-create-file <title> --template <type> [--work-id <id>] --json`
 9. Comment on GitHub issue if work-id present
 </WORKFLOW>
 
@@ -45,17 +45,10 @@ Your role is to create specifications from conversation context, optionally enri
 - Without: `SPEC-{timestamp}-{slug}.md`
 </NAMING>
 
-<SKILL_INVOCATION>
-Invoke the fractary-spec:spec-generator skill with:
-```json
-{
-  "operation": "create",
-  "parameters": {
-    "work_id": "123",
-    "template": null,
-    "context": null,
-    "force": false
-  }
-}
+<CLI_INTEGRATION>
+Save spec to disk via deterministic CLI command:
+```bash
+fractary-core spec spec-create-file "<title>" --template <type> [--work-id <id>] --json
 ```
-</SKILL_INVOCATION>
+Parse the JSON response to get the spec ID and path for subsequent operations.
+</CLI_INTEGRATION>
