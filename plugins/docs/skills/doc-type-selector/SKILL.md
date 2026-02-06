@@ -91,6 +91,14 @@ fractary-core docs doc-create <id> --doc-type <type> --title "<title>"
 → Use **testing** (Testing Documentation)
   - Test plans, test results, QA processes, validation, benchmarks
 
+**Is it a specification or implementation plan?**
+→ Select the appropriate spec type:
+  - **Simple task or quick change?** → Use **spec-basic**
+  - **New feature development?** → Use **spec-feature**
+  - **Bug investigation and fix?** → Use **spec-bug**
+  - **API design and implementation?** → Use **spec-api**
+  - **Infrastructure or DevOps change?** → Use **spec-infrastructure**
+
 </DECISION_TREE>
 
 <TYPE_SUMMARY_TABLE>
@@ -108,6 +116,11 @@ fractary-core docs doc-create <id> --doc-type <type> --title "<title>"
 | **infrastructure** | Describing ops/infrastructure | Runbooks, cloud resources, deployment docs |
 | **standards** | Defining rules/conventions | Coding standards, style guides, best practices |
 | **testing** | Documenting tests/QA | Test plans, test results, validation procedures |
+| **spec-basic** | Simple specification | Quick change spec, minor task, simple implementation plan |
+| **spec-feature** | Feature specification | New feature, comprehensive implementation plan |
+| **spec-bug** | Bug fix specification | Bug investigation, root cause analysis, fix plan |
+| **spec-api** | API specification | API design, endpoint spec, contract definition |
+| **spec-infrastructure** | Infrastructure spec | DevOps change, infrastructure modification |
 
 </TYPE_SUMMARY_TABLE>
 
@@ -181,6 +194,11 @@ When a type is selected, return just the type ID string:
 - `infrastructure`
 - `standards`
 - `testing`
+- `spec-basic`
+- `spec-feature`
+- `spec-bug`
+- `spec-api`
+- `spec-infrastructure`
 
 If no type matches well, return `null` and suggest using basic markdown.
 </OUTPUT>
