@@ -38,28 +38,28 @@ A command-line interface is available for all core operations:
 **Quick example:**
 ```bash
 # Work tracking
-fractary-core work issue fetch 123
-fractary-core work issue create "Bug: Login fails" --type bug
+fractary-core work issue-fetch 123
+fractary-core work issue-create "Bug: Login fails" --type bug
 
 # Repository operations
 fractary-core repo commit --message "Add feature" --type feat
-fractary-core repo branch create feature/new-ui
+fractary-core repo branch-create feature/new-ui
 
 # Specification management
-fractary-core spec validate SPEC-20241216
-fractary-core spec create --title "API Design"
+fractary-core spec spec-validate-check SPEC-20241216
+fractary-core spec spec-create-file --title "API Design"
 
 # Log management
 fractary-core logs search --query "error" --type session
-fractary-core logs capture session-001
+fractary-core logs capture 123
 
 # File operations
 fractary-core file write data.json --content '{"key":"value"}'
 fractary-core file list --pattern "*.json"
 
 # Documentation
-fractary-core docs create guide-001 --title "User Guide"
-fractary-core docs search --query "authentication"
+fractary-core docs doc-create --title "User Guide"
+fractary-core docs doc-search --query "authentication"
 ```
 
 See the [CLI documentation](./cli/README.md) for full command reference.
@@ -72,7 +72,7 @@ A standalone Model Context Protocol server for AI agent integration:
 |------|---------|--------|---------|
 | **MCP Server** | [`@fractary/core-mcp`](./mcp/server/) | Ready | `npx @fractary/core-mcp` |
 
-The MCP server provides 81 tools across 6 toolsets for AI agents to interact with core operations.
+The MCP server provides 80 tools across 6 toolsets for AI agents to interact with core operations.
 
 **Quick example:**
 ```bash
@@ -80,7 +80,7 @@ The MCP server provides 81 tools across 6 toolsets for AI agents to interact wit
 npx @fractary/core-mcp
 
 # Run with custom config
-npx @fractary/core-mcp --config .fractary/core/config.yaml
+npx @fractary/core-mcp --config .fractary/config.yaml
 ```
 
 **Claude Code integration:**
@@ -213,10 +213,6 @@ core/
 - [Configuration Guide](./docs/guides/configuration.md) - Unified `.fractary/config.yaml` reference
 - [Integration Guide](./docs/guides/integration.md) - How to integrate into your projects
 - [Troubleshooting](./docs/guides/troubleshooting.md) - Common issues and solutions
-
-### Examples
-
-- [Usage Examples](./docs/examples/) - Real-world integration patterns and code samples
 
 ## Development
 

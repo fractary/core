@@ -1,11 +1,11 @@
 # Fractary Repo Plugin
 
-**Version**: 2.2.0
+**Version**: 3.0.8
 **Universal source control operations across GitHub, GitLab, and Bitbucket**
 
 ## Overview
 
-The `fractary-repo` plugin provides a unified, platform-agnostic interface for source control operations. It features a modular 3-layer architecture that separates user commands, decision logic, and platform-specific implementations for maximum flexibility and context efficiency.
+The `fractary-repo` plugin provides a unified, platform-agnostic interface for source control operations. It uses an agents + commands + skills pattern with MCP-first architecture for maximum flexibility and context efficiency.
 
 ### Key Features
 
@@ -19,27 +19,23 @@ The `fractary-repo` plugin provides a unified, platform-agnostic interface for s
 
 ## Architecture
 
-The plugin uses a **3-layer architecture** with handler pattern:
+The plugin uses an **agents + commands + skills** pattern with MCP-first architecture:
 
 ```
 ┌─────────────────────────────────────────┐
-│  Layer 1: Commands (User Interface)    │
+│  Commands (User Interface)             │
 │  /fractary-repo:branch-create, etc.    │
 └─────────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────────┐
-│  Layer 2: Agent (Routing)              │
-│  repo-manager: validates & routes      │
+│  Agents (Orchestration)                │
+│  pr-review-agent                       │
 └─────────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────────┐
-│  Layer 3: Skills (Workflows)           │
-│  7 specialized skills + 3 handlers     │
-└─────────────────────────────────────────┘
-              ↓
-┌─────────────────────────────────────────┐
-│  Scripts (Deterministic Operations)    │
-│  Platform-specific shell scripts       │
+│  Skills (Knowledge & Templates)        │
+│  code-review-checklist, commit-format, │
+│  pr-template                           │
 └─────────────────────────────────────────┘
 ```
 
@@ -52,24 +48,15 @@ claude plugin install fractary/repo
 
 ## Quick Start
 
-### Option 1: Setup Wizard (Recommended) ⚡
+### Option 1: Unified Config Init (Recommended) ⚡
 
 The fastest way to get started:
 
 ```bash
-/fractary-repo:init
+fractary-core:config-init
 ```
 
-The interactive wizard will:
-- ✅ Auto-detect your platform (GitHub/GitLab/Bitbucket)
-- ✅ Guide you through authentication setup (SSH or HTTPS+token)
-- ✅ Validate your credentials
-- ✅ Create the configuration file
-- ✅ Test connectivity
-
-**Time to setup**: ~2 minutes
-
-See [`/fractary-repo:init` documentation](commands/init.md) for all options.
+This initializes the unified `.fractary/config.yaml` configuration, which includes repo plugin settings.
 
 ### Option 2: Manual Configuration
 
@@ -81,22 +68,15 @@ If you prefer manual setup:
 export GITHUB_TOKEN="your_github_token_here"
 ```
 
-2. **Create configuration file**:
+2. **Create configuration file** (`.fractary/config.yaml`):
 
-```bash
-mkdir -p ~/.fractary/repo
-cat > ~/.fractary/repo/config.json <<EOF
-{
-  "handlers": {
-    "source_control": {
-      "active": "github",
-      "github": {
-        "token": "$GITHUB_TOKEN"
-      }
-    }
-  }
-}
-EOF
+```yaml
+repo:
+  handlers:
+    source_control:
+      active: github
+      github:
+        token: ${GITHUB_TOKEN}
 ```
 
 3. **Choose authentication method**:
@@ -352,7 +332,7 @@ This argument is always optional and appears as the final argument. When provide
 /fractary-repo:init --context "Use company-specific branch naming conventions"
 ```
 
-See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+Context arguments follow the `--context` flag pattern as described above.
 
 ## Programmatic Usage
 
@@ -387,44 +367,24 @@ The plugin can be invoked programmatically by other plugins or FABER workflows:
 
 ### Agent
 
-**repo-manager** - Universal routing agent
-- Validates operation requests
-- Routes to appropriate skills
-- Returns structured responses
-- Platform-agnostic (no platform-specific logic)
+**pr-review-agent** - Pull request review orchestration
+- Analyzes PR changes
+- Applies code review checklists
+- Returns structured review feedback
 
-[Agent documentation](agents/repo-manager.md)
+[Agent documentation](agents/pr-review-agent.md)
 
-### Skills (8 Specialized)
+### Skills (Knowledge Resources)
 
-1. **branch-namer** - Generate semantic branch names
-2. **branch-manager** - Create and manage branches
-3. **commit-creator** - Create semantic commits
-4. **branch-pusher** - Push branches safely
-5. **pr-manager** - Complete PR lifecycle
-6. **tag-manager** - Version tag management
-7. **cleanup-manager** - Branch cleanup operations
-8. **permission-manager** - Claude Code permission configuration
+- **code-review-checklist** - Standards for code review
+- **commit-format** - Commit message formatting rules
+- **pr-template** - Pull request templates
 
 [Skills documentation](skills/)
 
-### Handlers (3 Platforms)
+### Archived Components
 
-1. **handler-source-control-github** - GitHub operations (complete)
-2. **handler-source-control-gitlab** - GitLab operations (stub)
-3. **handler-source-control-bitbucket** - Bitbucket operations (stub)
-
-[Handler documentation](skills/handler-source-control-github/SKILL.md)
-
-### Utilities
-
-**repo-common** - Shared utilities for all skills
-- Configuration loading
-- Branch validation
-- Commit formatting
-- Metadata extraction
-
-[Common utilities documentation](skills/repo-common/SKILL.md)
+Previous versions (v1.x-v2.x) used specialized skills for each operation (branch-namer, branch-manager, commit-creator, branch-pusher, pr-manager, tag-manager, cleanup-manager, permission-manager) and handler skills for platform abstraction. These have been archived in `archived/`.
 
 ## Platform Support
 
@@ -450,33 +410,26 @@ See [Bitbucket Setup Guide](docs/setup/bitbucket-setup.md) (coming soon)
 
 Configuration is loaded from:
 1. `.fractary/config.yaml` (project-specific)
-2. `~/.fractary/repo/config.json` (user-global)
-3. Built-in defaults
+2. Built-in defaults
 
 ### Example Configuration
 
-```json
-{
-  "handlers": {
-    "source_control": {
-      "active": "github",
-      "github": {
-        "token": "$GITHUB_TOKEN",
-        "api_url": "https://api.github.com"
-      }
-    }
-  },
-  "defaults": {
-    "default_branch": "main",
-    "protected_branches": ["main", "master", "production"],
-    "branch_naming": {
-      "pattern": "{prefix}/{issue_id}-{slug}",
-      "allowed_prefixes": ["feat", "fix", "chore", "docs", "test", "refactor"]
-    },
-    "commit_format": "faber",
-    "merge_strategy": "no-ff"
-  }
-}
+```yaml
+repo:
+  handlers:
+    source_control:
+      active: github
+      github:
+        token: ${GITHUB_TOKEN}
+        api_url: https://api.github.com
+  defaults:
+    default_branch: main
+    protected_branches: [main, master, production]
+    branch_naming:
+      pattern: "{prefix}/{issue_id}-{slug}"
+      allowed_prefixes: [feat, fix, chore, docs, test, refactor]
+    commit_format: faber
+    merge_strategy: no-ff
 ```
 
 [Full configuration schema](config/repo.example.json)
@@ -719,51 +672,35 @@ Use the cache in your Claude Code status line (`.claude/statusline.json`):
 ```
 repo/
 ├── .claude-plugin/
-│   └── plugin.json                 # Plugin manifest
+│   └── plugin.json                  # Plugin manifest (v3.0.8)
 ├── README.md                        # This file
+├── agents/
+│   └── pr-review-agent.md           # PR review orchestration agent
+├── archived/                        # Archived legacy components
+│   ├── agents/                      # Old agents (repo-manager, pr-create, etc.)
+│   ├── scripts/                     # Old utility scripts
+│   └── skills/                      # Old specialized skills (v2.0)
+├── commands/
+│   ├── branch-create.md             # Branch management
+│   ├── commit.md                    # Commit creation
+│   ├── commit-push.md               # Commit + push
+│   ├── commit-push-pr.md            # Commit + push + PR
+│   ├── commit-push-pr-merge.md      # Full workflow
+│   ├── pr-create.md                 # PR creation
+│   ├── pr-merge.md                  # PR merging
+│   ├── pr-review.md                 # PR review
+│   ├── pull.md                      # Pull changes
+│   ├── worktree-create.md           # Worktree creation
+│   ├── worktree-list.md             # Worktree listing
+│   ├── worktree-remove.md           # Worktree removal
+│   └── worktree-cleanup.md          # Worktree cleanup
 ├── config/
 │   └── repo.example.json            # Configuration template
-├── docs/
-│   ├── spec/
-│   │   └── repo-plugin-refactoring-spec.md
-│   ├── setup/                       # Setup guides
-│   │   ├── github-setup.md
-│   │   ├── gitlab-setup.md
-│   │   └── bitbucket-setup.md
-│   ├── branch-aware-permissions.md  # Branch-aware permission system (comprehensive)
-│   ├── permissions-behavior.md      # Permission behavior and technical details
-│   ├── permissions-guide.md         # Original permission guide
-│   ├── status-cache-statusline-examples.md  # Status line integration
-│   └── status-cache-migration-guide.md      # Migration from custom hooks
-├── commands/                        # User commands (Layer 1)
-│   ├── init-permissions.md          # Permission management command
-│   ├── branch.md
-│   ├── commit.md
-│   ├── push.md
-│   ├── pr.md
-│   ├── tag.md
-│   └── cleanup.md
-├── agents/                          # Routing agent (Layer 2)
-│   └── repo-manager.md
-├── scripts/                         # Utility scripts
-│   ├── update-status-cache.sh       # Update git status cache
-│   ├── read-status-cache.sh         # Read git status cache
-│   └── generate-commit-message.sh   # Generate commit messages
-├── hooks/
-│   └── hooks.json                   # Plugin hook configuration
-└── skills/                          # Workflows & handlers (Layer 3)
-    ├── permission-manager/          # Permission configuration
-    ├── branch-namer/
-    ├── branch-manager/
-    ├── commit-creator/
-    ├── branch-pusher/
-    ├── pr-manager/
-    ├── tag-manager/
-    ├── cleanup-manager/
-    ├── repo-common/
-    ├── handler-source-control-github/
-    ├── handler-source-control-gitlab/
-    └── handler-source-control-bitbucket/
+├── docs/                            # Documentation
+└── skills/                          # Knowledge resources
+    ├── code-review-checklist.md     # Code review standards
+    ├── commit-format.md             # Commit formatting rules
+    └── pr-template.md               # PR templates
 ```
 
 ## Safety Features
@@ -839,7 +776,7 @@ gh auth status
 
 ```bash
 # Check protected branches in config
-cat ~/.fractary/repo/config.json
+cat .fractary/config.yaml
 
 # Protected branches cannot be:
 # - Force pushed
@@ -870,7 +807,9 @@ If you're upgrading from the monolithic v1.x architecture:
 
 ## Version History
 
-- **v2.2.0** (Current) - Branch-aware permission system
+- **v3.0.8** (Current) - MCP-first architecture with agents + commands + skills
+
+- **v2.2.0** - Branch-aware permission system
   - Branch-aware permissions (fast on features, protected on production)
   - Auto-allow ~50 commands for feature branches
   - Require approval only for protected branch operations

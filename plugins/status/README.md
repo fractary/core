@@ -59,7 +59,7 @@ This argument is always optional and appears as the final argument. When provide
 /fractary-status:sync --context "Force full refresh of all cached data"
 ```
 
-See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+Context arguments follow the `--context` flag pattern as described above.
 
 ## Installation
 
@@ -344,20 +344,21 @@ To remove the status line plugin:
 ```
 plugins/status/
 ├── .claude-plugin/
-│   └── plugin.json              # Plugin metadata
+│   └── plugin.json              # Plugin manifest (v1.1.11)
+├── README.md                    # This file
+├── agents/
+│   ├── status-install.md        # Installation agent
+│   └── status-sync.md           # Sync agent
+├── archived/                    # Archived legacy components
+│   ├── README.md
+│   └── skills/                  # Old skills (status-line-manager, status-syncer)
 ├── commands/
-│   └── install.md               # /status:install command
-├── skills/
-│   └── status-line-manager/
-│       ├── SKILL.md            # Installation skill
-│       └── scripts/
-│           ├── install.sh       # Installation script
-│           ├── status-line.sh   # Status line generator
-│           └── capture-prompt.sh # Prompt capture
-├── hooks/
-│   ├── status-line.json         # StatusLine hook template
-│   └── user-prompt-submit.json  # UserPromptSubmit hook template
-└── README.md                    # This file
+│   ├── install.md               # /status:install command
+│   └── sync.md                  # /status:sync command
+└── scripts/
+    ├── capture-prompt.sh        # Prompt capture
+    ├── install.sh               # Installation script
+    └── status-line.sh           # Status line generator
 ```
 
 ### Testing
@@ -380,7 +381,7 @@ cat .fractary/status/last-prompt.json
 
 Follow the Fractary plugin standards:
 - See `docs/standards/FRACTARY-PLUGIN-STANDARDS.md`
-- Use 3-layer architecture (commands → skills → scripts)
+- Use agents + commands + skills pattern with MCP-first architecture
 - Document with XML markup
 - Keep scripts fast and deterministic
 
@@ -404,6 +405,9 @@ For issues or questions:
 - Examples: See `plugins/status/hooks/` for configuration examples
 
 ## Changelog
+
+### v1.1.11 (Current)
+- Latest stable release
 
 ### v1.1.0 (2025-11-16)
 - Added clickable links for issue and PR numbers

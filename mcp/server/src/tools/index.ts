@@ -10,7 +10,7 @@ import { workTools } from './work.js';
 import { repoTools } from './repo.js';
 
 /**
- * All 81 MCP tools across 6 modules
+ * All 80 MCP tools across 6 modules
  */
 export const allTools: Tool[] = [
   ...specTools,   // 5 tools
@@ -18,5 +18,5 @@ export const allTools: Tool[] = [
   ...fileTools,   // 7 tools
   ...docsTools,   // 7 tools
   ...workTools,   // 19 tools
-  ...repoTools,   // 38 tools
+  ...repoTools,   // 37 tools
 ];

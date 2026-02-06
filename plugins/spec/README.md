@@ -57,13 +57,10 @@ Keeping old specs in the workspace pollutes context. This plugin archives comple
 ### Initialize
 
 ```bash
-/fractary-spec:init
+fractary-core:config-init
 ```
 
-Creates:
-- Configuration file
-- `/specs` directory
-- Archive index
+Creates unified `.fractary/config.yaml` configuration with all plugin settings including spec configuration, `/specs` directory, and archive index.
 
 ## Quick Start
 
@@ -147,7 +144,7 @@ Streams from cloud without local download.
 
 | Command | Description |
 |---------|-------------|
-| `/fractary-spec:init` | Initialize plugin |
+| `fractary-core:config-init` | Initialize unified configuration |
 | `/fractary-spec:create [--work-id <id>]` | Create spec from conversation context (auto-detects issue from branch) |
 | `/fractary-spec:validate <issue>` | Validate implementation |
 | `/fractary-spec:archive <issue>` | Archive to cloud |
@@ -176,7 +173,7 @@ This argument is always optional and appears as the final argument. When provide
 /fractary-spec:refine 123 --context "Focus on API design and error handling"
 ```
 
-See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+Context arguments follow the `--context` flag pattern as described above.
 
 ### Key Features of `create`
 
@@ -490,57 +487,72 @@ These specifications are permanently stored in cloud archive for future referenc
 
 ## Architecture
 
-### 3-Layer Pattern
+### Agents + Commands + Skills (MCP-First)
 
 ```
 Commands (Entry Points)
+    spec-create, spec-get, spec-list, spec-update, etc.
     ↓
-Agent (spec-manager)
+Agents (Orchestration)
+    spec-creator, spec-getter, spec-lister, spec-updater,
+    spec-deleter, spec-validator, spec-refiner, spec-archiver,
+    template-lister
     ↓
-Skills (generator, validator, archiver, linker)
-    ↓
-Scripts (Shell scripts for deterministic operations)
+Scripts (Deterministic Operations)
+    archive-local.sh, config-loader.sh, upload-to-cloud.sh
 ```
 
-### Skills
+### Agents (9)
 
-- **spec-generator**: Create specs from issues
+- **spec-creator**: Create specs from conversation context
+- **spec-getter**: Retrieve spec content
+- **spec-lister**: List available specs
+- **spec-updater**: Update existing specs
+- **spec-deleter**: Delete specs
 - **spec-validator**: Validate implementation
+- **spec-refiner**: Refine spec content
 - **spec-archiver**: Archive to cloud
-- **spec-linker**: Link specs to issues/PRs
-
-### Agent
-
-- **spec-manager**: Orchestrates full lifecycle
+- **template-lister**: List available templates
 
 ## Directory Structure
 
 ```
 plugins/spec/
 ├── .claude-plugin/
-│   └── plugin.json
+│   └── plugin.json              # Plugin manifest (v2.0.15)
+├── README.md
 ├── agents/
-│   └── spec-manager.md
+│   ├── spec-archiver.md         # Archive agent
+│   ├── spec-creator.md          # Creation agent
+│   ├── spec-deleter.md          # Deletion agent
+│   ├── spec-getter.md           # Retrieval agent
+│   ├── spec-lister.md           # Listing agent
+│   ├── spec-refiner.md          # Refinement agent
+│   ├── spec-updater.md          # Update agent
+│   ├── spec-validator.md        # Validation agent
+│   └── template-lister.md       # Template listing agent
+├── archived/                    # Archived legacy components
+│   ├── README.md
+│   └── skills/                  # Old skills (generator, archiver, etc.)
 ├── commands/
-│   ├── init.md
-│   ├── create.md              # Spec creation (context + auto-detection)
-│   ├── validate.md
-│   ├── archive.md
-│   └── read.md
-├── skills/
-│   ├── spec-generator/
-│   │   ├── SKILL.md
-│   │   ├── templates/
-│   │   ├── workflow/
-│   │   │   └── generate-from-context.md    # Context + auto-detection workflow
-│   │   ├── scripts/
-│   │   └── docs/
-│   ├── spec-validator/
-│   ├── spec-archiver/
-│   └── spec-linker/
+│   ├── spec-archive.md          # Archive command
+│   ├── spec-create.md           # Create command
+│   ├── spec-delete.md           # Delete command
+│   ├── spec-get.md              # Get command
+│   ├── spec-list.md             # List command
+│   ├── spec-refine.md           # Refine command
+│   ├── spec-update.md           # Update command
+│   ├── spec-validate.md         # Validate command
+│   └── template-list.md         # Template list command
 ├── config/
-│   └── config.example.json
-└── README.md
+│   └── config.example.json      # Configuration template
+├── docs/
+│   └── FABER-INTEGRATION.md     # FABER integration guide
+├── scripts/
+│   ├── archive-local.sh         # Local archival
+│   ├── config-loader.sh         # Configuration loading
+│   └── upload-to-cloud.sh       # Cloud upload
+└── skills/                      # (empty - agents handle orchestration)
 ```
 
 ## Dependencies
@@ -577,7 +589,7 @@ If `fractary-repo` is not installed:
 
 ```bash
 # 1. Initialize
-/fractary-spec:init
+fractary-core:config-init
 
 # 2. Have planning discussion with Claude
 # User: "Let's design a user authentication system with OAuth2..."
@@ -608,7 +620,7 @@ If `fractary-repo` is not installed:
 
 ```bash
 # 1. Initialize
-/fractary-spec:init
+fractary-core:config-init
 
 # 2. Create/checkout issue branch
 /fractary-repo:branch-create "implement feature" --work-id 123
@@ -766,9 +778,13 @@ Same as parent repository.
 
 ## Version
 
-2.0.6 - Upload verification and defense in depth
+2.0.15 - Latest stable release (see changelog below)
 
 ## Changelog
+
+### 2.0.15 (Current)
+
+- Latest stable release with agents + commands + skills MCP-first architecture
 
 ### 2.0.6
 

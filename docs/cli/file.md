@@ -1,216 +1,12 @@
-# File Toolset - CLI Reference
+# File Module - CLI Reference
 
-Command-line reference for the File toolset. File storage operations.
+Command-line reference for the File module. File storage operations with support for local and cloud backends.
 
 ## Command Structure
 
 ```bash
-fractary-core file <action> [options]
+fractary-core file <command> [arguments] [options]
 ```
-
-## File Commands
-
-### file write
-
-Write content to a file.
-
-```bash
-fractary-core file write <path> [options]
-```
-
-**Arguments:**
-- `path` - File path (relative to base directory)
-
-**Options:**
-- `--content <text>` - Content to write
-- `--file <path>` - Read content from file
-- `--overwrite` - Overwrite if exists (default: true)
-- `--no-overwrite` - Fail if file exists
-
-**Examples:**
-```bash
-# Write JSON content
-fractary-core file write config.json --content '{"key":"value"}'
-
-# Write from file
-fractary-core file write data/output.json --file ./local-file.json
-
-# Pipe content
-cat data.txt | fractary-core file write data/backup.txt
-```
-
-### file read
-
-Read a file's content.
-
-```bash
-fractary-core file read <path> [options]
-```
-
-**Arguments:**
-- `path` - File path
-
-**Options:**
-- `--format <type>` - Output format: `raw`, `json`
-
-**Examples:**
-```bash
-# Read file
-fractary-core file read config.json
-
-# Parse JSON
-fractary-core file read config.json --format json
-```
-
-### file list
-
-List files.
-
-```bash
-fractary-core file list [prefix] [options]
-```
-
-**Arguments:**
-- `prefix` (optional) - Path prefix to filter
-
-**Options:**
-- `--pattern <glob>` - Glob pattern
-- `--recursive` - List recursively
-- `--long` - Show detailed info
-- `--format <type>` - Output format
-
-**Examples:**
-```bash
-# List all files
-fractary-core file list
-
-# List in directory
-fractary-core file list data/
-
-# List JSON files
-fractary-core file list --pattern "*.json"
-
-# Detailed listing
-fractary-core file list --long
-```
-
-**Long Format Output:**
-```
-SIZE       MODIFIED             PATH
-1.2 KB     2024-01-15 10:30    config.json
-45.6 KB    2024-01-14 15:45    data/export.json
-2.3 KB     2024-01-13 09:00    settings.yaml
-```
-
-### file delete
-
-Delete a file.
-
-```bash
-fractary-core file delete <path> [options]
-```
-
-**Arguments:**
-- `path` - File path
-
-**Options:**
-- `--force` - Skip confirmation
-
-**Example:**
-```bash
-fractary-core file delete temp/old-file.json
-```
-
-### file exists
-
-Check if a file exists.
-
-```bash
-fractary-core file exists <path>
-```
-
-**Arguments:**
-- `path` - File path
-
-**Example:**
-```bash
-fractary-core file exists config.json && echo "File exists"
-```
-
-## Copy and Move Commands
-
-### file copy
-
-Copy a file.
-
-```bash
-fractary-core file copy <source> <destination> [options]
-```
-
-**Arguments:**
-- `source` - Source file path
-- `destination` - Destination file path
-
-**Options:**
-- `--overwrite` - Overwrite if exists
-
-**Example:**
-```bash
-fractary-core file copy config.json config.backup.json
-```
-
-### file move
-
-Move a file.
-
-```bash
-fractary-core file move <source> <destination> [options]
-```
-
-**Arguments:**
-- `source` - Source file path
-- `destination` - Destination file path
-
-**Options:**
-- `--overwrite` - Overwrite if exists
-
-**Example:**
-```bash
-fractary-core file move temp/output.json data/output.json
-```
-
-## Directory Commands
-
-### file mkdir
-
-Create a directory.
-
-```bash
-fractary-core file mkdir <path>
-```
-
-**Arguments:**
-- `path` - Directory path
-
-**Example:**
-```bash
-fractary-core file mkdir data/exports/2024
-```
-
-### file rmdir
-
-Remove a directory.
-
-```bash
-fractary-core file rmdir <path> [options]
-```
-
-**Arguments:**
-- `path` - Directory path
-
-**Options:**
-- `--recursive` - Delete contents recursively
-- `--force` - Skip confirmation
 
 ## Upload and Download Commands
 
@@ -219,67 +15,274 @@ fractary-core file rmdir <path> [options]
 Upload a local file to storage.
 
 ```bash
-fractary-core file upload <local-path> <remote-path> [options]
+fractary-core file upload <local-path> [options]
 ```
 
 **Arguments:**
-- `local-path` - Local file path
-- `remote-path` - Remote destination path
+- `local-path` - Path to local file
 
 **Options:**
-- `--overwrite` - Overwrite if exists
+- `--remote-path <path>` - Remote storage path (defaults to filename)
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
 
-**Example:**
+**Examples:**
 ```bash
-fractary-core file upload ./export.csv data/exports/export.csv
+# Upload file (uses filename as remote path)
+fractary-core file upload ./export.csv
+
+# Upload to specific remote path
+fractary-core file upload ./export.csv --remote-path data/exports/export.csv
+
+# Upload to named source
+fractary-core file upload ./backup.json --source s3-archive
 ```
 
 ### file download
 
-Download a file from storage.
+Download a file from storage to local path.
 
 ```bash
-fractary-core file download <remote-path> <local-path> [options]
+fractary-core file download <remote-path> [options]
 ```
 
 **Arguments:**
-- `remote-path` - Remote file path
-- `local-path` - Local destination path
+- `remote-path` - Remote storage path
 
 **Options:**
-- `--overwrite` - Overwrite if exists
+- `--local-path <path>` - Local destination path (defaults to filename)
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Download file (uses filename as local path)
+fractary-core file download data/config.json
+
+# Download to specific local path
+fractary-core file download data/config.json --local-path ./local-config.json
+```
+
+## Read and Write Commands
+
+### file write
+
+Write content to a storage path.
+
+```bash
+fractary-core file write <path> [options]
+```
+
+**Arguments:**
+- `path` - Storage path
+
+**Options:**
+- `--content <text>` - Content to write (required)
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Write JSON content
+fractary-core file write config.json --content '{"key":"value"}'
+
+# Write to named source
+fractary-core file write settings.yaml --content "key: value" --source mycloud
+```
+
+### file read
+
+Read content from a storage path.
+
+```bash
+fractary-core file read <path> [options]
+```
+
+**Arguments:**
+- `path` - Storage path
+
+**Options:**
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Read file (prints content to stdout)
+fractary-core file read config.json
+
+# Read as JSON envelope
+fractary-core file read config.json --json
+```
+
+## List and Query Commands
+
+### file list
+
+List files in storage.
+
+```bash
+fractary-core file list [options]
+```
+
+**Options:**
+- `--prefix <prefix>` - Filter by prefix
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# List all files
+fractary-core file list
+
+# List files under prefix
+fractary-core file list --prefix data/exports/
+
+# List from named source
+fractary-core file list --source s3-archive --json
+```
+
+### file exists
+
+Check if a file exists in storage.
+
+```bash
+fractary-core file exists <path> [options]
+```
+
+**Arguments:**
+- `path` - Storage path
+
+**Options:**
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Check existence
+fractary-core file exists config.json
+
+# Check with JSON output
+fractary-core file exists data/report.csv --json
+```
+
+### file get-url
+
+Get a URL for a file in storage.
+
+```bash
+fractary-core file get-url <path> [options]
+```
+
+**Arguments:**
+- `path` - Storage path
+
+**Options:**
+- `--expires-in <seconds>` - URL expiration in seconds
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Get URL
+fractary-core file get-url data/report.pdf
+
+# Get presigned URL with expiration
+fractary-core file get-url data/report.pdf --expires-in 3600
+```
+
+## File Operations
+
+### file delete
+
+Delete a file from storage.
+
+```bash
+fractary-core file delete <path> [options]
+```
+
+**Arguments:**
+- `path` - Storage path
+
+**Options:**
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
 
 **Example:**
 ```bash
-fractary-core file download data/config.json ./local-config.json
+fractary-core file delete temp/old-file.json
 ```
 
-## Configuration Commands
+### file copy
+
+Copy a file within storage.
+
+```bash
+fractary-core file copy <src-path> <dest-path> [options]
+```
+
+**Arguments:**
+- `src-path` - Source path
+- `dest-path` - Destination path
+
+**Options:**
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
+
+**Example:**
+```bash
+fractary-core file copy config.json config.backup.json
+```
+
+### file move
+
+Move a file within storage.
+
+```bash
+fractary-core file move <src-path> <dest-path> [options]
+```
+
+**Arguments:**
+- `src-path` - Source path
+- `dest-path` - Destination path
+
+**Options:**
+- `--source <name>` - Named source from config
+- `--json` - Output as JSON
+
+**Example:**
+```bash
+fractary-core file move temp/output.json data/output.json
+```
+
+## Configuration and Diagnostics
 
 ### file show-config
 
-Show file storage configuration.
+Show file plugin configuration.
 
+```bash
+fractary-core file show-config [options]
+```
+
+**Options:**
+- `--json` - Output as JSON
+
+**Example:**
 ```bash
 fractary-core file show-config
 ```
 
 **Output:**
 ```
-File Storage Configuration
-==========================
+File Plugin Configuration:
 
-Active Handler: local
-Base Path: ./data
+  default: local
+    Base path: .fractary/files
 
-Handlers:
-  local:
-    base_path: ./data
-    create_directories: true
-
-  s3 (inactive):
-    bucket: my-bucket
-    region: us-east-1
+  s3-archive: s3
+    Bucket: my-bucket
+    Region: us-east-1
+    Auth: configured
 ```
 
 ### file test-connection
@@ -291,76 +294,46 @@ fractary-core file test-connection [options]
 ```
 
 **Options:**
-- `--handler <name>` - Test specific handler
+- `--source <name>` - Named source to test
+- `--json` - Output as JSON
 
-**Example:**
+**Examples:**
 ```bash
+# Test default source
 fractary-core file test-connection
+
+# Test specific source
+fractary-core file test-connection --source s3-archive
 ```
 
 **Output:**
 ```
-Testing local storage connection...
-  ✓ Base path exists
-  ✓ Write permission
-  ✓ Read permission
-  ✓ Delete permission
-
-Connection test: PASSED
+Connection successful
+  Source: default (local)
+  Response time: 12ms
 ```
 
-### file switch-handler
+## JSON Output
 
-Switch active storage handler.
-
-```bash
-fractary-core file switch-handler <handler>
-```
-
-**Arguments:**
-- `handler` - Handler name: `local`, `s3`
-
-**Example:**
-```bash
-fractary-core file switch-handler s3
-```
-
-## Output Examples
-
-### JSON Listing
+All commands support `--json` for structured output:
 
 ```bash
-fractary-core file list --format json
+fractary-core file upload ./data.csv --json
 ```
 
 ```json
-[
-  {
-    "path": "config.json",
-    "name": "config.json",
-    "size": 1234,
-    "isDirectory": false,
-    "modifiedAt": "2024-01-15T10:30:00Z"
-  },
-  {
-    "path": "data/",
-    "name": "data",
-    "isDirectory": true
+{
+  "status": "success",
+  "data": {
+    "source": "default",
+    "localPath": "./data.csv",
+    "remotePath": "data.csv",
+    "url": ".fractary/files/data.csv",
+    "sizeBytes": 1234,
+    "checksum": "sha256:abc123...",
+    "uploadedAt": "2024-01-15T10:30:00Z"
   }
-]
-```
-
-## Environment Variables
-
-```bash
-# Base directory
-export FRACTARY_FILE_BASE_DIRECTORY=./data
-
-# S3 configuration
-export AWS_ACCESS_KEY_ID=your_access_key
-export AWS_SECRET_ACCESS_KEY=your_secret_key
-export AWS_REGION=us-east-1
-export FRACTARY_FILE_S3_BUCKET=my-bucket
+}
 ```
 
 ## Other Interfaces

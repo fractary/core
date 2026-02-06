@@ -232,20 +232,20 @@ await specManager.createSpec({
 ### Logging
 
 ```typescript
-import { LogsManager } from '@fractary/core/logs';
+import { LogManager } from '@fractary/core/logs';
 
-const logsManager = new LogsManager({
-  logDir: './logs'
+const logManager = new LogManager({
+  localPath: './logs'
 });
 
 // Start a session
-const sessionId = await logsManager.startSession({
+const sessionId = await logManager.startCapture({
   name: 'deployment',
   metadata: { version: '1.0.0' }
 });
 
 // Log events
-await logsManager.log(sessionId, {
+await logManager.log(sessionId, {
   level: 'info',
   message: 'Deployment started'
 });

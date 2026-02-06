@@ -2,25 +2,26 @@
 
 Type-agnostic documentation system with operation-specific skills and data-driven type context.
 
-**Version**: 3.1.0 | **Architecture**: Operation-focused with SDK/CLI integration
+**Version**: 4.0.0 | **Architecture**: Agents + commands + skills with MCP-first architecture
 
 ## Overview
 
-The `fractary-docs` plugin provides a flexible, type-agnostic documentation management system. Instead of maintaining separate skills for each document type, v2.0 uses **operation-specific skills** that load type-specific behavior from data files.
+The `fractary-docs` plugin provides a flexible documentation management system with per-type skills, archival, refinement, fulfillment validation, and work-linking. It uses an agents + commands + skills pattern with MCP-first architecture.
 
-### What's New in v2.0
+### What's New in v4.0
 
 **Architecture Transformation**:
-- ✅ **93% less code duplication** - From ~7,000 to ~2,500 lines
-- ✅ **Type-agnostic operations** - Single `doc-writer` handles all types
-- ✅ **Data-driven behavior** - Type context in `types/{doc_type}/` directories
-- ✅ **Simplified coordination** - Unified manager for all document types
+- ✅ **Per-type skills** with archival, refinement, and fulfillment validation
+- ✅ **Work-linking** - Link documentation to work items
+- ✅ **Agent-based orchestration** - 6 specialized agents
+- ✅ **Data-driven behavior** - Type context via SDK/CLI
 - ✅ **Auto-indexing** - Configurable flat/hierarchical organization per type
 
-**Migration from v1.x**:
-- Old: 11 type-specific skills (`docs-manage-api`, `docs-manage-adr`, etc.)
-- New: 4 operation skills (`doc-writer`, `doc-validator`, `doc-classifier`, `doc-lister`)
-- Frontmatter change: `type:` → `fractary_doc_type:`
+**Migration from earlier versions**:
+- v1.x: 11 type-specific skills (`docs-manage-api`, `docs-manage-adr`, etc.)
+- v2.0-v3.1: 4 operation skills (`doc-writer`, `doc-validator`, `doc-classifier`, `doc-lister`)
+- v4.0: 6 agents + commands + skills with archival and refinement
+- Frontmatter field: `type:` → `fractary_doc_type:`
 
 ### Key Features
 
@@ -103,30 +104,25 @@ The `fractary-docs` plugin provides a flexible, type-agnostic documentation mana
 
 ## Architecture
 
-The plugin uses a **three-layer architecture** optimized for context efficiency:
+The plugin uses an **agents + commands + skills** pattern with MCP-first architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Layer 1: Commands (Entry Points)                      │
-│  /fractary-docs:write, /fractary-docs:validate, /fractary-docs:list, /fractary-docs:audit  │
+│  Commands (Entry Points)                                │
+│  write, validate, list, audit, archive, refine, etc.   │
 └──────────────────────┬──────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Layer 2: Coordination (Decision & Routing)             │
-│  ┌──────────────────┐  ┌──────────────────────────┐    │
-│  │ docs-manager     │  │ docs-director-skill      │    │
-│  │ (single doc)     │  │ (multi-doc + parallel)   │    │
-│  └──────────────────┘  └──────────────────────────┘    │
+│  Agents (Orchestration)                                 │
+│  docs-writer, docs-validator, docs-auditor,            │
+│  docs-archiver, docs-refiner, docs-consistency-checker │
 └──────────────────────┬──────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Layer 3: Operations (Type-Agnostic Execution)          │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-│  │ doc-     │ │ doc-     │ │ doc-     │ │ doc-     │  │
-│  │ writer   │ │ validator│ │ classifier│ │ lister   │  │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
+│  Skills (Knowledge & Utilities)                         │
+│  doc-type-selector, common/_shared utilities           │
 └──────────────────────┬──────────────────────────────────┘
                        │
                        ▼
@@ -821,7 +817,7 @@ This argument is always optional and appears as the final argument. When provide
 /fractary-docs:audit --context "Focus on structure, ignore minor style issues"
 ```
 
-See [Context Argument Standard](../../docs/plugin-development/context-argument-standard.md) for full documentation.
+Context arguments follow the `--context` flag pattern as described above.
 
 ## Integration
 
@@ -910,42 +906,55 @@ cat .fractary/docs/templates/manifest.yaml
 ```
 plugins/docs/                          # Plugin directory
 ├── .claude-plugin/
-│   └── plugin.json                    # Plugin manifest (v3.1.0)
+│   └── plugin.json                    # Plugin manifest (v4.0.0)
+├── README.md
+├── CHANGELOG.md                       # Version history
+├── CONTRIBUTING.md                    # Contribution guide
 ├── agents/                            # Agent definitions
-│   ├── docs-audit.md
-│   ├── docs-check-consistency.md
-│   ├── docs-list.md
-│   ├── docs-validate.md
-│   └── docs-write.md                  # Main write agent (uses CLI)
+│   ├── docs-archiver.md              # Archive documentation
+│   ├── docs-auditor.md               # Audit documentation quality
+│   ├── docs-consistency-checker.md   # Check consistency
+│   ├── docs-refiner.md               # Refine documentation
+│   ├── docs-validator.md             # Validate documentation
+│   └── docs-writer.md                # Write documentation
+├── archived/                          # Archived legacy components
+│   ├── README.md
+│   ├── skills/                        # Old operation skills (v2.0-v3.1)
+│   └── types-v2/                      # Old type definitions
+├── commands/
+│   ├── archive.md                     # /fractary-docs:archive
+│   ├── audit.md                       # /fractary-docs:audit
+│   ├── check-consistency.md           # /fractary-docs:check-consistency
+│   ├── doc-create.md                  # /fractary-docs:doc-create
+│   ├── doc-delete.md                  # /fractary-docs:doc-delete
+│   ├── doc-get.md                     # /fractary-docs:doc-get
+│   ├── doc-list.md                    # /fractary-docs:doc-list
+│   ├── doc-search.md                  # /fractary-docs:doc-search
+│   ├── doc-update.md                  # /fractary-docs:doc-update
+│   ├── refine.md                      # /fractary-docs:refine
+│   ├── type-info.md                   # /fractary-docs:type-info
+│   ├── type-list.md                   # /fractary-docs:type-list
+│   ├── validate.md                    # /fractary-docs:validate
+│   └── write.md                       # /fractary-docs:write
+├── config/                            # Configuration templates
+├── docs/                              # Plugin documentation
+├── examples/                          # Usage examples
+├── samples/                           # Sample documents
+├── schemas/                           # JSON schemas for doc types
 ├── skills/
-│   ├── doc-type-selector/             # Type selection (uses CLI)
-│   └── _shared/
-│       └── lib/
-│           ├── index-updater.sh
-│           └── slugify.sh
-└── commands/
-    ├── write.md                       # /fractary-docs:write
-    ├── validate.md                    # /fractary-docs:validate
-    ├── list.md                        # /fractary-docs:list
-    ├── audit.md                       # /fractary-docs:audit
-    └── check-consistency.md
+│   ├── _shared/                       # Shared utilities
+│   ├── common/                        # Common skills
+│   └── doc-type-selector/             # Type selection (uses CLI)
 
 templates/docs/                        # Core doc types (in repo root)
-├── manifest.yaml                      # Lists all 11 core types
+├── manifest.yaml                      # Lists all core types
 ├── adr/
 │   ├── type.yaml                      # Type definition
 │   ├── template.md                    # Mustache template
 │   └── standards.md                   # Writing guidelines
 ├── api/
 ├── architecture/
-├── audit/
-├── changelog/
-├── dataset/
-├── etl/
-├── guides/
-├── infrastructure/
-├── standards/
-└── testing/
+└── ... (11 types total)
 
 .fractary/docs/templates/              # Custom project types (optional)
 ├── manifest.yaml                      # Custom type manifest
@@ -957,14 +966,16 @@ templates/docs/                        # Core doc types (in repo root)
 
 ## Version
 
-**3.1.0** - SDK/CLI integration with language-agnostic templates
+**4.0.0** - Per-type skills with archival, refinement, fulfillment validation, and work-linking
 
-**Changes in 3.1.0**:
-- Doc types moved from plugin skills to `templates/docs/` (YAML/Markdown format)
-- SDK `DocTypeRegistry` loads types from templates directory
-- CLI commands: `fractary-core docs types`, `fractary-core docs type-info`
-- Custom types supported via `docs.custom_templates_path` in config
-- Agents use CLI commands instead of loading skills directly
+**Changes in 4.0.0**:
+- 6 specialized agents (writer, validator, auditor, archiver, refiner, consistency-checker)
+- Per-type skills with archival and refinement capabilities
+- Work-linking for connecting docs to work items
+- Expanded command set (14 commands)
+- Old operation skills archived
+
+**3.1.0** - SDK/CLI integration with language-agnostic templates
 
 **2.0.0** - Architecture refactor (operation-specific skills with data-driven type context)
 

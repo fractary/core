@@ -1,6 +1,6 @@
 # Docs Toolset - MCP Tools Reference
 
-MCP tools reference for the Docs toolset. Tools for documentation management.
+MCP tools reference for the Docs toolset. 7 tools for documentation management.
 
 ## Tool Naming Convention
 
@@ -12,28 +12,25 @@ fractary_docs_{action}
 
 ### fractary_docs_create
 
-Create a new document.
+Create documentation.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Document identifier |
-| `content` | string | Yes | Document content |
+| `id` | string | Yes | Document ID |
 | `title` | string | Yes | Document title |
-| `format` | string | No | Format: `markdown`, `html`, `text` |
-| `type` | string | No | Type: `adr`, `api`, `guide`, `readme` |
-| `tags` | string[] | No | Tags |
-| `author` | string | No | Author name |
+| `content` | string | Yes | Document content |
+| `type` | string | No | Document type |
+| `tags` | string[] | No | Document tags |
 
 **Example:**
 ```json
 {
   "id": "user-guide",
-  "content": "# User Guide\n\nWelcome to the application...",
   "title": "User Guide",
-  "format": "markdown",
-  "tags": ["guide", "user"],
-  "author": "developer1"
+  "content": "# User Guide\n\nWelcome to the application...",
+  "type": "guide",
+  "tags": ["guide", "user"]
 }
 ```
 
@@ -44,15 +41,14 @@ Create a new document.
   "data": {
     "id": "user-guide",
     "title": "User Guide",
-    "path": "docs/guides/user-guide.md",
-    "format": "markdown"
+    "path": "docs/guides/user-guide.md"
   }
 }
 ```
 
-### fractary_docs_get
+### fractary_docs_read
 
-Get a document by ID.
+Read documentation content.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
@@ -74,10 +70,8 @@ Get a document by ID.
     "id": "user-guide",
     "title": "User Guide",
     "content": "# User Guide\n\nWelcome...",
-    "format": "markdown",
     "metadata": {
       "tags": ["guide", "user"],
-      "author": "developer1",
       "createdAt": "2024-01-15T10:00:00Z",
       "updatedAt": "2024-01-15T10:00:00Z"
     }
@@ -87,53 +81,57 @@ Get a document by ID.
 
 ### fractary_docs_update
 
-Update a document.
+Update documentation.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `id` | string | Yes | Document ID |
-| `content` | string | No | New content |
-| `title` | string | No | New title |
-| `status` | string | No | Status: `draft`, `review`, `published`, `archived` |
-| `addTags` | string[] | No | Tags to add |
-| `removeTags` | string[] | No | Tags to remove |
+| `title` | string | No | New document title |
+| `content` | string | No | New document content |
+| `tags` | string[] | No | New document tags |
 
 **Example:**
 ```json
 {
   "id": "user-guide",
-  "status": "published",
-  "addTags": ["v1.0"]
+  "content": "# User Guide\n\nUpdated content...",
+  "tags": ["guide", "user", "v2"]
 }
 ```
 
 ### fractary_docs_delete
 
-Delete a document.
+Delete documentation.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `id` | string | Yes | Document ID |
 
+**Example:**
+```json
+{
+  "id": "outdated-doc"
+}
+```
+
 ### fractary_docs_list
 
-List documents.
+List documentation.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `type` | string | No | Filter by type |
 | `tags` | string[] | No | Filter by tags |
 | `author` | string | No | Filter by author |
-| `status` | string | No | Filter by status |
+| `limit` | number | No | Maximum number of results |
 
 **Example:**
 ```json
 {
-  "type": "guide",
-  "status": "published"
+  "tags": ["guide"],
+  "limit": 10
 }
 ```
 
@@ -145,39 +143,34 @@ List documents.
     {
       "id": "user-guide",
       "title": "User Guide",
-      "type": "guide",
-      "status": "published",
       "updatedAt": "2024-01-15T10:00:00Z"
     },
     {
       "id": "getting-started",
       "title": "Getting Started",
-      "type": "guide",
-      "status": "published",
       "updatedAt": "2024-01-10T08:00:00Z"
     }
   ]
 }
 ```
 
-## Search Tools
-
 ### fractary_docs_search
 
-Search documents.
+Search documentation.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `query` | string | Yes | Search query |
-| `type` | string | No | Filter by type |
+| `text` | string | No | Search text |
 | `tags` | string[] | No | Filter by tags |
+| `author` | string | No | Filter by author |
+| `limit` | number | No | Maximum number of results |
 
 **Example:**
 ```json
 {
-  "query": "authentication",
-  "type": "api"
+  "text": "authentication",
+  "tags": ["api"]
 }
 ```
 
@@ -196,122 +189,23 @@ Search documents.
 }
 ```
 
-## Validation Tools
+### fractary_docs_export
 
-### fractary_docs_validate
-
-Validate a document.
+Export documentation.
 
 **Parameters:**
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `id` | string | Yes | Document ID |
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "valid": true,
-    "errors": [],
-    "warnings": [
-      {
-        "code": "MISSING_DESCRIPTION",
-        "message": "Consider adding a description for better discoverability"
-      }
-    ]
-  }
-}
-```
-
-### fractary_docs_validate_all
-
-Validate all documents.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `type` | string | No | Validate specific type |
-
-## Audit Tools
-
-### fractary_docs_audit
-
-Audit documentation quality.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `report` | string | No | Report type: `summary`, `gaps`, `quality`, `full` |
+| `format` | string | No | Export format: `markdown`, `html`, `pdf` |
 
 **Example:**
 ```json
 {
-  "report": "gaps"
+  "id": "user-guide",
+  "format": "html"
 }
 ```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "missing": [
-      { "path": "src/auth/", "reason": "No README" },
-      { "path": "src/api/handlers/", "reason": "No documentation" }
-    ],
-    "incomplete": [
-      { "id": "api-auth", "reason": "Missing error handling section" }
-    ],
-    "recommendations": [
-      "Add README to src/auth/",
-      "Document API handlers"
-    ]
-  }
-}
-```
-
-### fractary_docs_check_consistency
-
-Check documentation consistency with code.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `sourceDir` | string | No | Source directory to check |
-| `types` | string[] | No | Document types to check |
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "upToDate": 8,
-    "outdated": [
-      {
-        "id": "api-auth",
-        "issues": [
-          "Function 'authenticate()' signature changed",
-          "New parameter 'refreshToken' not documented"
-        ]
-      }
-    ],
-    "missing": 1
-  }
-}
-```
-
-## Export Tools
-
-### fractary_docs_export
-
-Export a document to another format.
-
-**Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | string | Yes | Document ID |
-| `format` | string | Yes | Target format: `html`, `pdf`, `text` |
 
 **Response:**
 ```json
@@ -329,17 +223,33 @@ Export a document to another format.
 
 | Tool | Description |
 |------|-------------|
-| `fractary_docs_create` | Create a document |
-| `fractary_docs_get` | Get a document |
-| `fractary_docs_update` | Update a document |
-| `fractary_docs_delete` | Delete a document |
-| `fractary_docs_list` | List documents |
-| `fractary_docs_search` | Search documents |
-| `fractary_docs_validate` | Validate a document |
-| `fractary_docs_validate_all` | Validate all documents |
-| `fractary_docs_audit` | Audit documentation |
-| `fractary_docs_check_consistency` | Check code consistency |
-| `fractary_docs_export` | Export document |
+| `fractary_docs_create` | Create documentation |
+| `fractary_docs_read` | Read documentation content |
+| `fractary_docs_update` | Update documentation |
+| `fractary_docs_delete` | Delete documentation |
+| `fractary_docs_list` | List documentation |
+| `fractary_docs_search` | Search documentation |
+| `fractary_docs_export` | Export documentation |
+
+## Error Responses
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Document 'missing-doc' not found"
+  }
+}
+```
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| `NOT_FOUND` | Document not found |
+| `VALIDATION_ERROR` | Invalid parameters |
+| `ALREADY_EXISTS` | Document ID already exists |
 
 ## Other Interfaces
 

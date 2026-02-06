@@ -4,9 +4,9 @@ MCP (Model Context Protocol) server for Fractary Core SDK - provides universal t
 
 ## Features
 
-- **81 MCP Tools** across 6 modules:
+- **80 MCP Tools** across 6 modules:
   - Work Tracking (19 tools): Issues, comments, labels, milestones
-  - Repository Management (38 tools): Git operations, PRs, branches, tags, worktrees
+  - Repository Management (37 tools): Git operations, PRs, branches, tags, worktrees
   - Specifications (5 tools): Create, validate, refine specs
   - Logging (5 tools): Capture, search, archive logs
   - File Storage (7 tools): Read, write, copy, move files
@@ -56,23 +56,34 @@ Add to your `.claude/settings.json`:
 
 ### Configuration File
 
-Alternatively, create `.fractary/config.json`:
+Create `.fractary/config.yaml`:
 
-```json
-{
-  "work": {
-    "platform": "github",
-    "owner": "your-org",
-    "repo": "your-repo",
-    "token": "ghp_..."
-  },
-  "repo": {
-    "platform": "github",
-    "owner": "your-org",
-    "repo": "your-repo",
-    "token": "ghp_..."
-  }
-}
+```yaml
+work:
+  provider: github
+  config:
+    owner: your-org
+    repo: your-repo
+    token: ${GITHUB_TOKEN}
+
+repo:
+  provider: github
+  config:
+    owner: your-org
+    repo: your-repo
+    token: ${GITHUB_TOKEN}
+
+spec:
+  directory: ./specs
+
+logs:
+  directory: ./logs
+
+file:
+  baseDirectory: ./data
+
+docs:
+  directory: ./docs
 ```
 
 ## Available Tools
@@ -99,17 +110,18 @@ Alternatively, create `.fractary/config.json`:
 - `fractary_work_milestone_set` - Set milestone on issue
 - `fractary_work_milestone_remove` - Remove milestone
 
-### Repository Module (38 tools)
+### Repository Module (37 tools)
 
 - `fractary_repo_status` - Get repository status
 - `fractary_repo_branch_current` - Get current branch
+- `fractary_repo_is_dirty` - Check for uncommitted changes
+- `fractary_repo_diff` - Get diff
 - `fractary_repo_branch_create` - Create branch
 - `fractary_repo_branch_delete` - Delete branch
 - `fractary_repo_branch_list` - List branches
 - `fractary_repo_branch_get` - Get branch details
 - `fractary_repo_checkout` - Checkout branch
-- `fractary_repo_is_dirty` - Check for uncommitted changes
-- `fractary_repo_diff` - Get diff
+- `fractary_repo_branch_name_generate` - Generate semantic branch name
 - `fractary_repo_stage` - Stage files
 - `fractary_repo_stage_all` - Stage all changes
 - `fractary_repo_unstage` - Unstage files
@@ -137,23 +149,22 @@ Alternatively, create `.fractary/config.json`:
 - `fractary_repo_worktree_remove` - Remove worktree
 - `fractary_repo_worktree_prune` - Prune stale worktrees
 - `fractary_repo_worktree_cleanup` - Cleanup worktrees
-- `fractary_repo_branch_name_generate` - Generate semantic branch name
 
 ### Spec Module (5 tools)
 
 - `fractary_spec_create` - Create specification
-- `fractary_spec_validate` - Validate spec
-- `fractary_spec_refine` - Refine spec
-- `fractary_spec_list` - List specs
 - `fractary_spec_read` - Read spec content
+- `fractary_spec_list` - List specs
+- `fractary_spec_validate` - Validate spec
+- `fractary_spec_refine` - Refine spec with feedback
 
 ### Logs Module (5 tools)
 
 - `fractary_logs_capture` - Capture log entry
-- `fractary_logs_search` - Search logs
-- `fractary_logs_archive` - Archive logs
-- `fractary_logs_list` - List log entries
 - `fractary_logs_read` - Read log entry
+- `fractary_logs_search` - Search logs
+- `fractary_logs_list` - List log entries
+- `fractary_logs_archive` - Archive logs
 
 ### File Module (7 tools)
 
@@ -168,12 +179,12 @@ Alternatively, create `.fractary/config.json`:
 ### Docs Module (7 tools)
 
 - `fractary_docs_create` - Create documentation
+- `fractary_docs_read` - Read doc content
 - `fractary_docs_update` - Update documentation
+- `fractary_docs_delete` - Delete documentation
+- `fractary_docs_list` - List docs
 - `fractary_docs_search` - Search docs
 - `fractary_docs_export` - Export docs
-- `fractary_docs_list` - List docs
-- `fractary_docs_read` - Read doc content
-- `fractary_docs_delete` - Delete documentation
 
 ## Usage Example
 
@@ -187,7 +198,7 @@ Parameters: { "issue_number": "123" }
 
 // Create a branch
 Tool: fractary_repo_branch_create
-Parameters: { "name": "feature/new-feature" }
+Parameters: { "name": "feature/new-feature", "base_branch": "main" }
 
 // Create a pull request
 Tool: fractary_repo_pr_create

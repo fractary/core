@@ -1,320 +1,293 @@
-# Spec Toolset - CLI Reference
+# Spec Module - CLI Reference
 
-Command-line reference for the Spec toolset. Technical specification management.
+Command-line reference for the Spec module. Technical specification management.
 
 ## Command Structure
 
 ```bash
-fractary-core spec <action> [options]
+fractary-core spec <command> [arguments] [options]
 ```
+
+All commands use dash-separated names (e.g., `spec-create-file`, `spec-validate-check`).
 
 ## Specification Commands
 
-### spec create
+### spec spec-create-file
 
-Create a new specification.
+Create a new specification file.
 
 ```bash
-fractary-core spec create [options]
+fractary-core spec spec-create-file <title> [options]
 ```
 
+**Arguments:**
+- `title` - Specification title
+
 **Options:**
-- `--title <text>` - Specification title (required)
-- `--type <type>` - Work type: `feature`, `bug`, `infrastructure`, `api`
-- `--template <template>` - Template: `basic`, `feature`, `bug`, `infrastructure`, `api`
+- `--template <type>` - Specification template: `feature`, `bugfix`, `refactor` (default: `feature`)
 - `--work-id <id>` - Associated work item ID
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # Create feature spec
-fractary-core spec create \
-  --title "User Authentication" \
-  --type feature \
-  --template feature
+fractary-core spec spec-create-file "User Authentication" --template feature
 
-# Create API spec with work item link
-fractary-core spec create \
-  --title "REST API Design" \
-  --template api \
+# Create bugfix spec linked to issue
+fractary-core spec spec-create-file "Fix Login Timeout" \
+  --template bugfix \
   --work-id 123
+
+# Create refactor spec with JSON output
+fractary-core spec spec-create-file "Restructure API Layer" \
+  --template refactor \
+  --json
 ```
 
-### spec get
+### spec spec-get
 
-Get a specification by ID.
+Get a specification by ID or path.
 
 ```bash
-fractary-core spec get <spec-id> [options]
+fractary-core spec spec-get <id> [options]
 ```
 
 **Arguments:**
-- `spec-id` - Specification ID (e.g., SPEC-20240101)
+- `id` - Specification ID or path
 
 **Options:**
-- `--format <type>` - Output format: `json`, `markdown`, `text`
+- `--json` - Output as JSON
 
-**Example:**
+**Examples:**
 ```bash
-fractary-core spec get SPEC-20240101 --format markdown
+# Get spec by ID
+fractary-core spec spec-get SPEC-00123
+
+# Get as JSON
+fractary-core spec spec-get SPEC-00123 --json
 ```
 
-### spec update
-
-Update a specification.
-
-```bash
-fractary-core spec update <spec-id> [options]
-```
-
-**Arguments:**
-- `spec-id` - Specification ID
-
-**Options:**
-- `--title <text>` - New title
-- `--content <file>` - New content from file
-- `--status <status>` - Status: `draft`, `review`, `approved`, `archived`
-
-**Example:**
-```bash
-fractary-core spec update SPEC-20240101 --status review
-```
-
-### spec delete
-
-Delete a specification.
-
-```bash
-fractary-core spec delete <spec-id> [options]
-```
-
-**Options:**
-- `--force` - Skip confirmation
-
-### spec list
+### spec spec-list
 
 List specifications.
 
 ```bash
-fractary-core spec list [options]
+fractary-core spec spec-list [options]
 ```
 
 **Options:**
-- `--type <type>` - Filter by work type
-- `--status <status>` - Filter by validation status
-- `--format <type>` - Output format
+- `--status <status>` - Filter by status: `draft`, `validated`, `needs_revision`
+- `--work-id <id>` - Filter by work item ID
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # List all specs
-fractary-core spec list
+fractary-core spec spec-list
 
-# List feature specs
-fractary-core spec list --type feature
+# List draft specs
+fractary-core spec spec-list --status draft
 
-# Output as JSON
-fractary-core spec list --format json
+# List specs for a work item
+fractary-core spec spec-list --work-id 123 --json
+```
+
+### spec spec-update
+
+Update a specification.
+
+```bash
+fractary-core spec spec-update <id> [options]
+```
+
+**Arguments:**
+- `id` - Specification ID or path
+
+**Options:**
+- `--title <title>` - New title
+- `--content <content>` - New content
+- `--work-id <id>` - Update work item ID
+- `--status <status>` - Update status
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Update title
+fractary-core spec spec-update SPEC-00123 --title "Updated Authentication Spec"
+
+# Update status
+fractary-core spec spec-update SPEC-00123 --status validated
+
+# Update work item link
+fractary-core spec spec-update SPEC-00123 --work-id 456
+```
+
+### spec spec-delete
+
+Delete a specification.
+
+```bash
+fractary-core spec spec-delete <id> [options]
+```
+
+**Arguments:**
+- `id` - Specification ID or path
+
+**Options:**
+- `--json` - Output as JSON
+
+**Example:**
+```bash
+fractary-core spec spec-delete SPEC-00123
 ```
 
 ## Validation Commands
 
-### spec validate
+### spec spec-validate-check
 
-Validate a specification.
+Run structural validation checks on a specification.
 
 ```bash
-fractary-core spec validate <spec-id> [options]
+fractary-core spec spec-validate-check <id> [options]
 ```
 
 **Arguments:**
-- `spec-id` - Specification ID
+- `id` - Specification ID or path
 
 **Options:**
-- `--format <type>` - Output format
-- `--strict` - Fail on warnings
+- `--json` - Output as JSON
 
 **Example:**
 ```bash
-fractary-core spec validate SPEC-20240101
+fractary-core spec spec-validate-check SPEC-00123
 ```
 
 **Output:**
 ```
-Validation Results for SPEC-20240101
-====================================
+Validation Result: PARTIAL
+Score: 75%
 
-Status: PARTIAL (75%)
-
-Checks:
-  ✓ Has title
-  ✓ Has problem statement
-  ✓ Has proposed solution
-  ✗ Missing acceptance criteria
-  ✓ Has technical approach
-
-Suggestions:
-  - Add specific acceptance criteria with measurable outcomes
-  - Consider adding rollout plan section
+Requirements: 3/4 - partial
+Acceptance Criteria: 2/5 - incomplete
 ```
-
-### spec validate-all
-
-Validate all specifications.
-
-```bash
-fractary-core spec validate-all [options]
-```
-
-**Options:**
-- `--type <type>` - Filter by work type
-- `--fail-fast` - Stop on first failure
 
 ## Refinement Commands
 
-### spec refine
+### spec spec-refine-scan
 
-Get refinement questions for a specification.
+Scan a specification for structural gaps and refinement areas.
 
 ```bash
-fractary-core spec refine <spec-id> [options]
+fractary-core spec spec-refine-scan <id> [options]
 ```
 
 **Arguments:**
-- `spec-id` - Specification ID
+- `id` - Specification ID or path
 
 **Options:**
-- `--interactive` - Interactive refinement mode
+- `--json` - Output as JSON
 
 **Example:**
 ```bash
-fractary-core spec refine SPEC-20240101
+fractary-core spec spec-refine-scan SPEC-00123
 ```
 
 **Output:**
 ```
-Refinement Questions for SPEC-20240101
-======================================
+Refinement Questions:
 
-HIGH PRIORITY:
-  1. What are the specific acceptance criteria?
-     Context: The spec describes the feature but lacks measurable outcomes.
+1. What are the specific acceptance criteria?
+   Category: requirements
 
-  2. What error handling is required?
-     Context: The API design doesn't specify error response formats.
-
-MEDIUM PRIORITY:
-  3. Are there performance requirements?
-     Context: No latency or throughput targets specified.
+2. What error handling is required?
+   Category: technical
 ```
 
 ## Archive Commands
 
-### spec archive
+### spec spec-archive
 
-Archive a completed specification.
+Archive specifications for a completed issue (copy to archive, verify, remove originals).
 
 ```bash
-fractary-core spec archive <spec-id> [options]
+fractary-core spec spec-archive <issue_number> [options]
 ```
 
 **Arguments:**
-- `spec-id` - Specification ID
+- `issue_number` - GitHub issue number
 
 **Options:**
-- `--reason <text>` - Archive reason
-- `--destination <path>` - Custom archive location
+- `--local` - Force local archive mode (skip cloud storage)
+- `--json` - Output as JSON
 
-**Example:**
+Specs are matched by filename pattern (e.g., `SPEC-00123` or `WORK-00123`). When cloud storage is configured, specs are archived to cloud and verified before removing originals. Otherwise, specs are copied to a local `archive/` directory with checksum verification.
+
+**Examples:**
 ```bash
-fractary-core spec archive SPEC-20240101 --reason "Feature completed"
+# Archive specs for issue #123
+fractary-core spec spec-archive 123
+
+# Force local archive
+fractary-core spec spec-archive 123 --local
+
+# Get detailed results as JSON
+fractary-core spec spec-archive 123 --json
 ```
 
 ## Template Commands
 
-### spec template list
+### spec template-list
 
-List available templates.
+List available specification templates.
 
 ```bash
-fractary-core spec template list
+fractary-core spec template-list [options]
+```
+
+**Options:**
+- `--json` - Output as JSON
+
+**Example:**
+```bash
+fractary-core spec template-list
 ```
 
 **Output:**
 ```
 Available Templates:
-  basic          - Simple specification template
-  feature        - Feature request with phases
-  bug            - Bug fix specification
-  infrastructure - Infrastructure changes
-  api            - API design specification
+
+feature
+  Feature request specification template
+
+bugfix
+  Bug fix specification template
+
+refactor
+  Refactoring specification template
 ```
 
-### spec template show
+## JSON Output
 
-Show template content.
-
-```bash
-fractary-core spec template show <template-name>
-```
-
-## Output Examples
-
-### JSON Output
+All commands support `--json` for structured output:
 
 ```bash
-fractary-core spec get SPEC-20240101 --format json
+fractary-core spec spec-get SPEC-00123 --json
 ```
 
 ```json
 {
-  "id": "SPEC-20240101",
-  "title": "User Authentication",
-  "workType": "feature",
-  "template": "feature",
-  "status": "draft",
-  "metadata": {
-    "author": "developer1",
-    "version": "1.0",
-    "createdAt": "2024-01-01T10:00:00Z"
-  },
-  "validation": {
-    "status": "partial",
-    "score": 75
+  "status": "success",
+  "data": {
+    "id": "SPEC-00123",
+    "title": "User Authentication",
+    "path": ".fractary/specs/SPEC-00123-user-authentication.md",
+    "workId": "123",
+    "content": "...",
+    "metadata": {
+      "validation_status": "draft"
+    }
   }
 }
-```
-
-### Validation JSON
-
-```bash
-fractary-core spec validate SPEC-20240101 --format json
-```
-
-```json
-{
-  "specId": "SPEC-20240101",
-  "status": "partial",
-  "score": 75,
-  "checks": [
-    { "name": "has_title", "passed": true },
-    { "name": "has_acceptance_criteria", "passed": false, "message": "Missing acceptance criteria" }
-  ],
-  "suggestions": [
-    "Add specific acceptance criteria with measurable outcomes"
-  ]
-}
-```
-
-## Environment Variables
-
-```bash
-# Spec directory
-export FRACTARY_SPEC_DIRECTORY=./specs
-
-# Default template
-export FRACTARY_SPEC_TEMPLATE=feature
-
-# Auto-validation
-export FRACTARY_SPEC_AUTO_VALIDATE=true
 ```
 
 ## Other Interfaces

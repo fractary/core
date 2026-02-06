@@ -1,317 +1,403 @@
-# Work Toolset - CLI Reference
+# Work Module - CLI Reference
 
-Command-line reference for the Work toolset. Work tracking across GitHub Issues, Jira, and Linear.
+Command-line reference for the Work module. Work item tracking across GitHub Issues, Jira, and Linear.
 
 ## Command Structure
 
 ```bash
-fractary-core work <resource> <action> [options]
+fractary-core work <command> [arguments] [options]
 ```
+
+All commands use dash-separated names (e.g., `issue-fetch`, `label-add`).
 
 ## Issue Commands
 
-### work issue fetch
+### work issue-fetch
 
-Fetch an issue by number or ID.
+Fetch a work item by ID.
 
 ```bash
-fractary-core work issue fetch <issue-id> [options]
+fractary-core work issue-fetch <number> [options]
 ```
 
 **Arguments:**
-- `issue-id` - Issue number or ID
+- `number` - Issue number
 
 **Options:**
-- `--format <type>` - Output format: `json`, `table`, `text`
+- `--json` - Output as JSON
+- `--verbose` - Show additional details (labels, assignees)
 
 **Examples:**
 ```bash
 # Fetch issue #123
-fractary-core work issue fetch 123
+fractary-core work issue-fetch 123
 
 # Output as JSON
-fractary-core work issue fetch 123 --format json
+fractary-core work issue-fetch 123 --json
+
+# Show full details
+fractary-core work issue-fetch 123 --verbose
 ```
 
-### work issue create
+### work issue-create
 
-Create a new issue.
+Create a new work item.
 
 ```bash
-fractary-core work issue create <title> [options]
+fractary-core work issue-create [options]
 ```
 
-**Arguments:**
-- `title` - Issue title
-
 **Options:**
-- `--body <text>` - Issue description
-- `--type <type>` - Work type: `feature`, `bug`, `chore`, `patch`, `infrastructure`, `api`
+- `--title <title>` - Issue title (required)
+- `--body <body>` - Issue body
 - `--labels <labels>` - Comma-separated labels
-- `--assignees <users>` - Comma-separated usernames
-- `--milestone <name>` - Milestone name
+- `--assignees <assignees>` - Comma-separated assignees
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # Create a bug report
-fractary-core work issue create "Login fails on mobile" \
-  --type bug \
+fractary-core work issue-create \
+  --title "Login fails on mobile" \
   --labels "bug,priority:high" \
   --assignees "developer1"
 
 # Create a feature request
-fractary-core work issue create "Add dark mode" \
-  --type feature \
+fractary-core work issue-create \
+  --title "Add dark mode" \
   --body "Implement dark mode toggle in settings"
 ```
 
-### work issue update
+### work issue-update
 
-Update an existing issue.
+Update a work item.
 
 ```bash
-fractary-core work issue update <issue-id> [options]
+fractary-core work issue-update <number> [options]
 ```
 
 **Arguments:**
-- `issue-id` - Issue number or ID
+- `number` - Issue number
 
 **Options:**
-- `--title <text>` - New title
-- `--body <text>` - New description
-- `--state <state>` - State: `open`, `closed`
+- `--title <title>` - New title
+- `--body <body>` - New body
+- `--state <state>` - New state (`open`, `closed`)
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
-# Close an issue
-fractary-core work issue update 123 --state closed
-
 # Update title
-fractary-core work issue update 123 --title "Updated title"
+fractary-core work issue-update 123 --title "Updated title"
+
+# Change state
+fractary-core work issue-update 123 --state closed
 ```
 
-### work issue list
+### work issue-close
 
-List issues.
-
-```bash
-fractary-core work issue list [options]
-```
-
-**Options:**
-- `--state <state>` - Filter by state: `open`, `closed`, `all`
-- `--labels <labels>` - Filter by labels (comma-separated)
-- `--assignee <user>` - Filter by assignee
-- `--limit <n>` - Maximum results
-- `--format <type>` - Output format
-
-**Examples:**
-```bash
-# List open issues
-fractary-core work issue list --state open
-
-# List bugs assigned to me
-fractary-core work issue list --labels bug --assignee @me
-```
-
-### work issue search
-
-Search issues.
+Close a work item.
 
 ```bash
-fractary-core work issue search <query> [options]
+fractary-core work issue-close <number> [options]
 ```
 
 **Arguments:**
-- `query` - Search query
+- `number` - Issue number
 
 **Options:**
-- `--state <state>` - Filter by state
-- `--labels <labels>` - Filter by labels
+- `--comment <text>` - Add closing comment
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Close issue
+fractary-core work issue-close 123
+
+# Close with comment
+fractary-core work issue-close 123 --comment "Fixed in PR #456"
+```
+
+### work issue-reopen
+
+Reopen a closed work item.
+
+```bash
+fractary-core work issue-reopen <number> [options]
+```
+
+**Arguments:**
+- `number` - Issue number
+
+**Options:**
+- `--comment <text>` - Add comment when reopening
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Reopen issue
+fractary-core work issue-reopen 123
+
+# Reopen with comment
+fractary-core work issue-reopen 123 --comment "Regression found, reopening"
+```
+
+### work issue-assign
+
+Assign or unassign a work item.
+
+```bash
+fractary-core work issue-assign <number> [options]
+```
+
+**Arguments:**
+- `number` - Issue number
+
+**Options:**
+- `--user <username>` - User to assign (use `@me` for self; omit to unassign)
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Assign to user
+fractary-core work issue-assign 123 --user developer1
+
+# Assign to self
+fractary-core work issue-assign 123 --user @me
+
+# Unassign
+fractary-core work issue-assign 123
+```
+
+### work issue-classify
+
+Classify work item type (feature, bug, chore, patch).
+
+```bash
+fractary-core work issue-classify <number> [options]
+```
+
+**Arguments:**
+- `number` - Issue number
+
+**Options:**
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Classify issue
+fractary-core work issue-classify 123
+
+# Get classification as JSON
+fractary-core work issue-classify 123 --json
+```
+
+**Output:**
+```
+feature
+(confidence: 85%)
+```
+
+### work issue-search
+
+Search work items.
+
+```bash
+fractary-core work issue-search [options]
+```
+
+**Options:**
+- `--query <query>` - Search query (required)
+- `--state <state>` - Filter by state: `open`, `closed`, `all` (default: `open`)
+- `--labels <labels>` - Filter by labels (comma-separated)
+- `--limit <n>` - Max results (default: `10`)
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # Search for authentication issues
-fractary-core work issue search "authentication" --state open
+fractary-core work issue-search --query "authentication"
+
+# Search closed bugs
+fractary-core work issue-search --query "login" --state closed --labels "bug"
+
+# Limit results
+fractary-core work issue-search --query "API" --limit 5 --json
 ```
 
 ## Comment Commands
 
-### work comment add
+### work issue-comment
 
-Add a comment to an issue.
+Add a comment to a work item.
 
 ```bash
-fractary-core work comment add <issue-id> <body> [options]
+fractary-core work issue-comment <number> [options]
 ```
 
 **Arguments:**
-- `issue-id` - Issue number or ID
-- `body` - Comment text
+- `number` - Issue number
 
 **Options:**
-- `--faber-context <phase>` - FABER phase: `frame`, `architect`, `build`, `evaluate`, `release`
+- `--body <text>` - Comment body (required)
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # Add a comment
-fractary-core work comment add 123 "Investigation complete, root cause identified"
-
-# Add comment with FABER context
-fractary-core work comment add 123 "Starting implementation" --faber-context build
+fractary-core work issue-comment 123 --body "Investigation complete, root cause identified"
 ```
 
-### work comment list
+### work issue-comment-list
 
-List comments on an issue.
+List comments on a work item.
 
 ```bash
-fractary-core work comment list <issue-id> [options]
+fractary-core work issue-comment-list <number> [options]
 ```
 
 **Arguments:**
-- `issue-id` - Issue number or ID
+- `number` - Issue number
 
 **Options:**
-- `--limit <n>` - Maximum results
-- `--format <type>` - Output format
+- `--limit <n>` - Max comments to show
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# List comments
+fractary-core work issue-comment-list 123
+
+# Limit to 5 comments
+fractary-core work issue-comment-list 123 --limit 5
+```
 
 ## Label Commands
 
-### work label add
+### work label-add
 
-Add labels to an issue.
+Add labels to a work item.
 
 ```bash
-fractary-core work label add <issue-id> <labels>
+fractary-core work label-add <number> [options]
 ```
 
 **Arguments:**
-- `issue-id` - Issue number or ID
-- `labels` - Comma-separated labels
+- `number` - Issue number
+
+**Options:**
+- `--labels <labels>` - Comma-separated labels to add (required)
+- `--json` - Output as JSON
 
 **Example:**
 ```bash
-fractary-core work label add 123 "bug,priority:high"
+fractary-core work label-add 123 --labels "bug,priority:high"
 ```
 
-### work label remove
+### work label-remove
 
-Remove labels from an issue.
-
-```bash
-fractary-core work label remove <issue-id> <labels>
-```
-
-### work label set
-
-Replace all labels on an issue.
+Remove labels from a work item.
 
 ```bash
-fractary-core work label set <issue-id> <labels>
-```
-
-### work label list
-
-List labels.
-
-```bash
-fractary-core work label list [issue-id]
+fractary-core work label-remove <number> [options]
 ```
 
 **Arguments:**
-- `issue-id` (optional) - Issue number to list labels for; if omitted, lists all repo labels
-
-## Milestone Commands
-
-### work milestone create
-
-Create a milestone.
-
-```bash
-fractary-core work milestone create <title> [options]
-```
-
-**Arguments:**
-- `title` - Milestone title
+- `number` - Issue number
 
 **Options:**
-- `--description <text>` - Milestone description
-- `--due <date>` - Due date (YYYY-MM-DD)
+- `--labels <labels>` - Comma-separated labels to remove (required)
+- `--json` - Output as JSON
 
-### work milestone list
+**Example:**
+```bash
+fractary-core work label-remove 123 --labels "wontfix"
+```
 
-List milestones.
+### work label-list
+
+List all available labels or labels on an issue.
 
 ```bash
-fractary-core work milestone list [options]
+fractary-core work label-list [options]
 ```
 
 **Options:**
-- `--state <state>` - Filter by state: `open`, `closed`, `all`
+- `--issue <number>` - Show labels for specific issue
+- `--json` - Output as JSON
 
-### work milestone set
-
-Set milestone on an issue.
-
+**Examples:**
 ```bash
-fractary-core work milestone set <issue-id> <milestone>
+# List all repo labels
+fractary-core work label-list
+
+# List labels on a specific issue
+fractary-core work label-list --issue 123
 ```
 
-### work milestone remove
+## Configuration Command
 
-Remove milestone from an issue.
+### work configure
+
+Configure work tracking settings.
 
 ```bash
-fractary-core work milestone remove <issue-id>
+fractary-core work configure [options]
 ```
 
-## Output Examples
+**Options:**
+- `--platform <name>` - Platform: `github`, `gitlab`, `bitbucket`, `jira`, `linear`
+- `--project <name>` - Project name (for Jira/Linear)
+- `--yes` - Skip confirmation prompts
+- `--json` - Output as JSON
 
-### JSON Output
+**Examples:**
+```bash
+# Auto-detect platform from git remote
+fractary-core work configure
+
+# Explicitly set platform
+fractary-core work configure --platform github
+
+# Configure Jira project
+fractary-core work configure --platform jira --project MYPROJ
+```
+
+## JSON Output
+
+All commands support `--json` for structured output:
 
 ```bash
-fractary-core work issue fetch 123 --format json
+fractary-core work issue-fetch 123 --json
 ```
 
 ```json
 {
-  "number": 123,
-  "title": "Bug: Login fails on mobile",
-  "state": "open",
-  "labels": ["bug", "priority:high"],
-  "assignees": ["developer1"],
-  "url": "https://github.com/myorg/myrepo/issues/123"
+  "status": "success",
+  "data": {
+    "number": 123,
+    "title": "Bug: Login fails on mobile",
+    "state": "open",
+    "body": "...",
+    "labels": ["bug", "priority:high"],
+    "assignees": ["developer1"]
+  }
 }
-```
-
-### Table Output
-
-```bash
-fractary-core work issue list --format table
-```
-
-```
-NUMBER  TITLE                           STATE   LABELS
-123     Bug: Login fails on mobile      open    bug, priority:high
-124     Add dark mode                   open    enhancement
-125     Update dependencies             closed  chore
 ```
 
 ## Environment Variables
 
 ```bash
-# Provider selection
-export FRACTARY_WORK_PROVIDER=github
-
 # GitHub credentials
 export GITHUB_TOKEN=ghp_your_token
-export GITHUB_OWNER=myorg
-export GITHUB_REPO=myrepo
+
+# GitLab credentials
+export GITLAB_TOKEN=glpat_your_token
+
+# Bitbucket credentials
+export BITBUCKET_TOKEN=your_token
 
 # Jira credentials
-export JIRA_HOST=https://myorg.atlassian.net
-export JIRA_EMAIL=user@example.com
 export JIRA_TOKEN=your_jira_token
 
 # Linear credentials

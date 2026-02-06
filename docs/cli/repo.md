@@ -1,115 +1,115 @@
-# Repo Toolset - CLI Reference
+# Repo Module - CLI Reference
 
-Command-line reference for the Repo toolset. Repository and Git operations.
+Command-line reference for the Repo module. Repository and Git operations.
 
 ## Command Structure
 
 ```bash
-fractary-core repo <resource> <action> [options]
+fractary-core repo <command> [arguments] [options]
 ```
+
+All commands use dash-separated names (e.g., `branch-create`, `pr-merge`).
 
 ## Branch Commands
 
-### repo branch create
+### repo branch-create
 
 Create a new branch.
 
 ```bash
-fractary-core repo branch create <name> [options]
+fractary-core repo branch-create <name> [options]
 ```
 
 **Arguments:**
 - `name` - Branch name
 
 **Options:**
-- `--base <branch>` - Base branch (default: main)
+- `--base <branch>` - Base branch
 - `--checkout` - Checkout after creation
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # Create feature branch
-fractary-core repo branch create feature/auth
+fractary-core repo branch-create feature/auth
 
-# Create from develop branch
-fractary-core repo branch create feature/auth --base develop --checkout
+# Create from develop branch and checkout
+fractary-core repo branch-create feature/auth --base develop --checkout
 ```
 
-### repo branch delete
+### repo branch-delete
 
 Delete a branch.
 
 ```bash
-fractary-core repo branch delete <name> [options]
+fractary-core repo branch-delete <name> [options]
 ```
 
 **Arguments:**
 - `name` - Branch name
 
 **Options:**
-- `--force` - Force delete unmerged branch
-- `--remote` - Also delete remote branch
+- `--location <where>` - Delete location: `local`, `remote`, `both` (default: `local`)
+- `--force` - Force delete even if not merged
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # Delete local branch
-fractary-core repo branch delete feature/old-feature
+fractary-core repo branch-delete feature/old-feature
 
-# Delete local and remote
-fractary-core repo branch delete feature/old-feature --remote
+# Delete both local and remote
+fractary-core repo branch-delete feature/old-feature --location both
+
+# Force delete unmerged branch
+fractary-core repo branch-delete feature/experiment --force
 ```
 
-### repo branch list
+### repo branch-list
 
 List branches.
 
 ```bash
-fractary-core repo branch list [options]
+fractary-core repo branch-list [options]
 ```
 
 **Options:**
-- `--remote` - Include remote branches
-- `--merged` - Only merged branches
-- `--format <type>` - Output format
+- `--merged` - Show only merged branches
+- `--stale` - Show only stale branches
+- `--pattern <pattern>` - Filter by pattern
+- `--limit <n>` - Limit results (default: `20`)
+- `--json` - Output as JSON
 
-### repo branch generate
-
-Generate a semantic branch name.
-
+**Examples:**
 ```bash
-fractary-core repo branch generate [options]
+# List all branches
+fractary-core repo branch-list
+
+# List merged branches
+fractary-core repo branch-list --merged
+
+# Filter by pattern
+fractary-core repo branch-list --pattern "feature/*"
 ```
 
-**Options:**
-- `--type <type>` - Branch type: `feature`, `bugfix`, `hotfix`, `release`
-- `--description <text>` - Brief description
-- `--work-id <id>` - Associated work item ID
-
-**Example:**
-```bash
-fractary-core repo branch generate \
-  --type feature \
-  --description "user authentication" \
-  --work-id 123
-# Output: feature/123-user-authentication
-```
-
-## Commit Commands
+## Commit Command
 
 ### repo commit
 
-Create a commit.
+Create a commit with conventional commit format.
 
 ```bash
 fractary-core repo commit [options]
 ```
 
 **Options:**
-- `--message <text>` - Commit message (required)
-- `--type <type>` - Conventional commit type: `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `perf`, `test`
+- `--message <msg>` - Commit message (required)
+- `--type <type>` - Commit type: `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `test`, `build`
 - `--scope <scope>` - Commit scope
+- `--work-id <id>` - Work item ID
 - `--breaking` - Mark as breaking change
-- `--body <text>` - Extended description
-- `--files <files>` - Files to stage (comma-separated)
+- `--all` - Stage all changes before committing
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
@@ -122,286 +122,409 @@ fractary-core repo commit \
   --type feat \
   --scope auth
 
-# Breaking change
+# Breaking change with all staged
 fractary-core repo commit \
   --message "Change API response format" \
   --type feat \
-  --breaking
+  --breaking \
+  --all
+
+# Link to work item
+fractary-core repo commit \
+  --message "Fix login bug" \
+  --type fix \
+  --work-id 123
 ```
-
-### repo stage
-
-Stage files.
-
-```bash
-fractary-core repo stage <files>
-```
-
-**Arguments:**
-- `files` - Files to stage (comma-separated or glob patterns)
-
-**Examples:**
-```bash
-# Stage specific files
-fractary-core repo stage src/auth.ts,tests/auth.test.ts
-
-# Stage all
-fractary-core repo stage --all
-```
-
-### repo push
-
-Push to remote.
-
-```bash
-fractary-core repo push [options]
-```
-
-**Options:**
-- `--remote <name>` - Remote name (default: origin)
-- `--branch <name>` - Branch name
-- `--force` - Force push
-- `--set-upstream` - Set upstream tracking
-
-### repo pull
-
-Pull from remote.
-
-```bash
-fractary-core repo pull [options]
-```
-
-**Options:**
-- `--remote <name>` - Remote name
-- `--branch <name>` - Branch name
-- `--rebase` - Rebase instead of merge
 
 ## Pull Request Commands
 
-### repo pr create
+### repo pr-create
 
-Create a pull request.
+Create a new pull request.
 
 ```bash
-fractary-core repo pr create [options]
+fractary-core repo pr-create [options]
 ```
 
 **Options:**
-- `--title <text>` - PR title (required)
-- `--body <text>` - PR description
-- `--base <branch>` - Target branch (default: main)
-- `--head <branch>` - Source branch (default: current)
-- `--draft` - Create as draft
+- `--title <title>` - PR title (required)
+- `--body <body>` - PR body/description
+- `--base <branch>` - Base branch (default: main/master)
+- `--head <branch>` - Head branch (default: current branch)
+- `--draft` - Create as draft PR
+- `--json` - Output as JSON
 
 **Examples:**
 ```bash
 # Create PR
-fractary-core repo pr create \
+fractary-core repo pr-create \
   --title "Add authentication system" \
   --body "Implements JWT authentication"
 
 # Create draft PR
-fractary-core repo pr create \
+fractary-core repo pr-create \
   --title "WIP: New feature" \
   --draft
 ```
 
-### repo pr merge
+### repo pr-list
+
+List pull requests.
+
+```bash
+fractary-core repo pr-list [options]
+```
+
+**Options:**
+- `--state <state>` - Filter by state: `open`, `closed`, `all` (default: `open`)
+- `--author <username>` - Filter by author
+- `--limit <n>` - Limit results (default: `10`)
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# List open PRs
+fractary-core repo pr-list
+
+# List my PRs
+fractary-core repo pr-list --author myusername
+
+# List all PRs as JSON
+fractary-core repo pr-list --state all --json
+```
+
+### repo pr-merge
 
 Merge a pull request.
 
 ```bash
-fractary-core repo pr merge <number> [options]
+fractary-core repo pr-merge <number> [options]
 ```
 
 **Arguments:**
 - `number` - PR number
 
 **Options:**
-- `--method <method>` - Merge method: `merge`, `squash`, `rebase`
+- `--strategy <strategy>` - Merge strategy: `merge`, `squash`, `rebase` (default: `merge`)
 - `--delete-branch` - Delete branch after merge
+- `--json` - Output as JSON
 
-**Example:**
+**Examples:**
 ```bash
-fractary-core repo pr merge 42 --method squash --delete-branch
+# Merge PR
+fractary-core repo pr-merge 42
+
+# Squash merge and delete branch
+fractary-core repo pr-merge 42 --strategy squash --delete-branch
 ```
 
-### repo pr list
+### repo pr-review
 
-List pull requests.
+Review a pull request.
 
 ```bash
-fractary-core repo pr list [options]
+fractary-core repo pr-review <number> [options]
 ```
+
+**Arguments:**
+- `number` - PR number
 
 **Options:**
-- `--state <state>` - Filter by state: `open`, `closed`, `all`
-- `--author <user>` - Filter by author
-- `--format <type>` - Output format
+- `--approve` - Approve the PR
+- `--request-changes` - Request changes
+- `--comment <text>` - Add review comment
+- `--json` - Output as JSON
 
-### repo pr view
-
-View pull request details.
-
+**Examples:**
 ```bash
-fractary-core repo pr view <number>
+# Approve PR
+fractary-core repo pr-review 42 --approve
+
+# Request changes with comment
+fractary-core repo pr-review 42 --request-changes --comment "Please add tests"
+
+# Comment only
+fractary-core repo pr-review 42 --comment "Looks good overall"
 ```
 
 ## Tag Commands
 
-### repo tag create
+### repo tag-create
 
-Create a tag.
+Create a new tag.
 
 ```bash
-fractary-core repo tag create <name> [options]
+fractary-core repo tag-create <name> [options]
 ```
 
 **Arguments:**
 - `name` - Tag name
 
 **Options:**
-- `--message <text>` - Tag message (creates annotated tag)
-- `--sha <commit>` - Commit to tag (default: HEAD)
+- `--message <msg>` - Tag message (creates annotated tag)
+- `--sign` - Create a GPG-signed tag
+- `--force` - Replace existing tag
+- `--json` - Output as JSON
 
-**Example:**
+**Examples:**
 ```bash
-fractary-core repo tag create v1.0.0 --message "Release version 1.0.0"
+# Create lightweight tag
+fractary-core repo tag-create v1.0.0
+
+# Create annotated tag
+fractary-core repo tag-create v1.0.0 --message "Release version 1.0.0"
+
+# Create signed tag
+fractary-core repo tag-create v1.0.0 --message "Release 1.0.0" --sign
 ```
 
-### repo tag delete
+### repo tag-push
 
-Delete a tag.
+Push tag(s) to remote.
 
 ```bash
-fractary-core repo tag delete <name> [options]
+fractary-core repo tag-push <name> [options]
 ```
+
+**Arguments:**
+- `name` - Tag name or `all` for all tags
 
 **Options:**
-- `--remote` - Also delete from remote
+- `--remote <name>` - Remote name (default: `origin`)
+- `--json` - Output as JSON
 
-### repo tag push
-
-Push a tag to remote.
-
+**Examples:**
 ```bash
-fractary-core repo tag push <name> [options]
+# Push single tag
+fractary-core repo tag-push v1.0.0
+
+# Push all tags
+fractary-core repo tag-push all
+
+# Push to specific remote
+fractary-core repo tag-push v1.0.0 --remote upstream
 ```
 
-**Options:**
-- `--remote <name>` - Remote name
-
-### repo tag list
+### repo tag-list
 
 List tags.
 
 ```bash
-fractary-core repo tag list [options]
+fractary-core repo tag-list [options]
 ```
 
 **Options:**
-- `--format <type>` - Output format
+- `--pattern <pattern>` - Filter by pattern
+- `--latest <n>` - Show only latest N tags
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# List all tags
+fractary-core repo tag-list
+
+# List release tags
+fractary-core repo tag-list --pattern "v*"
+
+# Show latest 5 tags
+fractary-core repo tag-list --latest 5
+```
 
 ## Worktree Commands
 
-### repo worktree create
+### repo worktree-create
 
-Create a git worktree.
+Create a new worktree.
 
 ```bash
-fractary-core repo worktree create [options]
+fractary-core repo worktree-create <branch> [options]
 ```
+
+**Arguments:**
+- `branch` - Branch name
 
 **Options:**
-- `--path <path>` - Worktree path
-- `--branch <name>` - Branch to checkout
-- `--create-branch` - Create branch if doesn't exist
+- `--path <path>` - Worktree path (default: `.worktrees/<branch>`)
+- `--work-id <id>` - Work item ID
+- `--base <branch>` - Base branch to create from
+- `--no-checkout` - Skip checking out files
+- `--json` - Output as JSON
 
-**Example:**
+**Examples:**
 ```bash
-fractary-core repo worktree create \
-  --path ../myrepo-feature \
-  --branch feature/parallel-work \
-  --create-branch
+# Create worktree for feature branch
+fractary-core repo worktree-create feature/parallel-work
+
+# Create with custom path and base
+fractary-core repo worktree-create feature/auth \
+  --path ../myrepo-auth \
+  --base develop
+
+# Link to work item
+fractary-core repo worktree-create feature/fix-123 --work-id 123
 ```
 
-### repo worktree list
+### repo worktree-list
 
 List worktrees.
 
 ```bash
-fractary-core repo worktree list
+fractary-core repo worktree-list [options]
 ```
 
-### repo worktree remove
+**Options:**
+- `--json` - Output as JSON
+
+**Example:**
+```bash
+fractary-core repo worktree-list
+```
+
+### repo worktree-remove
 
 Remove a worktree.
 
 ```bash
-fractary-core repo worktree remove <path> [options]
+fractary-core repo worktree-remove <path> [options]
 ```
 
-**Options:**
-- `--force` - Force remove even if dirty
+**Arguments:**
+- `path` - Worktree path
 
-### repo worktree prune
+**Options:**
+- `--force` - Force removal even with uncommitted changes
+- `--json` - Output as JSON
+
+**Example:**
+```bash
+fractary-core repo worktree-remove .worktrees/feature/old-feature --force
+```
+
+### repo worktree-cleanup
 
 Clean up stale worktrees.
 
 ```bash
-fractary-core repo worktree prune [options]
+fractary-core repo worktree-cleanup [options]
 ```
 
 **Options:**
-- `--dry-run` - Preview without removing
+- `--merged` - Remove only merged worktrees
+- `--stale` - Remove only stale worktrees
+- `--dry-run` - Show what would be removed without removing
+- `--json` - Output as JSON
 
-## Workflow Commands
-
-### repo commit-push
-
-Commit and push in one command.
-
+**Examples:**
 ```bash
-fractary-core repo commit-push [options]
+# Preview cleanup
+fractary-core repo worktree-cleanup --dry-run
+
+# Clean up merged worktrees
+fractary-core repo worktree-cleanup --merged
+
+# Clean up stale worktrees
+fractary-core repo worktree-cleanup --stale
 ```
 
-Uses same options as `repo commit`, plus:
-- `--set-upstream` - Set upstream if needed
+## Status and Sync Commands
 
-### repo commit-push-pr
+### repo status
 
-Commit, push, and create PR.
+Show repository status.
 
 ```bash
-fractary-core repo commit-push-pr [options]
+fractary-core repo status [options]
 ```
 
-Combines options from `repo commit` and `repo pr create`.
+**Options:**
+- `--json` - Output as JSON
 
 **Example:**
 ```bash
-fractary-core repo commit-push-pr \
-  --message "Add authentication" \
-  --type feat \
-  --title "Feature: Authentication System" \
-  --body "Implements JWT authentication"
+fractary-core repo status
 ```
 
-## Environment Variables
+**Output:**
+```
+Repository Status
+Branch: feature/auth
+
+Staged changes:
+  + src/auth.ts
+
+Modified changes:
+  M src/config.ts
+
+Untracked files:
+  ? src/new-file.ts
+```
+
+### repo push
+
+Push commits to remote.
 
 ```bash
-# Provider selection
-export FRACTARY_REPO_PROVIDER=github
+fractary-core repo push [options]
+```
 
-# GitHub credentials
-export GITHUB_TOKEN=ghp_your_token
+**Options:**
+- `--remote <name>` - Remote name (default: `origin`)
+- `--set-upstream` - Set upstream branch
+- `--force` - Force push (use with caution)
+- `--json` - Output as JSON
 
-# GitLab credentials
-export GITLAB_TOKEN=glpat_your_token
+**Examples:**
+```bash
+# Push to origin
+fractary-core repo push
 
-# Bitbucket credentials
-export BITBUCKET_USERNAME=your_username
-export BITBUCKET_APP_PASSWORD=your_app_password
+# Set upstream on first push
+fractary-core repo push --set-upstream
+
+# Push to different remote
+fractary-core repo push --remote upstream
+```
+
+### repo pull
+
+Pull changes from remote.
+
+```bash
+fractary-core repo pull [options]
+```
+
+**Options:**
+- `--remote <name>` - Remote name (default: `origin`)
+- `--rebase` - Rebase instead of merge
+- `--json` - Output as JSON
+
+**Examples:**
+```bash
+# Pull from origin
+fractary-core repo pull
+
+# Pull with rebase
+fractary-core repo pull --rebase
+```
+
+## JSON Output
+
+All commands support `--json` for structured output:
+
+```bash
+fractary-core repo status --json
+```
+
+```json
+{
+  "status": "success",
+  "data": {
+    "branch": "feature/auth",
+    "staged": ["src/auth.ts"],
+    "modified": ["src/config.ts"],
+    "untracked": ["src/new-file.ts"]
+  }
+}
 ```
 
 ## Other Interfaces

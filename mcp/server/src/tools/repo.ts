@@ -2,7 +2,7 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 /**
  * MCP tool definitions for the Repo module
- * 38 tools for repository management (Git, PRs, branches, tags, worktrees)
+ * 37 tools for repository management (Git, PRs, branches, tags, worktrees)
  */
 export const repoTools: Tool[] = [
   // Repository status

@@ -1,6 +1,6 @@
 # Fractary Core MCP Server
 
-Model Context Protocol (MCP) server providing 81 tools for AI agent integration.
+Model Context Protocol (MCP) server providing 80 tools for AI agent integration.
 
 ## What is MCP?
 
@@ -76,24 +76,24 @@ fractary_{toolset}_{resource}_{action}
 | `fractary_repo_branch_create` | Repo | Branch | Create |
 | `fractary_repo_pr_merge` | Repo | PR | Merge |
 | `fractary_spec_validate` | Spec | - | Validate |
-| `fractary_logs_search` | Logs | - | Search |
+| `fractary_logs_capture` | Logs | - | Capture |
 
 ## Tool Categories by Toolset
 
 | Toolset | Tool Count | Documentation |
 |---------|------------|---------------|
 | **Work** | 19 tools | [Work Tools](/docs/mcp/server/work.md) |
-| **Repo** | 38 tools | [Repo Tools](/docs/mcp/server/repo.md) |
-| **Spec** | 8 tools | [Spec Tools](/docs/mcp/server/spec.md) |
-| **Logs** | 10 tools | [Logs Tools](/docs/mcp/server/logs.md) |
-| **File** | 6 tools | [File Tools](/docs/mcp/server/file.md) |
-| **Docs** | - | [Docs Tools](/docs/mcp/server/docs.md) |
+| **Repo** | 37 tools | [Repo Tools](/docs/mcp/server/repo.md) |
+| **Spec** | 5 tools | [Spec Tools](/docs/mcp/server/spec.md) |
+| **Logs** | 5 tools | [Logs Tools](/docs/mcp/server/logs.md) |
+| **File** | 7 tools | [File Tools](/docs/mcp/server/file.md) |
+| **Docs** | 7 tools | [Docs Tools](/docs/mcp/server/docs.md) |
 
 ## Configuration
 
-### Server Configuration File
+### Configuration File
 
-Create `.fractary/core-mcp.yaml`:
+Create `.fractary/config.yaml`:
 
 ```yaml
 server:
@@ -136,7 +136,7 @@ export JIRA_TOKEN=your_jira_token
 export LINEAR_API_KEY=your_linear_key
 
 # Server settings
-export FRACTARY_MCP_CONFIG=.fractary/core-mcp.yaml
+export FRACTARY_MCP_CONFIG=.fractary/config.yaml
 export FRACTARY_MCP_LOG_LEVEL=info
 ```
 
@@ -183,12 +183,12 @@ All tools return responses in a consistent format:
 
 // fractary_work_issue_fetch
 {
-  "issueId": 123
+  "issue_number": "123"
 }
 
-// fractary_work_comment_add
+// fractary_work_comment_create
 {
-  "issueId": 123,
+  "issue_number": "123",
   "body": "Investigation complete"
 }
 ```
@@ -199,7 +199,7 @@ All tools return responses in a consistent format:
 // fractary_repo_branch_create
 {
   "name": "feature/auth",
-  "base": "main"
+  "base_branch": "main"
 }
 
 // fractary_repo_commit
@@ -223,12 +223,12 @@ All tools return responses in a consistent format:
 // fractary_spec_create
 {
   "title": "API Design",
-  "type": "api"
+  "template": "api"
 }
 
 // fractary_spec_validate
 {
-  "specId": "SPEC-20240101"
+  "spec_id": "SPEC-20240101"
 }
 ```
 
