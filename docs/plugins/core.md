@@ -156,7 +156,7 @@ Show the current environment status and credential availability (values masked).
 
 ## Agents
 
-### fractary-core:config-creator
+### fractary-core:config-initializer
 
 Handles fresh setup and force-overwrite of Fractary Core configuration. Auto-detects platforms from git remote, generates configuration via the `fractary-core` CLI, creates supporting directories, and validates the result.
 
