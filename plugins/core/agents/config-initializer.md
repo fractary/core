@@ -33,8 +33,10 @@ The CLI command `fractary-core config configure` (backed by SDK's `getDefaultCon
 5. ALWAYS present proposed changes BEFORE applying and get user confirmation (unless --yes)
 6. ONLY create config for the 6 core plugins: work, repo, logs, file, spec, docs
 7. NEVER create `codex` or `faber` sections - those are managed by their own plugins
-8. When arguments are NOT provided, ALWAYS auto-detect/guess values and confirm with user via AskUserQuestion - do NOT fail or prompt user to re-run with arguments
+8. When arguments are NOT provided, ALWAYS auto-detect/guess values and confirm with user via the AskUserQuestion TOOL - do NOT fail or prompt user to re-run with arguments
 9. ALWAYS present your best guess as the first/recommended option in AskUserQuestion, and include a "Custom value" option so the user can override
+10. NEVER ask the user questions via plain text output. You MUST use the AskUserQuestion tool for ALL user prompts, confirmations, and value selections. If you output a question as text instead of calling AskUserQuestion, you are violating this rule.
+11. NEVER proceed to generate config without first confirming auto-detected values with the user via AskUserQuestion (unless --yes flag is set)
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -76,162 +78,47 @@ If no git remote is found, check directory name and any package.json or other pr
 
 ## 2. Smart Detection & User Confirmation
 
-For each critical value that was NOT explicitly provided as an argument, auto-detect the best guess and present it to the user for confirmation. Use a SINGLE `AskUserQuestion` call with ALL questions that need confirmation to minimize back-and-forth.
+**MANDATORY**: For each critical value that was NOT explicitly provided as an argument, you MUST auto-detect the best guess and present it to the user for confirmation by calling the **AskUserQuestion tool**. Do NOT output questions as text. Do NOT skip this step. Do NOT proceed to config generation without completing this step.
 
-Build the questions array dynamically based on which values are missing:
+Call AskUserQuestion with a `questions` array. Each element has: `question` (string), `header` (string), `options` (array of `{label, description}`), and `multiSelect` (boolean). Batch all non-dependent questions into a single AskUserQuestion call.
 
-### 2a. Project Identity (owner/repo)
+### Round 1: Core Settings
 
-If `--owner` and `--repo` are not provided but were detected from git remote:
+Call AskUserQuestion once with all of these questions (omit any where the user provided the value as an argument):
 
-```
-{
-  question: "Detected project: {detected_owner}/{detected_repo}\n\nIs this correct?",
-  header: "Project",
-  options: [
-    { label: "{detected_owner}/{detected_repo}", description: "Detected from git remote (Recommended)" },
-    { label: "Enter custom value", description: "Specify a different owner/repo" }
-  ],
-  multiSelect: false
-}
-```
+**Project Identity** (if `--owner`/`--repo` not provided):
+- header: "Project"
+- question: "Detected project: {detected_owner}/{detected_repo} — Is this correct?" (or "Could not detect project info. What is the owner/repo?" if no remote)
+- options: detected value as recommended + "Enter custom value"
 
-If no git remote exists:
-```
-{
-  question: "Could not detect project info from git remote. What is the project owner and repository name?",
-  header: "Project",
-  options: [
-    { label: "Enter custom value", description: "Type owner/repo (e.g. myorg/myproject)" }
-  ],
-  multiSelect: false
-}
-```
+**Work Platform** (if `--work-platform` not provided):
+- header: "Work Platform"
+- question: "Which platform for work/issue tracking?" with detection note
+- options: "GitHub Issues" / "Jira" / "Linear" (mark detected platform as Recommended)
 
-### 2b. Work Platform
+**Repository Platform** (if `--repo-platform` not provided):
+- header: "Repo Platform"
+- question: "Which repository platform?" with detection note
+- options: "GitHub" / "GitLab" / "Bitbucket" (mark detected platform as Recommended)
 
-If `--work-platform` is not provided:
+**File Storage** (if `--file-handler` not provided):
+- header: "Storage"
+- question: "Where should files (logs, specs) be stored?"
+- options: "Local" (Recommended) / "S3"
 
-When git remote points to github.com, present GitHub as the best guess:
-```
-{
-  question: "Which platform do you use for work/issue tracking?\n\nDetected: GitHub (based on git remote pointing to github.com)",
-  header: "Work",
-  options: [
-    { label: "GitHub Issues", description: "Use GitHub for issue tracking (Recommended - matches your remote)" },
-    { label: "Jira", description: "Use Atlassian Jira for issue tracking" },
-    { label: "Linear", description: "Use Linear for project management" }
-  ],
-  multiSelect: false
-}
-```
+### Round 2: Platform-Specific Follow-ups
 
-When git remote points to gitlab.com or bitbucket.org, adjust the recommended option accordingly. When no remote is found, present all options without a recommendation.
+Based on Round 1 answers, call AskUserQuestion again if needed:
 
-### 2c. Repository Platform
+- **If S3 selected**: Ask for bucket name (derive from project name) and AWS region
+- **If Jira selected**: Ask for Jira project key (derive from repo name)
+- **If Linear selected**: Ask for Linear team key (derive from org name)
 
-If `--repo-platform` is not provided:
-
-When the repo platform can be inferred from the git remote URL, present it as the best guess:
-```
-{
-  question: "Which repository platform?\n\nDetected: GitHub (based on git remote)",
-  header: "Repo",
-  options: [
-    { label: "GitHub", description: "github.com (Recommended - matches your remote)" },
-    { label: "GitLab", description: "gitlab.com" },
-    { label: "Bitbucket", description: "bitbucket.org" }
-  ],
-  multiSelect: false
-}
-```
-
-### 2d. File Storage Handler
-
-If `--file-handler` is not provided:
-```
-{
-  question: "Where should files (logs, specs) be stored?\n\nFor most projects, local storage is sufficient. Use S3 if you need cloud archival or team sharing.",
-  header: "Storage",
-  options: [
-    { label: "Local", description: "Store files locally in .fractary/ directory (Recommended for most projects)" },
-    { label: "S3", description: "Use AWS S3 for cloud storage and archival" }
-  ],
-  multiSelect: false
-}
-```
-
-### 2e. S3-Specific Values (only if S3 is selected)
-
-If the user selects S3, derive a bucket name from the project name and ask for confirmation in a follow-up question:
-```
-{
-  question: "S3 bucket name for this project?\n\nSuggested: {derived_bucket_name} (derived from project name)",
-  header: "S3 Bucket",
-  options: [
-    { label: "{derived_bucket_name}", description: "Auto-derived bucket name (Recommended)" },
-    { label: "Enter custom value", description: "Specify a different bucket name" }
-  ],
-  multiSelect: false
-}
-```
-
-And for the region:
-```
-{
-  question: "AWS region for S3 bucket?",
-  header: "AWS Region",
-  options: [
-    { label: "us-east-1", description: "US East - N. Virginia (Recommended)" },
-    { label: "us-west-2", description: "US West - Oregon" },
-    { label: "eu-west-1", description: "EU - Ireland" },
-    { label: "Enter custom value", description: "Specify a different region" }
-  ],
-  multiSelect: false
-}
-```
-
-### 2f. Jira-Specific Values (only if Jira is selected)
-
-If the user selects Jira as the work platform, ask for the project key:
-```
-{
-  question: "What is your Jira project key?\n\nThis is the prefix on your Jira issues (e.g., 'PROJ' in PROJ-123).\n\nBest guess: {uppercase_repo_name} (derived from repository name)",
-  header: "Jira Key",
-  options: [
-    { label: "{uppercase_repo_name}", description: "Derived from repo name (Recommended)" },
-    { label: "Enter custom value", description: "Specify a different project key" }
-  ],
-  multiSelect: false
-}
-```
-
-### 2g. Linear-Specific Values (only if Linear is selected)
-
-If the user selects Linear as the work platform:
-```
-{
-  question: "What is your Linear team key?\n\nThis is the prefix on your Linear issues (e.g., 'TEAM' in TEAM-123).\n\nBest guess: {uppercase_org_name} (derived from organization name)",
-  header: "Linear Key",
-  options: [
-    { label: "{uppercase_org_name}", description: "Derived from org name (Recommended)" },
-    { label: "Enter custom value", description: "Specify a different team key" }
-  ],
-  multiSelect: false
-}
-```
-
-### Batching Strategy
-
-**Round 1**: Ask all non-dependent questions together (project identity, work platform, repo platform, file storage).
-
-**Round 2** (if needed): Based on Round 1 answers, ask follow-up questions for platform-specific values (Jira project key, Linear team key, S3 bucket/region).
-
-This keeps the interaction to at most 2 rounds of questions.
+This keeps the interaction to at most 2 rounds of AskUserQuestion calls.
 
 ### When --yes is Set
 
-Skip all `AskUserQuestion` calls and use auto-detected values directly. If a critical value cannot be detected and --yes is set, fall back to sensible defaults (github for platform, local for storage) and note the assumption in the output.
+Skip all AskUserQuestion calls and use auto-detected values directly. If a critical value cannot be detected and --yes is set, fall back to sensible defaults (github for platform, local for storage) and note the assumption in the output.
 
 ## 3. Generate Configuration via CLI
 
@@ -282,26 +169,15 @@ grep -q "^\.env$" .gitignore 2>/dev/null || echo -e "\n.env\n.env.*\n!.env.examp
 
 ## 7. Final Confirmation Before Applying
 
-Unless --yes is set, present a summary of ALL resolved values and ask for final approval:
+Unless --yes is set, you MUST call AskUserQuestion to present a summary and get final approval before generating config:
 
-```
-AskUserQuestion(
-  questions: [{
-    question: "Ready to create configuration with these settings:\n\n  Project: {owner}/{repo}\n  Work platform: {work_platform}\n  Repo platform: {repo_platform}\n  File storage: {file_handler}\n  {s3_details_if_applicable}\n  Plugins: {plugins_list}\n\nProceed?",
-    header: "Confirm",
-    options: [
-      { label: "Yes, create configuration", description: "Apply all settings as shown above" },
-      { label: "No, let me change something", description: "Go back and adjust values" },
-      { label: "Cancel", description: "Don't create any configuration" }
-    ],
-    multiSelect: false
-  }]
-)
-```
+- header: "Confirm"
+- question: Summary of all resolved values (project, work platform, repo platform, file storage, plugins)
+- options: "Yes, create configuration" / "No, let me change something" / "Cancel"
 
 Handle responses:
 - "Yes, create configuration" → Proceed to generate and apply
-- "No, let me change something" → Re-ask the relevant questions
+- "No, let me change something" → Re-ask the relevant questions via AskUserQuestion
 - "Cancel" → Exit without changes
 
 ## 8. Validate
