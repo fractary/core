@@ -36,13 +36,6 @@ function getDefaultWorkConfig(options: DefaultConfigOptions): WorkConfig {
   const baseConfig: WorkConfig = {
     active_handler: workPlatform,
     handlers: {},
-    defaults: {
-      auto_assign: false,
-      auto_label: true,
-      close_on_merge: true,
-      comment_on_state_change: true,
-      link_pr_to_issue: true,
-    },
   };
 
   if (workPlatform === 'github') {
@@ -51,26 +44,6 @@ function getDefaultWorkConfig(options: DefaultConfigOptions): WorkConfig {
       repo,
       token: '${GITHUB_TOKEN}',
       api_url: 'https://api.github.com',
-      classification: {
-        feature: ['feature', 'enhancement', 'story', 'user-story'],
-        bug: ['bug', 'fix', 'defect', 'error'],
-        chore: ['chore', 'maintenance', 'docs', 'documentation', 'test', 'refactor'],
-        patch: ['hotfix', 'patch', 'urgent', 'critical', 'security'],
-      },
-      states: {
-        open: 'OPEN',
-        in_progress: 'OPEN',
-        in_review: 'OPEN',
-        done: 'CLOSED',
-        closed: 'CLOSED',
-      },
-      labels: {
-        prefix: 'faber-',
-        in_progress: 'in-progress',
-        in_review: 'in-review',
-        completed: 'completed',
-        error: 'faber-error',
-      },
     };
   } else if (workPlatform === 'jira') {
     baseConfig.handlers.jira = {
@@ -78,37 +51,11 @@ function getDefaultWorkConfig(options: DefaultConfigOptions): WorkConfig {
       email: '${JIRA_EMAIL}',
       api_token: '${JIRA_API_TOKEN}',
       project_key: 'PROJ',
-      classification: {
-        feature: ['Story', 'New Feature'],
-        bug: ['Bug'],
-        chore: ['Task', 'Sub-task'],
-        patch: ['Bug'],
-      },
-      states: {
-        open: 'To Do',
-        in_progress: 'In Progress',
-        in_review: 'In Review',
-        done: 'Done',
-        closed: 'Done',
-      },
     };
   } else if (workPlatform === 'linear') {
     baseConfig.handlers.linear = {
       api_key: '${LINEAR_API_KEY}',
       team_key: 'TEAM',
-      classification: {
-        feature: ['Feature'],
-        bug: ['Bug'],
-        chore: ['Chore'],
-        patch: ['Bug'],
-      },
-      states: {
-        open: 'Backlog',
-        in_progress: 'In Progress',
-        in_review: 'In Review',
-        done: 'Done',
-        closed: 'Canceled',
-      },
     };
   }
 
@@ -131,31 +78,7 @@ function getDefaultRepoConfig(options: DefaultConfigOptions): RepoConfig {
     },
     defaults: {
       default_branch: 'main',
-      protected_branches: ['main', 'master', 'production', 'staging'],
-      branch_naming: {
-        pattern: '{prefix}/{issue_id}-{slug}',
-        allowed_prefixes: ['feat', 'fix', 'chore', 'hotfix', 'docs', 'test', 'refactor', 'style', 'perf'],
-      },
-      commit_format: 'faber',
-      require_signed_commits: false,
-      merge_strategy: 'no-ff',
-      auto_delete_merged_branches: false,
-      remote: {
-        name: 'origin',
-        auto_set_upstream: true,
-      },
-      push_sync_strategy: 'auto-merge',
-      pull_sync_strategy: 'auto-merge-prefer-remote',
       pr: {
-        template: 'standard',
-        require_work_id: true,
-        auto_link_issues: true,
-        ci_polling: {
-          enabled: true,
-          interval_seconds: 60,
-          timeout_seconds: 900,
-          initial_delay_seconds: 10,
-        },
         merge: {
           strategy: 'squash',
           delete_branch: true,
@@ -168,49 +91,11 @@ function getDefaultRepoConfig(options: DefaultConfigOptions): RepoConfig {
 /**
  * Get default logs configuration
  */
-function getDefaultLogsConfig(options: DefaultConfigOptions): LogsConfig {
-  const { fileHandler = 'local' } = options;
-  const useS3 = fileHandler === 's3';
-
+function getDefaultLogsConfig(): LogsConfig {
   return {
     schema_version: '2.0',
-    custom_templates_path: '.fractary/logs/templates/manifest.yaml',
     storage: {
       local_path: '.fractary/logs',
-      archive_path: '.fractary/logs/archive',
-      file_handler: 'logs',
-      ...(useS3 && { cloud_archive_path: 'logs/archive' }),
-    },
-    retention: {
-      default: {
-        local_days: 30,
-        ...(useS3 && { cloud_days: 'forever' }),
-        priority: 'medium',
-      },
-      paths: [
-        {
-          pattern: 'sessions/*',
-          log_type: 'session',
-          local_days: 7,
-          ...(useS3 && { cloud_days: 'forever' }),
-          priority: 'high',
-        },
-      ],
-    },
-    session_logging: {
-      enabled: true,
-      auto_capture: true,
-      format: 'markdown',
-      include_timestamps: true,
-      redact_sensitive: true,
-      auto_name_by_issue: true,
-      redaction_patterns: {
-        api_keys: true,
-        jwt_tokens: true,
-        passwords: true,
-        credit_cards: true,
-        email_addresses: false,
-      },
     },
   };
 }
@@ -233,13 +118,6 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
           local: {
             base_path: '.fractary/specs',
           },
-          push: {
-            compress: false,
-            keep_local: true,
-          },
-          auth: {
-            profile: 'default',
-          },
         },
         logs: {
           type: 's3',
@@ -249,21 +127,7 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
           local: {
             base_path: '.fractary/logs',
           },
-          push: {
-            compress: true,
-            keep_local: true,
-          },
-          auth: {
-            profile: 'default',
-          },
         },
-      },
-      global_settings: {
-        retry_attempts: 3,
-        retry_delay_ms: 1000,
-        timeout_seconds: 300,
-        verify_checksums: true,
-        parallel_uploads: 4,
       },
     };
   }
@@ -284,48 +148,19 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
         },
       },
     },
-    global_settings: {
-      retry_attempts: 3,
-      retry_delay_ms: 1000,
-      timeout_seconds: 300,
-      verify_checksums: true,
-      parallel_uploads: 4,
-    },
   };
 }
 
 /**
  * Get default specification configuration
  */
-function getDefaultSpecConfig(_options: DefaultConfigOptions): SpecConfig {
+function getDefaultSpecConfig(): SpecConfig {
   return {
     schema_version: '1.0',
     storage: {
       local_path: '.fractary/specs',
       archive_path: '.fractary/specs/archive',
       file_handler: 'specs',
-    },
-    naming: {
-      issue_specs: {
-        prefix: 'WORK',
-        digits: 5,
-        phase_format: 'numeric',
-        phase_separator: '-',
-      },
-      standalone_specs: {
-        prefix: 'SPEC',
-        digits: 4,
-        auto_increment: true,
-      },
-    },
-    archive: {
-      strategy: 'lifecycle',
-    },
-    integration: {
-      work_plugin: 'fractary-work',
-      file_plugin: 'fractary-file',
-      link_to_issue: true,
-      update_issue_on_create: true,
     },
   };
 }
@@ -364,8 +199,8 @@ export function getDefaultConfig(options: DefaultConfigOptions = {}): CoreYamlCo
     work: getDefaultWorkConfig(options),
     file: getDefaultFileConfig(options),
     docs: getDefaultDocsConfig(),
-    spec: getDefaultSpecConfig(options),
-    logs: getDefaultLogsConfig(options),
+    spec: getDefaultSpecConfig(),
+    logs: getDefaultLogsConfig(),
   };
 }
 

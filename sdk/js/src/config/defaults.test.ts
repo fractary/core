@@ -50,40 +50,14 @@ describe('getDefaultConfig', () => {
       expect(github.api_url).toBe('https://api.github.com');
     });
 
-    it('includes classification mappings', () => {
+    it('does not include unused classification, states, labels, or defaults', () => {
       const config = getDefaultConfig();
       const github = config.work?.handlers?.github;
 
-      expect(github.classification).toBeDefined();
-      expect(github.classification.feature).toContain('feature');
-      expect(github.classification.bug).toContain('bug');
-      expect(github.classification.chore).toContain('chore');
-      expect(github.classification.patch).toContain('hotfix');
-    });
-
-    it('includes state mappings', () => {
-      const config = getDefaultConfig();
-      const github = config.work?.handlers?.github;
-
-      expect(github.states).toBeDefined();
-      expect(github.states.open).toBe('OPEN');
-      expect(github.states.done).toBe('CLOSED');
-    });
-
-    it('includes label configuration', () => {
-      const config = getDefaultConfig();
-      const github = config.work?.handlers?.github;
-
-      expect(github.labels).toBeDefined();
-      expect(github.labels.prefix).toBe('faber-');
-    });
-
-    it('includes work defaults', () => {
-      const config = getDefaultConfig();
-
-      expect(config.work?.defaults).toBeDefined();
-      expect(config.work?.defaults?.auto_label).toBe(true);
-      expect(config.work?.defaults?.close_on_merge).toBe(true);
+      expect(github.classification).toBeUndefined();
+      expect(github.states).toBeUndefined();
+      expect(github.labels).toBeUndefined();
+      expect(config.work?.defaults).toBeUndefined();
     });
   });
 
@@ -106,21 +80,12 @@ describe('getDefaultConfig', () => {
       expect(jira.project_key).toBe('PROJ');
     });
 
-    it('includes jira classification mappings', () => {
+    it('does not include unused classification or states', () => {
       const config = getDefaultConfig({ workPlatform: 'jira' });
       const jira = config.work?.handlers?.jira;
 
-      expect(jira.classification.feature).toContain('Story');
-      expect(jira.classification.bug).toContain('Bug');
-    });
-
-    it('includes jira state mappings', () => {
-      const config = getDefaultConfig({ workPlatform: 'jira' });
-      const jira = config.work?.handlers?.jira;
-
-      expect(jira.states.open).toBe('To Do');
-      expect(jira.states.in_progress).toBe('In Progress');
-      expect(jira.states.done).toBe('Done');
+      expect(jira.classification).toBeUndefined();
+      expect(jira.states).toBeUndefined();
     });
   });
 
@@ -140,13 +105,11 @@ describe('getDefaultConfig', () => {
       expect(linear.team_key).toBe('TEAM');
     });
 
-    it('includes linear state mappings', () => {
+    it('does not include unused states', () => {
       const config = getDefaultConfig({ workPlatform: 'linear' });
       const linear = config.work?.handlers?.linear;
 
-      expect(linear.states.open).toBe('Backlog');
-      expect(linear.states.in_progress).toBe('In Progress');
-      expect(linear.states.closed).toBe('Canceled');
+      expect(linear.states).toBeUndefined();
     });
   });
 
@@ -164,40 +127,14 @@ describe('getDefaultConfig', () => {
       expect(github.api_url).toBe('https://api.github.com');
     });
 
-    it('includes repo defaults', () => {
+    it('includes only essential repo defaults', () => {
       const config = getDefaultConfig();
       const defaults = config.repo?.defaults;
 
       expect(defaults?.default_branch).toBe('main');
-      expect(defaults?.protected_branches).toContain('main');
-      expect(defaults?.commit_format).toBe('faber');
-    });
-
-    it('includes branch naming configuration', () => {
-      const config = getDefaultConfig();
-      const naming = config.repo?.defaults?.branch_naming;
-
-      expect(naming?.pattern).toBe('{prefix}/{issue_id}-{slug}');
-      expect(naming?.allowed_prefixes).toContain('feat');
-      expect(naming?.allowed_prefixes).toContain('fix');
-    });
-
-    it('includes PR configuration', () => {
-      const config = getDefaultConfig();
-      const pr = config.repo?.defaults?.pr;
-
-      expect(pr?.template).toBe('standard');
-      expect(pr?.require_work_id).toBe(true);
-      expect(pr?.auto_link_issues).toBe(true);
-    });
-
-    it('includes CI polling configuration', () => {
-      const config = getDefaultConfig();
-      const ciPolling = config.repo?.defaults?.pr?.ci_polling;
-
-      expect(ciPolling?.enabled).toBe(true);
-      expect(ciPolling?.interval_seconds).toBe(60);
-      expect(ciPolling?.timeout_seconds).toBe(900);
+      expect(defaults?.protected_branches).toBeUndefined();
+      expect(defaults?.commit_format).toBeUndefined();
+      expect(defaults?.branch_naming).toBeUndefined();
     });
 
     it('includes merge configuration', () => {
@@ -206,6 +143,16 @@ describe('getDefaultConfig', () => {
 
       expect(merge?.strategy).toBe('squash');
       expect(merge?.delete_branch).toBe(true);
+    });
+
+    it('does not include unused PR settings', () => {
+      const config = getDefaultConfig();
+      const pr = config.repo?.defaults?.pr;
+
+      expect(pr?.template).toBeUndefined();
+      expect(pr?.require_work_id).toBeUndefined();
+      expect(pr?.auto_link_issues).toBeUndefined();
+      expect(pr?.ci_polling).toBeUndefined();
     });
   });
 
@@ -231,11 +178,10 @@ describe('getDefaultConfig', () => {
       expect(config.file?.handlers?.specs?.region).toBeUndefined();
     });
 
-    it('includes global settings', () => {
+    it('does not include unused global settings', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.global_settings?.retry_attempts).toBe(3);
-      expect(config.file?.global_settings?.timeout_seconds).toBe(300);
+      expect(config.file?.global_settings).toBeUndefined();
     });
   });
 
@@ -260,25 +206,6 @@ describe('getDefaultConfig', () => {
 
       expect(config.file?.handlers?.specs?.prefix).toBe('specs/');
       expect(config.file?.handlers?.logs?.prefix).toBe('logs/');
-    });
-
-    it('includes push configuration for S3', () => {
-      const config = getDefaultConfig({
-        fileHandler: 's3',
-        s3Bucket: 'my-bucket',
-      });
-
-      expect(config.file?.handlers?.specs?.push?.keep_local).toBe(true);
-      expect(config.file?.handlers?.logs?.push?.compress).toBe(true);
-    });
-
-    it('includes auth configuration for S3', () => {
-      const config = getDefaultConfig({
-        fileHandler: 's3',
-        s3Bucket: 'my-bucket',
-      });
-
-      expect(config.file?.handlers?.specs?.auth?.profile).toBe('default');
     });
 
     it('falls back to local when s3 specified without bucket', () => {
@@ -308,33 +235,12 @@ describe('getDefaultConfig', () => {
       expect(config.logs?.storage?.local_path).toBe('.fractary/logs');
     });
 
-    it('includes retention configuration', () => {
+    it('does not include unused retention or session logging settings', () => {
       const config = getDefaultConfig();
-      expect(config.logs?.retention?.default?.local_days).toBe(30);
-    });
 
-    it('includes session logging configuration', () => {
-      const config = getDefaultConfig();
-      const session = config.logs?.session_logging;
-
-      expect(session?.enabled).toBe(true);
-      expect(session?.format).toBe('markdown');
-      expect(session?.redact_sensitive).toBe(true);
-    });
-
-    it('includes cloud archive path for S3', () => {
-      const config = getDefaultConfig({
-        fileHandler: 's3',
-        s3Bucket: 'my-bucket',
-      });
-
-      expect(config.logs?.storage?.cloud_archive_path).toBeDefined();
-    });
-
-    it('omits cloud archive path for local', () => {
-      const config = getDefaultConfig({ fileHandler: 'local' });
-
-      expect(config.logs?.storage?.cloud_archive_path).toBeUndefined();
+      expect(config.logs?.retention).toBeUndefined();
+      expect(config.logs?.session_logging).toBeUndefined();
+      expect(config.logs?.custom_templates_path).toBeUndefined();
     });
   });
 
@@ -344,19 +250,20 @@ describe('getDefaultConfig', () => {
       expect(config.spec?.schema_version).toBe('1.0');
     });
 
-    it('includes naming configuration', () => {
+    it('includes storage paths', () => {
       const config = getDefaultConfig();
-      const naming = config.spec?.naming;
+      const storage = config.spec?.storage;
 
-      expect(naming?.issue_specs?.prefix).toBe('WORK');
-      expect(naming?.standalone_specs?.prefix).toBe('SPEC');
+      expect(storage?.local_path).toBe('.fractary/specs');
+      expect(storage?.archive_path).toBe('.fractary/specs/archive');
     });
 
-    it('includes archive configuration', () => {
+    it('does not include unused naming, archive, or integration settings', () => {
       const config = getDefaultConfig();
-      const archive = config.spec?.archive;
 
-      expect(archive?.strategy).toBe('lifecycle');
+      expect(config.spec?.naming).toBeUndefined();
+      expect(config.spec?.archive).toBeUndefined();
+      expect(config.spec?.integration).toBeUndefined();
     });
   });
 
