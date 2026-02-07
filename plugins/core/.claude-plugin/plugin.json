@@ -12,7 +12,7 @@
     "./commands/env-show.md"
   ],
   "agents": [
-    "./agents/config-initializer.md",
+    "./agents/config-creator.md",
     "./agents/config-updater.md",
     "./agents/env-switcher.md"
   ]

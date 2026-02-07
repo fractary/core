@@ -13,7 +13,7 @@ All plugins share a common configuration approach to ensure:
 ## Agent Naming Convention
 
 Configuration agents use noun forms of their corresponding command verbs:
-- `fractary-core:config-initializer` - Core plugin configuration (fresh setup)
+- `fractary-core:config-creator` - Core plugin configuration (fresh setup)
 - `fractary-core:config-updater` - Core plugin incremental updates
 - `fractary-core:env-switcher` - Environment switching
 - `fractary-faber:configurator` - FABER workflow configuration
@@ -25,7 +25,7 @@ The core agents were renamed from `configurator` to operation-specific noun-form
 
 | Old Name | New Name |
 |----------|----------|
-| `fractary-core:configurator` | `fractary-core:config-initializer` (fresh setup) |
+| `fractary-core:configurator` | `fractary-core:config-creator` (fresh setup) |
 | `fractary-core:configurator` | `fractary-core:config-updater` (incremental) |
 | `fractary-core:switch-env` | `fractary-core:env-switcher` |
 
@@ -215,7 +215,7 @@ If configuration write or validation fails:
 
 ## Cross-Reference
 
-- Core config-initializer: `core/plugins/core/agents/config-initializer.md`
+- Core config-creator: `core/plugins/core/agents/config-creator.md`
 - Core config-updater: `core/plugins/core/agents/config-updater.md`
 - Core env-switcher: `core/plugins/core/agents/env-switcher.md`
 - Core archived configurator: `core/plugins/core/archived/agents/configurator.md`
