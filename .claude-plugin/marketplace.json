@@ -83,7 +83,7 @@
           "./commands/worktree-create.md",
           "./commands/worktree-list.md",
           "./commands/worktree-remove.md",
-          "./commands/worktree-prune.md"
+          "./commands/worktree-cleanup.md"
         ],
         "agents":  [
           "./agents/pr-review-agent.md"
@@ -192,26 +192,27 @@
         "category": "development",
         "strict": true,
         "commands": [
-          "./commands/capture.md",
-          "./commands/stop.md",
-          "./commands/log.md",
+          "./commands/analyze.md",
           "./commands/archive.md",
           "./commands/audit.md",
+          "./commands/capture.md",
           "./commands/cleanup.md",
+          "./commands/delete.md",
+          "./commands/list.md",
+          "./commands/log.md",
+          "./commands/read.md",
           "./commands/search.md",
-          "./commands/analyze.md",
-          "./commands/read.md"
+          "./commands/stop.md",
+          "./commands/type-info.md",
+          "./commands/types.md",
+          "./commands/validate.md",
+          "./commands/write.md"
         ],
         "agents": [
           "./agents/logs-analyze.md",
-          "./agents/logs-archive.md",
           "./agents/logs-audit.md",
-          "./agents/logs-capture.md",
           "./agents/logs-cleanup.md",
-          "./agents/logs-log.md",
-          "./agents/logs-read.md",
-          "./agents/logs-search.md",
-          "./agents/logs-stop.md"
+          "./agents/logs-log.md"
         ]
       },
       {
@@ -269,16 +270,26 @@
         "category": "development",
         "strict": true,
         "commands": [
-          "./commands/create.md",
-          "./commands/refine.md",
-          "./commands/validate.md",
-          "./commands/archive.md"
+          "./commands/spec-archive.md",
+          "./commands/spec-create.md",
+          "./commands/spec-delete.md",
+          "./commands/spec-get.md",
+          "./commands/spec-list.md",
+          "./commands/spec-refine.md",
+          "./commands/spec-update.md",
+          "./commands/spec-validate.md",
+          "./commands/template-list.md"
         ],
         "agents": [
-          "./agents/spec-archive.md",
-          "./agents/spec-create.md",
-          "./agents/spec-refine.md",
-          "./agents/spec-validate.md"
+          "./agents/spec-archiver.md",
+          "./agents/spec-creator.md",
+          "./agents/spec-deleter.md",
+          "./agents/spec-getter.md",
+          "./agents/spec-lister.md",
+          "./agents/spec-refiner.md",
+          "./agents/spec-updater.md",
+          "./agents/spec-validator.md",
+          "./agents/template-lister.md"
         ]
       },
       {
@@ -305,18 +316,28 @@
         "category": "development",
         "strict": true,
         "commands": [
-          "./commands/write.md",
-          "./commands/validate.md",
-          "./commands/list.md",
+          "./commands/archive.md",
           "./commands/audit.md",
-          "./commands/check-consistency.md"
+          "./commands/check-consistency.md",
+          "./commands/doc-create.md",
+          "./commands/doc-delete.md",
+          "./commands/doc-get.md",
+          "./commands/doc-list.md",
+          "./commands/doc-search.md",
+          "./commands/doc-update.md",
+          "./commands/refine.md",
+          "./commands/type-info.md",
+          "./commands/type-list.md",
+          "./commands/validate.md",
+          "./commands/write.md"
         ],
         "agents": [
-          "./agents/docs-audit.md",
-          "./agents/docs-check-consistency.md",
-          "./agents/docs-list.md",
-          "./agents/docs-validate.md",
-          "./agents/docs-write.md"
+          "./agents/docs-archiver.md",
+          "./agents/docs-auditor.md",
+          "./agents/docs-consistency-checker.md",
+          "./agents/docs-refiner.md",
+          "./agents/docs-validator.md",
+          "./agents/docs-writer.md"
         ]
       }
     ]
