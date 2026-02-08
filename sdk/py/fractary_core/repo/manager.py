@@ -77,6 +77,17 @@ class RepoManager:
         return {
             "platform": os.getenv("FABER_REPO_PLATFORM", "github"),
             "default_branch": "main",
+            "environments": {
+                "production": {
+                    "branch": "main",
+                    "protected": True,
+                },
+                "test": {
+                    "branch": "test",
+                    "protected": False,
+                },
+            },
+            "default_environment": "production",
             "branch_prefixes": {
                 "feature": "feat",
                 "bug": "fix",
@@ -106,7 +117,21 @@ class RepoManager:
         return result.stdout.strip()
 
     def get_default_branch(self) -> str:
-        """Get the default branch name (main or master)."""
+        """Get the default branch name.
+
+        Resolution order:
+        1. If environments config exists, resolve via default_environment
+        2. Try remote HEAD symbolic ref
+        3. Fall back to config default_branch or 'main'
+        """
+        # Resolve from environments config if available
+        environments = self.config.get("environments")
+        default_env = self.config.get("default_environment")
+        if environments and default_env and default_env in environments:
+            env_config = environments[default_env]
+            if isinstance(env_config, dict) and env_config.get("branch"):
+                return env_config["branch"]
+
         # Try to get from remote
         result = self._run_git(
             ["symbolic-ref", "refs/remotes/origin/HEAD", "--short"],
@@ -126,6 +151,60 @@ class RepoManager:
             return "master"
 
         return "main"
+
+    def get_branch_for_environment(self, env_id: str) -> Optional[str]:
+        """Get the branch name for a specific environment.
+
+        Args:
+            env_id: Environment identifier (e.g., "production", "test", "staging")
+
+        Returns:
+            Branch name or None if environment is not configured
+        """
+        environments = self.config.get("environments", {})
+        env_config = environments.get(env_id)
+        if isinstance(env_config, dict):
+            return env_config.get("branch")
+        return None
+
+    def get_environment_for_branch(self, branch_name: str) -> Optional[str]:
+        """Get the environment ID for a given branch name.
+
+        Args:
+            branch_name: The branch name to look up
+
+        Returns:
+            Environment ID (e.g., "production") or None
+        """
+        environments = self.config.get("environments", {})
+        for env_id, env_config in environments.items():
+            if isinstance(env_config, dict) and env_config.get("branch") == branch_name:
+                return env_id
+        return None
+
+    def is_protected_branch(self, branch_name: str) -> bool:
+        """Check if a branch is protected.
+
+        Uses environment configuration if available, otherwise falls back
+        to checking common protected branch names.
+
+        Args:
+            branch_name: The branch name to check
+
+        Returns:
+            True if the branch is protected
+        """
+        environments = self.config.get("environments")
+        if environments:
+            for env_config in environments.values():
+                if (isinstance(env_config, dict)
+                        and env_config.get("branch") == branch_name
+                        and env_config.get("protected") is True):
+                    return True
+            return False
+
+        # Fallback: common protected branch names
+        return branch_name in ("main", "master", "develop", "production", "staging")
 
     def get_branch(self, name: str) -> Branch:
         """Get branch details."""

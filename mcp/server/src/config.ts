@@ -19,6 +19,13 @@ export interface PrMergeDefaults {
   deleteBranch?: boolean;
 }
 
+/** Environment-to-branch mapping for MCP config */
+export interface McpEnvironmentBranch {
+  branch: string;
+  protected?: boolean;
+  deployTarget?: string;
+}
+
 export interface Config {
   work?: {
     platform: 'github' | 'jira' | 'linear';
@@ -32,7 +39,10 @@ export interface Config {
     owner?: string;
     repo?: string;
     token?: string;
+    /** @deprecated Use environments + defaultEnvironment instead */
     defaultBranch?: string;
+    environments?: Record<string, McpEnvironmentBranch>;
+    defaultEnvironment?: string;
     prMergeDefaults?: PrMergeDefaults;
   };
   spec?: {
@@ -148,12 +158,44 @@ function convertToMcpConfig(sdkConfig: LoadedConfig): Config {
     const activeHandler = sdkConfig.repo.active_handler as 'github' | 'gitlab' | 'bitbucket';
     const handlerConfig = sdkConfig.repo.handlers?.[activeHandler] || {};
     const prMergeConfig = sdkConfig.repo.defaults?.pr?.merge;
+    // Convert environments from snake_case config to camelCase MCP format
+    const sdkEnvironments = sdkConfig.repo.defaults?.environments;
+    let mcpEnvironments: Record<string, McpEnvironmentBranch> | undefined;
+    if (sdkEnvironments && typeof sdkEnvironments === 'object') {
+      mcpEnvironments = {};
+      for (const [envId, envConfig] of Object.entries(sdkEnvironments)) {
+        if (envConfig && typeof envConfig === 'object' && 'branch' in envConfig) {
+          const env = envConfig as { branch: string; protected?: boolean; deploy_target?: string };
+          mcpEnvironments[envId] = {
+            branch: env.branch,
+            protected: env.protected,
+            deployTarget: env.deploy_target,
+          };
+        }
+      }
+      if (Object.keys(mcpEnvironments).length === 0) {
+        mcpEnvironments = undefined;
+      }
+    }
+
+    // Resolve defaultBranch from environments for backwards compatibility
+    const defaultEnv = sdkConfig.repo.defaults?.default_environment;
+    let resolvedDefaultBranch = sdkConfig.repo.defaults?.default_branch;
+    if (sdkEnvironments && defaultEnv && sdkEnvironments[defaultEnv]) {
+      const env = sdkEnvironments[defaultEnv] as { branch?: string };
+      if (env.branch) {
+        resolvedDefaultBranch = env.branch;
+      }
+    }
+
     config.repo = {
       platform: activeHandler,
       owner: handlerConfig.owner,
       repo: handlerConfig.repo,
       token: handlerConfig.token,
-      defaultBranch: sdkConfig.repo.defaults?.default_branch,
+      defaultBranch: resolvedDefaultBranch,
+      environments: mcpEnvironments,
+      defaultEnvironment: defaultEnv,
       prMergeDefaults: prMergeConfig ? {
         strategy: prMergeConfig.strategy,
         deleteBranch: prMergeConfig.delete_branch,

@@ -67,7 +67,7 @@ export class RepoManager {
   constructor(config?: RepoConfig, cwd?: string) {
     this.cwd = cwd || process.cwd();
     this.config = config || loadRepoConfig() || { platform: 'github' };
-    this.git = new Git(this.cwd);
+    this.git = new Git(this.cwd, this.config.environments, this.config.defaultEnvironment);
     this.provider = createProvider(this.config);
   }
 
@@ -115,6 +115,34 @@ export class RepoManager {
    */
   getDiff(options?: DiffOptions): string {
     return this.git.getDiff(options);
+  }
+
+  /**
+   * Get the branch name for a specific environment
+   *
+   * @param envId Environment identifier (e.g., "production", "test", "staging")
+   * @returns Branch name or undefined if environment is not configured
+   */
+  getBranchForEnvironment(envId: string): string | undefined {
+    return this.git.getBranchForEnvironment(envId);
+  }
+
+  /**
+   * Get the environment ID for a given branch name
+   *
+   * @param branchName The branch name to look up
+   * @returns Environment ID (e.g., "production") or undefined
+   */
+  getEnvironmentForBranch(branchName: string): string | undefined {
+    return this.git.getEnvironmentForBranch(branchName);
+  }
+
+  /**
+   * Check if the current branch is an environment branch (production, test, etc.)
+   */
+  isEnvironmentBranch(branchName?: string): boolean {
+    const name = branchName || this.getCurrentBranch();
+    return this.getEnvironmentForBranch(name) !== undefined;
   }
 
   // =========================================================================

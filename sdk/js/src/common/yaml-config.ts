@@ -72,10 +72,29 @@ export interface PRDefaults {
 }
 
 /**
+ * Environment branch configuration
+ *
+ * Maps an environment to its corresponding branch and protection settings.
+ */
+export interface EnvironmentBranch {
+  /** The git branch name for this environment */
+  branch: string;
+  /** Whether the branch is protected (requires approval for direct push) */
+  protected?: boolean;
+  /** Optional CI/CD deploy target name */
+  deploy_target?: string;
+}
+
+/**
  * Repository defaults configuration
  */
 export interface RepoDefaults {
+  /** @deprecated Use environments + default_environment instead */
   default_branch?: string;
+  /** Map of environment IDs to their branch configuration */
+  environments?: Record<string, EnvironmentBranch>;
+  /** Which environment is the default context (e.g., "production") */
+  default_environment?: string;
   protected_branches?: string[];
   branch_naming?: Record<string, any>;
   commit_format?: string;

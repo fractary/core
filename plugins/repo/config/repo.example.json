@@ -40,16 +40,27 @@
   },
 
   "defaults": {
-    "default_branch": "main",
-    "$comment_default_branch": "Default base branch for new feature branches",
-
-    "protected_branches": [
-      "main",
-      "master",
-      "production",
-      "staging"
-    ],
-    "$comment_protected": "Branches that require extra protection (no force push, merge warnings)",
+    "environments": {
+      "production": {
+        "branch": "main",
+        "protected": true,
+        "$comment_protected": "Require approval for direct push to production branch"
+      },
+      "test": {
+        "branch": "test",
+        "protected": false,
+        "$comment_test": "Test/QA environment branch - no push protection by default"
+      },
+      "staging": {
+        "branch": "staging",
+        "protected": true,
+        "deploy_target": "staging",
+        "$comment_staging": "Optional staging environment - uncomment to enable"
+      }
+    },
+    "$comment_environments": "Maps environment IDs to their branch and protection settings. Protection is derived from these entries.",
+    "default_environment": "production",
+    "$comment_default_environment": "Which environment is the default context. The production branch is resolved from this.",
 
     "branch_naming": {
       "pattern": "{prefix}/{issue_id}-{slug}",
