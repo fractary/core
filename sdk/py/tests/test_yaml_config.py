@@ -412,14 +412,20 @@ repo:
 logs:
   schema_version: "2.0"
   storage:
-    local_path: /logs
+    file_handlers:
+      - name: default
+        write: logs-write
+        archive: logs-archive
 file:
   schema_version: "1.0"
   active_handler: local
 spec:
   schema_version: "1.0"
   storage:
-    local_path: /specs
+    file_handlers:
+      - name: default
+        write: specs-write
+        archive: specs-archive
 docs:
   schema_version: "1.1"
   doc_types:
