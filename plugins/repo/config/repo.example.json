@@ -9,6 +9,10 @@
       "$comment": "Active source control platform: github|gitlab|bitbucket",
 
       "github": {
+        "owner": "your-org",
+        "$comment_owner": "GitHub organization or user that owns the repository",
+        "repo": "your-repo",
+        "$comment_repo": "Repository name",
         "token": "$GITHUB_TOKEN",
         "$comment": "GitHub token from environment variable. Generate at: https://github.com/settings/tokens",
         "$comment_auth": "Token is required for API operations (gh CLI). For git operations, you can use either HTTPS+token or SSH keys.",
