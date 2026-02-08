@@ -160,22 +160,30 @@ describe('getDefaultConfig', () => {
     it('uses local storage by default', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.handlers?.specs?.type).toBe('local');
-      expect(config.file?.handlers?.logs?.type).toBe('local');
+      expect(config.file?.handlers?.['specs-write']?.type).toBe('local');
+      expect(config.file?.handlers?.['specs-archive']?.type).toBe('local');
+      expect(config.file?.handlers?.['logs-write']?.type).toBe('local');
+      expect(config.file?.handlers?.['logs-archive']?.type).toBe('local');
+      expect(config.file?.handlers?.['docs-write']?.type).toBe('local');
+      expect(config.file?.handlers?.['docs-archive']?.type).toBe('local');
     });
 
     it('configures local base paths', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.handlers?.specs?.local?.base_path).toBe('.fractary/specs');
-      expect(config.file?.handlers?.logs?.local?.base_path).toBe('.fractary/logs');
+      expect(config.file?.handlers?.['specs-write']?.local?.base_path).toBe('.fractary/specs');
+      expect(config.file?.handlers?.['specs-archive']?.local?.base_path).toBe('.fractary/specs/archive');
+      expect(config.file?.handlers?.['logs-write']?.local?.base_path).toBe('.fractary/logs');
+      expect(config.file?.handlers?.['logs-archive']?.local?.base_path).toBe('.fractary/logs/archive');
+      expect(config.file?.handlers?.['docs-write']?.local?.base_path).toBe('.fractary/docs');
+      expect(config.file?.handlers?.['docs-archive']?.local?.base_path).toBe('.fractary/docs/archive');
     });
 
     it('does not include S3-specific fields for local', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.handlers?.specs?.bucket).toBeUndefined();
-      expect(config.file?.handlers?.specs?.region).toBeUndefined();
+      expect(config.file?.handlers?.['specs-write']?.bucket).toBeUndefined();
+      expect(config.file?.handlers?.['specs-write']?.region).toBeUndefined();
     });
 
     it('does not include unused global settings', () => {
@@ -193,9 +201,9 @@ describe('getDefaultConfig', () => {
         awsRegion: 'us-west-2',
       });
 
-      expect(config.file?.handlers?.specs?.type).toBe('s3');
-      expect(config.file?.handlers?.specs?.bucket).toBe('my-bucket');
-      expect(config.file?.handlers?.specs?.region).toBe('us-west-2');
+      expect(config.file?.handlers?.['specs-write']?.type).toBe('s3');
+      expect(config.file?.handlers?.['specs-write']?.bucket).toBe('my-bucket');
+      expect(config.file?.handlers?.['specs-write']?.region).toBe('us-west-2');
     });
 
     it('includes S3 prefixes', () => {
@@ -204,14 +212,16 @@ describe('getDefaultConfig', () => {
         s3Bucket: 'my-bucket',
       });
 
-      expect(config.file?.handlers?.specs?.prefix).toBe('specs/');
-      expect(config.file?.handlers?.logs?.prefix).toBe('logs/');
+      expect(config.file?.handlers?.['specs-write']?.prefix).toBe('specs/');
+      expect(config.file?.handlers?.['specs-archive']?.prefix).toBe('specs/archive/');
+      expect(config.file?.handlers?.['logs-write']?.prefix).toBe('logs/');
+      expect(config.file?.handlers?.['logs-archive']?.prefix).toBe('logs/archive/');
     });
 
     it('falls back to local when s3 specified without bucket', () => {
       const config = getDefaultConfig({ fileHandler: 's3' });
 
-      expect(config.file?.handlers?.specs?.type).toBe('local');
+      expect(config.file?.handlers?.['specs-write']?.type).toBe('local');
     });
 
     it('uses default region when not specified', () => {
@@ -220,7 +230,7 @@ describe('getDefaultConfig', () => {
         s3Bucket: 'my-bucket',
       });
 
-      expect(config.file?.handlers?.specs?.region).toBe('us-east-1');
+      expect(config.file?.handlers?.['specs-write']?.region).toBe('us-east-1');
     });
   });
 
@@ -230,9 +240,13 @@ describe('getDefaultConfig', () => {
       expect(config.logs?.schema_version).toBe('2.0');
     });
 
-    it('includes storage paths', () => {
+    it('includes default file handler entries', () => {
       const config = getDefaultConfig();
-      expect(config.logs?.storage?.local_path).toBe('.fractary/logs');
+      const handlers = config.logs?.storage?.file_handlers;
+      expect(handlers).toHaveLength(1);
+      expect(handlers?.[0]?.name).toBe('default');
+      expect(handlers?.[0]?.write).toBe('logs-write');
+      expect(handlers?.[0]?.archive).toBe('logs-archive');
     });
 
     it('does not include unused retention or session logging settings', () => {
@@ -250,12 +264,14 @@ describe('getDefaultConfig', () => {
       expect(config.spec?.schema_version).toBe('1.0');
     });
 
-    it('includes storage paths', () => {
+    it('includes default file handler entries', () => {
       const config = getDefaultConfig();
-      const storage = config.spec?.storage;
+      const handlers = config.spec?.storage?.file_handlers;
 
-      expect(storage?.local_path).toBe('.fractary/specs');
-      expect(storage?.archive_path).toBe('.fractary/specs/archive');
+      expect(handlers).toHaveLength(1);
+      expect(handlers?.[0]?.name).toBe('default');
+      expect(handlers?.[0]?.write).toBe('specs-write');
+      expect(handlers?.[0]?.archive).toBe('specs-archive');
     });
 
     it('does not include unused naming, archive, or integration settings', () => {
@@ -276,6 +292,16 @@ describe('getDefaultConfig', () => {
     it('includes custom templates path', () => {
       const config = getDefaultConfig();
       expect(config.docs?.custom_templates_path).toBe('.fractary/docs/templates/manifest.yaml');
+    });
+
+    it('includes default file handler entries', () => {
+      const config = getDefaultConfig();
+      const handlers = config.docs?.storage?.file_handlers;
+
+      expect(handlers).toHaveLength(1);
+      expect(handlers?.[0]?.name).toBe('default');
+      expect(handlers?.[0]?.write).toBe('docs-write');
+      expect(handlers?.[0]?.archive).toBe('docs-archive');
     });
   });
 });

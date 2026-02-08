@@ -78,12 +78,37 @@ export const RepoConfigSchema = z.object({
 });
 
 /**
+ * Plugin file handler entry schema
+ *
+ * Validates a single entry in the file_handlers list used by
+ * spec, logs, and docs plugins. Each entry maps a name to
+ * write and archive handler references.
+ */
+export const PluginFileHandlerSchema = z.object({
+  name: z.string().min(1, 'file handler entry name is required'),
+  write: z.string().min(1, 'write handler reference is required'),
+  archive: z.string().min(1, 'archive handler reference is required'),
+});
+
+/**
+ * Plugin storage schema
+ *
+ * Shared storage schema for spec, logs, and docs plugins.
+ * Contains a list of file handler mappings where the 'default'
+ * entry acts as a fallback and additional entries provide
+ * template-specific overrides.
+ */
+export const PluginStorageSchema = z.object({
+  file_handlers: z.array(PluginFileHandlerSchema).min(1, 'At least one file handler entry is required'),
+});
+
+/**
  * Logs configuration schema
  */
 export const LogsConfigSchema = z.object({
   schema_version: z.string(),
   custom_templates_path: z.string().optional(),
-  storage: z.record(z.any()).optional(),
+  storage: PluginStorageSchema.optional(),
   retention: z.record(z.any()).optional(),
   session_logging: z.record(z.any()).optional(),
   auto_backup: z.record(z.any()).optional(),
@@ -130,7 +155,7 @@ export const FileConfigSchema = z.object({
  */
 export const SpecConfigSchema = z.object({
   schema_version: z.string(),
-  storage: z.record(z.any()).optional(),
+  storage: PluginStorageSchema.optional(),
   naming: z.record(z.any()).optional(),
   archive: z.record(z.any()).optional(),
   integration: z.record(z.any()).optional(),
@@ -143,6 +168,7 @@ export const SpecConfigSchema = z.object({
 export const DocsConfigSchema = z.object({
   schema_version: z.string(),
   custom_templates_path: z.string().optional(),
+  storage: PluginStorageSchema.optional(),
   hooks: z.record(z.any()).optional(),
   doc_types: z.record(z.any()).optional(),
   output_paths: z.record(z.any()).optional(),

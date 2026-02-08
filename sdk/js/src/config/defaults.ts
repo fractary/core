@@ -95,13 +95,19 @@ function getDefaultLogsConfig(): LogsConfig {
   return {
     schema_version: '2.0',
     storage: {
-      local_path: '.fractary/logs',
+      file_handlers: [
+        { name: 'default', write: 'logs-write', archive: 'logs-archive' },
+      ],
     },
   };
 }
 
 /**
  * Get default file storage configuration
+ *
+ * Generates separate write and archive handlers for each plugin (specs, logs, docs).
+ * When using S3, the write handler stores to S3 directly while keeping a local
+ * fallback path, and the archive handler uses a separate S3 prefix.
  */
 function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
   const { fileHandler = 'local', s3Bucket, awsRegion = 'us-east-1' } = options;
@@ -110,7 +116,7 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
     return {
       schema_version: '2.0',
       handlers: {
-        specs: {
+        'specs-write': {
           type: 's3',
           bucket: s3Bucket,
           prefix: 'specs/',
@@ -119,13 +125,49 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
             base_path: '.fractary/specs',
           },
         },
-        logs: {
+        'specs-archive': {
+          type: 's3',
+          bucket: s3Bucket,
+          prefix: 'specs/archive/',
+          region: awsRegion,
+          local: {
+            base_path: '.fractary/specs/archive',
+          },
+        },
+        'logs-write': {
           type: 's3',
           bucket: s3Bucket,
           prefix: 'logs/',
           region: awsRegion,
           local: {
             base_path: '.fractary/logs',
+          },
+        },
+        'logs-archive': {
+          type: 's3',
+          bucket: s3Bucket,
+          prefix: 'logs/archive/',
+          region: awsRegion,
+          local: {
+            base_path: '.fractary/logs/archive',
+          },
+        },
+        'docs-write': {
+          type: 's3',
+          bucket: s3Bucket,
+          prefix: 'docs/',
+          region: awsRegion,
+          local: {
+            base_path: '.fractary/docs',
+          },
+        },
+        'docs-archive': {
+          type: 's3',
+          bucket: s3Bucket,
+          prefix: 'docs/archive/',
+          region: awsRegion,
+          local: {
+            base_path: '.fractary/docs/archive',
           },
         },
       },
@@ -135,16 +177,40 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
   return {
     schema_version: '2.0',
     handlers: {
-      specs: {
+      'specs-write': {
         type: 'local',
         local: {
           base_path: '.fractary/specs',
         },
       },
-      logs: {
+      'specs-archive': {
+        type: 'local',
+        local: {
+          base_path: '.fractary/specs/archive',
+        },
+      },
+      'logs-write': {
         type: 'local',
         local: {
           base_path: '.fractary/logs',
+        },
+      },
+      'logs-archive': {
+        type: 'local',
+        local: {
+          base_path: '.fractary/logs/archive',
+        },
+      },
+      'docs-write': {
+        type: 'local',
+        local: {
+          base_path: '.fractary/docs',
+        },
+      },
+      'docs-archive': {
+        type: 'local',
+        local: {
+          base_path: '.fractary/docs/archive',
         },
       },
     },
@@ -158,9 +224,9 @@ function getDefaultSpecConfig(): SpecConfig {
   return {
     schema_version: '1.0',
     storage: {
-      local_path: '.fractary/specs',
-      archive_path: '.fractary/specs/archive',
-      file_handler: 'specs',
+      file_handlers: [
+        { name: 'default', write: 'specs-write', archive: 'specs-archive' },
+      ],
     },
   };
 }
@@ -172,6 +238,11 @@ function getDefaultDocsConfig(): DocsConfig {
   return {
     schema_version: '1.1',
     custom_templates_path: '.fractary/docs/templates/manifest.yaml',
+    storage: {
+      file_handlers: [
+        { name: 'default', write: 'docs-write', archive: 'docs-archive' },
+      ],
+    },
   };
 }
 

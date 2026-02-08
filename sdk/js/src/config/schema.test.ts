@@ -378,7 +378,11 @@ describe('LogsConfigSchema', () => {
     const logsConfig = {
       schema_version: '2.0',
       custom_templates_path: '.fractary/logs/templates/manifest.yaml',
-      storage: { local_path: '.fractary/logs' },
+      storage: {
+        file_handlers: [
+          { name: 'default', write: 'logs-write', archive: 'logs-archive' },
+        ],
+      },
       retention: { default: { local_days: 30 } },
       session_logging: { enabled: true },
     };
@@ -469,7 +473,11 @@ describe('SpecConfigSchema', () => {
   it('allows optional fields', () => {
     const specConfig = {
       schema_version: '1.0',
-      storage: { local_path: '.fractary/specs' },
+      storage: {
+        file_handlers: [
+          { name: 'default', write: 'specs-write', archive: 'specs-archive' },
+        ],
+      },
       naming: { issue_specs: { prefix: 'WORK' } },
       archive: { strategy: 'lifecycle' },
     };

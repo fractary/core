@@ -110,7 +110,7 @@ export interface LogsConfig {
    * Falls back to core templates if not specified
    */
   custom_templates_path?: string;
-  storage?: Record<string, any>;
+  storage?: PluginStorage;
   retention?: Record<string, any>;
   session_logging?: Record<string, any>;
   auto_backup?: Record<string, any>;
@@ -119,6 +119,34 @@ export interface LogsConfig {
   search?: Record<string, any>;
   integration?: Record<string, any>;
   docs_integration?: Record<string, any>;
+}
+
+/**
+ * Plugin file handler entry
+ *
+ * Maps a name (e.g. 'default' or a template name) to write and archive
+ * file handler references. The referenced handlers are defined in the
+ * file.handlers section and own the storage path/type configuration.
+ */
+export interface PluginFileHandler {
+  /** Identifier: 'default' for the fallback, or a template/type name for overrides */
+  name: string;
+  /** Named file handler for write operations (references a key in file.handlers) */
+  write: string;
+  /** Named file handler for archive operations (references a key in file.handlers) */
+  archive: string;
+}
+
+/**
+ * Plugin storage configuration
+ *
+ * Shared storage shape used by spec, logs, and docs plugins.
+ * Provides a list of file handler mappings where the first entry named
+ * 'default' acts as the fallback and additional entries can override
+ * handlers for specific templates or types.
+ */
+export interface PluginStorage {
+  file_handlers: PluginFileHandler[];
 }
 
 /**
@@ -157,7 +185,7 @@ export interface FileConfig {
  */
 export interface SpecConfig {
   schema_version: string;
-  storage?: Record<string, any>;
+  storage?: PluginStorage;
   naming?: Record<string, any>;
   archive?: Record<string, any>;
   integration?: Record<string, any>;
@@ -174,6 +202,7 @@ export interface DocsConfig {
    * Falls back to core templates if not specified
    */
   custom_templates_path?: string;
+  storage?: PluginStorage;
   hooks?: Record<string, any>;
   doc_types?: Record<string, any>;
   output_paths?: Record<string, any>;
