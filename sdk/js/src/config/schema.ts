@@ -32,10 +32,34 @@ export const PRDefaultsSchema = z.object({
 }).optional();
 
 /**
+ * Environment branch configuration schema
+ *
+ * Maps an environment (e.g., production, test, staging) to a branch
+ * and optional metadata like protection status and deploy target.
+ */
+export const EnvironmentBranchSchema = z.object({
+  branch: z.string().min(1, 'branch name is required'),
+  protected: z.boolean().optional(),
+  deploy_target: z.string().optional(),
+});
+
+/**
+ * Environments map schema
+ *
+ * Maps environment IDs (e.g., "production", "test", "staging") to their
+ * branch configuration. At least one environment (production) should exist.
+ */
+export const EnvironmentsSchema = z.record(z.string(), EnvironmentBranchSchema).optional();
+
+/**
  * Repository defaults schema
  */
 export const RepoDefaultsSchema = z.object({
+  // Legacy field - still supported for backwards compatibility
   default_branch: z.string().optional(),
+  // New environment-to-branch mapping
+  environments: EnvironmentsSchema,
+  default_environment: z.string().optional(),
   protected_branches: z.array(z.string()).optional(),
   branch_naming: z.record(z.any()).optional(),
   commit_format: z.string().optional(),

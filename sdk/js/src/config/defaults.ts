@@ -77,7 +77,17 @@ function getDefaultRepoConfig(options: DefaultConfigOptions): RepoConfig {
       },
     },
     defaults: {
-      default_branch: 'main',
+      environments: {
+        production: {
+          branch: 'main',
+          protected: true,
+        },
+        test: {
+          branch: 'test',
+          protected: false,
+        },
+      },
+      default_environment: 'production',
       pr: {
         merge: {
           strategy: 'squash',

@@ -12,6 +12,7 @@ import {
   Branch,
   Tag,
   Worktree,
+  EnvironmentBranchConfig,
 } from '../common/types';
 import {
   CommandExecutionError,
@@ -44,9 +45,13 @@ function git(args: string, cwd?: string): string {
  */
 export class Git {
   private cwd: string;
+  private environments?: Record<string, EnvironmentBranchConfig>;
+  private defaultEnvironment?: string;
 
-  constructor(cwd?: string) {
+  constructor(cwd?: string, environments?: Record<string, EnvironmentBranchConfig>, defaultEnvironment?: string) {
     this.cwd = cwd || findProjectRoot();
+    this.environments = environments;
+    this.defaultEnvironment = defaultEnvironment;
   }
 
   /**
@@ -226,8 +231,21 @@ export class Git {
 
   /**
    * Get default branch name
+   *
+   * Resolution order:
+   * 1. If environments config exists, resolve via defaultEnvironment
+   * 2. Try remote HEAD symbolic ref
+   * 3. Fall back to 'main'
    */
   getDefaultBranch(): string {
+    // Resolve from environments config if available
+    if (this.environments && this.defaultEnvironment) {
+      const env = this.environments[this.defaultEnvironment];
+      if (env?.branch) {
+        return env.branch;
+      }
+    }
+
     try {
       const result = git('symbolic-ref refs/remotes/origin/HEAD', this.cwd);
       return result.replace('refs/remotes/origin/', '');
@@ -237,9 +255,45 @@ export class Git {
   }
 
   /**
-   * Check if branch is protected (simple heuristic)
+   * Get the branch name for a specific environment
+   *
+   * @param envId Environment identifier (e.g., "production", "test", "staging")
+   * @returns Branch name or undefined if environment is not configured
+   */
+  getBranchForEnvironment(envId: string): string | undefined {
+    return this.environments?.[envId]?.branch;
+  }
+
+  /**
+   * Get the environment ID for a given branch name
+   *
+   * @param branchName The branch name to look up
+   * @returns Environment ID or undefined if branch is not mapped to any environment
+   */
+  getEnvironmentForBranch(branchName: string): string | undefined {
+    if (!this.environments) return undefined;
+    for (const [envId, config] of Object.entries(this.environments)) {
+      if (config.branch === branchName) {
+        return envId;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Check if branch is protected
+   *
+   * Uses environment configuration if available, otherwise falls back
+   * to a hardcoded list of common protected branch names.
    */
   isProtectedBranch(name: string): boolean {
+    // If environments are configured, derive protection from config
+    if (this.environments) {
+      return Object.values(this.environments)
+        .some(env => env.branch === name && env.protected === true);
+    }
+
+    // Fallback: hardcoded common protected branch names
     const protectedNames = ['main', 'master', 'develop', 'production', 'staging'];
     return protectedNames.includes(name);
   }

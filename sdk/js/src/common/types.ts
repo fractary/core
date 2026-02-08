@@ -153,11 +153,23 @@ export type FaberContext = 'frame' | 'architect' | 'build' | 'evaluate' | 'relea
 
 export type RepoPlatform = 'github' | 'gitlab' | 'bitbucket';
 
+/** Runtime environment-to-branch mapping */
+export interface EnvironmentBranchConfig {
+  branch: string;
+  protected?: boolean;
+  deployTarget?: string;
+}
+
 export interface RepoConfig {
   platform: RepoPlatform;
   owner?: string;
   repo?: string;
+  /** @deprecated Use environments + defaultEnvironment instead */
   defaultBranch?: string;
+  /** Map of environment IDs to their branch configuration */
+  environments?: Record<string, EnvironmentBranchConfig>;
+  /** Which environment is the default context (e.g., "production") */
+  defaultEnvironment?: string;
   token?: string;
   branchPrefix?: BranchPrefixConfig;
   branchPrefixes?: BranchPrefixConfig;
