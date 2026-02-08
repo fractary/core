@@ -9,7 +9,7 @@
 import { WorkManager } from './work';
 import { RepoManager } from './repo';
 import { loadConfig, LoadedConfig } from './config/loader';
-import type { WorkConfig, RepoConfig } from './common/types';
+import type { WorkConfig, RepoConfig, EnvironmentBranchConfig } from './common/types';
 import { ConfigurationError } from './common/errors';
 
 /** Regex pattern for valid GitHub owner/repo format */
@@ -132,11 +132,40 @@ function buildRepoConfig(config: LoadedConfig, token?: string): RepoConfig {
     [owner, repo] = parseProject(project);
   }
 
+  // Convert environments from snake_case config to camelCase runtime format
+  let environments: Record<string, EnvironmentBranchConfig> | undefined;
+  if (defaults.environments && typeof defaults.environments === 'object') {
+    environments = {};
+    for (const [envId, envConfig] of Object.entries(defaults.environments)) {
+      if (envConfig && typeof envConfig === 'object' && 'branch' in envConfig) {
+        const env = envConfig as { branch: string; protected?: boolean; deploy_target?: string };
+        environments[envId] = {
+          branch: env.branch,
+          protected: env.protected,
+          deployTarget: env.deploy_target,
+        };
+      }
+    }
+    if (Object.keys(environments).length === 0) {
+      environments = undefined;
+    }
+  }
+
+  const defaultEnvironment = defaults.default_environment as string | undefined;
+
+  // Resolve defaultBranch: environments config takes priority, then legacy fields
+  let defaultBranch = defaults.default_branch || handlerConfig.default_branch;
+  if (environments && defaultEnvironment && environments[defaultEnvironment]?.branch) {
+    defaultBranch = environments[defaultEnvironment].branch;
+  }
+
   return {
     platform,
     owner,
     repo,
-    defaultBranch: defaults.default_branch || handlerConfig.default_branch,
+    defaultBranch,
+    environments,
+    defaultEnvironment,
     token: token || handlerConfig.token || config.github?.token,
     branchPrefixes: defaults.branch_naming?.prefixes,
   };
