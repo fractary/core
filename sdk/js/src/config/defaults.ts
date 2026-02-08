@@ -66,12 +66,14 @@ function getDefaultWorkConfig(options: DefaultConfigOptions): WorkConfig {
  * Get default repository configuration for a platform
  */
 function getDefaultRepoConfig(options: DefaultConfigOptions): RepoConfig {
-  const { repoPlatform = 'github' } = options;
+  const { repoPlatform = 'github', owner = 'your-org', repo = 'your-repo' } = options;
 
   return {
     active_handler: repoPlatform,
     handlers: {
       [repoPlatform]: {
+        owner,
+        repo,
         token: '${GITHUB_TOKEN}',
         api_url: 'https://api.github.com',
       },
