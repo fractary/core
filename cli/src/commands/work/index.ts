@@ -25,6 +25,7 @@ export function createWorkCommand(): Command {
   // Issue operations (flat with dashes)
   work.addCommand(createIssueFetchCommand());
   work.addCommand(createIssueCreateCommand());
+  work.addCommand(createIssueCreateBulkCommand());
   work.addCommand(createIssueUpdateCommand());
   work.addCommand(createIssueCloseCommand());
   work.addCommand(createIssueReopenCommand());
@@ -52,9 +53,11 @@ export function createWorkCommand(): Command {
 function createIssueFetchCommand(): Command {
   return new Command('issue-fetch')
     .description('Fetch a work item by ID')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .option('--json', 'Output as JSON')
     .option('--verbose', 'Show additional details')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -94,6 +97,7 @@ function createIssueCreateCommand(): Command {
     .option('--labels <labels>', 'Comma-separated labels')
     .option('--assignees <assignees>', 'Comma-separated assignees')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (options) => {
       try {
         const workManager = await getWorkManager();
@@ -115,14 +119,131 @@ function createIssueCreateCommand(): Command {
     });
 }
 
+function createIssueCreateBulkCommand(): Command {
+  return new Command('issue-create-bulk')
+    .description('Create multiple work items at once')
+    .option('--file <path>', 'JSON file with issues to create')
+    .option('--titles <titles>', 'Comma-separated titles for quick creation')
+    .option('--body <body>', 'Shared body for all issues (used with --titles)')
+    .option('--labels <labels>', 'Comma-separated labels to apply to all issues')
+    .option('--assignee <user>', 'Assign all issues to this user')
+    .option('--type <type>', 'Type label to apply (feature, bug, chore, patch)')
+    .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
+    .action(async (options) => {
+      try {
+        const workManager = await getWorkManager();
+
+        // Build list of issues to create
+        let issueDefs: Array<{
+          title: string;
+          body?: string;
+          labels?: string[];
+          assignees?: string[];
+        }> = [];
+
+        if (options.file) {
+          // Load from JSON file
+          const content = await fs.readFile(options.file, 'utf-8');
+          const parsed = JSON.parse(content);
+          issueDefs = Array.isArray(parsed) ? parsed : parsed.issues || [];
+        } else if (options.titles) {
+          // Quick creation from comma-separated titles
+          const titles = options.titles.split(',').map((t: string) => t.trim());
+          issueDefs = titles.map((title: string) => ({
+            title,
+            body: options.body,
+          }));
+        } else {
+          console.error(
+            chalk.red('Error: Provide --file <path> or --titles <titles> to specify issues')
+          );
+          process.exit(1);
+        }
+
+        // Apply shared options to all issues
+        const sharedLabels: string[] = [];
+        if (options.labels) {
+          sharedLabels.push(...options.labels.split(',').map((l: string) => l.trim()));
+        }
+        if (options.type) {
+          sharedLabels.push(options.type);
+        }
+
+        const results: Array<{ number: number; title: string; url?: string; error?: string }> = [];
+
+        for (const def of issueDefs) {
+          try {
+            const issueLabels = [
+              ...(def.labels || []),
+              ...sharedLabels,
+            ];
+            const assignees = def.assignees || (options.assignee ? [options.assignee] : undefined);
+
+            const issue = await workManager.createIssue({
+              title: def.title,
+              body: def.body,
+              labels: issueLabels.length > 0 ? issueLabels : undefined,
+              assignees,
+            });
+
+            results.push({ number: issue.number, title: issue.title, url: issue.url });
+
+            if (!options.json) {
+              console.log(chalk.green(`✓ Created issue #${issue.number}: ${issue.title}`));
+            }
+          } catch (err: any) {
+            results.push({ number: 0, title: def.title, error: err.message || String(err) });
+            if (!options.json) {
+              console.log(chalk.red(`✗ Failed to create "${def.title}": ${err.message || err}`));
+            }
+          }
+        }
+
+        if (options.json) {
+          const successes = results.filter((r) => !r.error);
+          const failures = results.filter((r) => r.error);
+          console.log(
+            JSON.stringify(
+              {
+                status: failures.length === 0 ? 'success' : 'partial',
+                data: { created: successes, failed: failures },
+                summary: {
+                  total: results.length,
+                  created: successes.length,
+                  failed: failures.length,
+                },
+              },
+              null,
+              2
+            )
+          );
+        } else {
+          const successes = results.filter((r) => !r.error);
+          const failures = results.filter((r) => r.error);
+          console.log(
+            chalk.bold(`\nCreated ${successes.length}/${results.length} issues`)
+          );
+          if (failures.length > 0) {
+            console.log(chalk.red(`${failures.length} failed`));
+          }
+        }
+      } catch (error) {
+        handleError(error, options);
+      }
+    });
+}
+
 function createIssueUpdateCommand(): Command {
   return new Command('issue-update')
     .description('Update a work item')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .option('--title <title>', 'New title')
     .option('--body <body>', 'New body')
     .option('--state <state>', 'New state (open, closed)')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -146,9 +267,11 @@ function createIssueUpdateCommand(): Command {
 function createIssueCloseCommand(): Command {
   return new Command('issue-close')
     .description('Close a work item')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .option('--comment <text>', 'Add closing comment')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -174,9 +297,11 @@ function createIssueCloseCommand(): Command {
 function createIssueReopenCommand(): Command {
   return new Command('issue-reopen')
     .description('Reopen a closed work item')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .option('--comment <text>', 'Add comment when reopening')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -215,9 +340,11 @@ function createIssueReopenCommand(): Command {
 function createIssueAssignCommand(): Command {
   return new Command('issue-assign')
     .description('Assign or unassign a work item')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .option('--user <username>', 'User to assign (use @me for self, omit to unassign)')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -265,6 +392,7 @@ function createIssueSearchCommand(): Command {
     .option('--labels <labels>', 'Filter by labels (comma-separated)')
     .option('--limit <n>', 'Max results', '10')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (options) => {
       try {
         const workManager = await getWorkManager();
@@ -295,8 +423,10 @@ function createIssueSearchCommand(): Command {
 function createIssueClassifyCommand(): Command {
   return new Command('issue-classify')
     .description('Classify work item type (feature, bug, chore, patch)')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -345,9 +475,11 @@ function createIssueClassifyCommand(): Command {
 function createIssueCommentCommand(): Command {
   return new Command('issue-comment')
     .description('Add a comment to a work item')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .requiredOption('--body <text>', 'Comment body')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -367,9 +499,11 @@ function createIssueCommentCommand(): Command {
 function createIssueCommentListCommand(): Command {
   return new Command('issue-comment-list')
     .description('List comments on a work item')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .option('--limit <n>', 'Max comments to show')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -402,9 +536,11 @@ function createIssueCommentListCommand(): Command {
 function createLabelAddCommand(): Command {
   return new Command('label-add')
     .description('Add labels to a work item')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .requiredOption('--labels <labels>', 'Comma-separated labels to add')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -425,9 +561,11 @@ function createLabelAddCommand(): Command {
 function createLabelRemoveCommand(): Command {
   return new Command('label-remove')
     .description('Remove labels from a work item')
+    .usage('<number> [options]')
     .argument('<number>', 'Issue number')
     .requiredOption('--labels <labels>', 'Comma-separated labels to remove')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (number: string, options) => {
       try {
         const workManager = await getWorkManager();
@@ -450,6 +588,7 @@ function createLabelListCommand(): Command {
     .description('List all available labels or labels on an issue')
     .option('--issue <number>', 'Show labels for specific issue')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (options) => {
       try {
         const workManager = await getWorkManager();
@@ -511,6 +650,7 @@ function createConfigureCommand(): Command {
     .option('--project <name>', 'Project name (for Jira/Linear)')
     .option('--yes', 'Skip confirmation prompts')
     .option('--json', 'Output as JSON')
+    .option('--context <text>', 'Additional context for the operation')
     .action(async (options) => {
       try {
         let platform = options.platform;
