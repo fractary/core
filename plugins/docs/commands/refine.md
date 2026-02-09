@@ -1,27 +1,17 @@
 ---
-name: refine
-description: Refine a document through gap scanning and interactive Q&A
-usage: /fractary-docs:refine <id>
-delegates_to: docs-refiner
-triggers:
-  - refine doc
-  - improve spec
-  - find gaps
-  - review documentation quality
-  - tighten spec
+name: fractary-docs:refine
+description: Refine a document - delegates to fractary-docs:docs-refiner agent
+allowed-tools: Task(fractary-docs:docs-refiner)
+model: claude-haiku-4-5
+argument-hint: '<id> [--context "<text>"]'
 ---
 
-Refine a document through structural gap scanning and AI-powered Q&A improvement.
+Use **Task** tool with `fractary-docs:docs-refiner` agent to refine a document through gap scanning and interactive Q&A.
 
-Works with ANY document type — specs, ADRs, API docs, architecture docs, guides, etc.
-The refiner loads the type's required sections and standards at runtime to generate
-contextually relevant questions.
-
-The refinement process:
-1. Structural scan: finds missing sections, placeholders, empty sections
-2. AI analysis: identifies vague requirements, missing edge cases, contradictions
-3. Question generation: prioritized questions organized by severity
-4. Interactive Q&A: user answers questions, improvements are applied
-5. Changelog: records refinement history in the document (if configured)
-
-For work-linked documents, questions can be posted to the GitHub issue for team visibility.
+```
+Task(
+  subagent_type="fractary-docs:docs-refiner",
+  description="Refine document",
+  prompt="Refine document through gap scanning and interactive Q&A: $ARGUMENTS"
+)
+```
