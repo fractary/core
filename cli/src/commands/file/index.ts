@@ -59,6 +59,9 @@ export function createFileCommand(): Command {
   file.addCommand(createFileMoveCommand());
   file.addCommand(createFileGetUrlCommand());
 
+  // Archive migration
+  file.addCommand(createFileMigrateArchiveCommand());
+
   // Configuration and diagnostics
   file.addCommand(createFileShowConfigCommand());
   file.addCommand(createFileTestConnectionCommand());
@@ -410,6 +413,61 @@ function createFileGetUrlCommand(): Command {
             console.log(url);
           } else {
             console.log(chalk.yellow('URL generation not supported by current storage backend'));
+          }
+        }
+      } catch (error) {
+        handleError(error, options);
+      }
+    });
+}
+
+function createFileMigrateArchiveCommand(): Command {
+  return new Command('migrate-archive')
+    .description('Migrate locally archived files to cloud storage')
+    .requiredOption('--local-dir <path>', 'Local archive directory (e.g., .fractary/logs/archive)')
+    .requiredOption('--cloud-prefix <prefix>', 'Cloud storage prefix (e.g., archive/logs)')
+    .requiredOption('--source <name>', 'Named source from config for cloud storage')
+    .option('--dry-run', 'Show what would be migrated without doing it')
+    .option('--no-verify', 'Skip verification of cloud upload before deleting local')
+    .option('--json', 'Output as JSON')
+    .action(async (options) => {
+      try {
+        const { migrateArchive } = await import('@fractary/core/file');
+        const fileManager = await getFileManager({ source: options.source });
+        const storage = fileManager.getStorage();
+
+        const result = await migrateArchive({
+          localArchiveDir: options.localDir,
+          cloudPrefix: options.cloudPrefix,
+          cloudStorage: storage,
+          dryRun: options.dryRun || false,
+          verify: options.verify !== false,
+        });
+
+        if (options.json) {
+          console.log(JSON.stringify({ status: 'success', data: result }, null, 2));
+        } else {
+          if (result.migrated === 0 && result.failed === 0) {
+            console.log(chalk.gray(result.message));
+          } else {
+            if (result.dryRun) {
+              console.log(chalk.yellow(`Dry run: ${result.migrated} file(s) would be migrated`));
+              result.migratedFiles.forEach((f) => {
+                console.log(chalk.gray(`  ${f.file} → ${f.cloudUrl}`));
+              });
+            } else {
+              if (result.migrated > 0) {
+                console.log(
+                  chalk.green(`✓ Migrated ${result.migrated} file(s) to cloud storage`)
+                );
+              }
+              if (result.failed > 0) {
+                console.log(chalk.red(`✗ ${result.failed} file(s) failed to migrate`));
+                result.failedFiles.forEach((f) => {
+                  console.log(chalk.red(`  ${f.file}: ${f.error}`));
+                });
+              }
+            }
           }
         }
       } catch (error) {

@@ -33,10 +33,14 @@ export class LocalStorage implements Storage {
    * Write content to storage
    * @returns The path where content was written
    */
-  async write(id: string, content: string): Promise<string> {
+  async write(id: string, content: string | Buffer): Promise<string> {
     const fullPath = this.getFullPath(id);
     this.ensureDir(path.dirname(fullPath));
-    fs.writeFileSync(fullPath, content, 'utf-8');
+    if (Buffer.isBuffer(content)) {
+      fs.writeFileSync(fullPath, content);
+    } else {
+      fs.writeFileSync(fullPath, content, 'utf-8');
+    }
     return fullPath;
   }
 

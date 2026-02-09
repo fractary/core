@@ -47,17 +47,51 @@ Example: If log is at `.fractary/logs/sessions/2026-01-15-issue-123.md`, archive
 This ensures Codex can reference files consistently regardless of storage location.
 </ARCHIVE_MODE_DETECTION>
 
+<LOCAL_ARCHIVE_MIGRATION>
+**IMPORTANT**: When cloud mode is detected, BEFORE archiving current logs, check for
+previously locally archived files and migrate them to cloud storage.
+
+Projects typically start with local archiving and later transition to cloud storage.
+Any files previously archived to `.fractary/logs/archive/` must be migrated to cloud
+to maintain a single source of truth.
+
+**Migration** (run at the start of cloud archive operations):
+
+Use the CLI command:
+
+```bash
+fractary-core file migrate-archive \
+    --local-dir ".fractary/logs/archive" \
+    --cloud-prefix "archive/logs" \
+    --source logs \
+    --json
+```
+
+The migration:
+1. Scans `.fractary/logs/archive/` for any files
+2. Uploads each to cloud at `archive/logs/{relative_path}` (same structure)
+3. Verifies upload, then removes the local archived copy
+4. Returns JSON: `{"migrated": N, "failed": N, "migratedFiles": [...]}`
+
+This is idempotent - if no local archived files exist, it returns immediately.
+If some files fail to migrate, they remain locally and can be retried.
+</LOCAL_ARCHIVE_MIGRATION>
+
 <WORKFLOW>
 1. Parse arguments (issue_number, --force, --retry, --local, --context)
 2. If --context provided, apply as additional instructions to workflow
-3. Collect all logs for issue:
-   - Call plugins/logs/scripts/collect-logs.sh <issue_number>
-   - Returns JSON array of log file paths
-4. Determine archive mode:
+3. Determine archive mode:
    a. If --local flag: use local archive
    b. Else: check for cloud storage availability
    c. If cloud not available: use local archive
-5. For each log file (preserving original path structure relative to .fractary/logs/):
+4. **If cloud mode**: Migrate any previously locally archived files to cloud:
+   - Call `fractary-core file migrate-archive --local-dir .fractary/logs/archive --cloud-prefix archive/logs --source logs --json`
+   - Log migration results (count of files migrated, any failures)
+   - Continue with normal archive even if some migrations fail
+5. Collect all logs for issue:
+   - Call plugins/logs/scripts/collect-logs.sh <issue_number>
+   - Returns JSON array of log file paths
+6. For each log file (preserving original path structure relative to .fractary/logs/):
    a. Check size (if > 1MB, compress with plugins/logs/scripts/compress-logs.sh)
    b. Prepare upload metadata with plugins/logs/scripts/prepare-upload-metadata.sh
    c. Compute relative_path = path after .fractary/logs/ (e.g., "sessions/2026-01-15-issue-123.md")
@@ -74,8 +108,11 @@ This ensures Codex can reference files consistently regardless of storage locati
    e. Call plugins/logs/scripts/archive-local.sh <local_path> <archive_path>
       - Script copies to archive, verifies checksum, AND removes original file on success
    f. Add to archive metadata with local_archive_path (no cloud_url)
-6. Comment on GitHub issue with archive location
-7. Git commit changes if needed
+7. Comment on GitHub issue with archive location
+8. Git commit changes if needed
+
+NOTE: The archive index (.archive-index.json) is DEPRECATED. Do NOT update or
+maintain the archive index. Cloud storage is the source of truth for archived files.
 </WORKFLOW>
 
 <ARGUMENTS>
@@ -89,6 +126,14 @@ This ensures Codex can reference files consistently regardless of storage locati
 <SCRIPTS_USAGE>
 **IMPORTANT**: The upload and archive scripts handle the COMPLETE archive operation including removal of the original file.
 Do NOT use manual file operations (cp, mv, Write tool). Always use these scripts.
+
+**Migrate Local Archive (Cloud Mode)**: `fractary-core file migrate-archive`
+- CLI: `fractary-core file migrate-archive --local-dir .fractary/logs/archive --cloud-prefix archive/logs --source logs --json [--dry-run]`
+- Scans `.fractary/logs/archive/` for previously locally archived files
+- Uploads each to cloud at `archive/logs/{relative_path}` and removes local copy
+- Returns JSON: `{"migrated": N, "failed": N, "migratedFiles": [...]}`
+- Idempotent: returns immediately if no local archived files exist
+- MUST be called at the start of cloud archive operations
 
 **Collect Logs**: plugins/logs/scripts/collect-logs.sh
 - Usage: `collect-logs.sh <issue_number>`

@@ -29,5 +29,14 @@ export {
   getDefaultStorageType,
 } from './factory';
 
+// Migration
+export {
+  migrateArchive,
+  type MigrateArchiveOptions,
+  type MigrateArchiveResult,
+  type MigratedFile,
+  type FailedFile,
+} from './migration';
+
 // Type exports
 export * from './types';

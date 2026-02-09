@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 #
-# sync-index.sh - Sync archive index between local cache and cloud backup
+# DEPRECATED: The archive index is no longer maintained.
+# Cloud storage is the source of truth for archived files.
+# This script remains for backward compatibility only. Do NOT call it.
+#
+# Original purpose: Sync archive index between local cache and cloud backup
 #
 # Usage: sync-index.sh <operation> <local_index_path> [cloud_index_path]
-#
+echo "WARNING: sync-index.sh is DEPRECATED. The archive index is no longer maintained." >&2
+echo "Cloud storage is the source of truth for archived files." >&2
+echo "This script is a no-op and will be removed in a future version." >&2
+exit 0
+
+# --- DEPRECATED CODE BELOW ---
 # Operations:
 #   download: Sync from cloud to local (used by init/read)
 #   upload: Sync from local to cloud (used after archival)

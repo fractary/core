@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 #
-# update-index.sh - Update archive index with new entry (two-tier storage)
+# DEPRECATED: The archive index is no longer maintained.
+# Cloud storage is the source of truth for archived files.
+# This script remains for backward compatibility only. Do NOT call it.
+#
+# Original purpose: Update archive index with new entry (two-tier storage)
 #
 # Usage: update-index.sh <local_index_file> <entry_json> [cloud_index_path]
-#
-# Two-tier storage:
-#   1. Updates local cache (fast access)
-#   2. Backs up to cloud (durability, recoverability)
-#
+echo "WARNING: update-index.sh is DEPRECATED. The archive index is no longer maintained." >&2
+echo "Cloud storage is the source of truth for archived files." >&2
+echo "This script is a no-op and will be removed in a future version." >&2
+exit 0
+
+# --- DEPRECATED CODE BELOW ---
 # Adds archive entry to index
 
 set -euo pipefail

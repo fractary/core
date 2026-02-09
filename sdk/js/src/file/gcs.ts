@@ -81,13 +81,13 @@ export class GCSStorage implements Storage {
   /**
    * Write content to GCS
    */
-  async write(id: string, content: string): Promise<string> {
+  async write(id: string, content: string | Buffer): Promise<string> {
     const { bucket } = await this.getClient();
     const path = this.getPath(id);
     const file = bucket.file(path);
 
     await file.save(content, {
-      contentType: 'text/plain; charset=utf-8',
+      contentType: Buffer.isBuffer(content) ? 'application/octet-stream' : 'text/plain; charset=utf-8',
       resumable: false,
     });
 
