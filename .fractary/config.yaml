@@ -3,47 +3,22 @@ repo:
   active_handler: github
   handlers:
     github:
+      owner: fractary
+      repo: core
       token: ${GITHUB_TOKEN}
       api_url: https://api.github.com
   defaults:
-    default_branch: main
-    protected_branches:
-      - main
-      - master
-      - production
-      - staging
-    branch_naming:
-      pattern: '{prefix}/{issue_id}-{slug}'
-      allowed_prefixes:
-        - feat
-        - fix
-        - chore
-        - hotfix
-        - docs
-        - test
-        - refactor
-        - style
-        - perf
-    commit_format: faber
-    require_signed_commits: false
-    merge_strategy: no-ff
-    auto_delete_merged_branches: false
-    remote:
-      name: origin
-      auto_set_upstream: true
-    push_sync_strategy: auto-merge
-    pull_sync_strategy: auto-merge-prefer-remote
+    environments:
+      production:
+        branch: main
+        protected: true
+      test:
+        branch: test
+        protected: false
+    default_environment: production
     pr:
-      template: standard
-      require_work_id: true
-      auto_link_issues: true
-      ci_polling:
-        enabled: true
-        interval_seconds: 60
-        timeout_seconds: 900
-        initial_delay_seconds: 10
       merge:
-        strategy: squash  # options: squash, merge, rebase
+        strategy: squash
         delete_branch: true
 work:
   active_handler: github
@@ -53,55 +28,13 @@ work:
       repo: core
       token: ${GITHUB_TOKEN}
       api_url: https://api.github.com
-      classification:
-        feature:
-          - feature
-          - enhancement
-          - story
-          - user-story
-        bug:
-          - bug
-          - fix
-          - defect
-          - error
-        chore:
-          - chore
-          - maintenance
-          - docs
-          - documentation
-          - test
-          - refactor
-        patch:
-          - hotfix
-          - patch
-          - urgent
-          - critical
-          - security
-      states:
-        open: OPEN
-        in_progress: OPEN
-        in_review: OPEN
-        done: CLOSED
-        closed: CLOSED
-      labels:
-        prefix: faber-
-        in_progress: in-progress
-        in_review: in-review
-        completed: completed
-        error: faber-error
-  defaults:
-    auto_assign: false
-    auto_label: true
-    close_on_merge: true
-    comment_on_state_change: true
-    link_pr_to_issue: true
 file:
   schema_version: '2.0'
   active_handler: local
   handlers:
     local:
       type: local
-      config:
+      local:
         base_path: .fractary
     specs-write:
       type: local
@@ -127,12 +60,6 @@ file:
       type: local
       local:
         base_path: .fractary/docs/archive
-  global_settings:
-    retry_attempts: 3
-    retry_delay_ms: 1000
-    timeout_seconds: 300
-    verify_checksums: true
-    parallel_uploads: 4
 docs:
   schema_version: '1.1'
   custom_templates_path: .fractary/docs/templates/manifest.yaml
@@ -148,50 +75,17 @@ spec:
       - name: default
         write: specs-write
         archive: specs-archive
-  naming:
-    issue_specs:
-      prefix: WORK
-      digits: 5
-      phase_format: numeric
-      phase_separator: '-'
-    standalone_specs:
-      prefix: SPEC
-      digits: 4
-      auto_increment: true
-  archive:
-    strategy: lifecycle
-  integration:
-    work_plugin: fractary-work
-    file_plugin: fractary-file
-    link_to_issue: true
-    update_issue_on_create: true
 logs:
   schema_version: '2.0'
-  custom_templates_path: .fractary/logs/templates/manifest.yaml
   storage:
     file_handlers:
       - name: default
         write: logs-write
         archive: logs-archive
-  retention:
-    default:
-      local_days: 30
-      priority: medium
-    paths:
-      - pattern: sessions/*
-        log_type: session
-        local_days: 7
-        priority: high
-  session_logging:
-    enabled: true
-    auto_capture: true
-    format: markdown
-    include_timestamps: true
-    redact_sensitive: true
-    auto_name_by_issue: true
-    redaction_patterns:
-      api_keys: true
-      jwt_tokens: true
-      passwords: true
-      credit_cards: true
-      email_addresses: false
+faber:
+  workflows:
+    path: .fractary/faber/workflows
+    default: default
+    autonomy: guarded
+  runs:
+    path: .fractary/faber/runs
