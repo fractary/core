@@ -5,15 +5,13 @@
 ## 1. Validate Archive Request
 
 ### Check if Already Archived
-Query archive index:
+Check if logs for this issue already exist in cloud storage:
 ```bash
-jq -e --arg issue "$ISSUE_NUMBER" \
-  '.archives[] | select(.issue_number == $issue)' \
-  /logs/.archive-index.json
+# Use cloud storage list to check for existing archives
+node storage.mjs list logs "archive/logs/" | jq -r '.files[]' | grep "$ISSUE_NUMBER"
 ```
 
 If found:
-- Check archive_reason and archived_at
 - Ask user if force re-archive needed
 - If not force: Skip archival, return existing archive info
 
@@ -23,7 +21,30 @@ For lifecycle-based archival:
 - pr_merged: Verify PR is merged
 - manual: No verification needed
 
-## 2. Collect All Logs for Issue
+## 2. Migrate Local Archives to Cloud
+
+**IMPORTANT**: Before archiving new logs, check for previously locally archived files.
+
+When a project transitions from local to cloud archiving, files archived to
+`.fractary/logs/archive/` need to be migrated to cloud storage.
+
+Execute `scripts/migrate-local-archive.sh`:
+```bash
+MIGRATION=$(plugins/logs/scripts/migrate-local-archive.sh)
+MIGRATED_COUNT=$(echo "$MIGRATION" | jq -r '.migrated // 0')
+FAILED_COUNT=$(echo "$MIGRATION" | jq -r '.failed // 0')
+```
+
+- Script scans `.fractary/logs/archive/` for any files
+- Each file is uploaded to cloud at `archive/logs/{relative_path}`
+- After successful upload and verification, the local copy is removed
+- If no locally archived files exist, returns immediately with `migrated: 0`
+
+If migration failures occur:
+- Log the failures but continue with normal archive
+- Failed files remain locally and can be retried later
+
+## 3. Collect All Logs for Issue
 
 Execute `scripts/collect-logs.sh <issue_number>`
 
@@ -44,10 +65,9 @@ Returns JSON array:
 
 If no logs found:
 - Report "No logs found for issue"
-- Create archive index entry with empty logs array
 - Exit successfully
 
-## 3. Compress Large Logs
+## 4. Compress Large Logs
 
 For each log file:
 1. Check size: `du -m "$LOG_FILE"`
@@ -59,7 +79,7 @@ For each log file:
 
 Result: Array of files ready for upload (mix of .gz and originals)
 
-## 4. Prepare Files for Cloud Upload
+## 5. Prepare Files for Cloud Upload
 
 For each log file, prepare metadata for upload:
 
@@ -87,7 +107,7 @@ For each log file, prepare metadata for upload:
 
 **Return to agent**: Array of files with upload metadata
 
-## 5. Agent Uploads to Cloud (via file-manager)
+## 6. Agent Uploads to Cloud (via file-manager)
 
 **IMPORTANT**: This step is performed by the log-manager AGENT, not the skill.
 
@@ -135,42 +155,13 @@ If upload fails for any file:
 - Return error to user
 - Keep already-uploaded files (no rollback)
 
-## 6. Update Archive Index
-
-**Performed by log-manager agent** after successful uploads.
-
-The agent invokes the log-archiver skill again (or uses a script) to update the index:
-
-Execute `scripts/update-index.sh <issue> <metadata_json>`
-
-Adds entry to `/logs/.archive-index.json`:
-```json
-{
-  "issue_number": "123",
-  "issue_url": "https://github.com/org/repo/issues/123",
-  "issue_title": "Implement user authentication",
-  "archived_at": "2025-01-15T14:00:00Z",
-  "archive_reason": "issue_closed",
-  "logs": [
-    { /* log metadata */ },
-    { /* log metadata */ }
-  ],
-  "total_size_bytes": 173600,
-  "total_logs": 3,
-  "compression_ratio": 0.35
-}
-```
-
-Sort archives by issue_number (descending).
-Update last_updated timestamp.
-
 ## 7. Comment on GitHub Issue
 
 If gh CLI available and configured:
 
 Generate comment:
 ```markdown
-📦 **Logs Archived**
+**Logs Archived**
 
 Session logs and operational logs have been archived to cloud storage.
 
@@ -197,28 +188,21 @@ gh issue comment $ISSUE_NUMBER --body "$COMMENT"
 
 ## 8. Clean Local Storage
 
-Execute `scripts/cleanup-local.sh <issue_number>`
-
 For each archived log:
-1. Verify entry in archive index
-2. Verify cloud URL accessible (optional)
-3. Delete local file:
+1. Verify cloud upload was successful
+2. Delete local file:
    ```bash
    rm "$LOG_FILE"
    ```
-4. Track freed space
-
-Keep the archive index file locally!
+3. Track freed space
 
 ## 9. Git Commit
 
-Commit the updated index:
+Commit any local changes:
 ```bash
-git add /logs/.archive-index.json
 git commit -m "Archive logs for issue #$ISSUE_NUMBER
 
 - Archived $LOG_COUNT logs to cloud storage
-- Updated archive index
 - Freed $FREED_SPACE locally
 
 Archive reason: $TRIGGER
@@ -229,11 +213,11 @@ Issue: #$ISSUE_NUMBER"
 
 Output:
 ```
-✓ Logs archived for issue #123
+Logs archived for issue #123
+  Migrated: 2 previously local archives to cloud
   Collected: 3 logs
-  Compressed: 1 log (128 KB → 45 KB, 65% reduction)
+  Compressed: 1 log (128 KB -> 45 KB, 65% reduction)
   Uploaded: 3 logs to archive/logs/2025/01/123/
-  Index updated: /logs/.archive-index.json
   GitHub commented: issue #123
   Local cleaned: 173 KB freed
 
@@ -259,55 +243,13 @@ Archive complete!
 - Maximum 10 minutes total retry time per file
 - Exponential backoff between retries
 
-### Partial Upload Tracking
-
-Each file in the archive index tracks its upload status:
-- `upload_status`: "pending" | "uploaded" | "failed" | "retrying"
-- `upload_timestamp`: When status was last updated
-- `upload_attempt`: Number of upload attempts
-- `last_error`: Error message from last failure
-- `cloud_url`: Set when upload succeeds
-
-The archive entry has flags:
-- `partial_archive`: true if any file is failed/pending/retrying
-- `upload_complete`: true if all files are uploaded
-- `retry_count`: Total number of retries performed
-
-### Cleanup Procedures
-
-**On Upload Failure**:
-1. Keep compressed files locally (don't delete)
-2. Mark file status as "failed" in index
-3. Log error details for troubleshooting
-4. Clean up temporary files (*.tmp, *.part)
-
-**On Partial Success**:
-1. Keep all local files until all uploads succeed
-2. Clean up successfully uploaded compressed files
-3. Preserve failed files for manual intervention
-
-**Orphaned File Cleanup**:
-- Compressed files (*.gz) older than 7 days with no index entry
-- Temporary files (*.tmp) older than 24 hours
-- Lock files (*.lock) older than 1 hour with no active process
-
-### Partial Upload Workflow
+### Partial Upload Handling
 
 If some files uploaded, others failed:
 
-1. **Track each file status**:
-   ```bash
-   scripts/update-file-status.sh <issue> <filepath> "uploaded" "<cloud_url>"
-   scripts/update-file-status.sh <issue> <filepath> "failed"
+1. **Return partial archive info to user**:
    ```
-
-2. **Index automatically marked as partial**:
-   - `partial_archive: true`
-   - `upload_complete: false`
-
-3. **Return partial archive info to user**:
-   ```
-   ⚠️  Partial archive completed for issue #123
+   Partial archive completed for issue #123
      Uploaded: 2 of 3 files
      Failed: 1 file
 
@@ -317,71 +259,42 @@ If some files uploaded, others failed:
    Retry with: /fractary-logs:archive 123 --retry
    ```
 
-4. **Local files preserved** until all uploads succeed
+2. **Local files preserved** until all uploads succeed
 
-### Retry Failed Uploads
+### Cleanup Procedures
 
-Execute `scripts/retry-failed-uploads.sh <issue>`
+**On Upload Failure**:
+1. Keep compressed files locally (don't delete)
+2. Log error details for troubleshooting
+3. Clean up temporary files (*.tmp, *.part)
 
-1. Query index for files with status "failed" or "pending"
-2. Check if local files still exist
-3. Return list of files to retry
-4. Agent re-invokes file-manager for each file
-5. Update status as uploads succeed/fail
-6. When all succeed: `partial_archive` → false, `upload_complete` → true
+**On Partial Success**:
+1. Keep all local files until all uploads succeed
+2. Preserve failed files for manual intervention
 
-Example:
-```bash
-# Check for failed uploads
-./scripts/retry-failed-uploads.sh 123
-# Returns JSON with files to retry
-
-# Agent uploads each file and updates status
-./scripts/update-file-status.sh 123 "/logs/builds/123-build.log.gz" "uploaded" "r2://..."
-
-# Archive now complete
-```
-
-### Index Update Failed
-
-If uploads succeeded but index update failed:
-
-1. Files are in cloud (durable)
-2. Local files remain (can rebuild index)
-3. Alert user to manual recovery
-4. User can re-run archive with --force to rebuild index
-
-**Transaction-Like Index Updates**:
-1. Create backup: `cp .archive-index.json .archive-index.json.backup`
-2. Write new index to temporary file: `.archive-index.json.tmp`
-3. Validate JSON structure of temporary file
-4. Atomic rename: `mv .archive-index.json.tmp .archive-index.json`
-5. Remove backup on success
-6. On failure: Restore from backup
-
-**Rollback Procedure**:
-If index update fails after successful uploads:
-```bash
-# Restore previous index
-cp .archive-index.json.backup .archive-index.json
-
-# Mark archive as partial in restored index
-./scripts/mark-partial-archive.sh <issue> "Index update failed"
-
-# Files are in cloud but not indexed
-# User can manually re-run: /fractary-logs:archive <issue> --reindex-only
-```
-
-Do NOT write to /tmp - index is the source of truth.
+**Orphaned File Cleanup**:
+- Compressed files (*.gz) older than 7 days with no cloud counterpart
+- Temporary files (*.tmp) older than 24 hours
+- Lock files (*.lock) older than 1 hour with no active process
 
 ### Cleanup Failed
 
 If cannot delete local files after successful upload:
 
 1. Archive succeeded (cloud is source of truth)
-2. `upload_complete: true` in index
-3. Log which files couldn't be deleted
-4. Files can be manually cleaned later
-5. Mark archival as successful
+2. Log which files couldn't be deleted
+3. Files can be manually cleaned later
+4. Mark archival as successful
 
 </WORKFLOW>
+
+## Deprecated Features
+
+The following features are **DEPRECATED** and should NOT be used:
+
+- **Archive index** (`.archive-index.json`): No longer maintained. Cloud storage is the
+  source of truth for archived files. Use cloud storage list/exists operations instead.
+- **`update-index.sh`**: Do not call this script. It remains for backward compatibility only.
+- **`sync-index.sh`**: Do not call this script. It remains for backward compatibility only.
+- **Index-based duplicate detection**: Use cloud storage `exists` operation to check if a
+  file has already been archived instead of querying the index.

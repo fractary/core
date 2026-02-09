@@ -1,6 +1,6 @@
 ---
 name: log-archiver
-description: Archives completed logs to cloud storage with index management and cleanup
+description: Archives completed logs to cloud storage with cleanup and local-to-cloud migration
 model: claude-haiku-4-5
 ---
 
@@ -13,7 +13,7 @@ You are the log-archiver skill for the fractary-logs plugin. You implement **pat
 
 **CRITICAL**: Load config from the **project working directory** (`.fractary/config.yaml (logs section)`), NOT the plugin installation directory (`~/.claude/plugins/marketplaces/...`).
 
-You collect logs based on retention rules, match them against path patterns in config, compress large files, upload to cloud storage via fractary-file, maintain a type-aware archive index, and clean up local storage.
+You collect logs based on retention rules, match them against path patterns in config, compress large files, upload to cloud storage via fractary-file, and clean up local storage. When cloud storage is configured, any previously locally archived files are automatically migrated to cloud.
 </CONTEXT>
 
 <CRITICAL_RULES>
@@ -21,11 +21,10 @@ You collect logs based on retention rules, match them against path patterns in c
 2. **MATCH log paths against patterns** to find applicable retention policy (or use retention.default)
 3. **NEVER delete logs without archiving first** (unless retention exceptions apply)
 4. **ALWAYS compress logs** based on per-path compression settings (respects threshold_mb)
-5. **ALWAYS update type-aware archive index** after archival
-6. **ALWAYS verify cloud upload successful** before local deletion
-7. **NEVER archive the same logs twice** (check index first)
-8. **MUST respect retention exceptions** (never_delete_production, keep_if_linked_to_open_issue, etc.)
-9. **ALWAYS keep archive index locally** even after cleanup
+5. **ALWAYS verify cloud upload successful** before local deletion
+6. **MUST respect retention exceptions** (never_delete_production, keep_if_linked_to_open_issue, etc.)
+7. **ALWAYS migrate local archives to cloud** when cloud storage is configured (via `scripts/migrate-local-archive.sh`)
+8. **DEPRECATED**: The archive index (`.archive-index.json`) is no longer maintained. Cloud storage is the source of truth. Do NOT update or create archive index files.
 </CRITICAL_RULES>
 
 <INPUTS>
@@ -43,6 +42,14 @@ You receive archive requests with:
 ## Archive Logs by Type (Type-Aware Retention)
 
 When archiving logs based on retention policy:
+
+### Step 0: Migrate Local Archives (Cloud Mode Only)
+If cloud storage is configured, migrate any previously locally archived files:
+- Execute `scripts/migrate-local-archive.sh`
+- Script scans `.fractary/logs/archive/` for any files
+- Each file is uploaded to cloud at `archive/logs/{relative_path}`
+- After successful upload and verification, local archived copy is removed
+- This is idempotent - returns immediately if no local archives exist
 
 ### Step 1: Discover Archival Candidates
 Invoke log-lister skill:
@@ -183,46 +190,18 @@ Execute `scripts/upload-to-cloud.sh`:
   - Receive cloud URL
   - Verify upload successful
 
-### Step 8: Update Type-Aware Index
-Execute `scripts/update-archive-index.sh`:
-```json
-{
-  "version": "2.0",
-  "type_aware": true,
-  "archives": [
-    {
-      "log_id": "session-550e8400",
-      "log_type": "session",
-      "issue_number": 123,
-      "archived_at": "2025-11-23T10:00:00Z",
-      "local_path": ".fractary/logs/session/session-550e8400.md",
-      "cloud_url": "r2://logs/2025/11/session/session-550e8400.md.gz",
-      "original_size_bytes": 125000,
-      "compressed_size_bytes": 42000,
-      "retention_policy": {
-        "local_days": 7,
-        "cloud_policy": "forever"
-      },
-      "delete_local_after": "2025-11-30T10:00:00Z"
-    }
-  ],
-  "by_type": {
-    "session": {"count": 12, "total_size_mb": 15.2},
-    "test": {"count": 45, "total_size_mb": 8.7},
-    "audit": {"count": 3, "total_size_mb": 2.1}
-  }
-}
-```
-
-### Step 9: Clean Local Storage (Per Retention)
+### Step 8: Clean Local Storage (Per Retention)
 Execute `scripts/cleanup-local.sh`:
 - For each archived log:
   - Check if past local retention period
   - Verify cloud backup exists
   - Delete local copy
-  - Update index with deletion timestamp
 
-### Step 10: Copy Session Summaries to Docs (Optional)
+> **DEPRECATED**: The archive index (`.archive-index.json`) is no longer maintained.
+> Cloud storage is the source of truth for archived files. The `update-archive-index.sh`
+> script should NOT be called. Use cloud storage list/exists operations to verify archives.
+
+### Step 9: Copy Session Summaries to Docs (Optional)
 If `docs_integration.copy_summary_to_docs` is enabled in config:
 
 Execute `scripts/copy-to-docs.sh`:
@@ -241,11 +220,11 @@ This step:
 - Updates README.md index with new entry (if configured)
 - Limits index to `max_index_entries` most recent
 
-### Step 11: Comment on Issues (Optional)
+### Step 10: Comment on Issues (Optional)
 If archiving issue-related logs:
 - Comment with archive summary and cloud URLs
 
-### Step 12: Output Summary
+### Step 11: Output Summary
 Report archival results grouped by type
 
 ## Archive Issue Logs (Legacy - Type-Aware)
@@ -267,8 +246,9 @@ For each log type found:
 
 When verifying archived logs:
 
-### Step 1: Load Archive Index
-Read `.fractary/logs/.archive-index.json`
+### Step 1: List Cloud Archives
+Use the cloud storage list operation to enumerate archived files:
+- List all files under `archive/logs/` prefix via fractary-file
 
 ### Step 2: Verify Cloud Files
 For each archived entry:
@@ -298,6 +278,12 @@ Recommendation: Re-upload missing build log
 
 <SCRIPTS>
 
+## scripts/migrate-local-archive.sh
+**Purpose**: Migrate previously locally archived files to cloud storage
+**Usage**: `migrate-local-archive.sh [--dry-run]`
+**Outputs**: JSON with migration results (migrated count, failed count, file details)
+**MUST be called** at the start of cloud archive operations to migrate any files previously archived locally
+
 ## scripts/check-retention-status.sh
 **Purpose**: Calculate retention status per log path
 **Usage**: `check-retention-status.sh <log_path> <config_file>`
@@ -322,11 +308,10 @@ Recommendation: Re-upload missing build log
 **Outputs**: Cloud URL
 **v2.0 CHANGE**: Uses type-specific path structure
 
-## scripts/update-archive-index.sh
-**Purpose**: Update type-aware archive index
-**Usage**: `update-index.sh <archive_metadata_json>`
-**Outputs**: Updated index path
-**v2.0 CHANGE**: Includes type-specific retention metadata from user config
+## scripts/update-archive-index.sh (DEPRECATED)
+**Purpose**: ~~Update type-aware archive index~~
+**DEPRECATED**: The archive index is no longer maintained. Cloud storage is the source of truth.
+Do NOT call this script. It remains only for backward compatibility with older workflows.
 
 ## scripts/cleanup-local.sh
 **Purpose**: Remove local logs based on path-specific retention
@@ -334,27 +319,25 @@ Recommendation: Re-upload missing build log
 **Outputs**: List of deleted files by type
 **v2.0 CHANGE**: Reads `retention.paths` from config, matches logs against patterns, respects per-path `cleanup_after_archive` and `local_days` settings
 
-## scripts/load-retention-policy.sh (NEW)
+## scripts/load-retention-policy.sh
 **Purpose**: Load retention policy for a specific log path
 **Usage**: `load-retention-policy.sh <log_path> <config_file>`
 **Outputs**: JSON with matched retention policy (from paths array or default)
-**v2.0 NEW**: Core script for path-based retention matching - tests log path against all patterns in config, returns first match or default
 
-## scripts/copy-to-docs.sh (NEW)
+## scripts/copy-to-docs.sh
 **Purpose**: Copy session summaries to docs/conversations/ for project documentation
 **Usage**: `copy-to-docs.sh --summary-path <path> --docs-path <path> [--issue-number <num>] [--update-index true|false]`
 **Outputs**: JSON with copy results including target path and index update status
-**v2.0 NEW**: Supports docs_integration config for automatic summary archival to project docs
 
 </SCRIPTS>
 
 <COMPLETION_CRITERIA>
 Operation complete when:
-1. Retention policies loaded for all relevant types
-2. Logs categorized by retention status (expired/protected/active)
-3. Expired logs compressed (if > 1MB)
-4. All logs uploaded to type-specific cloud paths
-5. Type-aware archive index updated
+1. Any previously locally archived files migrated to cloud (if cloud mode)
+2. Retention policies loaded for all relevant types
+3. Logs categorized by retention status (expired/protected/active)
+4. Expired logs compressed (if > 1MB)
+5. All logs uploaded to type-specific cloud paths
 6. Local storage cleaned per type retention periods
 7. Retention exceptions respected (production, open issues, etc.)
 8. User receives per-type archive summary
@@ -401,10 +384,6 @@ Archiving by type:
     ✓ Deleted local copies (expired > 3 days)
     Space freed: 0.8 MB
 
-Updating archive index...
-✓ Added 45 entries (type-aware)
-✓ Index: .fractary/logs/.archive-index.json
-
 ✅ COMPLETED: Log Archive
 Archived: 45 logs across 3 types
 Protected: 7 logs (retention exceptions)
@@ -435,7 +414,12 @@ audit (90d local, forever cloud):
 </OUTPUTS>
 
 <DOCUMENTATION>
-Archive operations documented in **type-aware archive index** at `.fractary/logs/.archive-index.json`. Each log type has its retention policy specified.
+Cloud storage is the source of truth for archived files. Use cloud storage list/exists
+operations to query archived content.
+
+**DEPRECATED**: The archive index (`.archive-index.json`) is no longer maintained.
+Do not create, update, or rely on this file. It may exist in older projects but should
+be ignored.
 
 **Retention policies centralized in user config**: `.fractary/config.yaml (logs section)`
 - Path-based matching via `retention.paths` array
@@ -493,7 +477,8 @@ Retry: /fractary-logs:archive --type audit --retry
 - **Deprecated**: Plugin source files `types/{type}/retention-config.json` no longer used
 - Type-aware archive paths (archive/logs/{year}/{month}/{type}/)
 - Retention exceptions per path (never_delete_production, keep_if_open, etc.)
-- Archive index includes type and retention metadata
+- **Deprecated**: Archive index (`.archive-index.json`) no longer maintained - cloud storage is source of truth
+- **New**: Local-to-cloud archive migration (`migrate-local-archive.sh`) automatically moves previously locally archived files to cloud when cloud storage becomes configured
 
 **What stayed the same:**
 - Compression logic (per-path compression settings)
@@ -505,6 +490,8 @@ Retry: /fractary-logs:archive --type audit --retry
 - **One config file** - all retention settings in `.fractary/config.yaml (logs section)`
 - **Project-specific policies** - customize retention per project, not globally
 - **Version control friendly** - config committed with project
+- **Seamless cloud transition** - local archives automatically migrated when switching to cloud storage
+- **No index maintenance** - cloud storage is the source of truth, no index to keep in sync
 - Audit logs protected for 90 days (compliance)
 - Test logs cleaned quickly (3 days) to save space
 - Session logs kept forever in cloud for debugging
@@ -515,3 +502,4 @@ Retry: /fractary-logs:archive --type audit --retry
 - Run `/fractary-logs:init --force` to generate new v2.0 config
 - Review `retention.paths` array and adjust as needed
 - Old configs (v1.x) automatically migrated to path-based structure
+- Existing `.archive-index.json` files can be safely deleted - they are no longer used
