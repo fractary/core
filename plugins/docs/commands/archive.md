@@ -1,5 +1,5 @@
 ---
-name: archive
+name: fractary-docs:archive
 description: Archive a document using its type's configured archive source
 usage: /fractary-docs:archive <id> [--source <name>]
 delegates_to: docs-archiver
