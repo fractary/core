@@ -12,7 +12,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Storage } from './types';
-import { LocalStorage } from './local';
 
 /**
  * Options for migrating local archives to cloud storage
@@ -158,6 +157,11 @@ export async function migrateArchive(
 ): Promise<MigrateArchiveResult> {
   const { localArchiveDir, cloudPrefix, cloudStorage, dryRun = false, verify = true } = options;
 
+  // Validate cloudPrefix for path traversal
+  if (cloudPrefix.includes('..') || cloudPrefix.includes('\0') || path.isAbsolute(cloudPrefix)) {
+    throw new Error('Invalid cloud prefix: must be a relative path without ".." or null bytes');
+  }
+
   // Check if local archive directory exists
   if (!fs.existsSync(localArchiveDir)) {
     return {
@@ -195,14 +199,20 @@ export async function migrateArchive(
     // Cloud path mirrors the same structure under the cloud prefix
     const cloudPath = path.posix.join(cloudPrefix, relPath.split(path.sep).join('/'));
 
+    // Validate the computed cloud path for traversal
+    if (cloudPath.includes('..') || cloudPath.includes('\0') || path.isAbsolute(cloudPath)) {
+      failedFiles.push({ file: relPath, error: 'Invalid cloud path: contains traversal sequences' });
+      continue;
+    }
+
     if (dryRun) {
       migratedFiles.push({ file: relPath, cloudUrl: cloudPath });
       continue;
     }
 
     try {
-      // Read the local file
-      const content = fs.readFileSync(filePath, 'utf-8');
+      // Read the local file as Buffer to preserve binary content (e.g., .gz files)
+      const content = fs.readFileSync(filePath);
 
       // Upload to cloud storage
       const cloudUrl = await cloudStorage.write(cloudPath, content);

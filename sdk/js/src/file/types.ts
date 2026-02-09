@@ -11,10 +11,10 @@ export interface Storage {
   /**
    * Write content to storage
    * @param id - Unique identifier for the content
-   * @param content - Content to write
+   * @param content - Content to write (string for text, Buffer for binary)
    * @returns Path or URI where content was written
    */
-  write(id: string, content: string): Promise<string>;
+  write(id: string, content: string | Buffer): Promise<string>;
 
   /**
    * Read content from storage

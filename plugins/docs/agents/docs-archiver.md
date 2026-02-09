@@ -77,13 +77,13 @@ gh issue comment <work_id> --body "Specification archived. Archive path: <path>,
    ```
    Extract: docType, work_id from frontmatter
 
-4. **Load type configuration**
+3. **Load type configuration**
    ```bash
    fractary-core docs type-info <docType> --json
    ```
    Check: archive.enabled, work_linking settings
 
-5. **Pre-archive checks**
+4. **Pre-archive checks**
    - If `work_linking.require_closed_for_archive` is true AND document has `work_id`:
      ```bash
      gh issue view <work_id> --json state,title
@@ -91,12 +91,12 @@ gh issue comment <work_id> --body "Specification archived. Archive path: <path>,
      - If state is NOT "CLOSED": refuse to archive, explain why
    - If archive is not enabled for this type: inform user and ask if they want to use --source override
 
-6. **Execute archive**
+5. **Execute archive**
    ```bash
    fractary-core docs doc-archive <id> --json
    ```
 
-7. **Post-archive actions**
+6. **Post-archive actions**
    - If `work_linking.comment_on_archive` is true AND document has `work_id`:
      ```bash
      gh issue comment <work_id> --body "📦 Document archived.
@@ -106,7 +106,7 @@ gh issue comment <work_id> --body "Specification archived. Archive path: <path>,
      - **Checksum**: <checksum>"
      ```
 
-8. **Report results**
+7. **Report results**
    - Archive path
    - Checksum
    - Whether original was deleted

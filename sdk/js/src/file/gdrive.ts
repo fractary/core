@@ -140,7 +140,7 @@ export class GDriveStorage implements Storage {
   /**
    * Write content to Google Drive
    */
-  async write(id: string, content: string): Promise<string> {
+  async write(id: string, content: string | Buffer): Promise<string> {
     const drive = await this.getClient();
     const fileName = this.getFileName(id);
     const folderId = this.getParentFolderId();
@@ -149,7 +149,7 @@ export class GDriveStorage implements Storage {
     const existingFileId = await this.findFile(id);
 
     const media = {
-      mimeType: 'text/plain',
+      mimeType: Buffer.isBuffer(content) ? 'application/octet-stream' : 'text/plain',
       body: content,
     };
 
