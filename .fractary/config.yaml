@@ -89,3 +89,22 @@ faber:
     autonomy: guarded
   runs:
     path: .fractary/faber/runs
+codex:
+  schema_version: '2.0'
+  organization: fractary
+  project: core
+  codex_repo: codex
+  remotes:
+    fractary/codex:
+      token: ${GITHUB_TOKEN}
+  sync:
+    to_codex:
+      include:
+        - docs/**
+        - README.md
+        - CLAUDE.md
+      exclude:
+        - '*.tmp'
+    from_codex:
+      include:
+        - codex://fractary/codex/docs/**
