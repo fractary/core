@@ -93,9 +93,9 @@ codex:
   schema_version: '2.0'
   organization: fractary
   project: core
-  codex_repo: codex
+  codex_repo: codex.fractary.com
   remotes:
-    fractary/codex:
+    fractary/codex.fractary.com:
       token: ${GITHUB_TOKEN}
   sync:
     to_codex:
@@ -107,5 +107,6 @@ codex:
         - '*.tmp'
     from_codex:
       include:
+        - codex://fractary/codex.fractary.com/docs/**
         - codex://fractary/codex/docs/**
         - codex://fractary/faber/docs/**
