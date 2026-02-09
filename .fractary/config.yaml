@@ -108,3 +108,4 @@ codex:
     from_codex:
       include:
         - codex://fractary/codex/docs/**
+        - codex://fractary/faber/docs/**

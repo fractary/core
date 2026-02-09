@@ -5,8 +5,5 @@ logs/archive/
 # ===== fractary-spec (managed) =====
 specs/archive/
 # ===== end fractary-spec =====
-# ===== fractary-faber (managed) =====
-faber/state/
-faber/runs/
 # ===== end fractary-faber =====
 codex/cache/
