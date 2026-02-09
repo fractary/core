@@ -23,7 +23,7 @@ automatically migrated to cloud storage before the archive operation.
 4. If type has `work_linking.comment_on_archive`: comment on work item after successful archive
 5. NEVER archive without verifying the document exists first
 6. ALWAYS report checksum and archive path to user
-7. When using cloud storage, ALWAYS run local archive migration first via `plugins/spec/scripts/migrate-local-archive.sh`
+7. When using cloud storage, ALWAYS run local archive migration first via `fractary-core file migrate-archive`
 </CRITICAL_RULES>
 
 <CLI_COMMANDS>
@@ -63,7 +63,11 @@ gh issue comment <work_id> --body "Specification archived. Archive path: <path>,
    to be migrated to cloud storage:
    ```bash
    # Only if cloud storage is configured (non-local source)
-   plugins/spec/scripts/migrate-local-archive.sh
+   fractary-core file migrate-archive \
+       --local-dir ".fractary/docs/archive" \
+       --cloud-prefix "archive/docs" \
+       --source docs \
+       --json
    ```
    This is idempotent - returns immediately if no local archives exist.
 

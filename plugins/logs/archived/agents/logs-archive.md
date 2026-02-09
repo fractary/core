@@ -55,27 +55,26 @@ Projects typically start with local archiving and later transition to cloud stor
 Any files previously archived to `.fractary/logs/archive/` must be migrated to cloud
 to maintain a single source of truth.
 
-**Migration step** (run ONCE at the start of cloud archive operations):
-1. Call `plugins/logs/scripts/migrate-local-archive.sh`
-2. Script scans `.fractary/logs/archive/` for any files
-3. Each file is uploaded to cloud at `archive/logs/{relative_path}` (same structure)
-4. After successful upload and verification, the local archived copy is removed
-5. Empty directories in local archive are cleaned up
-6. Migration results are returned as JSON
+**Migration** (run at the start of cloud archive operations):
 
-This migration is idempotent - if no local archived files exist, it returns immediately.
-If some files fail to migrate, they remain locally and can be retried.
+Use the CLI command:
 
-**Example**:
 ```bash
-# Run migration before normal archive process
-MIGRATION=$(plugins/logs/scripts/migrate-local-archive.sh)
-MIGRATED_COUNT=$(echo "$MIGRATION" | jq -r '.migrated // 0')
-if [[ "$MIGRATED_COUNT" -gt 0 ]]; then
-    echo "Migrated $MIGRATED_COUNT previously archived file(s) to cloud storage"
-fi
-# Then proceed with normal archive workflow...
+fractary-core file migrate-archive \
+    --local-dir ".fractary/logs/archive" \
+    --cloud-prefix "archive/logs" \
+    --source logs \
+    --json
 ```
+
+The migration:
+1. Scans `.fractary/logs/archive/` for any files
+2. Uploads each to cloud at `archive/logs/{relative_path}` (same structure)
+3. Verifies upload, then removes the local archived copy
+4. Returns JSON: `{"migrated": N, "failed": N, "migratedFiles": [...]}`
+
+This is idempotent - if no local archived files exist, it returns immediately.
+If some files fail to migrate, they remain locally and can be retried.
 </LOCAL_ARCHIVE_MIGRATION>
 
 <WORKFLOW>
@@ -86,7 +85,7 @@ fi
    b. Else: check for cloud storage availability
    c. If cloud not available: use local archive
 4. **If cloud mode**: Migrate any previously locally archived files to cloud:
-   - Call `plugins/logs/scripts/migrate-local-archive.sh`
+   - Call `fractary-core file migrate-archive --local-dir .fractary/logs/archive --cloud-prefix archive/logs --source logs --json`
    - Log migration results (count of files migrated, any failures)
    - Continue with normal archive even if some migrations fail
 5. Collect all logs for issue:
@@ -128,11 +127,11 @@ maintain the archive index. Cloud storage is the source of truth for archived fi
 **IMPORTANT**: The upload and archive scripts handle the COMPLETE archive operation including removal of the original file.
 Do NOT use manual file operations (cp, mv, Write tool). Always use these scripts.
 
-**Migrate Local Archive (Cloud Mode)**: plugins/logs/scripts/migrate-local-archive.sh
-- Usage: `migrate-local-archive.sh [--dry-run]`
+**Migrate Local Archive (Cloud Mode)**: `fractary-core file migrate-archive`
+- CLI: `fractary-core file migrate-archive --local-dir .fractary/logs/archive --cloud-prefix archive/logs --source logs --json [--dry-run]`
 - Scans `.fractary/logs/archive/` for previously locally archived files
 - Uploads each to cloud at `archive/logs/{relative_path}` and removes local copy
-- Returns JSON: `{"migrated": N, "failed": N, "migrated_files": [...]}`
+- Returns JSON: `{"migrated": N, "failed": N, "migratedFiles": [...]}`
 - Idempotent: returns immediately if no local archived files exist
 - MUST be called at the start of cloud archive operations
 

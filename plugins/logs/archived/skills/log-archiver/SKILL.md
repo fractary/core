@@ -23,7 +23,7 @@ You collect logs based on retention rules, match them against path patterns in c
 4. **ALWAYS compress logs** based on per-path compression settings (respects threshold_mb)
 5. **ALWAYS verify cloud upload successful** before local deletion
 6. **MUST respect retention exceptions** (never_delete_production, keep_if_linked_to_open_issue, etc.)
-7. **ALWAYS migrate local archives to cloud** when cloud storage is configured (via `scripts/migrate-local-archive.sh`)
+7. **ALWAYS migrate local archives to cloud** when cloud storage is configured (via `fractary-core file migrate-archive`)
 8. **DEPRECATED**: The archive index (`.archive-index.json`) is no longer maintained. Cloud storage is the source of truth. Do NOT update or create archive index files.
 </CRITICAL_RULES>
 
@@ -45,8 +45,8 @@ When archiving logs based on retention policy:
 
 ### Step 0: Migrate Local Archives (Cloud Mode Only)
 If cloud storage is configured, migrate any previously locally archived files:
-- Execute `scripts/migrate-local-archive.sh`
-- Script scans `.fractary/logs/archive/` for any files
+- Execute `fractary-core file migrate-archive --local-dir .fractary/logs/archive --cloud-prefix archive/logs --source logs --json`
+- Scans `.fractary/logs/archive/` for any files
 - Each file is uploaded to cloud at `archive/logs/{relative_path}`
 - After successful upload and verification, local archived copy is removed
 - This is idempotent - returns immediately if no local archives exist
@@ -278,10 +278,11 @@ Recommendation: Re-upload missing build log
 
 <SCRIPTS>
 
-## scripts/migrate-local-archive.sh
+## fractary-core file migrate-archive (CLI)
 **Purpose**: Migrate previously locally archived files to cloud storage
-**Usage**: `migrate-local-archive.sh [--dry-run]`
+**CLI**: `fractary-core file migrate-archive --local-dir <path> --cloud-prefix <prefix> --source <name> [--dry-run] --json`
 **Outputs**: JSON with migration results (migrated count, failed count, file details)
+**SDK**: `@fractary/core/file` → `migrateArchive()` function
 **MUST be called** at the start of cloud archive operations to migrate any files previously archived locally
 
 ## scripts/check-retention-status.sh
@@ -478,7 +479,7 @@ Retry: /fractary-logs:archive --type audit --retry
 - Type-aware archive paths (archive/logs/{year}/{month}/{type}/)
 - Retention exceptions per path (never_delete_production, keep_if_open, etc.)
 - **Deprecated**: Archive index (`.archive-index.json`) no longer maintained - cloud storage is source of truth
-- **New**: Local-to-cloud archive migration (`migrate-local-archive.sh`) automatically moves previously locally archived files to cloud when cloud storage becomes configured
+- **New**: Local-to-cloud archive migration (`fractary-core file migrate-archive`) automatically moves previously locally archived files to cloud when cloud storage becomes configured
 
 **What stayed the same:**
 - Compression logic (per-path compression settings)

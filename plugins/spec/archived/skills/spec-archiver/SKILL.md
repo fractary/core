@@ -21,7 +21,7 @@ You are invoked by the spec-manager agent when work is complete (issue closed, P
 6. NEVER delete specs without cloud backup
 7. ALWAYS warn if docs not updated
 8. ALWAYS provide archive URLs to user
-9. ALWAYS migrate local archives to cloud when cloud storage is configured (via `scripts/migrate-local-archive.sh`)
+9. ALWAYS migrate local archives to cloud when cloud storage is configured (via `fractary-core file migrate-archive`)
 10. **DEPRECATED**: The archive index (`archive-index.json`) is no longer maintained. Cloud storage is the source of truth. Do NOT update or create archive index files.
 </CRITICAL_RULES>
 
@@ -41,7 +41,7 @@ You receive:
 Follow the workflow defined in `workflow/archive-issue-specs.md` for detailed step-by-step instructions.
 
 High-level process:
-1. Migrate any previously locally archived files to cloud (via `scripts/migrate-local-archive.sh`)
+1. Migrate any previously locally archived files to cloud (via `fractary-core file migrate-archive`)
 2. Find all specs for issue
 3. Check pre-archive conditions
 4. Prompt user if warnings (unless --skip-warnings)

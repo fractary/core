@@ -28,11 +28,15 @@ For lifecycle-based archival:
 When a project transitions from local to cloud archiving, files archived to
 `.fractary/logs/archive/` need to be migrated to cloud storage.
 
-Execute `scripts/migrate-local-archive.sh`:
+Use the CLI command:
 ```bash
-MIGRATION=$(plugins/logs/scripts/migrate-local-archive.sh)
-MIGRATED_COUNT=$(echo "$MIGRATION" | jq -r '.migrated // 0')
-FAILED_COUNT=$(echo "$MIGRATION" | jq -r '.failed // 0')
+MIGRATION=$(fractary-core file migrate-archive \
+    --local-dir ".fractary/logs/archive" \
+    --cloud-prefix "archive/logs" \
+    --source logs \
+    --json)
+MIGRATED_COUNT=$(echo "$MIGRATION" | jq -r '.data.migrated // 0')
+FAILED_COUNT=$(echo "$MIGRATION" | jq -r '.data.failed // 0')
 ```
 
 - Script scans `.fractary/logs/archive/` for any files

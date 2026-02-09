@@ -9,11 +9,15 @@ This workflow describes the detailed steps for archiving specifications when wor
 When a project transitions from local to cloud archiving, files archived to
 `.fractary/specs/archive/` need to be migrated to cloud storage.
 
-Execute `plugins/spec/scripts/migrate-local-archive.sh`:
+Use the CLI command:
 ```bash
-MIGRATION=$(plugins/spec/scripts/migrate-local-archive.sh)
-MIGRATED_COUNT=$(echo "$MIGRATION" | jq -r '.migrated // 0')
-FAILED_COUNT=$(echo "$MIGRATION" | jq -r '.failed // 0')
+MIGRATION=$(fractary-core file migrate-archive \
+    --local-dir ".fractary/specs/archive" \
+    --cloud-prefix "archive/specs" \
+    --source specs \
+    --json)
+MIGRATED_COUNT=$(echo "$MIGRATION" | jq -r '.data.migrated // 0')
+FAILED_COUNT=$(echo "$MIGRATION" | jq -r '.data.failed // 0')
 ```
 
 - Script scans `.fractary/specs/archive/` for any files
