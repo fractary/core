@@ -353,8 +353,23 @@ export function createDocArchiveCommand(): Command {
         const verifyChecksum = archiveConfig?.verifyChecksum ?? true;
         const deleteOriginal = archiveConfig?.deleteOriginal ?? false;
 
+        // Resolve logical source name (e.g. "archive") through docs.storage.file_handlers mapping
+        let resolvedSource = sourceName;
+        try {
+          const { loadDocsConfig } = await import('@fractary/core/common/config');
+          const docsConfig = loadDocsConfig();
+          const handlerEntry = docsConfig?.storage?.file_handlers?.find(
+            (h: any) => h.name === 'default'
+          ) || docsConfig?.storage?.file_handlers?.[0];
+          if (handlerEntry?.[sourceName]) {
+            resolvedSource = handlerEntry[sourceName];
+          }
+        } catch {
+          // Fall back to using sourceName directly if docs config unavailable
+        }
+
         // Get file manager for the archive source
-        const fileManager = await getFileManagerForSource(sourceName);
+        const fileManager = await getFileManagerForSource(resolvedSource);
 
         // Read source content
         const content = doc.content;
@@ -398,7 +413,7 @@ export function createDocArchiveCommand(): Command {
           console.log(chalk.green(`✓ Archived document: ${id}`));
           console.log(chalk.gray(`  Archive path: ${archivePath}`));
           console.log(chalk.gray(`  Checksum: ${checksum}`));
-          console.log(chalk.gray(`  Source: ${sourceName}`));
+          console.log(chalk.gray(`  Source: ${resolvedSource}`));
           if (deleteOriginal) {
             console.log(chalk.gray(`  Original deleted: yes`));
           }
