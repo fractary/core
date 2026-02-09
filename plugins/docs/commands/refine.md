@@ -1,5 +1,5 @@
 ---
-name: refine
+name: fractary-docs:refine
 description: Refine a document through gap scanning and interactive Q&A
 usage: /fractary-docs:refine <id>
 delegates_to: docs-refiner
