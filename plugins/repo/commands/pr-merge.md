@@ -9,26 +9,20 @@ argument-hint: '<pr_number> [--strategy <merge|squash|rebase>] [--delete-branch]
 ## Context
 
 - Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
-- Config defaults: !`cat .fractary/config.yaml 2>/dev/null | grep -A5 'pr:' | grep -A2 'merge:' | grep -E '(strategy|delete_branch):' | tr '\n' ' ' || echo "strategy: squash delete_branch: true"`
 
 ## Your task
 
-Merge a pull request using `fractary-core repo pr-merge`.
+Merge a pull request using the CLI command `fractary-core repo pr-merge`.
 
 Parse arguments:
 - pr_number (required): PR number to merge
-- --strategy: Merge strategy (merge, squash, rebase). Default from config or squash.
-- --delete-branch: Delete branch after merge. Default from config or true.
+- --strategy: Merge strategy (merge, squash, rebase). Default: squash.
+- --delete-branch: Delete branch after merge
 - --json: Output as JSON for structured data
 
-**Default behavior**: If no strategy flag is provided, use the configured default from `.fractary/config.yaml`. If config not available, default to strategy=squash and delete-branch=true. Explicit flags always override config.
-
-## Execution steps
-
+Steps:
 1. Get changed files: `gh pr view <pr_number> --json files -q '.files[].path'`
-
-2. Execute merge: `fractary-core repo pr-merge <number> --strategy <strategy> --delete-branch --json`
-
+2. Merge the PR: `fractary-core repo pr-merge <number> --strategy <strategy> --delete-branch --json`
 3. After successful merge, analyze changed files and output **Required Actions**:
 
 ### Packages requiring npm publish
@@ -54,4 +48,4 @@ Parse arguments:
 
 If no packages or plugins were changed, output: "No packages or plugins require updates."
 
-You have the capability to call multiple tools in a single response. Execute all steps in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+Execute all steps in a single message. Do not use any other tools. Do not send any other text.

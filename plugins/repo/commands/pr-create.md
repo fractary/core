@@ -15,16 +15,19 @@ argument-hint: '[--title "<title>"] [--body "<body>"] [--draft] [--base <branch>
 
 ## Your task
 
-Create a pull request using `fractary-core repo pr-create`.
+Create a pull request using the CLI command `fractary-core repo pr-create`.
 
-If title not provided in arguments:
-- Generate from first commit message or branch name
-- Example: "feat/123-add-oauth" -> "Add OAuth"
+Parse arguments:
+- --title: PR title (if not provided, generate from commit history or branch name)
+- --body: PR description (if not provided, generate from commit history and diff summary)
+- --draft: Create as draft PR
+- --base: Target branch for the PR
+- --json: Output as JSON for structured data
 
-If body not provided in arguments:
-- Generate from commit history and diff summary
-- Include key changes and files modified
+If title or body not provided in arguments, generate them from the context above.
 
-Execute: `fractary-core repo pr-create --title "..." --body "..." [--draft] [--base ...]`
+Examples:
+- `fractary-core repo pr-create --title "Add OAuth support" --body "Implements OAuth2 flow"`
+- `fractary-core repo pr-create --draft --json`
 
-You have the capability to call multiple tools in a single response. Execute the PR creation in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+Execute in a single message. Do not use any other tools. Do not send any other text.

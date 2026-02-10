@@ -14,7 +14,7 @@ Parse arguments:
 - --json: Output as JSON for structured data
 
 Examples:
-- Basic list: `fractary-core repo worktree-list`
-- JSON output: `fractary-core repo worktree-list --json`
+- `fractary-core repo worktree-list`
+- `fractary-core repo worktree-list --json`
 
-You have the capability to call multiple tools in a single response. Execute the worktree list in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+Execute in a single message. Do not use any other tools. Do not send any other text.

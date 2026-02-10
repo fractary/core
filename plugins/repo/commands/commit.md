@@ -22,4 +22,4 @@ Based on the above changes, create a single git commit using `fractary-core repo
 
 Valid types: feat, fix, chore, docs, style, refactor, test, build
 
-You have the capability to call multiple tools in a single response. Execute the commit in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+Execute in a single message. Do not use any other tools. Do not send any other text.

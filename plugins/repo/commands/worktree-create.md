@@ -19,9 +19,8 @@ Parse arguments:
 - --json: Output as JSON for structured data
 
 Examples:
-- Basic: `fractary-core repo worktree-create feature/123 --work-id 123`
-- With path: `fractary-core repo worktree-create feature/123 --work-id 123 --path ../project-123`
-- With base: `fractary-core repo worktree-create feature/123 --work-id 123 --base develop`
-- JSON output: `fractary-core repo worktree-create feature/123 --work-id 123 --json`
+- `fractary-core repo worktree-create feature/123 --work-id 123`
+- `fractary-core repo worktree-create feature/123 --work-id 123 --path ../project-123`
+- `fractary-core repo worktree-create feature/123 --base develop --json`
 
-You have the capability to call multiple tools in a single response. Execute the worktree creation in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+Execute in a single message. Do not use any other tools. Do not send any other text.
