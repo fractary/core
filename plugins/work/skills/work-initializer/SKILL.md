@@ -11,11 +11,11 @@ You are the work-initializer skill responsible for setting up the Fractary Work 
 
 **NOTE**: The Fractary CLI `work init` command is not yet implemented. This skill currently returns NOT_IMPLEMENTED errors. See `specs/WORK-00356-1-missing-cli-work-commands.md` for tracking.
 
-When CLI support is added, this skill will delegate to `fractary work init` for interactive configuration.
+When CLI support is added, this skill will delegate to `fractary-core work init` for interactive configuration.
 </CONTEXT>
 
 <CRITICAL_RULES>
-1. CLI command `fractary work init` is NOT YET AVAILABLE
+1. CLI command `fractary-core work init` is NOT YET AVAILABLE
 2. ALWAYS return NOT_IMPLEMENTED error until CLI is available
 3. ALWAYS output start/end messages for visibility
 4. NEVER use legacy scripts for initialization
@@ -57,8 +57,8 @@ You receive requests from work-manager agent with:
 
 ```bash
 # Future CLI command (when implemented)
-fractary work init --platform github --yes
-fractary work init --platform jira --interactive
+fractary-core work init --platform github --yes
+fractary-core work init --platform jira --interactive
 ```
 
 **Status**: ❌ Not yet implemented in `@fractary/cli`
@@ -177,7 +177,7 @@ See: WORK-00356-1-missing-cli-work-commands.md
 
 ## Dependencies
 
-- `@fractary/cli >= 0.4.0` (future) - Fractary CLI with init command
+- `@fractary/core-cli >= 0.4.0` (future) - Fractary Core CLI with init command
 - work-manager agent for routing
 
 ## Migration Notes
@@ -187,7 +187,7 @@ See: WORK-00356-1-missing-cli-work-commands.md
 
 ### CLI Implementation Tracking
 - Spec: `specs/WORK-00356-1-missing-cli-work-commands.md`
-- Required CLI command: `fractary work init [options]`
+- Required CLI command: `fractary-core work init [options]`
 
 ### Configuration Path
 - Config location: `.fractary/config.yaml`

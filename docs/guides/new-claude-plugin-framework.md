@@ -154,7 +154,7 @@ class RepoManager {
 
 Now accessible from:
 - **Plugin** via MCP: `fractary_repo_branch_create` tool
-- **CLI** directly: `fractary repo branch create`
+- **CLI** directly: `fractary-core repo branch-create`
 - **FABER workflows**: Mix repo + work + spec building blocks
 - **n8n workflows**: HTTP calls to SDK endpoints
 - **Custom scripts**: Import and use SDK

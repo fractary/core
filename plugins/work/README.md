@@ -77,17 +77,17 @@ Layer 4: Scripts (Deterministic Operations)
 
 ### Fractary CLI (Required)
 
-The work plugin requires the Fractary CLI for core operations:
+The work plugin requires the Fractary Core CLI for core operations:
 
 ```bash
-# Install Fractary CLI globally
-npm install -g @fractary/cli
+# Install Fractary Core CLI globally
+npm install -g @fractary/core-cli
 
 # Verify installation
-fractary --version
+fractary-core --version
 ```
 
-**Minimum CLI Version:** `@fractary/cli >= 0.3.0`
+**Minimum CLI Version:** `@fractary/core-cli >= 0.4.0`
 
 ### Additional Dependencies
 

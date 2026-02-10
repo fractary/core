@@ -14,6 +14,8 @@ argument-hint: '[--squash|--merge|--rebase] [--wait-for-checks] [--context "<tex
 
 ## Your task
 
+**IMPORTANT: The CLI binary is `fractary-core`, NOT `fractary`. Always use `fractary-core` as the command prefix.**
+
 **SAFETY WARNING**: This command auto-merges PRs. Only use for solo development, hotfixes, documentation, or repos without branch protection requiring reviews.
 
 Use the **Bash** tool for each step below. Do NOT use the Skill tool.

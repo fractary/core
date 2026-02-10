@@ -14,6 +14,8 @@ argument-hint: '[--context "<text>"]'
 
 ## Your task
 
+**IMPORTANT: The CLI binary is `fractary-core`, NOT `fractary`. Always use `fractary-core` as the command prefix.**
+
 Use the **Bash** tool for each step below. Do NOT use the Skill tool.
 
 Based on the above changes:
