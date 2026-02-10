@@ -1,6 +1,6 @@
 {
   "name": "fractary-docs",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "Documentation system with per-type skills, archival, refinement, fulfillment validation, and work-linking.",
   "commands": "./commands/",
   "agents": [

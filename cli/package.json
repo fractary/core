@@ -1,6 +1,6 @@
 {
   "name": "@fractary/core-cli",
-  "version": "0.4.21",
+  "version": "0.4.22",
   "description": "CLI for Fractary Core SDK - work tracking, repository management, specifications, logging, file storage, and documentation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
