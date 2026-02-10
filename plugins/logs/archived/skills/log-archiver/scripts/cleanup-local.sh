@@ -1,8 +1,17 @@
 #!/bin/bash
 # Remove local logs after successful archive
+#
+# NOTE: This script previously relied on the archive index (.archive-index.json)
+# to determine which files to clean up. The archive index is now DEPRECATED.
+# Cloud storage is the source of truth.
+#
+# This script now accepts a list of file paths via stdin or as the second argument
+# (JSON array of paths). If neither is provided and an issue number is given,
+# it will search for log files matching that issue number in the logs directory.
 set -euo pipefail
 
 ISSUE_NUMBER="${1:?Issue number required}"
+LOG_PATHS_JSON="${2:-}"
 CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 
 # Load configuration
@@ -12,21 +21,18 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
 fi
 
 LOG_DIR=$(jq -r '.storage.local_path // "/logs"' "$CONFIG_FILE")
-INDEX_FILE="$LOG_DIR/.archive-index.json"
 
-# Verify index exists
-if [[ ! -f "$INDEX_FILE" ]]; then
-    echo "Error: Archive index not found. Cannot safely delete logs." >&2
-    exit 1
+# Determine which files to clean up
+if [[ -n "$LOG_PATHS_JSON" ]]; then
+    # Use provided JSON array of paths
+    ARCHIVED_LOGS=$(echo "$LOG_PATHS_JSON" | jq -r '.[]' 2>/dev/null || echo "$LOG_PATHS_JSON")
+else
+    # Search for log files matching issue number in the logs directory
+    ARCHIVED_LOGS=$(find "$LOG_DIR" -type f \( -name "*${ISSUE_NUMBER}*" \) -not -path "*/archive/*" 2>/dev/null || true)
 fi
 
-# Get list of archived logs for this issue from index
-ARCHIVED_LOGS=$(jq -r --arg issue "$ISSUE_NUMBER" \
-    '.archives[] | select(.issue_number == $issue) | .logs[].local_path' \
-    "$INDEX_FILE" 2>/dev/null || true)
-
 if [[ -z "$ARCHIVED_LOGS" ]]; then
-    echo "No archived logs found in index for issue #$ISSUE_NUMBER"
+    echo "No log files found for issue #$ISSUE_NUMBER"
     exit 0
 fi
 

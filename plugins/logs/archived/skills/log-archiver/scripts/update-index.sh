@@ -1,5 +1,15 @@
 #!/bin/bash
-# Update archive index with new entry
+# DEPRECATED: The archive index is no longer maintained.
+# Cloud storage is the source of truth for archived files.
+# This script remains for backward compatibility only. Do NOT call it.
+#
+# Original purpose: Update archive index with new entry
+echo "WARNING: update-index.sh is DEPRECATED. The archive index (.archive-index.json) is no longer maintained." >&2
+echo "Cloud storage is the source of truth for archived files." >&2
+echo "This script is a no-op and will be removed in a future version." >&2
+exit 0
+
+# --- DEPRECATED CODE BELOW ---
 set -euo pipefail
 
 ISSUE_NUMBER="${1:?Issue number required}"

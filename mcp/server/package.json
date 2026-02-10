@@ -48,7 +48,7 @@
   },
   "homepage": "https://github.com/fractary/core/tree/main/mcp/server#readme",
   "dependencies": {
-    "@fractary/core": "^0.7.9",
+    "@fractary/core": "^0.7.14",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "js-yaml": "^4.1.1",
     "minimatch": "^10.1.1"

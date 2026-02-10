@@ -103,7 +103,7 @@ export class FileManager {
    * @param content - Content to write
    * @returns URI or path where the content was written
    */
-  async write(path: string, content: string): Promise<string> {
+  async write(path: string, content: string | Buffer): Promise<string> {
     this.validatePath(path);
     return this.storage.write(path, content);
   }

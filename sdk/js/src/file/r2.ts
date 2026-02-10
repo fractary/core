@@ -40,7 +40,7 @@ export class R2Storage implements Storage {
   /**
    * Write content to R2
    */
-  async write(id: string, content: string): Promise<string> {
+  async write(id: string, content: string | Buffer): Promise<string> {
     const result = await this.s3Storage.write(id, content);
     // Return R2-style URI
     return result.replace('s3://', 'r2://');

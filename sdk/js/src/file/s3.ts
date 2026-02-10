@@ -89,7 +89,7 @@ export class S3Storage implements Storage {
   /**
    * Write content to S3
    */
-  async write(id: string, content: string): Promise<string> {
+  async write(id: string, content: string | Buffer): Promise<string> {
     const client = await this.getClient();
     const { PutObjectCommand } = await import('@aws-sdk/client-s3');
 
@@ -98,7 +98,7 @@ export class S3Storage implements Storage {
       Bucket: this.config.bucket,
       Key: key,
       Body: content,
-      ContentType: 'text/plain; charset=utf-8',
+      ContentType: Buffer.isBuffer(content) ? 'application/octet-stream' : 'text/plain; charset=utf-8',
     });
 
     await client.send(command);

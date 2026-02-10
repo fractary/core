@@ -9,7 +9,9 @@ set -euo pipefail
 
 LOGS_DIR="${1:-/logs}"
 THRESHOLD_DAYS="${2:-7}"
-INDEX_FILE="${3:-/logs/.archive-index.json}"
+# DEPRECATED: INDEX_FILE parameter is ignored. The archive index is no longer maintained.
+# Cloud storage is the source of truth. This parameter is kept for backward compatibility.
+INDEX_FILE="${3:-}"
 
 # Check for jq dependency
 if ! command -v jq &> /dev/null; then
@@ -61,18 +63,9 @@ while IFS= read -r log_file; do
         # Extract issue number from file
         ISSUE_NUM=$(grep "^issue_number:" "$log_file" 2>/dev/null | cut -d: -f2- | xargs || echo "unknown")
 
-        # Check if already archived
-        ALREADY_ARCHIVED=false
-        if [[ -f "$INDEX_FILE" ]]; then
-            if jq -e --arg issue "$ISSUE_NUM" '.archives[] | select(.issue_number == $issue)' "$INDEX_FILE" >/dev/null 2>&1; then
-                ALREADY_ARCHIVED=true
-            fi
-        fi
-
-        # Skip if already archived
-        if [[ "$ALREADY_ARCHIVED" == "true" ]]; then
-            continue
-        fi
+        # NOTE: Archive index-based duplicate detection is DEPRECATED.
+        # Cloud storage is the source of truth. Files in the local logs directory
+        # that are past retention are candidates for archival regardless of index state.
 
         # Calculate age in days
         AGE_SECONDS=$((CURRENT_TIME - FILE_TIME))

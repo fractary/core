@@ -2,7 +2,34 @@
 
 This workflow describes the detailed steps for archiving specifications when work completes.
 
-## Step 1: Find All Specs for Issue
+## Step 1: Migrate Local Archives to Cloud
+
+**IMPORTANT**: Before archiving new specs, check for previously locally archived files.
+
+When a project transitions from local to cloud archiving, files archived to
+`.fractary/specs/archive/` need to be migrated to cloud storage.
+
+Use the CLI command:
+```bash
+MIGRATION=$(fractary-core file migrate-archive \
+    --local-dir ".fractary/specs/archive" \
+    --cloud-prefix "archive/specs" \
+    --source specs \
+    --json)
+MIGRATED_COUNT=$(echo "$MIGRATION" | jq -r '.data.migrated // 0')
+FAILED_COUNT=$(echo "$MIGRATION" | jq -r '.data.failed // 0')
+```
+
+- Script scans `.fractary/specs/archive/` for any files
+- Each file is uploaded to cloud at `archive/specs/{relative_path}`
+- After successful upload and verification, the local copy is removed
+- If no locally archived files exist, returns immediately with `migrated: 0`
+
+If migration failures occur:
+- Log the failures but continue with normal archive
+- Failed files remain locally and can be retried later
+
+## Step 2: Find All Specs for Issue
 
 Search for all specs matching the issue number:
 
@@ -23,17 +50,16 @@ If no specs found:
 
 Store list of spec file paths for processing.
 
-## Step 2: Load Configuration
+## Step 3: Load Configuration
 
 Load plugin configuration from `.fractary/specs/config.json`:
 - Get `storage.cloud_archive_path` pattern
-- Get `storage.archive_index_file` location
 - Get `archive.auto_archive_on` settings
 - Get `archive.pre_archive` check settings
 - Get `archive.post_archive` action settings
 - Get `integration` settings
 
-## Step 3: Fetch Issue and PR Data
+## Step 4: Fetch Issue and PR Data
 
 Use fractary-work plugin or gh CLI:
 
@@ -54,7 +80,7 @@ Extract:
 - PR URL (if linked)
 - PR state (if exists)
 
-## Step 4: Check Pre-Archive Conditions
+## Step 5: Check Pre-Archive Conditions
 
 Unless `--force` flag provided, check:
 
@@ -72,7 +98,7 @@ fi
 ```
 
 **2. Specs Exist**:
-- Already verified in Step 1
+- Already verified in Step 2
 
 ### Warning Checks (prompt if `--skip-warnings` not set)
 
@@ -102,20 +128,20 @@ if [[ "$validated" != "true" ]]; then
 fi
 ```
 
-## Step 5: Prompt User if Warnings
+## Step 6: Prompt User if Warnings
 
 If warnings exist and `--skip-warnings` not set:
 
 ```
-⚠️  Pre-Archive Warnings
+Pre-Archive Warnings
 
 The following items may need attention:
 
 1. Documentation hasn't been updated since spec creation
-   → Consider updating docs to reflect current state
+   -> Consider updating docs to reflect current state
 
 2. Spec validation status: partial
-   → Some acceptance criteria may not be met
+   -> Some acceptance criteria may not be met
 
 Do you want to:
 1. Update documentation first
@@ -130,7 +156,7 @@ Handle user response:
 - 2: Continue with archival
 - 3: Cancel operation
 
-## Step 6: Upload Specs to Cloud
+## Step 7: Upload Specs to Cloud
 
 For each spec file, upload to cloud via fractary-file plugin:
 
@@ -155,9 +181,6 @@ Examples:
 
 ```bash
 # Use fractary-file plugin to upload
-# (This would invoke the file-manager agent)
-
-# For now, assuming direct upload capability:
 cloud_url=$(fractary-file upload "$SPEC_PATH" "$CLOUD_PATH")
 ```
 
@@ -173,77 +196,12 @@ If upload fails:
 - Return error with details
 - Specs remain in local storage
 
-## Step 7: Update Archive Index
-
-Load archive index from `.fractary/specs/archive-index.json`:
-
-```bash
-INDEX_FILE=".fractary/specs/archive-index.json"
-
-# Create if doesn't exist
-if [[ ! -f "$INDEX_FILE" ]]; then
-    echo '{"schema_version": "1.0", "last_updated": "", "archives": []}' > "$INDEX_FILE"
-fi
-
-# Load current index
-INDEX_JSON=$(cat "$INDEX_FILE")
-```
-
-Add new entry:
-
-```json
-{
-  "issue_number": "123",
-  "issue_url": "https://github.com/org/repo/issues/123",
-  "issue_title": "Implement user authentication",
-  "pr_url": "https://github.com/org/repo/pull/456",
-  "archived_at": "2025-01-15T14:30:00Z",
-  "archived_by": "Claude Code",
-  "specs": [
-    {
-      "filename": "WORK-00123-01-auth.md",
-      "local_path": "/specs/WORK-00123-01-auth.md",
-      "cloud_url": "s3://bucket/archive/specs/2025/123-phase1.md",
-      "public_url": "https://storage.example.com/specs/2025/123-phase1.md",
-      "size_bytes": 15420,
-      "checksum": "sha256:abc123...",
-      "validated": true,
-      "created": "2025-01-10T09:00:00Z"
-    },
-    {
-      "filename": "WORK-00123-02-oauth.md",
-      "local_path": "/specs/WORK-00123-02-oauth.md",
-      "cloud_url": "s3://bucket/archive/specs/2025/123-phase2.md",
-      "public_url": "https://storage.example.com/specs/2025/123-phase2.md",
-      "size_bytes": 18920,
-      "checksum": "sha256:def456...",
-      "validated": true,
-      "created": "2025-01-12T11:00:00Z"
-    }
-  ],
-  "documentation_updated": true,
-  "archive_notes": "All phases complete, validated"
-}
-```
-
-Update `last_updated` timestamp.
-
-Write updated index:
-```bash
-echo "$UPDATED_JSON" > "$INDEX_FILE"
-```
-
-If index update fails:
-- Critical error
-- Don't remove local specs
-- Return error
-
 ## Step 8: Comment on GitHub Issue
 
 Build comment message:
 
 ```markdown
-✅ Work Archived
+Work Archived
 
 This issue has been completed and archived!
 
@@ -252,7 +210,7 @@ This issue has been completed and archived!
 - [Phase 2: OAuth Integration](https://storage.example.com/specs/2025/123-phase2.md) (18.9 KB)
 
 **Archived**: 2025-01-15 14:30 UTC
-**Validation**: All specs validated ✓
+**Validation**: All specs validated
 
 These specifications are permanently stored in cloud archive for future reference.
 ```
@@ -271,7 +229,7 @@ If comment fails:
 If PR linked to issue, comment there too:
 
 ```markdown
-📦 Specifications Archived
+Specifications Archived
 
 Specifications for this PR have been archived:
 - [WORK-00123-01-auth.md](https://storage.example.com/specs/2025/123-phase1.md)
@@ -291,7 +249,7 @@ If comment fails:
 
 ## Step 10: Remove Specs from Local
 
-Only after successful upload and index update:
+Only after successful upload:
 
 ```bash
 for spec in "${SPEC_FILES[@]}"; do
@@ -308,15 +266,12 @@ done
 
 ## Step 11: Git Commit
 
-Commit both index update and spec removals:
+Commit spec removals:
 
 ```bash
-git add .fractary/specs/archive-index.json
-
 git commit -m "Archive specs for issue #${ISSUE_NUMBER}
 
 - Archived ${#SPEC_FILES[@]} specifications to cloud storage
-- Updated archive index
 - Issue: #${ISSUE_NUMBER}
 - PR: #${PR_NUMBER}
 
@@ -337,8 +292,8 @@ Return structured JSON output with:
 - Status (success)
 - Issue number
 - Archive timestamp
+- Number of local archives migrated to cloud
 - List of archived specs with URLs
-- Archive index status
 - GitHub comment status
 - Local cleanup status
 - Git commit status
@@ -347,26 +302,24 @@ Return structured JSON output with:
 
 At each critical step:
 
+**Migration Failure**:
+- Log warning, continue with normal archive
+- Failed files remain locally and can be retried
+
 **Upload Failure**:
 - Abort immediately
 - Leave local specs intact
 - Return error with details
 - User can retry
 
-**Index Update Failure**:
-- Critical error
-- Don't remove local specs
-- Specs uploaded but not indexed
-- User needs to manually update index or retry
-
 **Cleanup Failure**:
-- Specs uploaded and indexed (success)
+- Specs uploaded (success)
 - Local removal failed
 - User can manually remove
 - Still return success (archive complete)
 
 **Git Commit Failure**:
-- Specs uploaded and indexed (success)
+- Specs uploaded (success)
 - Local removed
 - Commit failed
 - User needs to commit manually
@@ -381,34 +334,34 @@ Input:
   skip_warnings: false
 
 Steps:
-  1. ✓ Found 2 specs for issue #123
-  2. ✓ Config loaded
-  3. ✓ Issue #123: closed
-     ✓ PR #456: merged
-  4. ⚠ Pre-archive checks:
-     - Issue closed: ✓
-     - PR merged: ✓
-     - Docs updated: ⚠ (warning)
-     - Validation: ✓
-  5. → User prompted, selected "Archive anyway"
-  6. ✓ Uploaded WORK-00123-01-auth.md
-        → https://storage.example.com/specs/2025/123-phase1.md
-     ✓ Uploaded WORK-00123-02-oauth.md
-        → https://storage.example.com/specs/2025/123-phase2.md
-  7. ✓ Archive index updated
-  8. ✓ Issue #123 commented
-  9. ✓ PR #456 commented
-  10. ✓ Local specs removed
-  11. ✓ Git commit created
-  12. ✓ Success returned
+  1. Migrated 1 previously local archive to cloud
+  2. Found 2 specs for issue #123
+  3. Config loaded
+  4. Issue #123: closed
+     PR #456: merged
+  5. Pre-archive checks:
+     - Issue closed: pass
+     - PR merged: pass
+     - Docs updated: warning
+     - Validation: pass
+  6. User prompted, selected "Archive anyway"
+  7. Uploaded WORK-00123-01-auth.md
+        -> https://storage.example.com/specs/2025/123-phase1.md
+     Uploaded WORK-00123-02-oauth.md
+        -> https://storage.example.com/specs/2025/123-phase2.md
+  8. Issue #123 commented
+  9. PR #456 commented
+  10. Local specs removed
+  11. Git commit created
+  12. Success returned
 
 Output:
   {
     "status": "success",
     "issue_number": "123",
+    "local_archives_migrated": 1,
     "specs_archived": 2,
     "cloud_urls": [...],
-    "archive_index_updated": true,
     "github_comments": {"issue": true, "pr": true},
     "local_cleanup": true,
     "git_committed": true
@@ -419,9 +372,18 @@ Output:
 
 When archiving multiple specs for one issue:
 - Upload all specs before any removal
-- Update index with all specs in one entry
 - Comment once with all spec URLs
 - Remove all local specs together
 - Commit all changes atomically
 
 This ensures consistency: either all specs archived or none.
+
+## Deprecated Features
+
+The following features are **DEPRECATED** and should NOT be used:
+
+- **Archive index** (`archive-index.json`): No longer maintained. Cloud storage is the
+  source of truth for archived files. Use cloud storage list/exists operations instead.
+- **`update-index.sh`**: Do not call this script. It remains for backward compatibility only.
+- **`sync-index.sh`**: Do not call this script. It remains for backward compatibility only.
+- Existing `archive-index.json` files can be safely deleted.
