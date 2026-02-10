@@ -16,16 +16,26 @@ argument-hint: '[--squash|--merge|--rebase] [--wait-for-checks] [--context "<tex
 
 **SAFETY WARNING**: This command auto-merges PRs. Only use for solo development, hotfixes, documentation, or repos without branch protection requiring reviews.
 
+Use the **Bash** tool for each step below. Do NOT use the Skill tool.
+
 Based on the above changes:
 
 1. If NOT on main/master/develop, STOP with error — must start from a base branch
-2. Create a feature branch using `fractary-core repo branch-create`
-3. Create a single commit with an appropriate message using `fractary-core repo commit`
-4. Push the branch to origin using `fractary-core repo push`
-5. Create a pull request with `--json` using `fractary-core repo pr-create` — extract PR number from output
-6. Check branch protection: `gh api repos/{owner}/{repo}/branches/main/protection --jq '.required_pull_request_reviews.required_approving_review_count' 2>/dev/null || echo "0"` — if reviews required > 0, STOP with error
-7. If `--wait-for-checks` passed, poll `gh pr view <number> --json statusCheckRollup` every 10s for max 5 minutes
-8. Merge the PR using `fractary-core repo pr-merge` with the requested strategy (default: merge) and `--delete-branch`
-9. Checkout the base branch and `fractary-core repo pull`
+2. Create a feature branch:
+   `fractary-core repo branch-create <name> --checkout`
+3. Create a single commit with an appropriate message:
+   `fractary-core repo commit --message "<message>" --type <type> --all`
+4. Push the branch to origin:
+   `fractary-core repo push --set-upstream`
+5. Create a pull request (extract PR number from output):
+   `fractary-core repo pr-create --title "<title>" --body "<body>" --json`
+6. Check branch protection — if reviews required > 0, STOP with error:
+   `gh api repos/{owner}/{repo}/branches/main/protection --jq '.required_pull_request_reviews.required_approving_review_count' 2>/dev/null || echo "0"`
+7. If `--wait-for-checks` passed, poll every 10s for max 5 minutes:
+   `gh pr view <number> --json statusCheckRollup`
+8. Merge the PR with the requested strategy (default: merge):
+   `fractary-core repo pr-merge <number> --delete-branch`
+9. Checkout the base branch and pull:
+   `git checkout <base-branch> && fractary-core repo pull`
 
-You have the capability to call multiple tools in a single response. You MUST do all of the above in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+You MUST use the Bash tool for all commands above. Do NOT use the Skill tool. Execute all steps in a single message.

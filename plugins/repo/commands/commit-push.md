@@ -14,10 +14,15 @@ argument-hint: '[--context "<text>"]'
 
 ## Your task
 
+Use the **Bash** tool for each step below. Do NOT use the Skill tool.
+
 Based on the above changes:
 
-1. If on main/master, create a feature branch using `fractary-core repo branch-create`
-2. Create a single commit with an appropriate message using `fractary-core repo commit`
-3. Push the branch to origin using `fractary-core repo push`
+1. If on main/master, create a feature branch:
+   `fractary-core repo branch-create <name> --checkout`
+2. Create a single commit with an appropriate message:
+   `fractary-core repo commit --message "<message>" --type <type> --all`
+3. Push the branch to origin:
+   `fractary-core repo push --set-upstream`
 
-You have the capability to call multiple tools in a single response. You MUST do all of the above in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+You MUST use the Bash tool for all commands above. Do NOT use the Skill tool. Execute all steps in a single message.

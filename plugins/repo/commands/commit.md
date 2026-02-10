@@ -15,11 +15,14 @@ argument-hint: '[--context "<text>"]'
 
 ## Your task
 
-Based on the above changes, create a single git commit using `fractary-core repo commit`.
+Use the **Bash** tool for each step below. Do NOT use the Skill tool.
+
+Based on the above changes, create a single git commit:
 
 1. Analyze the diff to determine an appropriate commit message and type
-2. Stage and commit: `fractary-core repo commit --message "..." --type <type> --all`
+2. Stage and commit:
+   `fractary-core repo commit --message "..." --type <type> --all`
 
 Valid types: feat, fix, chore, docs, style, refactor, test, build
 
-Execute in a single message. Do not use any other tools. Do not send any other text.
+You MUST use the Bash tool for all commands above. Do NOT use the Skill tool. Execute all steps in a single message.
