@@ -47,15 +47,38 @@ export class WorkManager {
 
   /**
    * Load work configuration from project
+   *
+   * Transforms the YAML handler-based config format into the flat WorkConfig
+   * that the rest of the class expects.
    */
   private loadConfig(): WorkConfig {
-    const config = loadWorkConfig(findProjectRoot());
-    if (!config) {
+    const raw = loadWorkConfig(findProjectRoot());
+    if (!raw) {
       throw new ConfigurationError(
         'Work configuration not found. Run "fractary work init" to set up.'
       );
     }
-    return config;
+
+    // Support both flat WorkConfig and YAML handler-based format
+    if (raw.platform) {
+      return raw as WorkConfig;
+    }
+
+    if (raw.active_handler && raw.handlers) {
+      const platform = raw.active_handler as WorkConfig['platform'];
+      const handler = raw.handlers[platform] || {};
+      return {
+        platform,
+        owner: handler.owner,
+        repo: handler.repo,
+        project: handler.project,
+        token: handler.token,
+      };
+    }
+
+    throw new ConfigurationError(
+      'Invalid work configuration: missing "platform" or "active_handler". Run "fractary-core work configure" to set up.'
+    );
   }
 
   /**

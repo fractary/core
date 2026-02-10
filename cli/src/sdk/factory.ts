@@ -55,13 +55,15 @@ export class SDKNotAvailableError extends Error {
  */
 export async function getWorkManager(config?: any): Promise<WorkManager> {
   if (!instances.work) {
+    let WorkManagerClass: typeof WorkManager;
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { WorkManager } = await import('@fractary/core/work');
-      instances.work = new WorkManager(config);
+      const mod = await import('@fractary/core/work');
+      WorkManagerClass = mod.WorkManager;
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
     }
+    instances.work = new WorkManagerClass(config);
   }
   return instances.work;
 }
@@ -71,13 +73,15 @@ export async function getWorkManager(config?: any): Promise<WorkManager> {
  */
 export async function getRepoManager(config?: any): Promise<RepoManager> {
   if (!instances.repo) {
+    let RepoManagerClass: typeof RepoManager;
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { RepoManager } = await import('@fractary/core/repo');
-      instances.repo = new RepoManager(config);
+      const mod = await import('@fractary/core/repo');
+      RepoManagerClass = mod.RepoManager;
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
     }
+    instances.repo = new RepoManagerClass(config);
   }
   return instances.repo;
 }
@@ -87,13 +91,15 @@ export async function getRepoManager(config?: any): Promise<RepoManager> {
  */
 export async function getSpecManager(config?: any): Promise<SpecManager> {
   if (!instances.spec) {
+    let SpecManagerClass: typeof SpecManager;
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { SpecManager } = await import('@fractary/core/spec');
-      instances.spec = new SpecManager(config);
+      const mod = await import('@fractary/core/spec');
+      SpecManagerClass = mod.SpecManager;
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
     }
+    instances.spec = new SpecManagerClass(config);
   }
   return instances.spec;
 }
@@ -103,13 +109,15 @@ export async function getSpecManager(config?: any): Promise<SpecManager> {
  */
 export async function getLogManager(config?: any): Promise<LogManager> {
   if (!instances.logs) {
+    let LogManagerClass: typeof LogManager;
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { LogManager } = await import('@fractary/core/logs');
-      instances.logs = new LogManager(config);
+      const mod = await import('@fractary/core/logs');
+      LogManagerClass = mod.LogManager;
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
     }
+    instances.logs = new LogManagerClass(config);
   }
   return instances.logs;
 }
@@ -209,18 +217,20 @@ export async function getFileManagerForSource(sourceName: string): Promise<FileM
  */
 export async function getDocsManager(config?: any): Promise<DocsManager> {
   if (!instances.docs) {
+    let DocsManagerClass: typeof DocsManager;
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { DocsManager } = await import('@fractary/core/docs');
-      // Provide sensible defaults if no config is provided
-      const docsConfig = config || {
-        docsDir: process.env.FRACTARY_DOCS_DIR || './docs',
-        metadataMode: 'frontmatter',
-      };
-      instances.docs = new DocsManager(docsConfig);
+      const mod = await import('@fractary/core/docs');
+      DocsManagerClass = mod.DocsManager;
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
     }
+    // Provide sensible defaults if no config is provided
+    const docsConfig = config || {
+      docsDir: process.env.FRACTARY_DOCS_DIR || './docs',
+      metadataMode: 'frontmatter',
+    };
+    instances.docs = new DocsManagerClass(docsConfig);
   }
   return instances.docs;
 }
@@ -232,33 +242,35 @@ export async function getDocsManager(config?: any): Promise<DocsManager> {
  */
 export async function getDocTypeRegistry(config?: any): Promise<DocTypeRegistry> {
   if (!instances.docTypeRegistry) {
+    let DocTypeRegistryClass: typeof DocTypeRegistry;
     try {
       // Dynamic import to avoid loading SDK at module load time
-      const { DocTypeRegistry } = await import('@fractary/core/docs');
-
-      // Build registry config, merging any provided config with project config
-      let registryConfig = config || {};
-
-      // If no customManifestPath provided, try to load from project config
-      if (!registryConfig.customManifestPath) {
-        try {
-          const { loadYamlConfig } = await import('@fractary/core/common/yaml-config');
-          const projectConfig = loadYamlConfig();
-          if (projectConfig?.docs?.custom_templates_path) {
-            registryConfig = {
-              ...registryConfig,
-              customManifestPath: projectConfig.docs.custom_templates_path,
-            };
-          }
-        } catch {
-          // Config not available, continue without custom types
-        }
-      }
-
-      instances.docTypeRegistry = new DocTypeRegistry(registryConfig);
+      const mod = await import('@fractary/core/docs');
+      DocTypeRegistryClass = mod.DocTypeRegistry;
     } catch (error) {
       throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
     }
+
+    // Build registry config, merging any provided config with project config
+    let registryConfig = config || {};
+
+    // If no customManifestPath provided, try to load from project config
+    if (!registryConfig.customManifestPath) {
+      try {
+        const { loadYamlConfig } = await import('@fractary/core/common/yaml-config');
+        const projectConfig = loadYamlConfig();
+        if (projectConfig?.docs?.custom_templates_path) {
+          registryConfig = {
+            ...registryConfig,
+            customManifestPath: projectConfig.docs.custom_templates_path,
+          };
+        }
+      } catch {
+        // Config not available, continue without custom types
+      }
+    }
+
+    instances.docTypeRegistry = new DocTypeRegistryClass(registryConfig);
   }
   return instances.docTypeRegistry;
 }
