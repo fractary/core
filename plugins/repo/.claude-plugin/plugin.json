@@ -1,6 +1,6 @@
 {
   "name": "fractary-repo",
-  "version": "3.0.9",
+  "version": "3.0.12",
   "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
   "commands": "./commands/",
   "agents": [

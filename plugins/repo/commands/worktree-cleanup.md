@@ -17,9 +17,8 @@ Parse arguments:
 - --json: Output as JSON for structured data
 
 Examples:
-- Dry run: `fractary-core repo worktree-cleanup --dry-run`
-- Cleanup merged: `fractary-core repo worktree-cleanup --merged`
-- JSON output: `fractary-core repo worktree-cleanup --json`
-- Full cleanup: `fractary-core repo worktree-cleanup`
+- `fractary-core repo worktree-cleanup --dry-run`
+- `fractary-core repo worktree-cleanup --merged`
+- `fractary-core repo worktree-cleanup --json`
 
-You have the capability to call multiple tools in a single response. Execute the worktree cleanup in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+Execute in a single message. Do not use any other tools. Do not send any other text.

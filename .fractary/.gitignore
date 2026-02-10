@@ -5,8 +5,5 @@ logs/archive/
 # ===== fractary-spec (managed) =====
 specs/archive/
 # ===== end fractary-spec =====
-
-# Local environment and secrets
-.env
-.env.local
-*.log
+# ===== end fractary-faber =====
+codex/cache/

@@ -1,6 +1,6 @@
 {
   "name": "fractary-core",
-  "version": "3.5.2",
+  "version": "3.5.4",
   "description": "Core configuration and environment management for Fractary plugins",
   "commands": [
     "./commands/config-init.md",

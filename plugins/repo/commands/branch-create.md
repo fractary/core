@@ -17,9 +17,7 @@ Parse arguments:
 - --json: Output as JSON for structured data
 
 Examples:
-- Basic: `fractary-core repo branch-create feature/123`
-- With base: `fractary-core repo branch-create feature/123 --base main`
-- With checkout: `fractary-core repo branch-create feature/123 --checkout`
-- JSON output: `fractary-core repo branch-create feature/123 --json`
+- `fractary-core repo branch-create feature/123`
+- `fractary-core repo branch-create feature/123 --base main --checkout`
 
-You have the capability to call multiple tools in a single response. Execute the branch creation in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+Execute in a single message. Do not use any other tools. Do not send any other text.

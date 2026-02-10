@@ -6,6 +6,10 @@ model: claude-haiku-4-5
 argument-hint: '--title "<title>" [--body "<text>"] [--labels <labels>] [--assignees <users>] [--json] [--context "<text>"]'
 ---
 
+## Context
+
+- Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
+
 ## Your task
 
 Create a new issue using the CLI command `fractary-core work issue-create`.
@@ -22,6 +26,5 @@ If title or body not provided in arguments, generate them from the conversation 
 Examples:
 - `fractary-core work issue-create --title "Bug: login timeout" --body "Users are logged out after 5 minutes" --labels bug`
 - `fractary-core work issue-create --title "Feature: CSV export" --assignees user1 --labels feature`
-- `fractary-core work issue-create --title "New feature" --json`
 
-You have the capability to call multiple tools in a single response. Execute the create operation in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+Execute in a single message. Do not use any other tools. Do not send any other text.
