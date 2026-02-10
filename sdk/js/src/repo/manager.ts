@@ -66,9 +66,62 @@ export class RepoManager {
 
   constructor(config?: RepoConfig, cwd?: string) {
     this.cwd = cwd || process.cwd();
-    this.config = config || loadRepoConfig() || { platform: 'github' };
+    this.config = config || this.loadConfig();
     this.git = new Git(this.cwd, this.config.environments, this.config.defaultEnvironment);
     this.provider = createProvider(this.config);
+  }
+
+  /**
+   * Load repo configuration from project
+   *
+   * Transforms the YAML handler-based config format into the flat RepoConfig
+   * that the rest of the class expects.
+   */
+  private loadConfig(): RepoConfig {
+    const raw = loadRepoConfig();
+
+    if (!raw) {
+      return { platform: 'github' };
+    }
+
+    // Already flat RepoConfig format
+    if (raw.platform) {
+      return raw as RepoConfig;
+    }
+
+    // Transform YAML handler-based format to flat RepoConfig
+    if (raw.active_handler && raw.handlers) {
+      const platform = raw.active_handler as RepoConfig['platform'];
+      const handler = raw.handlers[platform] || {};
+      const defaults = raw.defaults || {};
+
+      // Map YAML environment format (snake_case) to SDK format (camelCase)
+      let environments: Record<string, { branch: string; protected?: boolean; deployTarget?: string }> | undefined;
+      if (defaults.environments) {
+        environments = {};
+        for (const [envId, envConfig] of Object.entries(defaults.environments as Record<string, any>)) {
+          environments[envId] = {
+            branch: envConfig.branch,
+            protected: envConfig.protected,
+            deployTarget: envConfig.deploy_target,
+          };
+        }
+      }
+
+      return {
+        platform,
+        owner: handler.owner,
+        repo: handler.repo,
+        token: handler.token,
+        environments,
+        defaultEnvironment: defaults.default_environment,
+        branchPrefixes: defaults.branch_naming,
+      };
+    }
+
+    throw new ConfigurationError(
+      'Invalid repo configuration. Expected "platform" or "active_handler" + "handlers" format.'
+    );
   }
 
   /**

@@ -1,6 +1,6 @@
 ---
 name: handler-work-tracker-github
-description: "[DEPRECATED] GitHub Issues handler - Use Fractary CLI instead"
+description: "[DEPRECATED] GitHub Issues handler - Use Fractary Core CLI instead"
 model: haiku
 handler_type: work-tracker
 platform: github
@@ -9,14 +9,14 @@ deprecated: true
 
 # GitHub Work Tracker Handler
 
-> **⚠️ DEPRECATED**: This handler is deprecated. Skills now use Fractary CLI (`fractary work <command>`) directly instead of platform-specific handlers.
+> **⚠️ DEPRECATED**: This handler is deprecated. Skills now use Fractary Core CLI (`fractary-core work <command>`) directly instead of platform-specific handlers.
 >
 > **Migration**: See `specs/WORK-00356-implement-faber-cli-work-commands.md` for the CLI migration plan.
 
 <CONTEXT>
 You are the GitHub Issues handler for the work plugin. This handler is **DEPRECATED** as of the CLI migration.
 
-**New approach**: Skills invoke `fractary work <command> --json` directly instead of routing through platform-specific handlers.
+**New approach**: Skills invoke `fractary-core work <command> --json` directly instead of routing through platform-specific handlers.
 
 **Why deprecated**:
 1. CLI provides platform abstraction at a lower level
@@ -27,7 +27,7 @@ You are the GitHub Issues handler for the work plugin. This handler is **DEPRECA
 
 <CRITICAL_RULES>
 1. **DEPRECATED** - Do not use this handler for new implementations
-2. Skills should use Fractary CLI directly: `fractary work <command> --json`
+2. Skills should use Fractary Core CLI directly: `fractary-core work <command> --json`
 3. Existing scripts retained for backward compatibility only
 4. No new features will be added to this handler
 </CRITICAL_RULES>
@@ -41,7 +41,7 @@ Skill → Handler → scripts/*.sh → GitHub API
 
 ### After (CLI-based)
 ```
-Skill → Fractary CLI → GitHub API
+Skill → Fractary Core CLI → GitHub API
 ```
 
 ### Example Migration
@@ -55,25 +55,25 @@ Skill → Fractary CLI → GitHub API
 **After (recommended):**
 ```bash
 # Skill invokes CLI directly
-fractary work issue fetch 123 --json
+fractary-core work issue fetch 123 --json
 ```
 
 ## CLI Command Mapping
 
 | Handler Operation | CLI Command | Status |
 |-------------------|-------------|--------|
-| fetch-issue | `fractary work issue fetch <n>` | ✅ Available |
-| create-issue | `fractary work issue create` | ✅ Available |
-| update-issue | `fractary work issue update <n>` | ✅ Available |
-| close-issue | `fractary work issue close <n>` | ✅ Available |
-| reopen-issue | `fractary work issue reopen <n>` | ❌ Missing |
-| list-issues | `fractary work issue search` | ✅ Available |
-| create-comment | `fractary work comment create <n>` | ✅ Available |
-| list-comments | `fractary work comment list <n>` | ✅ Available |
-| add-label | `fractary work label add <n>` | ✅ Available |
-| remove-label | `fractary work label remove <n>` | ✅ Available |
-| assign-issue | `fractary work issue assign <n>` | ❌ Missing |
-| classify-issue | `fractary work issue classify <n>` | ❌ Missing |
+| fetch-issue | `fractary-core work issue fetch <n>` | ✅ Available |
+| create-issue | `fractary-core work issue create` | ✅ Available |
+| update-issue | `fractary-core work issue update <n>` | ✅ Available |
+| close-issue | `fractary-core work issue close <n>` | ✅ Available |
+| reopen-issue | `fractary-core work issue reopen <n>` | ❌ Missing |
+| list-issues | `fractary-core work issue search` | ✅ Available |
+| create-comment | `fractary-core work comment create <n>` | ✅ Available |
+| list-comments | `fractary-core work comment list <n>` | ✅ Available |
+| add-label | `fractary-core work label add <n>` | ✅ Available |
+| remove-label | `fractary-core work label remove <n>` | ✅ Available |
+| assign-issue | `fractary-core work issue assign <n>` | ❌ Missing |
+| classify-issue | `fractary-core work issue classify <n>` | ❌ Missing |
 
 ## Backward Compatibility
 

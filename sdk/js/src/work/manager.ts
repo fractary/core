@@ -55,7 +55,7 @@ export class WorkManager {
     const raw = loadWorkConfig(findProjectRoot());
     if (!raw) {
       throw new ConfigurationError(
-        'Work configuration not found. Run "fractary work init" to set up.'
+        'Work configuration not found. Run "fractary-core work init" to set up.'
       );
     }
 
