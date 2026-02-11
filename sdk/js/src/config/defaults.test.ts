@@ -23,7 +23,6 @@ describe('getDefaultConfig', () => {
       expect(config.repo).toBeDefined();
       expect(config.logs).toBeDefined();
       expect(config.file).toBeDefined();
-      expect(config.spec).toBeDefined();
       expect(config.docs).toBeDefined();
     });
 
@@ -160,8 +159,6 @@ describe('getDefaultConfig', () => {
     it('uses local storage by default', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.handlers?.['specs-write']?.type).toBe('local');
-      expect(config.file?.handlers?.['specs-archive']?.type).toBe('local');
       expect(config.file?.handlers?.['logs-write']?.type).toBe('local');
       expect(config.file?.handlers?.['logs-archive']?.type).toBe('local');
       expect(config.file?.handlers?.['docs-write']?.type).toBe('local');
@@ -171,25 +168,30 @@ describe('getDefaultConfig', () => {
     it('configures local base paths', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.handlers?.['specs-write']?.local?.base_path).toBe('.fractary/specs');
-      expect(config.file?.handlers?.['specs-archive']?.local?.base_path).toBe('.fractary/specs/archive');
-      expect(config.file?.handlers?.['logs-write']?.local?.base_path).toBe('.fractary/logs');
-      expect(config.file?.handlers?.['logs-archive']?.local?.base_path).toBe('.fractary/logs/archive');
-      expect(config.file?.handlers?.['docs-write']?.local?.base_path).toBe('.fractary/docs');
-      expect(config.file?.handlers?.['docs-archive']?.local?.base_path).toBe('.fractary/docs/archive');
+      expect(config.file?.handlers?.['logs-write']?.local?.base_path).toBe('logs');
+      expect(config.file?.handlers?.['logs-archive']?.local?.base_path).toBe('logs/_archive');
+      expect(config.file?.handlers?.['docs-write']?.local?.base_path).toBe('docs');
+      expect(config.file?.handlers?.['docs-archive']?.local?.base_path).toBe('docs/_archive');
     });
 
     it('does not include S3-specific fields for local', () => {
       const config = getDefaultConfig();
 
-      expect(config.file?.handlers?.['specs-write']?.bucket).toBeUndefined();
-      expect(config.file?.handlers?.['specs-write']?.region).toBeUndefined();
+      expect(config.file?.handlers?.['logs-write']?.bucket).toBeUndefined();
+      expect(config.file?.handlers?.['logs-write']?.region).toBeUndefined();
     });
 
     it('does not include unused global settings', () => {
       const config = getDefaultConfig();
 
       expect(config.file?.global_settings).toBeUndefined();
+    });
+
+    it('does not include spec handlers', () => {
+      const config = getDefaultConfig();
+
+      expect(config.file?.handlers?.['specs-write']).toBeUndefined();
+      expect(config.file?.handlers?.['specs-archive']).toBeUndefined();
     });
   });
 
@@ -201,9 +203,9 @@ describe('getDefaultConfig', () => {
         awsRegion: 'us-west-2',
       });
 
-      expect(config.file?.handlers?.['specs-write']?.type).toBe('s3');
-      expect(config.file?.handlers?.['specs-write']?.bucket).toBe('my-bucket');
-      expect(config.file?.handlers?.['specs-write']?.region).toBe('us-west-2');
+      expect(config.file?.handlers?.['logs-write']?.type).toBe('s3');
+      expect(config.file?.handlers?.['logs-write']?.bucket).toBe('my-bucket');
+      expect(config.file?.handlers?.['logs-write']?.region).toBe('us-west-2');
     });
 
     it('includes S3 prefixes', () => {
@@ -212,16 +214,16 @@ describe('getDefaultConfig', () => {
         s3Bucket: 'my-bucket',
       });
 
-      expect(config.file?.handlers?.['specs-write']?.prefix).toBe('specs/');
-      expect(config.file?.handlers?.['specs-archive']?.prefix).toBe('specs/archive/');
       expect(config.file?.handlers?.['logs-write']?.prefix).toBe('logs/');
-      expect(config.file?.handlers?.['logs-archive']?.prefix).toBe('logs/archive/');
+      expect(config.file?.handlers?.['logs-archive']?.prefix).toBe('logs/_archive/');
+      expect(config.file?.handlers?.['docs-write']?.prefix).toBe('docs/');
+      expect(config.file?.handlers?.['docs-archive']?.prefix).toBe('docs/_archive/');
     });
 
     it('falls back to local when s3 specified without bucket', () => {
       const config = getDefaultConfig({ fileHandler: 's3' });
 
-      expect(config.file?.handlers?.['specs-write']?.type).toBe('local');
+      expect(config.file?.handlers?.['logs-write']?.type).toBe('local');
     });
 
     it('uses default region when not specified', () => {
@@ -230,7 +232,7 @@ describe('getDefaultConfig', () => {
         s3Bucket: 'my-bucket',
       });
 
-      expect(config.file?.handlers?.['specs-write']?.region).toBe('us-east-1');
+      expect(config.file?.handlers?.['logs-write']?.region).toBe('us-east-1');
     });
   });
 
@@ -258,31 +260,6 @@ describe('getDefaultConfig', () => {
     });
   });
 
-  describe('spec configuration', () => {
-    it('includes spec config with schema version', () => {
-      const config = getDefaultConfig();
-      expect(config.spec?.schema_version).toBe('1.0');
-    });
-
-    it('includes default file handler entries', () => {
-      const config = getDefaultConfig();
-      const handlers = config.spec?.storage?.file_handlers;
-
-      expect(handlers).toHaveLength(1);
-      expect(handlers?.[0]?.name).toBe('default');
-      expect(handlers?.[0]?.write).toBe('specs-write');
-      expect(handlers?.[0]?.archive).toBe('specs-archive');
-    });
-
-    it('does not include unused naming, archive, or integration settings', () => {
-      const config = getDefaultConfig();
-
-      expect(config.spec?.naming).toBeUndefined();
-      expect(config.spec?.archive).toBeUndefined();
-      expect(config.spec?.integration).toBeUndefined();
-    });
-  });
-
   describe('docs configuration', () => {
     it('includes docs config with schema version', () => {
       const config = getDefaultConfig();
@@ -291,7 +268,7 @@ describe('getDefaultConfig', () => {
 
     it('includes custom templates path', () => {
       const config = getDefaultConfig();
-      expect(config.docs?.custom_templates_path).toBe('.fractary/docs/templates/manifest.yaml');
+      expect(config.docs?.custom_templates_path).toBe('docs/templates/manifest.yaml');
     });
 
     it('includes default file handler entries', () => {
@@ -319,7 +296,6 @@ describe('getMinimalConfig', () => {
     expect(config.repo).toBeDefined();
     expect(config.logs).toBeUndefined();
     expect(config.file).toBeUndefined();
-    expect(config.spec).toBeUndefined();
     expect(config.docs).toBeUndefined();
   });
 
@@ -367,7 +343,7 @@ describe('DefaultConfigOptions', () => {
     const config = getDefaultConfig(options);
 
     expect(config.work?.active_handler).toBe('linear');
-    expect(config.file?.handlers?.specs?.bucket).toBe('custom-bucket');
-    expect(config.file?.handlers?.specs?.region).toBe('eu-west-1');
+    expect(config.file?.handlers?.['logs-write']?.bucket).toBe('custom-bucket');
+    expect(config.file?.handlers?.['logs-write']?.region).toBe('eu-west-1');
   });
 });

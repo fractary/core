@@ -247,52 +247,6 @@
         ]
       },
       {
-        "name": "fractary-spec",
-        "source": "./plugins/spec",
-        "description": "Manage ephemeral specifications tied to work items with lifecycle-based archival",
-        "version": "2.0.19",
-        "author": {
-          "name": "The Fractary",
-          "url": "https://github.com/fractary"
-        },
-        "homepage": "https://github.com/fractary/core/tree/main/plugins/spec",
-        "repository": "https://github.com/fractary/core/tree/main/plugins/spec",
-        "license": "MIT",
-        "keywords": [
-          "specification",
-          "specs",
-          "architecture",
-          "design",
-          "documentation",
-          "work-items",
-          "lifecycle"
-        ],
-        "category": "development",
-        "strict": true,
-        "commands": [
-          "./commands/spec-archive.md",
-          "./commands/spec-create.md",
-          "./commands/spec-delete.md",
-          "./commands/spec-get.md",
-          "./commands/spec-list.md",
-          "./commands/spec-refine.md",
-          "./commands/spec-update.md",
-          "./commands/spec-validate.md",
-          "./commands/template-list.md"
-        ],
-        "agents": [
-          "./agents/spec-archiver.md",
-          "./agents/spec-creator.md",
-          "./agents/spec-deleter.md",
-          "./agents/spec-getter.md",
-          "./agents/spec-lister.md",
-          "./agents/spec-refiner.md",
-          "./agents/spec-updater.md",
-          "./agents/spec-validator.md",
-          "./agents/template-lister.md"
-        ]
-      },
-      {
         "name": "fractary-docs",
         "source": "./plugins/docs",
         "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",

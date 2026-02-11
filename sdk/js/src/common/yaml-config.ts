@@ -23,7 +23,6 @@ export const PLUGIN_DOC_URLS: Record<string, string> = {
   repo: `${GITHUB_DOCS_BASE_URL}/plugins/repo/README.md`,
   logs: `${GITHUB_DOCS_BASE_URL}/plugins/logs/README.md`,
   file: `${GITHUB_DOCS_BASE_URL}/plugins/file/README.md`,
-  spec: `${GITHUB_DOCS_BASE_URL}/plugins/spec/README.md`,
   docs: `${GITHUB_DOCS_BASE_URL}/plugins/docs/README.md`,
   codex: `${GITHUB_DOCS_BASE_URL}/docs/guides/configuration.md#codex-configuration`,
 };
@@ -159,7 +158,7 @@ export interface PluginFileHandler {
 /**
  * Plugin storage configuration
  *
- * Shared storage shape used by spec, logs, and docs plugins.
+ * Shared storage shape used by logs and docs plugins.
  * Provides a list of file handler mappings where the first entry named
  * 'default' acts as the fallback and additional entries can override
  * handlers for specific templates or types.
@@ -197,18 +196,6 @@ export interface FileConfig {
   global_settings?: Record<string, any>;
   // v1.0 config (deprecated) - used active_handler to select from handlers
   active_handler?: string;
-}
-
-/**
- * Specification management configuration
- */
-export interface SpecConfig {
-  schema_version: string;
-  storage?: PluginStorage;
-  naming?: Record<string, any>;
-  archive?: Record<string, any>;
-  integration?: Record<string, any>;
-  templates?: Record<string, any>;
 }
 
 /**
@@ -250,7 +237,6 @@ export interface CoreYamlConfig {
   repo?: RepoConfig;
   logs?: LogsConfig;
   file?: FileConfig;
-  spec?: SpecConfig;
   docs?: DocsConfig;
   codex?: CodexConfig;
 }

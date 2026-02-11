@@ -80,7 +80,7 @@ async function validateCommand(options: { verbose?: boolean }): Promise<void> {
     }
 
     // Check for at least one plugin section
-    const pluginSections = ['work', 'repo', 'logs', 'file', 'spec', 'docs'];
+    const pluginSections = ['work', 'repo', 'logs', 'file', 'docs'];
     const presentSections = pluginSections.filter((section) => config[section]);
 
     if (presentSections.length === 0) {
@@ -323,7 +323,7 @@ async function configureCommand(options: ConfigureOptions): Promise<void> {
       console.log(chalk.gray(`  Repo platform: ${config.repo.active_handler}`));
     }
     if (config.file) {
-      const fileType = config.file.handlers?.specs?.type || 'local';
+      const fileType = config.file.handlers?.['docs-write']?.type || 'local';
       console.log(chalk.gray(`  File storage: ${fileType}`));
     }
 

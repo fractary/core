@@ -8,7 +8,6 @@
 export {
   getWorkManager,
   getRepoManager,
-  getSpecManager,
   getLogManager,
   getFileManager,
   getDocsManager,
@@ -20,7 +19,6 @@ export {
 // Re-export command creators for programmatic composition
 export { createWorkCommand } from './commands/work';
 export { createRepoCommand } from './commands/repo';
-export { createSpecCommand } from './commands/spec';
 export { createLogsCommand } from './commands/logs';
 export { createFileCommand } from './commands/file';
 export { createDocsCommand } from './commands/docs';

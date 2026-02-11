@@ -36,45 +36,30 @@ file:
       type: local
       local:
         base_path: .fractary
-    specs-write:
-      type: local
-      local:
-        base_path: .fractary/specs
-    specs-archive:
-      type: local
-      local:
-        base_path: .fractary/specs/archive
     logs-write:
       type: local
       local:
-        base_path: .fractary/logs
+        base_path: logs
     logs-archive:
       type: local
       local:
-        base_path: .fractary/logs/archive
+        base_path: logs/_archive
     docs-write:
       type: local
       local:
-        base_path: .fractary/docs
+        base_path: docs
     docs-archive:
       type: local
       local:
-        base_path: .fractary/docs/archive
+        base_path: docs/_archive
 docs:
   schema_version: '1.1'
-  custom_templates_path: .fractary/docs/templates/manifest.yaml
+  custom_templates_path: docs/templates/manifest.yaml
   storage:
     file_handlers:
       - name: default
         write: docs-write
         archive: docs-archive
-spec:
-  schema_version: '1.0'
-  storage:
-    file_handlers:
-      - name: default
-        write: specs-write
-        archive: specs-archive
 logs:
   schema_version: '2.0'
   storage:

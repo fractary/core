@@ -6,7 +6,6 @@ import { Config } from '../config.js';
 import { errorResult } from './helpers.js';
 
 // Import all handler modules
-import * as specHandlers from './spec.js';
 import * as logsHandlers from './logs.js';
 import * as fileHandlers from './file.js';
 import * as docsHandlers from './docs.js';
@@ -22,18 +21,6 @@ export async function handleToolCall(
   config: Config
 ): Promise<CallToolResult> {
   switch (name) {
-    // Spec module (5 tools)
-    case 'fractary_spec_create':
-      return specHandlers.handleSpecCreate(args as Parameters<typeof specHandlers.handleSpecCreate>[0], config);
-    case 'fractary_spec_validate':
-      return specHandlers.handleSpecValidate(args as Parameters<typeof specHandlers.handleSpecValidate>[0], config);
-    case 'fractary_spec_refine':
-      return specHandlers.handleSpecRefine(args as Parameters<typeof specHandlers.handleSpecRefine>[0], config);
-    case 'fractary_spec_list':
-      return specHandlers.handleSpecList(args as Parameters<typeof specHandlers.handleSpecList>[0], config);
-    case 'fractary_spec_read':
-      return specHandlers.handleSpecRead(args as Parameters<typeof specHandlers.handleSpecRead>[0], config);
-
     // Logs module (5 tools)
     case 'fractary_logs_capture':
       return logsHandlers.handleLogsCapture(args as Parameters<typeof logsHandlers.handleLogsCapture>[0], config);

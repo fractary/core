@@ -6,7 +6,6 @@
 
 import { WorkManager } from '../work/manager';
 import { RepoManager } from '../repo/manager';
-import { SpecManager } from '../spec/manager';
 import { LogManager } from '../logs/manager';
 import { FileManager } from '../file/manager';
 import { DocsManager } from '../docs/manager';
@@ -19,10 +18,6 @@ describe('Fractary Core SDK - Smoke Tests', () => {
 
     it('should import RepoManager', () => {
       expect(RepoManager).toBeDefined();
-    });
-
-    it('should import SpecManager', () => {
-      expect(SpecManager).toBeDefined();
     });
 
     it('should import LogManager', () => {
@@ -60,12 +55,6 @@ describe('Fractary Core SDK - Smoke Tests', () => {
       };
       const manager = new RepoManager(config);
       expect(manager).toBeInstanceOf(RepoManager);
-    });
-
-    it('should create SpecManager with config', () => {
-      const config = { localPath: '.fractary/specs' };
-      const manager = new SpecManager(config);
-      expect(manager).toBeInstanceOf(SpecManager);
     });
 
     it('should create LogManager with config', () => {

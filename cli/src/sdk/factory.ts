@@ -12,7 +12,6 @@
 import type {
   WorkManager,
   RepoManager,
-  SpecManager,
   LogManager,
   FileManager,
   DocsManager,
@@ -26,7 +25,6 @@ import type {
 interface SDKInstances {
   work?: WorkManager;
   repo?: RepoManager;
-  spec?: SpecManager;
   logs?: LogManager;
   file?: FileManager;
   docs?: DocsManager;
@@ -84,24 +82,6 @@ export async function getRepoManager(config?: any): Promise<RepoManager> {
     instances.repo = new RepoManagerClass(config);
   }
   return instances.repo;
-}
-
-/**
- * Get SpecManager instance (lazy-loaded with dynamic import)
- */
-export async function getSpecManager(config?: any): Promise<SpecManager> {
-  if (!instances.spec) {
-    let SpecManagerClass: typeof SpecManager;
-    try {
-      // Dynamic import to avoid loading SDK at module load time
-      const mod = await import('@fractary/core/spec');
-      SpecManagerClass = mod.SpecManager;
-    } catch (error) {
-      throw new SDKNotAvailableError('core', error instanceof Error ? error : undefined);
-    }
-    instances.spec = new SpecManagerClass(config);
-  }
-  return instances.spec;
 }
 
 /**
@@ -281,7 +261,6 @@ export async function getDocTypeRegistry(config?: any): Promise<DocTypeRegistry>
 export function clearInstances(): void {
   instances.work = undefined;
   instances.repo = undefined;
-  instances.spec = undefined;
   instances.logs = undefined;
   instances.file = undefined;
   instances.docs = undefined;

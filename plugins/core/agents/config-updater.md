@@ -59,7 +59,7 @@ If ambiguous, use AskUserQuestion to clarify.
 Show which sections will be modified and which will be preserved:
 ```
 Sections to MODIFY: work
-Sections PRESERVED: repo, logs, file, spec, docs
+Sections PRESERVED: repo, logs, file, docs
 
 BEFORE:
   work.active_handler: github
@@ -94,7 +94,6 @@ This agent can modify these top-level sections:
 - `repo` - Repository configuration
 - `logs` - Logs configuration
 - `file` - File storage configuration
-- `spec` - Specification configuration
 - `docs` - Documentation configuration
 - `version` - Config version
 

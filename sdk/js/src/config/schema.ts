@@ -105,7 +105,7 @@ export const RepoConfigSchema = z.object({
  * Plugin file handler entry schema
  *
  * Validates a single entry in the file_handlers list used by
- * spec, logs, and docs plugins. Each entry maps a name to
+ * logs and docs plugins. Each entry maps a name to
  * write and archive handler references.
  */
 export const PluginFileHandlerSchema = z.object({
@@ -117,7 +117,7 @@ export const PluginFileHandlerSchema = z.object({
 /**
  * Plugin storage schema
  *
- * Shared storage schema for spec, logs, and docs plugins.
+ * Shared storage schema for logs and docs plugins.
  * Contains a list of file handler mappings where the 'default'
  * entry acts as a fallback and additional entries provide
  * template-specific overrides.
@@ -175,18 +175,6 @@ export const FileConfigSchema = z.object({
 });
 
 /**
- * Specification configuration schema
- */
-export const SpecConfigSchema = z.object({
-  schema_version: z.string(),
-  storage: PluginStorageSchema.optional(),
-  naming: z.record(z.any()).optional(),
-  archive: z.record(z.any()).optional(),
-  integration: z.record(z.any()).optional(),
-  templates: z.record(z.any()).optional(),
-});
-
-/**
  * Documentation configuration schema
  */
 export const DocsConfigSchema = z.object({
@@ -224,7 +212,6 @@ export const CoreYamlConfigSchema = z.object({
   repo: RepoConfigSchema.optional(),
   logs: LogsConfigSchema.optional(),
   file: FileConfigSchema.optional(),
-  spec: SpecConfigSchema.optional(),
   docs: DocsConfigSchema.optional(),
   codex: CodexConfigSchema.optional(),
 });
@@ -280,7 +267,7 @@ export function validateConfig(config: unknown): ValidationResult {
   const configObj = config as Record<string, unknown>;
 
   // Check for at least one plugin section
-  const pluginSections = ['work', 'repo', 'logs', 'file', 'spec', 'docs'];
+  const pluginSections = ['work', 'repo', 'logs', 'file', 'docs'];
   const presentSections = pluginSections.filter((section) => configObj[section]);
   if (presentSections.length === 0) {
     warnings.push('No plugin sections found in configuration');
