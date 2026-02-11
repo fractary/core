@@ -27,6 +27,7 @@ function git(args: string, cwd?: string): string {
     encoding: 'utf-8',
     cwd: cwd || findProjectRoot(),
     maxBuffer: 10 * 1024 * 1024,
+    stdio: ['pipe', 'pipe', 'pipe'],
   };
 
   try {
