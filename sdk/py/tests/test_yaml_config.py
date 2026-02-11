@@ -419,13 +419,6 @@ logs:
 file:
   schema_version: "1.0"
   active_handler: local
-spec:
-  schema_version: "1.0"
-  storage:
-    file_handlers:
-      - name: default
-        write: specs-write
-        archive: specs-archive
 docs:
   schema_version: "1.1"
   doc_types:
@@ -442,7 +435,6 @@ docs:
         assert config['repo']['active_handler'] == 'github'
         assert config['logs']['schema_version'] == '2.0'
         assert config['file']['schema_version'] == '1.0'
-        assert config['spec']['schema_version'] == '1.0'
         assert config['docs']['schema_version'] == '1.1'
 
 

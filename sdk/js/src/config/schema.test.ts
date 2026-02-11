@@ -11,7 +11,6 @@ import {
   RepoConfigSchema,
   LogsConfigSchema,
   FileConfigSchema,
-  SpecConfigSchema,
   DocsConfigSchema,
   CodexConfigSchema,
 } from './schema';
@@ -450,40 +449,6 @@ describe('FileConfigSchema', () => {
     const result = FileConfigSchema.safeParse(fileConfig);
 
     expect(result.success).toBe(false);
-  });
-});
-
-describe('SpecConfigSchema', () => {
-  it('validates valid spec config', () => {
-    const specConfig = {
-      schema_version: '1.0',
-    };
-    const result = SpecConfigSchema.safeParse(specConfig);
-
-    expect(result.success).toBe(true);
-  });
-
-  it('requires schema_version', () => {
-    const specConfig = {};
-    const result = SpecConfigSchema.safeParse(specConfig);
-
-    expect(result.success).toBe(false);
-  });
-
-  it('allows optional fields', () => {
-    const specConfig = {
-      schema_version: '1.0',
-      storage: {
-        file_handlers: [
-          { name: 'default', write: 'specs-write', archive: 'specs-archive' },
-        ],
-      },
-      naming: { issue_specs: { prefix: 'WORK' } },
-      archive: { strategy: 'lifecycle' },
-    };
-    const result = SpecConfigSchema.safeParse(specConfig);
-
-    expect(result.success).toBe(true);
   });
 });
 

@@ -1,9 +1,1 @@
-# ===== fractary-logs (managed) =====
-logs/archive/
-# ===== end fractary-logs =====
-
-# ===== fractary-spec (managed) =====
-specs/archive/
-# ===== end fractary-spec =====
-# ===== end fractary-faber =====
 codex/cache/

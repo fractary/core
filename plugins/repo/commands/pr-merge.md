@@ -42,7 +42,6 @@ Steps:
 | `plugins/work/**` | fractary-work | Reinstall plugin or restart Claude Code |
 | `plugins/file/**` | fractary-file | Reinstall plugin or restart Claude Code |
 | `plugins/logs/**` | fractary-logs | Reinstall plugin or restart Claude Code |
-| `plugins/spec/**` | fractary-spec | Reinstall plugin or restart Claude Code |
 | `plugins/docs/**` | fractary-docs | Reinstall plugin or restart Claude Code |
 | `plugins/status/**` | fractary-status | `/Fractary-Status-Sync` |
 

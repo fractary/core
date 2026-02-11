@@ -100,7 +100,7 @@ Review the issue and identify gaps in these **requirements-focused** areas:
 - Testing frameworks or approaches ("Should we use Jest or Vitest?")
 
 **If the issue description includes technical questions, note them but defer to spec-refine:**
-"Note: This issue contains technical questions (e.g., 'which database to use'). These are best addressed during the architect phase using /fractary-spec:refine after requirements are clear."
+"Note: This issue contains technical questions (e.g., 'which database to use'). These are best addressed during the architect phase using /fractary-docs:refine after requirements are clear."
 
 ## Step 3: Generate Clarifying Questions
 
@@ -324,7 +324,7 @@ Example:
 Q: Should we include caching?
 A: [Not answered]
 
-Best-effort decision: Added to acceptance criteria as "TBD: Determine caching strategy during architecture phase" - this is a technical decision best made during spec-refine.
+Best-effort decision: Added to acceptance criteria as "TBD: Determine caching strategy during architecture phase" - this is a technical decision best made during docs-refine.
 ```
 
 ### Execute Updates:

@@ -1,7 +1,7 @@
 {
   "name": "@fractary/core",
   "version": "0.7.17",
-  "description": "Fractary Core SDK - Primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation",
+  "description": "Fractary Core SDK - Primitive operations for work tracking, repository management, logging, file storage, and documentation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "typesVersions": {
@@ -23,9 +23,6 @@
       ],
       "repo": [
         "dist/repo/index.d.ts"
-      ],
-      "spec": [
-        "dist/spec/index.d.ts"
       ],
       "logs": [
         "dist/logs/index.d.ts"
@@ -54,10 +51,6 @@
     "./repo": {
       "types": "./dist/repo/index.d.ts",
       "default": "./dist/repo/index.js"
-    },
-    "./spec": {
-      "types": "./dist/spec/index.d.ts",
-      "default": "./dist/spec/index.js"
     },
     "./logs": {
       "types": "./dist/logs/index.d.ts",
@@ -112,7 +105,6 @@
     "bitbucket",
     "jira",
     "linear",
-    "specification",
     "logging",
     "file-storage"
   ],

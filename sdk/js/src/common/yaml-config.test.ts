@@ -412,13 +412,6 @@ logs:
 file:
   schema_version: "1.0"
   active_handler: local
-spec:
-  schema_version: "1.0"
-  storage:
-    file_handlers:
-      - name: default
-        write: specs-write
-        archive: specs-archive
 docs:
   schema_version: "1.1"
   doc_types:
@@ -435,7 +428,6 @@ docs:
       expect(config?.repo?.active_handler).toBe('github');
       expect(config?.logs?.schema_version).toBe('2.0');
       expect(config?.file?.schema_version).toBe('1.0');
-      expect(config?.spec?.schema_version).toBe('1.0');
       expect(config?.docs?.schema_version).toBe('1.1');
     });
   });

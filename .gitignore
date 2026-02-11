@@ -20,17 +20,15 @@ env/
 Thumbs.db
 
 # Fractary-specific directories
-.fractary/logs/*.log
-.fractary/logs/*.log.gz
 .fractary/codex/cache/
 
-# Local archive directories (gitignored to keep archived items out of source control)
-.fractary/specs/archive/
-.fractary/logs/archive/
+# ===== fractary-logs (managed) =====
+logs/_archive/
+# ===== end fractary-logs =====
 
-# Old structure (backward compat for pre-v2.0)
-/logs/
-/specs/
+# ===== fractary-docs (managed) =====
+docs/_archive/
+# ===== end fractary-docs =====
 
 # Build artifacts
 dist/

@@ -46,15 +46,6 @@ export type {
 } from '@fractary/core/repo';
 
 export type {
-  Specification,
-  SpecCreateOptions,
-  SpecListOptions,
-  SpecValidateResult,
-  SpecRefineResult,
-  PhaseUpdateOptions,
-} from '@fractary/core/spec';
-
-export type {
   LogEntry,
   LogWriteOptions,
   LogAppendOptions,

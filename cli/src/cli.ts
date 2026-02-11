@@ -11,7 +11,6 @@ import chalk from 'chalk';
 import { loadEnv } from '@fractary/core/config';
 import { createWorkCommand } from './commands/work';
 import { createRepoCommand } from './commands/repo';
-import { createSpecCommand } from './commands/spec';
 import { createLogsCommand } from './commands/logs';
 import { createFileCommand } from './commands/file';
 import { createDocsCommand } from './commands/docs';
@@ -29,13 +28,12 @@ const program = new Command();
 
 program
   .name('fractary-core')
-  .description('CLI for Fractary Core SDK - config, work, repo, spec, logs, file, docs')
+  .description('CLI for Fractary Core SDK - config, work, repo, logs, file, docs')
   .version(packageJson.version);
 
 // Add all command trees
 program.addCommand(createWorkCommand());
 program.addCommand(createRepoCommand());
-program.addCommand(createSpecCommand());
 program.addCommand(createLogsCommand());
 program.addCommand(createFileCommand());
 program.addCommand(createDocsCommand());
@@ -51,7 +49,6 @@ ${chalk.bold('Commands:')}
   config      Manage configuration (configure, validate, show, env-switch, env-list, env-show)
   work        Work item tracking (issues, comments, labels, milestones)
   repo        Repository operations (branches, commits, PRs, tags, worktrees)
-  spec        Specification management (create, validate, refine)
   logs        Log management (capture, search, archive)
   file        File storage operations (read, write, list, delete)
   docs        Documentation management (create, search, export)
@@ -64,7 +61,6 @@ ${chalk.bold('Examples:')}
   $ fractary-core config env-list
   $ fractary-core work issue fetch 123
   $ fractary-core repo commit --message "Add feature" --type feat
-  $ fractary-core spec validate SPEC-20241216
   $ fractary-core logs search --query "error" --type session
   $ fractary-core file write data.json --content '{"key":"value"}'
   $ fractary-core docs doc-create guide-001 --title "User Guide" --content "..."
@@ -94,7 +90,7 @@ async function main() {
     if (error.code === 'commander.unknownCommand') {
       console.error(chalk.red('Unknown command:'), error.message);
       console.log(
-        chalk.gray('\nAvailable commands: config, work, repo, spec, logs, file, docs')
+        chalk.gray('\nAvailable commands: config, work, repo, logs, file, docs')
       );
       console.log(chalk.gray('Run "fractary-core --help" for more information.'));
       process.exit(1);

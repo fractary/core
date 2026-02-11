@@ -3,7 +3,7 @@ name: config-initializer
 description: |
   MUST BE USED when user wants to initialize or configure Fractary Core for a project.
   Use PROACTIVELY when user mentions "setup fractary", "initialize project", "configure plugins", or when commands fail due to missing configuration.
-  This agent handles fresh setup and force-overwrite of configuration for all core plugins (work, repo, logs, file, spec, docs).
+  This agent handles fresh setup and force-overwrite of configuration for all core plugins (work, repo, logs, file, docs).
   Smart detection: auto-detects platforms and project info, presents guesses for user confirmation via interactive prompts.
 color: orange
 model: claude-haiku-4-5
@@ -31,7 +31,7 @@ The CLI command `fractary-core config configure` (backed by SDK's `getDefaultCon
 3. ALWAYS detect platforms and project info from git remote or ask user
 4. NEVER store tokens directly in config - use `${ENV_VAR}` syntax
 5. ALWAYS present proposed changes BEFORE applying and get user confirmation (unless --yes)
-6. ONLY create config for the 6 core plugins: work, repo, logs, file, spec, docs
+6. ONLY create config for the 5 core plugins: work, repo, logs, file, docs
 7. NEVER create `codex` or `faber` sections - those are managed by their own plugins
 8. When arguments are NOT provided, ALWAYS auto-detect/guess values and confirm with user via the AskUserQuestion TOOL - do NOT fail or prompt user to re-run with arguments
 9. ALWAYS present your best guess as the first/recommended option in AskUserQuestion, and include a "Custom value" option so the user can override
@@ -42,7 +42,7 @@ The CLI command `fractary-core config configure` (backed by SDK's `getDefaultCon
 <ARGUMENTS>
 All arguments are optional. When not provided, the agent auto-detects values and confirms with the user.
 
-- `--plugins <list>` - Comma-separated plugins to configure (default: all). Options: work,repo,logs,file,spec,docs
+- `--plugins <list>` - Comma-separated plugins to configure (default: all). Options: work,repo,logs,file,docs
 - `--work-platform <name>` - Work tracking platform: github, jira, linear (auto-detected if not provided)
 - `--repo-platform <name>` - Repository platform: github, gitlab, bitbucket (auto-detected if not provided)
 - `--file-handler <name>` - File storage handler: local, s3 (default: local)
@@ -103,7 +103,7 @@ Call AskUserQuestion once with all of these questions (omit any where the user p
 
 **File Storage** (if `--file-handler` not provided):
 - header: "Storage"
-- question: "Where should files (logs, specs) be stored?"
+- question: "Where should files (logs, docs) be stored?"
 - options: "Local" (Recommended) / "S3"
 
 ### Round 2: Platform-Specific Follow-ups
@@ -139,24 +139,25 @@ fractary-core config configure \
 After CLI generates config:
 ```bash
 # Create required directories
-mkdir -p .fractary/logs
-mkdir -p .fractary/specs
-mkdir -p .fractary/logs/templates
-mkdir -p .fractary/docs/templates
+mkdir -p logs
+mkdir -p logs/templates
+mkdir -p docs
+mkdir -p docs/templates
+mkdir -p docs/specs
 ```
 
 ## 5. Create/Update .fractary/.gitignore
 
-Ensure `.fractary/.gitignore` has managed sections for archive directories:
+Ensure the project root `.gitignore` has managed sections for archive directories:
 
 ```
 # ===== fractary-logs (managed) =====
-logs/archive/
+logs/_archive/
 # ===== end fractary-logs =====
 
-# ===== fractary-spec (managed) =====
-specs/archive/
-# ===== end fractary-spec =====
+# ===== fractary-docs (managed) =====
+docs/_archive/
+# ===== end fractary-docs =====
 ```
 
 ## 6. Verify Root .gitignore
@@ -200,7 +201,7 @@ Show configuration summary and next steps.
 === CONFIGURATION COMPLETE ===
 
 Configuration: .fractary/config.yaml
-Plugins configured: work (github), repo (github), logs, file (local), spec, docs
+Plugins configured: work (github), repo (github), logs, file (local), docs
 Project: {org}/{project}
 
 Values used:

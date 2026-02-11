@@ -5,7 +5,7 @@
  * Used by both CLI and agents to ensure consistent config generation.
  */
 
-import type { CoreYamlConfig, WorkConfig, RepoConfig, LogsConfig, FileConfig, SpecConfig, DocsConfig } from '../common/yaml-config';
+import type { CoreYamlConfig, WorkConfig, RepoConfig, LogsConfig, FileConfig, DocsConfig } from '../common/yaml-config';
 
 /**
  * Options for generating default configuration
@@ -117,7 +117,7 @@ function getDefaultLogsConfig(): LogsConfig {
 /**
  * Get default file storage configuration
  *
- * Generates separate write and archive handlers for each plugin (specs, logs, docs).
+ * Generates separate write and archive handlers for each plugin (logs, docs).
  * When using S3, the write handler stores to S3 directly while keeping a local
  * fallback path, and the archive handler uses a separate S3 prefix.
  */
@@ -128,40 +128,22 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
     return {
       schema_version: '2.0',
       handlers: {
-        'specs-write': {
-          type: 's3',
-          bucket: s3Bucket,
-          prefix: 'specs/',
-          region: awsRegion,
-          local: {
-            base_path: '.fractary/specs',
-          },
-        },
-        'specs-archive': {
-          type: 's3',
-          bucket: s3Bucket,
-          prefix: 'specs/archive/',
-          region: awsRegion,
-          local: {
-            base_path: '.fractary/specs/archive',
-          },
-        },
         'logs-write': {
           type: 's3',
           bucket: s3Bucket,
           prefix: 'logs/',
           region: awsRegion,
           local: {
-            base_path: '.fractary/logs',
+            base_path: 'logs',
           },
         },
         'logs-archive': {
           type: 's3',
           bucket: s3Bucket,
-          prefix: 'logs/archive/',
+          prefix: 'logs/_archive/',
           region: awsRegion,
           local: {
-            base_path: '.fractary/logs/archive',
+            base_path: 'logs/_archive',
           },
         },
         'docs-write': {
@@ -170,16 +152,16 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
           prefix: 'docs/',
           region: awsRegion,
           local: {
-            base_path: '.fractary/docs',
+            base_path: 'docs',
           },
         },
         'docs-archive': {
           type: 's3',
           bucket: s3Bucket,
-          prefix: 'docs/archive/',
+          prefix: 'docs/_archive/',
           region: awsRegion,
           local: {
-            base_path: '.fractary/docs/archive',
+            base_path: 'docs/_archive',
           },
         },
       },
@@ -189,56 +171,30 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
   return {
     schema_version: '2.0',
     handlers: {
-      'specs-write': {
-        type: 'local',
-        local: {
-          base_path: '.fractary/specs',
-        },
-      },
-      'specs-archive': {
-        type: 'local',
-        local: {
-          base_path: '.fractary/specs/archive',
-        },
-      },
       'logs-write': {
         type: 'local',
         local: {
-          base_path: '.fractary/logs',
+          base_path: 'logs',
         },
       },
       'logs-archive': {
         type: 'local',
         local: {
-          base_path: '.fractary/logs/archive',
+          base_path: 'logs/_archive',
         },
       },
       'docs-write': {
         type: 'local',
         local: {
-          base_path: '.fractary/docs',
+          base_path: 'docs',
         },
       },
       'docs-archive': {
         type: 'local',
         local: {
-          base_path: '.fractary/docs/archive',
+          base_path: 'docs/_archive',
         },
       },
-    },
-  };
-}
-
-/**
- * Get default specification configuration
- */
-function getDefaultSpecConfig(): SpecConfig {
-  return {
-    schema_version: '1.0',
-    storage: {
-      file_handlers: [
-        { name: 'default', write: 'specs-write', archive: 'specs-archive' },
-      ],
     },
   };
 }
@@ -249,7 +205,7 @@ function getDefaultSpecConfig(): SpecConfig {
 function getDefaultDocsConfig(): DocsConfig {
   return {
     schema_version: '1.1',
-    custom_templates_path: '.fractary/docs/templates/manifest.yaml',
+    custom_templates_path: 'docs/templates/manifest.yaml',
     storage: {
       file_handlers: [
         { name: 'default', write: 'docs-write', archive: 'docs-archive' },
@@ -282,7 +238,6 @@ export function getDefaultConfig(options: DefaultConfigOptions = {}): CoreYamlCo
     work: getDefaultWorkConfig(options),
     file: getDefaultFileConfig(options),
     docs: getDefaultDocsConfig(),
-    spec: getDefaultSpecConfig(),
     logs: getDefaultLogsConfig(),
   };
 }
