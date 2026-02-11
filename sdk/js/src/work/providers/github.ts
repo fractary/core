@@ -98,7 +98,7 @@ export class GitHubWorkProvider implements WorkProvider {
     args.push(`--title "${options.title.replace(/"/g, '\\"')}"`);
 
     if (options.body) {
-      args.push(`--body "${options.body.replace(/"/g, '\\"')}"`);
+      args.push('--body-file -');
     }
     if (options.labels && options.labels.length > 0) {
       args.push(`--label "${options.labels.join(',')}"`);
@@ -111,13 +111,29 @@ export class GitHubWorkProvider implements WorkProvider {
     }
 
     try {
-      const result = exec(`gh issue create ${args.join(' ')} --json number,title,body,state,labels,assignees,milestone,createdAt,updatedAt,url`);
-      return this.parseIssue(JSON.parse(result));
+      const cmd = `gh issue create ${args.join(' ')} --json number,title,body,state,labels,assignees,milestone,createdAt,updatedAt,url`;
+      const execOptions: ExecSyncOptions = {
+        encoding: 'utf-8' as BufferEncoding,
+        maxBuffer: 10 * 1024 * 1024,
+      };
+      if (options.body) {
+        execOptions.input = options.body;
+        execOptions.stdio = ['pipe', 'pipe', 'pipe'];
+      }
+      const result = execSync(cmd, execOptions);
+      const output = (typeof result === 'string' ? result : result.toString()).trim();
+      return this.parseIssue(JSON.parse(output));
     } catch (error) {
       if (error instanceof CommandExecutionError) {
         throw new IssueCreateError(error.stderr);
       }
-      throw error;
+      const err = error as { status?: number; stderr?: Buffer | string };
+      const exitCode = err.status || 1;
+      const stderr = err.stderr?.toString() || '';
+      if (stderr.includes('authentication') || stderr.includes('auth')) {
+        throw new AuthenticationError('github', 'GitHub authentication failed. Run "gh auth login"');
+      }
+      throw new IssueCreateError(stderr || String(error));
     }
   }
 
@@ -147,11 +163,31 @@ export class GitHubWorkProvider implements WorkProvider {
       args.push(`--title "${options.title.replace(/"/g, '\\"')}"`);
     }
     if (options.body) {
-      args.push(`--body "${options.body.replace(/"/g, '\\"')}"`);
+      args.push('--body-file -');
     }
 
     if (args.length > 1) {
-      exec(`gh issue edit ${issueId} ${args.join(' ')}`);
+      const cmd = `gh issue edit ${issueId} ${args.join(' ')}`;
+      if (options.body) {
+        try {
+          execSync(cmd, {
+            input: options.body,
+            encoding: 'utf-8',
+            stdio: ['pipe', 'pipe', 'pipe'],
+            maxBuffer: 10 * 1024 * 1024,
+          });
+        } catch (error: unknown) {
+          const err = error as { status?: number; stderr?: Buffer | string };
+          const exitCode = err.status || 1;
+          const stderr = err.stderr?.toString() || '';
+          if (stderr.includes('authentication') || stderr.includes('auth')) {
+            throw new AuthenticationError('github', 'GitHub authentication failed. Run "gh auth login"');
+          }
+          throw new CommandExecutionError(cmd, exitCode, stderr);
+        }
+      } else {
+        exec(cmd);
+      }
     }
 
     return this.fetchIssue(issueId);
