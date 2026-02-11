@@ -476,6 +476,8 @@ export function substituteEnvVars(content: string, warnMissing = true): string {
   // Maximum length for default values to prevent abuse
   const MAX_DEFAULT_LENGTH = 1000;
 
+  const warnedVars = new Set<string>();
+
   return content.replace(
     /\$\{([A-Z_][A-Z0-9_]*)(:-([^}]+))?\}/g,
     (match, varName, _, defaultValue) => {
@@ -504,7 +506,8 @@ export function substituteEnvVars(content: string, warnMissing = true): string {
         return defaultValue;
       }
 
-      if (warnMissing) {
+      if (warnMissing && !warnedVars.has(varName)) {
+        warnedVars.add(varName);
         console.warn(
           `Warning: Environment variable ${varName} not set. ` +
           `Using placeholder value.`

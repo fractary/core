@@ -29,6 +29,7 @@ function gh<T>(args: string, cwd?: string): T {
     encoding: 'utf-8' as const,
     cwd: cwd || findProjectRoot(),
     maxBuffer: 10 * 1024 * 1024,
+    stdio: ['pipe', 'pipe', 'pipe'] as const,
   };
 
   try {
@@ -49,6 +50,7 @@ function ghRaw(args: string, cwd?: string): string {
     encoding: 'utf-8' as const,
     cwd: cwd || findProjectRoot(),
     maxBuffer: 10 * 1024 * 1024,
+    stdio: ['pipe', 'pipe', 'pipe'] as const,
   };
 
   try {
