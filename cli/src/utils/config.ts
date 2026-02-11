@@ -126,7 +126,6 @@ export function mergeConfig(base: CoreConfig, override: Partial<CoreConfig>): Co
     version: override.version || base.version,
     work: override.work !== undefined ? override.work : base.work,
     repo: override.repo !== undefined ? override.repo : base.repo,
-    spec: override.spec !== undefined ? override.spec : base.spec,
     logs: override.logs !== undefined ? override.logs : base.logs,
     file: override.file !== undefined ? override.file : base.file,
     docs: override.docs !== undefined ? override.docs : base.docs,
