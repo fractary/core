@@ -1,65 +1,54 @@
 # Fractary Core Documentation
 
-Complete documentation for Fractary Core - the foundational infrastructure for managing software development workflows.
+Complete documentation for Fractary Core - foundational infrastructure for managing software development workflows.
 
 ## What is Fractary Core?
 
-Fractary Core provides primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation across multiple platforms. It offers four interfaces (SDK, CLI, MCP Server, and Plugins) to access these capabilities.
+Fractary Core provides primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation. It offers four interfaces (SDK, CLI, MCP Server, and Claude Code Plugins) to access these capabilities.
+
+> **Platform note:** Currently, only **GitHub** is fully supported for work tracking and repository operations. Jira, Linear, GitLab, and Bitbucket providers exist as stubs for future implementation. File storage supports Local, S3, R2, GCS, and Google Drive.
 
 ## The 6 Toolsets
 
-Fractary Core is organized around six **toolsets** - functional areas that each contain related tools and operations:
-
-| Toolset | Description | Platforms |
-|---------|-------------|-----------|
-| **[Work](/docs/sdk/js/work.md)** | Work item and issue tracking | GitHub Issues, Jira, Linear |
-| **[Repo](/docs/sdk/js/repo.md)** | Repository and Git operations | GitHub, GitLab, Bitbucket |
-| **[Spec](/docs/sdk/js/spec.md)** | Technical specification management | Local storage |
-| **[Logs](/docs/sdk/js/logs.md)** | Session and operational logging | Local storage |
-| **[File](/docs/sdk/js/file.md)** | File storage operations | Local, S3 |
-| **[Docs](/docs/sdk/js/docs.md)** | Documentation management | Local storage |
+| Toolset | Description | Platform |
+|---------|-------------|----------|
+| **Work** | Work item and issue tracking | GitHub Issues (Jira, Linear planned) |
+| **Repo** | Repository and Git operations | GitHub (GitLab, Bitbucket planned) |
+| **Spec** | Technical specification management | Local storage |
+| **Logs** | Session and operational logging | Local storage |
+| **File** | File storage operations | Local, S3, R2, GCS, Google Drive |
+| **Docs** | Documentation management | Local storage |
 
 ## The 4 Interfaces
 
-Each toolset is accessible through four interfaces, allowing you to choose the right approach for your workflow:
-
 ### 1. SDK (TypeScript)
 
-The SDK provides programmatic access to all toolsets through Manager classes.
+Programmatic access through Manager classes.
 
 ```typescript
-import { WorkManager } from '@fractary/core/work';
+import { createWorkManager, createRepoManager } from '@fractary/core';
 
-const workManager = new WorkManager({
-  provider: 'github',
-  config: { owner: 'myorg', repo: 'myrepo', token: process.env.GITHUB_TOKEN }
-});
-
+const workManager = await createWorkManager();
 const issue = await workManager.fetchIssue(123);
 ```
 
-**[SDK Documentation](/docs/sdk/js/README.md)** - Installation, quick start, and API reference
+**[SDK Documentation](./sdk/js/README.md)** - 6 Manager classes, factory functions, full type definitions
 
 ### 2. CLI
 
-The CLI provides command-line access to all operations.
+Command-line access with 83 commands across 7 modules.
 
 ```bash
-# Fetch an issue
 fractary-core work issue-fetch 123
-
-# Create a branch
-fractary-core repo branch-create feature/my-feature
-
-# Validate a specification
-fractary-core spec spec-validate-check SPEC-20240101
+fractary-core repo commit --message "Add feature" --type feat --all
+fractary-core file upload ./report.pdf --remote-path exports/report.pdf
 ```
 
-**[CLI Documentation](/docs/cli/README.md)** - Command structure and reference
+**[CLI Documentation](./cli/README.md)** - Complete command reference with all arguments and options
 
 ### 3. MCP Server
 
-The MCP (Model Context Protocol) Server exposes 80 tools for AI agent integration.
+80 tools for AI agent integration via Model Context Protocol.
 
 ```json
 {
@@ -72,22 +61,24 @@ The MCP (Model Context Protocol) Server exposes 80 tools for AI agent integratio
 }
 ```
 
-**[MCP Documentation](/docs/mcp/server/README.md)** - Setup and tool reference
+**[MCP Documentation](./mcp/server/README.md)** - Setup and tool reference
 
-### 4. Claude Plugins
+### 4. Claude Code Plugins
 
-Claude Code plugins provide agents, slash commands, and tools for enhanced workflow integration.
+81 slash commands and 32 agents across 8 plugins.
 
-| Plugin | Commands | Description |
-|--------|----------|-------------|
-| `fractary-work` | `/issue-create`, `/issue-fetch` | Work tracking integration |
-| `fractary-repo` | `/commit`, `/pr-create` | Repository operations |
-| `fractary-spec` | `/spec-create`, `/spec-validate` | Specification management |
-| `fractary-logs` | `/capture`, `/search` | Log management |
-| `fractary-file` | `/upload`, `/download` | File operations |
-| `fractary-docs` | `/write`, `/validate` | Documentation management |
+| Plugin | Commands | Agents | Description |
+|--------|----------|--------|-------------|
+| `fractary-core` | 7 | 3 | Configuration and environment management |
+| `fractary-work` | 8 | 2 | Work item tracking |
+| `fractary-repo` | 13 | 1 | Repository operations |
+| `fractary-spec` | 9 | 9 | Specification management |
+| `fractary-logs` | 15 | 4 | Log management |
+| `fractary-file` | 13 | 5 | File storage |
+| `fractary-docs` | 14 | 6 | Documentation management |
+| `fractary-status` | 2 | 2 | Status line |
 
-**[Plugins Documentation](/docs/plugins/README.md)** - Installation and commands
+**[Plugins Documentation](./plugins/README.md)** - All commands, agents, and triggers
 
 ## Quick Navigation
 
@@ -95,23 +86,23 @@ Claude Code plugins provide agents, slash commands, and tools for enhanced workf
 
 | Toolset | SDK | CLI | MCP | Plugin |
 |---------|-----|-----|-----|--------|
-| Work | [API](/docs/sdk/js/work.md) | [Commands](/docs/cli/work.md) | [Tools](/docs/mcp/server/work.md) | [Plugin](/docs/plugins/work.md) |
-| Repo | [API](/docs/sdk/js/repo.md) | [Commands](/docs/cli/repo.md) | [Tools](/docs/mcp/server/repo.md) | [Plugin](/docs/plugins/repo.md) |
-| Spec | [API](/docs/sdk/js/spec.md) | [Commands](/docs/cli/spec.md) | [Tools](/docs/mcp/server/spec.md) | [Plugin](/docs/plugins/spec.md) |
-| Logs | [API](/docs/sdk/js/logs.md) | [Commands](/docs/cli/logs.md) | [Tools](/docs/mcp/server/logs.md) | [Plugin](/docs/plugins/logs.md) |
-| File | [API](/docs/sdk/js/file.md) | [Commands](/docs/cli/file.md) | [Tools](/docs/mcp/server/file.md) | [Plugin](/docs/plugins/file.md) |
-| Docs | [API](/docs/sdk/js/docs.md) | [Commands](/docs/cli/docs.md) | [Tools](/docs/mcp/server/docs.md) | [Plugin](/docs/plugins/docs.md) |
+| Work | [API](./sdk/js/README.md#workmanager) | [Commands](./cli/README.md#work-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-work) |
+| Repo | [API](./sdk/js/README.md#repomanager) | [Commands](./cli/README.md#repo-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-repo) |
+| Spec | [API](./sdk/js/README.md#specmanager) | [Commands](./cli/README.md#spec-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-spec) |
+| Logs | [API](./sdk/js/README.md#logmanager) | [Commands](./cli/README.md#logs-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-logs) |
+| File | [API](./sdk/js/README.md#filemanager) | [Commands](./cli/README.md#file-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-file) |
+| Docs | [API](./sdk/js/README.md#docsmanager) | [Commands](./cli/README.md#docs-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-docs) |
 
-### Supporting Documentation
+### Guides
 
-- **[Configuration Guide](/docs/guides/configuration.md)** - Unified `.fractary/config.yaml` reference
-- **[Integration Guide](/docs/guides/integration.md)** - Integration patterns and best practices
-- **[Troubleshooting](/docs/guides/troubleshooting.md)** - Common issues and solutions
+- **[Configuration Guide](./guides/configuration.md)** - Unified `.fractary/config.yaml` reference
+- **[Integration Guide](./guides/integration.md)** - Integration patterns and best practices
+- **[Troubleshooting](./guides/troubleshooting.md)** - Common issues and solutions
 
 ### For Contributors
 
-- **[Development Standards](/docs/standards/config-management-standards.md)** - Configuration management standards
-- **[Plugin Development](/docs/guides/new-claude-plugin-framework.md)** - Creating new plugins
+- **[Development Standards](./standards/config-management-standards.md)** - Configuration management standards
+- **[Plugin Development](./guides/new-claude-plugin-framework.md)** - Creating new plugins
 
 ## Getting Started
 
@@ -133,17 +124,25 @@ npm install @fractary/core
 # CLI
 npm install -g @fractary/core-cli
 
-# MCP Server
+# MCP Server (no install needed)
 npx @fractary/core-mcp
 
-# Plugins (in Claude Code)
-# Add to .claude/settings.json:
-# "plugins": ["fractary-work", "fractary-repo", ...]
+# Plugins - installed via Claude Code settings
 ```
 
 ### 3. Configure
 
-Create `.fractary/config.yaml`:
+Create `.fractary/config.yaml` (or use the CLI/plugin initializer):
+
+```bash
+# Via CLI
+fractary-core config configure --owner myorg --repo myrepo
+
+# Via Claude Code plugin
+/fractary-core:config-init
+```
+
+Minimal config:
 
 ```yaml
 version: "2.0"
@@ -163,9 +162,9 @@ repo:
       token: ${GITHUB_TOKEN}
 ```
 
-See the [Configuration Guide](/docs/guides/configuration.md) for complete options.
+See the [Configuration Guide](./guides/configuration.md) for complete options.
 
-## Terminology Reference
+## Terminology
 
 | Term | Context | Example |
 |------|---------|---------|
@@ -174,3 +173,5 @@ See the [Configuration Guide](/docs/guides/configuration.md) for complete option
 | **Command group** | CLI | `fractary-core work issue-create` |
 | **Tool** | MCP Server | `fractary_work_issue_create` |
 | **Plugin** | Claude Code | `fractary-work` plugin |
+| **Command** | Plugin | `/fractary-work:issue-create` slash command |
+| **Agent** | Plugin | `issue-refine-agent` autonomous handler |
