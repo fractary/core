@@ -16,7 +16,6 @@ import {
   RepoConfig,
   LogsConfig,
   FileConfig,
-  SpecConfig,
   DocsConfig,
   CodexConfig,
 } from '../common/yaml-config';
@@ -355,9 +354,6 @@ export interface LoadedConfig {
   /** File storage configuration */
   file?: FileConfig;
 
-  /** Specification management configuration */
-  spec?: SpecConfig;
-
   /** Documentation management configuration */
   docs?: DocsConfig;
 
@@ -519,7 +515,6 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Loade
     repo: raw.repo,
     logs: raw.logs,
     file: raw.file,
-    spec: raw.spec,
     docs: raw.docs,
     codex: raw.codex,
     raw,
@@ -554,7 +549,6 @@ export function loadConfigSync(options: ConfigLoadOptions = {}): Omit<LoadedConf
     repo: raw.repo,
     logs: raw.logs,
     file: raw.file,
-    spec: raw.spec,
     docs: raw.docs,
     codex: raw.codex,
     raw,

@@ -59,14 +59,6 @@ export function loadRepoConfig(projectRoot?: string): any | null {
 }
 
 /**
- * Load specification plugin configuration from unified YAML
- */
-export function loadSpecConfig(projectRoot?: string): any | null {
-  const config = loadYamlConfig({ projectRoot });
-  return config?.spec || null;
-}
-
-/**
  * Load logging plugin configuration from unified YAML
  */
 export function loadLogConfig(projectRoot?: string): any | null {
