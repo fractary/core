@@ -161,7 +161,7 @@ fractary-core config env-section-write fractary-core \
   --set "# LINEAR_API_KEY="
 ```
 
-## 5. Create/Update .gitignore
+## 5. Create/Update Root .gitignore
 
 The `env-init` command handles `.fractary/.gitignore` for env files.
 
