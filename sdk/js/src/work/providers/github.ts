@@ -94,7 +94,8 @@ export class GitHubWorkProvider implements WorkProvider {
   // =========================================================================
 
   async createIssue(options: IssueCreateOptions): Promise<Issue> {
-    const args = [`--repo ${this.getRepoArg()}`];
+    const targetRepo = options.repo || this.getRepoArg();
+    const args = [`--repo ${targetRepo}`];
     args.push(`--title "${options.title.replace(/"/g, '\\"')}"`);
 
     if (options.body) {
