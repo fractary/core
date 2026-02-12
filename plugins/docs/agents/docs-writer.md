@@ -58,9 +58,42 @@ fractary-core docs doc-update <id> --content "<new_content>" --json
 fractary-core docs doc-search --doc-type <type> --json
 ```
 
+## Fetch Work Item Context (if work-linked)
+```bash
+fractary-core work issue-fetch <work_id> --json
+```
+
+## Comment on Work Item (post-completion)
+```bash
+fractary-core work issue-comment <work_id> --body "<message>"
+```
+
 </CLI_COMMANDS>
 
 <WORKFLOW>
+
+## Load Work Context (if --work-id provided)
+
+Before document creation or update, if `--work-id` was provided:
+
+1. **Fetch issue context with comments**
+   ```bash
+   fractary-core work issue-fetch <work_id> --json
+   ```
+   Parse the returned JSON to understand:
+   - Issue title and description (the work request)
+   - Issue state and labels
+   - Previous comments (workflow history, prior steps, any relevant context)
+   Use this context to inform document content.
+
+2. **If --work-id NOT provided: attempt auto-detect from git branch**
+   ```bash
+   git branch --show-current
+   ```
+   Parse issue number from branch prefix (e.g., `feat/123-name` -> work_id=123).
+   If detected, fetch the issue as above. If not detected: skip work context.
+
+This step always executes when a work_id is available. It is NOT conditional on type config.
 
 ## For NEW Documents
 
@@ -124,11 +157,42 @@ fractary-core docs doc-search --doc-type <type> --json
    fractary-core docs doc-update <id> --content "<new_content>" --json
    ```
 
+## Update Work Context (if work_id available)
+
+After document creation or update completes, if a work_id is available:
+
+1. **Determine final status**: `success`, `warning`, or `failure`
+2. **Post status comment**
+   ```bash
+   fractary-core work issue-comment <work_id> --body "<comment>"
+   ```
+   Comment format:
+   ```
+   ## ✅ Docs Writer Success | ## ⚠️ Docs Writer Warning | ## ❌ Docs Writer Failure
+
+   **Timestamp:** <ISO timestamp>
+
+   ### Summary
+   <Created|Updated> <doc_type> document: <doc_id>
+
+   ### Details
+   - **Operation**: <create|update>
+   - **Type**: <doc_type>
+   - **Path**: <file_path>
+   - **Status**: <success|warning|failure>
+   <additional details if warnings/errors>
+   ```
+
+   Status emoji mapping: success → ✅, warning → ⚠️, failure → ❌
+
+3. **CRITICAL:** Even on failure, if a work_id was provided, you MUST still post the status comment before returning.
+
 </WORKFLOW>
 
 <ARGUMENTS>
 - `<doc_type>` - Document type (adr, api, architecture, audit, changelog, dataset, etl, guides, infrastructure, standards, testing)
 - `[file_path]` - Optional path (auto-generated if omitted)
+- `--work-id <number>` - Optional: GitHub issue number. When provided, fetches issue context (including comments) and posts a status comment after completion.
 - `--context "<text>"` - Optional: Additional instructions prepended to workflow
 - `--skip-validation` - Skip validation step
 - `--skip-index` - Skip index update
@@ -185,39 +249,73 @@ If doc_type is not specified or unclear:
 </TYPE_SELECTION>
 
 <WORK_LINKING>
-After creating a document, check if work-linking applies:
+Work context integration is handled by the Load Work Context and Update Work Context steps in `<WORKFLOW>`.
 
-1. Check if the doc type has `work_linking.enabled` (via type-info --json)
-2. Check if the document has `work_id` in frontmatter
+**Unconditional behavior (when --work-id is provided or auto-detected from branch):**
+- Issue is ALWAYS fetched at the start to inform document content
+- Status comment is ALWAYS posted after completion
+- This is NOT gated by type-specific `work_linking` config
 
-**Auto-detect work_id:**
-- From explicit --work-id flag or frontmatter
-- From git branch name: `feat/123-name` → work_id=123
-  ```bash
-  git branch --show-current
-  ```
-  Parse issue number from branch prefix (feat/, fix/, chore/, etc.)
-
-**If work-linked AND `work_linking.comment_on_create`:**
-1. Fetch issue context for enrichment:
-   ```bash
-   gh issue view <work_id> --json title,body,labels
-   ```
-2. Use issue context to enrich document content during creation
-3. After creation, comment on the work item:
-   ```bash
-   gh issue comment <work_id> --body "Specification created: <title>
-   - **Type**: <docType>
-   - **Path**: <path>"
-   ```
-
-**NOTE:** Work-linking is OPTIONAL. Types without `work_linking` config are unaffected.
+**Type-specific `work_linking` config (supplementary):**
+- If a doc type has `work_linking.enabled`: the `work_id` field is set in document frontmatter
+- This is a supplementary mechanism for frontmatter metadata only
+- It does NOT control whether the issue is fetched or commented on
 </WORK_LINKING>
 
-<OUTPUT>
-Return write result with:
-- Created/updated file path
-- Document type used
-- Frontmatter fields set
-- Any warnings or errors
-</OUTPUT>
+<OUTPUTS>
+## Status Values
+
+The agent MUST return one of these status values:
+- **success**: Document created/updated successfully with all required sections
+- **warning**: Document created/updated but with non-critical issues (e.g., optional sections empty)
+- **failure**: Document creation/update failed due to errors
+
+## Return Format
+
+**Successful creation:**
+```json
+{
+  "status": "success",
+  "operation": "create",
+  "doc_id": "adr-042-use-event-sourcing",
+  "doc_type": "adr",
+  "file_path": "docs/adr/adr-042-use-event-sourcing.md",
+  "work_id": 123,
+  "summary": "Created adr document: adr-042-use-event-sourcing",
+  "details": null
+}
+```
+
+**Creation with warnings:**
+```json
+{
+  "status": "warning",
+  "operation": "create",
+  "doc_id": "spec-feature-auth",
+  "doc_type": "spec-feature",
+  "file_path": "docs/specs/spec-feature-auth.md",
+  "work_id": 45,
+  "summary": "Created spec-feature document with warnings: 2 optional sections empty",
+  "details": "Optional sections left empty due to insufficient context."
+}
+```
+
+**Failed creation:**
+```json
+{
+  "status": "failure",
+  "operation": "create",
+  "doc_id": "api-payments-v2",
+  "doc_type": "api",
+  "file_path": null,
+  "work_id": 78,
+  "summary": "Failed to create api document: type validation error",
+  "details": "Required field 'api_version' not provided."
+}
+```
+
+**Notes:**
+- `work_id` is `null` when not provided or auto-detected.
+- `file_path` is `null` on failure if the document was not created.
+- The `status` in the JSON MUST match the status used in the issue comment.
+</OUTPUTS>
