@@ -13,9 +13,16 @@ export {
   clearEnv,
   loadConfig,
   loadConfigSync,
+  getEnvDir,
+  ensureEnvDir,
+  listEnvFiles,
+  resolveEnvFile,
+  readManagedSection,
+  writeManagedSection,
   type LoadedConfig,
   type LoadConfigOptions,
   type ExtractedGitHubConfig,
+  type EnvFileInfo,
 } from './loader';
 
 // Re-export common yaml-config utilities

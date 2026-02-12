@@ -37,6 +37,260 @@ let envLoaded = false;
 let currentEnv: string | undefined;
 
 /**
+ * Track whether the deprecation warning for root-level .env files has been shown.
+ * Fires once per session, not per file.
+ */
+let deprecationWarned = false;
+
+// ─── Env Directory Utilities ────────────────────────────────────────────────
+
+/**
+ * Get the canonical env directory path (.fractary/env/)
+ *
+ * @param projectRoot Project root directory. If not provided, auto-detected.
+ * @returns Absolute path to .fractary/env/
+ */
+export function getEnvDir(projectRoot?: string): string {
+  const root = projectRoot || findProjectRoot();
+  return path.join(root, '.fractary', 'env');
+}
+
+/**
+ * Ensure .fractary/env/ directory exists, creating it if needed.
+ *
+ * @param projectRoot Project root directory. If not provided, auto-detected.
+ * @returns Absolute path to the created/existing .fractary/env/ directory
+ */
+export function ensureEnvDir(projectRoot?: string): string {
+  const envDir = getEnvDir(projectRoot);
+  if (!fs.existsSync(envDir)) {
+    fs.mkdirSync(envDir, { recursive: true });
+  }
+  return envDir;
+}
+
+/**
+ * Information about an env file found in the project.
+ */
+export interface EnvFileInfo {
+  /** Human-readable name, e.g., "(default)", "test", "prod", "local" */
+  name: string;
+  /** Relative file path, e.g., ".fractary/env/.env.test" */
+  file: string;
+  /** Whether this file is in the standard (.fractary/env/) or legacy (root) location */
+  location: 'standard' | 'legacy';
+  /** Whether the file actually exists on disk */
+  exists: boolean;
+}
+
+/**
+ * Extract the environment name from an env file basename.
+ */
+function envFileName(basename: string): string {
+  if (basename === '.env') return '(default)';
+  if (basename === '.env.local') return 'local';
+  return basename.replace('.env.', '');
+}
+
+/**
+ * List all env files across .fractary/env/ (standard) and project root (legacy).
+ *
+ * Standard-location files take precedence over legacy when both exist
+ * for the same base name (deduplication).
+ *
+ * @param projectRoot Project root directory. If not provided, auto-detected.
+ * @returns Array of EnvFileInfo sorted by name
+ */
+export function listEnvFiles(projectRoot?: string): EnvFileInfo[] {
+  const root = projectRoot || findProjectRoot();
+  const envDir = getEnvDir(root);
+  const seen = new Map<string, EnvFileInfo>();
+
+  // 1. Scan .fractary/env/ (standard location)
+  if (fs.existsSync(envDir)) {
+    const files = fs.readdirSync(envDir).filter(
+      (f) => f.startsWith('.env') && f !== '.env.example'
+    );
+    for (const file of files) {
+      const name = envFileName(file);
+      seen.set(file, {
+        name,
+        file: path.join('.fractary', 'env', file),
+        location: 'standard',
+        exists: true,
+      });
+    }
+  }
+
+  // 2. Scan project root (legacy location)
+  if (fs.existsSync(root)) {
+    const files = fs.readdirSync(root).filter(
+      (f) => f.startsWith('.env') && f !== '.env.example'
+    );
+    for (const file of files) {
+      // Standard wins over legacy (skip duplicates)
+      if (seen.has(file)) continue;
+      const name = envFileName(file);
+      seen.set(file, {
+        name,
+        file,
+        location: 'legacy',
+        exists: true,
+      });
+    }
+  }
+
+  return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * Resolve a specific env file path, checking .fractary/env/ first, then project root.
+ *
+ * @param fileName The env file name, e.g. ".env", ".env.test", ".env.local"
+ * @param projectRoot Project root directory. If not provided, auto-detected.
+ * @returns Object with path and location, or null if not found anywhere
+ */
+export function resolveEnvFile(
+  fileName: string,
+  projectRoot?: string
+): { path: string; location: 'standard' | 'legacy' } | null {
+  const root = projectRoot || findProjectRoot();
+
+  // Try .fractary/env/ first (standard)
+  const standardPath = path.join(root, '.fractary', 'env', fileName);
+  if (fs.existsSync(standardPath)) {
+    return { path: standardPath, location: 'standard' };
+  }
+
+  // Fallback to project root (legacy)
+  const legacyPath = path.join(root, fileName);
+  if (fs.existsSync(legacyPath)) {
+    return { path: legacyPath, location: 'legacy' };
+  }
+
+  return null;
+}
+
+// ─── Managed Section Utilities ──────────────────────────────────────────────
+
+/**
+ * Read a plugin's managed section from an env file.
+ *
+ * Section markers:
+ * ```
+ * # ===== {pluginName} (managed) =====
+ * KEY=VALUE
+ * # ===== end {pluginName} =====
+ * ```
+ *
+ * @param filePath Absolute path to the env file
+ * @param pluginName Plugin name, e.g. "fractary-core"
+ * @returns Key-value pairs within the section, or null if section not found
+ */
+export function readManagedSection(
+  filePath: string,
+  pluginName: string
+): Record<string, string> | null {
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
+
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const startMarker = `# ===== ${pluginName} (managed) =====`;
+  const endMarker = `# ===== end ${pluginName} =====`;
+
+  const startIdx = content.indexOf(startMarker);
+  if (startIdx === -1) return null;
+
+  const endIdx = content.indexOf(endMarker, startIdx);
+  if (endIdx === -1) return null;
+
+  const sectionContent = content.substring(startIdx + startMarker.length, endIdx);
+  const result: Record<string, string> = {};
+
+  for (const line of sectionContent.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIndex = trimmed.indexOf('=');
+    if (eqIndex > 0) {
+      const key = trimmed.substring(0, eqIndex).trim();
+      const value = trimmed.substring(eqIndex + 1).trim();
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Write/update a plugin's managed section in an env file.
+ *
+ * Creates the file if it doesn't exist. Preserves all other sections and
+ * content outside managed sections.
+ *
+ * If the plugin's section already exists, replaces content between markers.
+ * Otherwise, appends a new section at the end.
+ *
+ * @param filePath Absolute path to the env file
+ * @param pluginName Plugin name, e.g. "fractary-core"
+ * @param entries Key-value pairs to write in the section
+ */
+export function writeManagedSection(
+  filePath: string,
+  pluginName: string,
+  entries: Record<string, string>
+): void {
+  const startMarker = `# ===== ${pluginName} (managed) =====`;
+  const endMarker = `# ===== end ${pluginName} =====`;
+
+  // Build section content
+  const lines: string[] = [];
+  for (const [key, value] of Object.entries(entries)) {
+    lines.push(`${key}=${value}`);
+  }
+  const sectionBlock = `${startMarker}\n${lines.join('\n')}\n${endMarker}`;
+
+  // Ensure parent directory exists
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  if (!fs.existsSync(filePath)) {
+    // Create new file with just this section
+    fs.writeFileSync(filePath, sectionBlock + '\n', 'utf-8');
+    return;
+  }
+
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const startIdx = content.indexOf(startMarker);
+
+  if (startIdx === -1) {
+    // Section doesn't exist — append at end
+    const separator = content.length > 0 && !content.endsWith('\n') ? '\n\n' :
+      content.length > 0 ? '\n' : '';
+    fs.writeFileSync(filePath, content + separator + sectionBlock + '\n', 'utf-8');
+    return;
+  }
+
+  // Section exists — replace content between markers
+  const endIdx = content.indexOf(endMarker, startIdx);
+  if (endIdx === -1) {
+    // Malformed: start marker without end marker — append end and replace
+    const before = content.substring(0, startIdx);
+    const after = content.substring(startIdx + startMarker.length);
+    fs.writeFileSync(filePath, before + sectionBlock + after + '\n', 'utf-8');
+    return;
+  }
+
+  const before = content.substring(0, startIdx);
+  const after = content.substring(endIdx + endMarker.length);
+  fs.writeFileSync(filePath, before + sectionBlock + after, 'utf-8');
+}
+
+// ─── Environment Loading ────────────────────────────────────────────────────
+
+/**
  * Load environment variables from .env files with multi-environment support
  *
  * This function explicitly loads .env files - it must be called manually
@@ -55,11 +309,14 @@ let currentEnv: string | undefined;
  *
  * All files are optional. Missing files are silently skipped.
  *
- * ## File Locations
+ * ## File Locations (per file, checked in order)
  *
- * Searches for .env files in:
- * 1. Current working directory
- * 2. Project root (directory containing .fractary or .git)
+ * 1. `.fractary/env/<file>` — standard location (preferred)
+ * 2. `<projectRoot>/<file>` — legacy fallback (with deprecation warning)
+ * 3. `<cwd>/<file>` — if cwd differs from projectRoot
+ *
+ * Each file is resolved independently, so `.fractary/env/.env` can coexist
+ * with a legacy `<root>/.env.prod`.
  *
  * @param options Loading options
  * @returns true if any .env file was loaded, false if no .env files found
@@ -115,23 +372,39 @@ export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolea
 
   let anyLoaded = false;
 
-  // Try loading from project root (preferred)
-  // Files are loaded in order: .env → .env.{FRACTARY_ENV} → .env.local
-  // Later files override earlier ones (override: true)
+  // For each env file, resolve independently:
+  //   1. .fractary/env/<file>  (standard)
+  //   2. <projectRoot>/<file>  (legacy, with deprecation warning)
+  //   3. <cwd>/<file>          (if cwd != projectRoot)
   for (const envFile of envFiles) {
-    const envPath = path.join(projectRoot, envFile);
-    if (fs.existsSync(envPath)) {
-      dotenv.config({ path: envPath, override: true });
+    // Try standard location first
+    const standardPath = path.join(projectRoot, '.fractary', 'env', envFile);
+    if (fs.existsSync(standardPath)) {
+      dotenv.config({ path: standardPath, override: true });
       anyLoaded = true;
+      continue;
     }
-  }
 
-  // If project root didn't have .env files, try cwd as fallback
-  if (!anyLoaded && cwd !== projectRoot) {
-    for (const envFile of envFiles) {
-      const envPath = path.join(cwd, envFile);
-      if (fs.existsSync(envPath)) {
-        dotenv.config({ path: envPath, override: true });
+    // Fallback to project root (legacy)
+    const rootPath = path.join(projectRoot, envFile);
+    if (fs.existsSync(rootPath)) {
+      if (!deprecationWarned) {
+        console.warn(
+          `[fractary] Deprecation: Loading ${envFile} from project root. ` +
+          `Move env files to .fractary/env/ for the standard location.`
+        );
+        deprecationWarned = true;
+      }
+      dotenv.config({ path: rootPath, override: true });
+      anyLoaded = true;
+      continue;
+    }
+
+    // Fallback to cwd if different from projectRoot
+    if (cwd !== projectRoot) {
+      const cwdPath = path.join(cwd, envFile);
+      if (fs.existsSync(cwdPath)) {
+        dotenv.config({ path: cwdPath, override: true });
         anyLoaded = true;
       }
     }
@@ -228,7 +501,7 @@ export function switchEnv(
   if (result) {
     console.log(`Switched to environment: ${envName}`);
   } else {
-    console.warn(`Switched to environment '${envName}' but no .env.${envName} file found`);
+    console.warn(`Switched to environment '${envName}' but no .env.${envName} file found in .fractary/env/ or project root`);
   }
 
   return true;
@@ -302,6 +575,7 @@ export function clearEnv(variablesToClear?: string[]): void {
   // Reset internal state
   currentEnv = undefined;
   envLoaded = false;
+  deprecationWarned = false;
 }
 
 /**
