@@ -1,6 +1,6 @@
 {
   "name": "@fractary/core",
-  "version": "0.7.22",
+  "version": "0.7.23",
   "description": "Fractary Core SDK - Primitive operations for work tracking, repository management, logging, file storage, and documentation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
