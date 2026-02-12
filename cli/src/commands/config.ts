@@ -9,12 +9,15 @@
  * - env-list: List available environments
  * - env-show: Show current environment status
  * - env-clear: Clear environment credentials
+ * - env-init: Initialize .fractary/env/ directory
+ * - env-section-read: Read a plugin's managed section from an env file
+ * - env-section-write: Write a plugin's managed section to an env file
  */
 
 import { Command } from 'commander';
 import { loadConfig, getConfigPath, configExists } from '../utils/config.js';
 import chalk from 'chalk';
-import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
 import { dirname, join } from 'path';
 import {
   validateEnvVars,
@@ -26,6 +29,11 @@ import {
   getCurrentEnv,
   switchEnv,
   clearEnv,
+  resolveEnvFile,
+  listEnvFiles,
+  ensureEnvDir,
+  readManagedSection,
+  writeManagedSection,
   type DefaultConfigOptions,
 } from '@fractary/core/config';
 import { redactConfig } from '@fractary/core/common/secrets';
@@ -369,12 +377,15 @@ async function envSwitchCommand(envName: string, options: { clear?: boolean }): 
       clearEnv();
     }
 
-    // Check if .env.{envName} exists
+    // Check if .env.{envName} exists (in standard or legacy location)
     const projectRoot = findProjectRoot();
-    const envFilePath = join(projectRoot, `.env.${envName}`);
-    if (!existsSync(envFilePath)) {
-      console.log(chalk.yellow(`Warning: .env.${envName} not found in project root`));
+    const resolved = resolveEnvFile(`.env.${envName}`, projectRoot);
+    if (!resolved) {
+      console.log(chalk.yellow(`Warning: .env.${envName} not found in .fractary/env/ or project root`));
       console.log(chalk.gray('Will load: .env → .env.local (if exists)\n'));
+    } else if (resolved.location === 'legacy') {
+      console.log(chalk.yellow(`Note: .env.${envName} found in project root (legacy location)`));
+      console.log(chalk.gray('Consider moving to .fractary/env/ for the standard location.\n'));
     }
 
     // Perform the switch
@@ -398,47 +409,30 @@ async function envSwitchCommand(envName: string, options: { clear?: boolean }): 
  */
 async function envListCommand(): Promise<void> {
   try {
-    const projectRoot = findProjectRoot();
     const currentEnvName = getCurrentEnv() || process.env.FRACTARY_ENV;
 
     console.log(chalk.blue('Available environments:\n'));
 
-    // Scan for .env files
-    const files = readdirSync(projectRoot).filter(
-      (f) => f.startsWith('.env') && f !== '.env.example' && f !== '.env.local'
-    );
-
-    const envs: { name: string; file: string; exists: boolean }[] = [];
-
-    // Always show base .env
-    envs.push({
-      name: '(default)',
-      file: '.env',
-      exists: existsSync(join(projectRoot, '.env')),
-    });
-
-    // Find named environments
-    for (const file of files) {
-      if (file === '.env') continue;
-      const envName = file.replace('.env.', '');
-      envs.push({
-        name: envName,
-        file: file,
-        exists: true,
-      });
-    }
+    const envs = listEnvFiles();
 
     // Display
-    console.log(chalk.gray('  Name            File                Status'));
-    console.log(chalk.gray('  ──────────────────────────────────────────────'));
+    console.log(chalk.gray('  Name            File                          Location   Status'));
+    console.log(chalk.gray('  ────────────────────────────────────────────────────────────────'));
 
     for (const env of envs) {
       const isCurrent = env.name === currentEnvName || (env.name === '(default)' && !currentEnvName);
       const marker = isCurrent ? chalk.green(' *') : '  ';
       const status = env.exists ? chalk.green('exists') : chalk.red('not found');
+      const location = env.location === 'standard' ? chalk.cyan('standard') : chalk.yellow('legacy');
       const name = env.name.padEnd(16);
-      const file = env.file.padEnd(20);
-      console.log(`${marker}${name}${file}${status}`);
+      const file = env.file.padEnd(30);
+      const loc = (env.location === 'standard' ? 'standard' : 'legacy').padEnd(11);
+      console.log(`${marker}${name}${file}${loc}${status}`);
+    }
+
+    if (envs.length === 0) {
+      console.log(chalk.gray('  No .env files found.'));
+      console.log(chalk.gray('\n  Initialize with: fractary-core config env-init'));
     }
 
     console.log();
@@ -520,6 +514,165 @@ async function envClearCommand(options: { vars?: string }): Promise<void> {
 }
 
 /**
+ * Environment init command - create .fractary/env/ directory and .env.example
+ */
+async function envInitCommand(): Promise<void> {
+  try {
+    const projectRoot = findProjectRoot();
+    const envDir = ensureEnvDir(projectRoot);
+
+    console.log(chalk.green(`Created env directory: ${envDir}`));
+
+    // Create .env.example template
+    const examplePath = join(envDir, '.env.example');
+    if (!existsSync(examplePath)) {
+      const exampleContent = [
+        '# Fractary environment variables',
+        '# Copy this file to .env (or .env.test, .env.prod) and fill in values.',
+        '# See: https://fractary.dev/docs/configuration/environment',
+        '',
+        '# ===== fractary-core (managed) =====',
+        'GITHUB_TOKEN=ghp_your_token_here',
+        '# AWS_ACCESS_KEY_ID=',
+        '# AWS_SECRET_ACCESS_KEY=',
+        '# AWS_DEFAULT_REGION=us-east-1',
+        '# JIRA_URL=',
+        '# JIRA_EMAIL=',
+        '# JIRA_TOKEN=',
+        '# LINEAR_API_KEY=',
+        '# ===== end fractary-core =====',
+        '',
+      ].join('\n');
+      writeFileSync(examplePath, exampleContent, 'utf-8');
+      console.log(chalk.green(`Created template: ${examplePath}`));
+    } else {
+      console.log(chalk.gray(`Template already exists: ${examplePath}`));
+    }
+
+    // Update .fractary/.gitignore with managed section for env files
+    const fractaryGitignore = join(projectRoot, '.fractary', '.gitignore');
+    const sectionName = 'fractary-core';
+    const startMarker = `# ===== ${sectionName} (managed) =====`;
+
+    let gitignoreContent = '';
+    if (existsSync(fractaryGitignore)) {
+      gitignoreContent = readFileSync(fractaryGitignore, 'utf-8');
+    }
+
+    if (!gitignoreContent.includes(startMarker)) {
+      const section = [
+        '',
+        startMarker,
+        'env/.env',
+        'env/.env.*',
+        '!env/.env.example',
+        `# ===== end ${sectionName} =====`,
+        '',
+      ].join('\n');
+      writeFileSync(fractaryGitignore, gitignoreContent + section, 'utf-8');
+      console.log(chalk.green('Updated .fractary/.gitignore with env patterns'));
+    }
+
+    console.log(chalk.cyan('\nNext steps:'));
+    console.log(chalk.gray('  1. Copy .fractary/env/.env.example to .fractary/env/.env'));
+    console.log(chalk.gray('  2. Fill in your credentials'));
+    console.log(chalk.gray('  3. Create .fractary/env/.env.test and .env.prod for other environments'));
+  } catch (error) {
+    console.error(chalk.red('Failed to initialize env directory:'), error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Environment section read command
+ */
+async function envSectionReadCommand(
+  pluginName: string,
+  options: { env?: string; file?: string }
+): Promise<void> {
+  try {
+    let filePath: string;
+
+    if (options.file) {
+      filePath = options.file;
+    } else {
+      const fileName = options.env ? `.env.${options.env}` : '.env';
+      const resolved = resolveEnvFile(fileName);
+      if (!resolved) {
+        console.error(chalk.red(`File not found: ${fileName}`));
+        console.log(chalk.gray('Searched in .fractary/env/ and project root.'));
+        process.exit(1);
+      }
+      filePath = resolved.path;
+    }
+
+    const section = readManagedSection(filePath, pluginName);
+
+    if (!section) {
+      console.log(chalk.yellow(`No managed section found for '${pluginName}' in ${filePath}`));
+      process.exit(0);
+    }
+
+    console.log(chalk.blue(`Managed section for '${pluginName}':\n`));
+    for (const [key, value] of Object.entries(section)) {
+      console.log(`${key}=${value}`);
+    }
+  } catch (error) {
+    console.error(chalk.red('Failed to read managed section:'), error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Environment section write command
+ */
+async function envSectionWriteCommand(
+  pluginName: string,
+  options: { env?: string; file?: string; set?: string[] }
+): Promise<void> {
+  try {
+    if (!options.set || options.set.length === 0) {
+      console.error(chalk.red('Error: At least one --set KEY=VALUE is required'));
+      process.exit(1);
+    }
+
+    // Parse --set entries into a Record
+    const entries: Record<string, string> = {};
+    for (const entry of options.set) {
+      const eqIndex = entry.indexOf('=');
+      if (eqIndex <= 0) {
+        console.error(chalk.red(`Invalid --set format: ${entry} (expected KEY=VALUE)`));
+        process.exit(1);
+      }
+      const key = entry.substring(0, eqIndex).trim();
+      const value = entry.substring(eqIndex + 1).trim();
+      entries[key] = value;
+    }
+
+    // Resolve the target file
+    let filePath: string;
+
+    if (options.file) {
+      filePath = options.file;
+    } else {
+      const fileName = options.env ? `.env.${options.env}` : '.env';
+      // Ensure env directory exists for standard location
+      const projectRoot = findProjectRoot();
+      const envDir = ensureEnvDir(projectRoot);
+      filePath = join(envDir, fileName);
+    }
+
+    writeManagedSection(filePath, pluginName, entries);
+
+    console.log(chalk.green(`Updated managed section for '${pluginName}' in ${filePath}`));
+    console.log(chalk.gray(`  ${Object.keys(entries).length} variable(s) written`));
+  } catch (error) {
+    console.error(chalk.red('Failed to write managed section:'), error);
+    process.exit(1);
+  }
+}
+
+/**
  * Register config command
  */
 export function registerConfigCommand(program: Command): void {
@@ -573,4 +726,26 @@ export function registerConfigCommand(program: Command): void {
     .description('Clear environment credentials')
     .option('--vars <vars>', 'Comma-separated list of specific variables to clear')
     .action(envClearCommand);
+
+  config
+    .command('env-init')
+    .description('Initialize .fractary/env/ directory with template files')
+    .action(envInitCommand);
+
+  config
+    .command('env-section-read')
+    .description('Read a plugin managed section from an env file')
+    .argument('<plugin>', 'Plugin name (e.g., fractary-core)')
+    .option('--env <name>', 'Environment name (e.g., test, prod). Defaults to base .env')
+    .option('--file <path>', 'Explicit file path (overrides --env)')
+    .action(envSectionReadCommand);
+
+  config
+    .command('env-section-write')
+    .description('Write a plugin managed section to an env file')
+    .argument('<plugin>', 'Plugin name (e.g., fractary-core)')
+    .option('--env <name>', 'Environment name (e.g., test, prod). Defaults to base .env')
+    .option('--file <path>', 'Explicit file path (overrides --env)')
+    .option('--set <entries...>', 'KEY=VALUE pairs to write (repeatable)')
+    .action(envSectionWriteCommand);
 }

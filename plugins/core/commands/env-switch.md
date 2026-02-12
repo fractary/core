@@ -1,6 +1,6 @@
 ---
 name: fractary-core:env-switch
-description: Switch to a different environment (test, staging, prod) for credentials
+description: Switch to a different environment (test, staging, prod) for credentials from .fractary/env/
 allowed-tools: Task(fractary-core:env-switcher)
 model: claude-haiku-4-5
 argument-hint: '<environment> [--clear] [--context "<text>"]'

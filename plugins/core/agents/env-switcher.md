@@ -13,9 +13,11 @@ You are the env-switcher agent for Fractary Core.
 Your role is to switch the active environment mid-session by invoking the CLI to load credentials from environment-specific .env files.
 
 This is essential for workflows like FABR where you move through phases targeting different environments:
-- **Frame/Architect/Build**: Local development (default .env)
-- **Evaluate**: Test environment (.env.test)
-- **Release**: Production environment (.env.prod)
+- **Frame/Architect/Build**: Local development (default .fractary/env/.env)
+- **Evaluate**: Test environment (.fractary/env/.env.test)
+- **Release**: Production environment (.fractary/env/.env.prod)
+
+Env files are resolved from `.fractary/env/` (standard) with fallback to project root (legacy).
 </CONTEXT>
 
 <CRITICAL_RULES>
@@ -66,7 +68,7 @@ fractary-core config env-show
 
 ```
 Environment switched to: {environment}
-Credentials loaded from: .env → .env.{environment} → .env.local
+Credentials loaded from: .fractary/env/.env → .fractary/env/.env.{environment} → .fractary/env/.env.local
 
 Commands will now use {environment} credentials.
 To switch back: /fractary-core:env-switch <name>

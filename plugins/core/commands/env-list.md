@@ -10,7 +10,7 @@ argument-hint: '[--context "<text>"]'
 
 List available environments using the CLI command `fractary-core config env-list`.
 
-Shows all `.env` files found in the project root and indicates the currently active environment.
+Shows all `.env` files found in `.fractary/env/` (standard) and project root (legacy), indicating the currently active environment and file location.
 
 Examples:
 - List environments: `fractary-core config env-list`

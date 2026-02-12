@@ -7,7 +7,7 @@ description: |
   Smart detection: auto-detects platforms and project info, presents guesses for user confirmation via interactive prompts.
 color: orange
 model: claude-haiku-4-5
-allowed-tools: Bash(git remote *), Bash(fractary-core config *), Bash(mkdir *), Bash(grep *), Bash(touch *), Bash(cat *), Read(*), Edit(*), Write(*), Glob(*), AskUserQuestion(*)
+allowed-tools: Bash(git remote *), Bash(fractary-core config *), Bash(mkdir *), Bash(grep *), Bash(touch *), Bash(cat *), Read(*), Edit(*), Write(*), Glob(*), AskUserQuestion(*), Bash(fractary-core config env-init:*), Bash(fractary-core config env-section-write:*)
 ---
 
 <CONTEXT>
@@ -144,9 +144,26 @@ mkdir -p logs/templates
 mkdir -p docs
 mkdir -p docs/templates
 mkdir -p docs/specs
+
+# Initialize env directory and example file
+fractary-core config env-init
+
+# Write core plugin's managed section to .env.example
+fractary-core config env-section-write fractary-core \
+  --file .fractary/env/.env.example \
+  --set "GITHUB_TOKEN=ghp_your_token_here" \
+  --set "# AWS_ACCESS_KEY_ID=" \
+  --set "# AWS_SECRET_ACCESS_KEY=" \
+  --set "# AWS_DEFAULT_REGION=us-east-1" \
+  --set "# JIRA_URL=" \
+  --set "# JIRA_EMAIL=" \
+  --set "# JIRA_TOKEN=" \
+  --set "# LINEAR_API_KEY="
 ```
 
-## 5. Create/Update .fractary/.gitignore
+## 5. Create/Update .gitignore
+
+The `env-init` command handles `.fractary/.gitignore` for env files.
 
 Ensure the project root `.gitignore` has managed sections for archive directories:
 
@@ -213,7 +230,7 @@ Values used:
 
 Next steps:
 1. Review config: fractary-core config show
-2. Set credentials in .env file
+2. Set credentials in .fractary/env/.env (copy from .fractary/env/.env.example)
 3. Test: /fractary-work:issue-list
 4. For updates: /fractary-core:config-update --context "description of changes"
 ```
