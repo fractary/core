@@ -93,6 +93,7 @@ function createIssueCreateCommand(): Command {
     .option('--body <body>', 'Issue body')
     .option('--labels <labels>', 'Comma-separated labels')
     .option('--assignees <assignees>', 'Comma-separated assignees')
+    .option('--repo <repo>', 'Target repository as owner/repo (e.g., "corthosai/lake.corthonomy.ai")')
     .option('--json', 'Output as JSON')
     .action(async (options) => {
       try {
@@ -102,6 +103,7 @@ function createIssueCreateCommand(): Command {
           body: options.body,
           labels: options.labels?.split(',').map((l: string) => l.trim()),
           assignees: options.assignees?.split(',').map((a: string) => a.trim()),
+          repo: options.repo,
         });
 
         if (options.json) {

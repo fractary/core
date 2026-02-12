@@ -32,10 +32,6 @@ file:
   schema_version: '2.0'
   active_handler: local
   handlers:
-    local:
-      type: local
-      local:
-        base_path: .fractary
     logs-write:
       type: local
       local:
@@ -85,6 +81,7 @@ codex:
   sync:
     to_codex:
       include:
+        - .fractary/codex/memory/**
         - docs/**
         - README.md
         - CLAUDE.md
@@ -93,5 +90,6 @@ codex:
     from_codex:
       include:
         - codex://fractary/codex.fractary.com/docs/**
+        - codex://fractary/codex.fractary.com/.fractary/codex/memory/**
         - codex://fractary/codex/docs/**
         - codex://fractary/faber/docs/**

@@ -70,6 +70,8 @@ export interface IssueCreateOptions {
   labels?: string[];
   assignees?: string[];
   milestone?: string;
+  /** Override target repository as "owner/repo" (e.g., "corthosai/lake.corthonomy.ai") */
+  repo?: string;
 }
 
 export interface IssueUpdateOptions {
