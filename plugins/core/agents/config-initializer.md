@@ -146,7 +146,7 @@ mkdir -p docs/templates
 mkdir -p docs/specs
 ```
 
-## 5. Create/Update .fractary/.gitignore
+## 5. Create/Update Root .gitignore
 
 Ensure the project root `.gitignore` has managed sections for archive directories:
 
