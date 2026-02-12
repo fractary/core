@@ -2,7 +2,19 @@
  * Unit tests for config loader
  */
 
-import { loadEnv, isEnvLoaded, getCurrentEnv, switchEnv, clearEnv } from '../loader';
+import {
+  loadEnv,
+  isEnvLoaded,
+  getCurrentEnv,
+  switchEnv,
+  clearEnv,
+  getEnvDir,
+  ensureEnvDir,
+  listEnvFiles,
+  resolveEnvFile,
+  readManagedSection,
+  writeManagedSection,
+} from '../loader';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -24,6 +36,8 @@ describe('loadEnv', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.FRACTARY_ENV;
+    // Reset internal state
+    clearEnv();
   });
 
   afterAll(() => {
@@ -35,50 +49,167 @@ describe('loadEnv', () => {
     }
   });
 
-  describe('when .env exists in cwd', () => {
-    it('should load .env from current working directory', () => {
+  describe('standard location (.fractary/env/)', () => {
+    it('should load .env from .fractary/env/ when present', () => {
+      const projectRoot = process.cwd();
+      const standardPath = path.join(projectRoot, '.fractary', 'env', '.env');
+
       mockedFs.existsSync.mockImplementation((p) => {
-        return p === path.join(process.cwd(), '.env');
+        return String(p) === standardPath;
       });
 
       const result = loadEnv({ force: true });
 
       expect(result).toBe(true);
       expect(mockedDotenv.config).toHaveBeenCalledWith({
-        path: path.join(process.cwd(), '.env'),
+        path: standardPath,
         override: true,
       });
     });
 
+    it('should load environment-specific file from .fractary/env/', () => {
+      process.env.FRACTARY_ENV = 'prod';
+      const projectRoot = process.cwd();
+      const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
+      const standardProd = path.join(projectRoot, '.fractary', 'env', '.env.prod');
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        const pathStr = String(p);
+        return pathStr === standardEnv || pathStr === standardProd;
+      });
+
+      const result = loadEnv({ force: true });
+
+      expect(result).toBe(true);
+      expect(mockedDotenv.config).toHaveBeenCalledWith({
+        path: standardEnv,
+        override: true,
+      });
+      expect(mockedDotenv.config).toHaveBeenCalledWith({
+        path: standardProd,
+        override: true,
+      });
+    });
+  });
+
+  describe('legacy fallback (project root)', () => {
+    it('should load .env from project root as fallback', () => {
+      const projectRoot = process.cwd();
+      const legacyPath = path.join(projectRoot, '.env');
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        // Standard location doesn't exist, only legacy
+        return String(p) === legacyPath;
+      });
+
+      const result = loadEnv({ force: true });
+
+      expect(result).toBe(true);
+      expect(mockedDotenv.config).toHaveBeenCalledWith({
+        path: legacyPath,
+        override: true,
+      });
+    });
+
+    it('should fire deprecation warning when loading from root', () => {
+      const projectRoot = process.cwd();
+      const legacyPath = path.join(projectRoot, '.env');
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        return String(p) === legacyPath;
+      });
+
+      loadEnv({ force: true });
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Deprecation')
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('should fire deprecation warning only once per session', () => {
+      const projectRoot = process.cwd();
+      const legacyPath = path.join(projectRoot, '.env');
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        return String(p) === legacyPath;
+      });
+
+      loadEnv({ force: true });
+      loadEnv({ force: true });
+
+      const deprecationCalls = warnSpy.mock.calls.filter(
+        (c) => String(c[0]).includes('Deprecation')
+      );
+      expect(deprecationCalls.length).toBe(1);
+      warnSpy.mockRestore();
+    });
+  });
+
+  describe('mixed standard and legacy', () => {
+    it('should load .env from standard and .env.prod from legacy', () => {
+      const projectRoot = process.cwd();
+      process.env.FRACTARY_ENV = 'prod';
+      const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
+      const legacyProd = path.join(projectRoot, '.env.prod');
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        const pathStr = String(p);
+        return pathStr === standardEnv || pathStr === legacyProd;
+      });
+
+      const result = loadEnv({ force: true });
+
+      expect(result).toBe(true);
+      expect(mockedDotenv.config).toHaveBeenCalledWith({
+        path: standardEnv,
+        override: true,
+      });
+      expect(mockedDotenv.config).toHaveBeenCalledWith({
+        path: legacyProd,
+        override: true,
+      });
+      // Deprecation fired for legacy .env.prod
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Deprecation')
+      );
+      warnSpy.mockRestore();
+    });
+  });
+
+  describe('existing behavior', () => {
     it('should not load again if already loaded', () => {
-      mockedFs.existsSync.mockReturnValue(true);
+      const projectRoot = process.cwd();
+      mockedFs.existsSync.mockImplementation((p) => {
+        return String(p) === path.join(projectRoot, '.fractary', 'env', '.env');
+      });
 
       loadEnv({ force: true });
       const callCount = mockedDotenv.config.mock.calls.length;
 
       loadEnv(); // Second call without force
 
-      // Should not call dotenv.config again
       expect(mockedDotenv.config).toHaveBeenCalledTimes(callCount);
     });
 
     it('should reload with force option', () => {
+      const projectRoot = process.cwd();
       mockedFs.existsSync.mockImplementation((p) => {
-        // Only .env exists (no .env.local)
-        return String(p).endsWith('.env') && !String(p).endsWith('.local');
+        const pathStr = String(p);
+        return pathStr === path.join(projectRoot, '.fractary', 'env', '.env');
       });
 
       loadEnv({ force: true });
       const callCount = mockedDotenv.config.mock.calls.length;
 
-      loadEnv({ force: true }); // Force reload
+      loadEnv({ force: true });
 
-      // Each reload loads .env (and would load .env.local if it existed)
       expect(mockedDotenv.config.mock.calls.length).toBeGreaterThan(callCount);
     });
-  });
 
-  describe('when .env does not exist', () => {
     it('should return false when no .env file found', () => {
       mockedFs.existsSync.mockReturnValue(false);
 
@@ -87,85 +218,19 @@ describe('loadEnv', () => {
       expect(result).toBe(false);
     });
 
-    it('should try project root if cwd .env does not exist', () => {
-      // First call (cwd .env) returns false, second call (project root) returns true
-      let callCount = 0;
-      mockedFs.existsSync.mockImplementation(() => {
-        callCount++;
-        return callCount > 1; // Project root .env exists
-      });
-
-      const result = loadEnv({ force: true });
-
-      expect(result).toBe(true);
-    });
-  });
-
-  describe('with custom cwd', () => {
-    it('should use provided cwd', () => {
-      const customCwd = '/custom/path';
-      mockedFs.existsSync.mockImplementation((p) => {
-        return p === path.join(customCwd, '.env');
-      });
-
-      const result = loadEnv({ cwd: customCwd, force: true });
-
-      expect(result).toBe(true);
-      expect(mockedDotenv.config).toHaveBeenCalledWith({
-        path: path.join(customCwd, '.env'),
-        override: true,
-      });
-    });
-  });
-
-  describe('multi-environment support (FRACTARY_ENV)', () => {
-    it('should load .env.{FRACTARY_ENV} when FRACTARY_ENV is set', () => {
-      process.env.FRACTARY_ENV = 'prod';
-      const projectRoot = process.cwd();
-
-      mockedFs.existsSync.mockImplementation((p) => {
-        const pathStr = String(p);
-        // Both .env and .env.prod exist
-        return (
-          pathStr === path.join(projectRoot, '.env') ||
-          pathStr === path.join(projectRoot, '.env.prod')
-        );
-      });
-
-      const result = loadEnv({ force: true });
-
-      expect(result).toBe(true);
-      // Should load .env first, then .env.prod
-      expect(mockedDotenv.config).toHaveBeenCalledWith({
-        path: path.join(projectRoot, '.env'),
-        override: true,
-      });
-      expect(mockedDotenv.config).toHaveBeenCalledWith({
-        path: path.join(projectRoot, '.env.prod'),
-        override: true,
-      });
-    });
-
     it('should load .env.local last for local overrides', () => {
       const projectRoot = process.cwd();
+      const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
+      const standardLocal = path.join(projectRoot, '.fractary', 'env', '.env.local');
 
       mockedFs.existsSync.mockImplementation((p) => {
         const pathStr = String(p);
-        // Both .env and .env.local exist
-        return (
-          pathStr === path.join(projectRoot, '.env') ||
-          pathStr === path.join(projectRoot, '.env.local')
-        );
+        return pathStr === standardEnv || pathStr === standardLocal;
       });
 
-      const result = loadEnv({ force: true });
+      loadEnv({ force: true });
 
-      expect(result).toBe(true);
-
-      // Get all call arguments as strings
       const calls = mockedDotenv.config.mock.calls.map((c) => String(c[0]?.path || ''));
-
-      // .env should be loaded before .env.local
       const envIndex = calls.findIndex((p) => p.endsWith('.env') && !p.includes('.local'));
       const localIndex = calls.findIndex((p) => p.endsWith('.env.local'));
 
@@ -191,15 +256,41 @@ describe('loadEnv', () => {
       expect(getCurrentEnv()).toBeUndefined();
     });
   });
+
+  describe('clearEnv resets deprecationWarned', () => {
+    it('should fire deprecation warning again after clearEnv', () => {
+      const projectRoot = process.cwd();
+      const legacyPath = path.join(projectRoot, '.env');
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        return String(p) === legacyPath;
+      });
+
+      loadEnv({ force: true });
+      clearEnv();
+      loadEnv({ force: true });
+
+      const deprecationCalls = warnSpy.mock.calls.filter(
+        (c) => String(c[0]).includes('Deprecation')
+      );
+      expect(deprecationCalls.length).toBe(2);
+      warnSpy.mockRestore();
+    });
+  });
 });
 
 describe('isEnvLoaded', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearEnv();
   });
 
   it('should return true after successful loadEnv', () => {
-    mockedFs.existsSync.mockReturnValue(true);
+    const projectRoot = process.cwd();
+    mockedFs.existsSync.mockImplementation((p) => {
+      return String(p) === path.join(projectRoot, '.fractary', 'env', '.env');
+    });
 
     loadEnv({ force: true });
 
@@ -211,17 +302,17 @@ describe('switchEnv', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.FRACTARY_ENV;
+    clearEnv();
   });
 
   it('should set FRACTARY_ENV and reload environment', () => {
     const projectRoot = process.cwd();
+    const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
+    const standardTest = path.join(projectRoot, '.fractary', 'env', '.env.test');
 
     mockedFs.existsSync.mockImplementation((p) => {
       const pathStr = String(p);
-      return (
-        pathStr === path.join(projectRoot, '.env') ||
-        pathStr === path.join(projectRoot, '.env.test')
-      );
+      return pathStr === standardEnv || pathStr === standardTest;
     });
 
     const result = switchEnv('test');
@@ -230,29 +321,29 @@ describe('switchEnv', () => {
     expect(process.env.FRACTARY_ENV).toBe('test');
     expect(getCurrentEnv()).toBe('test');
     expect(mockedDotenv.config).toHaveBeenCalledWith({
-      path: path.join(projectRoot, '.env.test'),
+      path: standardTest,
       override: true,
     });
   });
 
   it('should allow switching between environments (FABR workflow)', () => {
     const projectRoot = process.cwd();
+    const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
+    const standardTest = path.join(projectRoot, '.fractary', 'env', '.env.test');
+    const standardProd = path.join(projectRoot, '.fractary', 'env', '.env.prod');
 
     mockedFs.existsSync.mockImplementation((p) => {
       const pathStr = String(p);
-      // Simulate having .env, .env.test, and .env.prod
       return (
-        pathStr === path.join(projectRoot, '.env') ||
-        pathStr === path.join(projectRoot, '.env.test') ||
-        pathStr === path.join(projectRoot, '.env.prod')
+        pathStr === standardEnv ||
+        pathStr === standardTest ||
+        pathStr === standardProd
       );
     });
 
-    // Start with test (evaluate phase)
     switchEnv('test');
     expect(getCurrentEnv()).toBe('test');
 
-    // Switch to prod (release phase)
     switchEnv('prod');
     expect(getCurrentEnv()).toBe('prod');
     expect(process.env.FRACTARY_ENV).toBe('prod');
@@ -284,7 +375,6 @@ describe('clearEnv', () => {
   });
 
   it('should clear default Fractary environment variables', () => {
-    // Set some env vars
     process.env.GITHUB_TOKEN = 'test-token';
     process.env.AWS_ACCESS_KEY_ID = 'test-key';
     process.env.AWS_SECRET_ACCESS_KEY = 'test-secret';
@@ -303,24 +393,23 @@ describe('clearEnv', () => {
 
     clearEnv(['CUSTOM_VAR', 'ANOTHER_VAR']);
 
-    // GITHUB_TOKEN should remain (not in the list)
     expect(process.env.GITHUB_TOKEN).toBe('test-token');
     expect(process.env.CUSTOM_VAR).toBeUndefined();
     expect(process.env.ANOTHER_VAR).toBeUndefined();
 
-    // Cleanup
     delete process.env.GITHUB_TOKEN;
   });
 
   it('should reset getCurrentEnv to undefined', () => {
-    mockedFs.existsSync.mockReturnValue(true);
+    const projectRoot = process.cwd();
+    mockedFs.existsSync.mockImplementation((p) => {
+      return String(p) === path.join(projectRoot, '.fractary', 'env', '.env');
+    });
 
-    // Load an environment first
     process.env.FRACTARY_ENV = 'test';
     loadEnv({ force: true });
     expect(getCurrentEnv()).toBe('test');
 
-    // Clear should reset
     clearEnv();
     expect(getCurrentEnv()).toBeUndefined();
   });
@@ -336,29 +425,357 @@ describe('clearEnv', () => {
   });
 });
 
+describe('getEnvDir', () => {
+  it('should return .fractary/env/ under project root', () => {
+    const projectRoot = '/my/project';
+    const result = getEnvDir(projectRoot);
+    expect(result).toBe(path.join(projectRoot, '.fractary', 'env'));
+  });
+});
+
+describe('ensureEnvDir', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should create directory if it does not exist', () => {
+    const projectRoot = '/my/project';
+    mockedFs.existsSync.mockReturnValue(false);
+
+    const result = ensureEnvDir(projectRoot);
+
+    expect(result).toBe(path.join(projectRoot, '.fractary', 'env'));
+    expect(mockedFs.mkdirSync).toHaveBeenCalledWith(
+      path.join(projectRoot, '.fractary', 'env'),
+      { recursive: true }
+    );
+  });
+
+  it('should not create directory if it already exists', () => {
+    const projectRoot = '/my/project';
+    mockedFs.existsSync.mockReturnValue(true);
+
+    ensureEnvDir(projectRoot);
+
+    expect(mockedFs.mkdirSync).not.toHaveBeenCalled();
+  });
+});
+
+describe('resolveEnvFile', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should prefer standard location', () => {
+    const projectRoot = '/my/project';
+    const standardPath = path.join(projectRoot, '.fractary', 'env', '.env.test');
+
+    mockedFs.existsSync.mockImplementation((p) => {
+      return String(p) === standardPath;
+    });
+
+    const result = resolveEnvFile('.env.test', projectRoot);
+
+    expect(result).toEqual({ path: standardPath, location: 'standard' });
+  });
+
+  it('should fall back to legacy location', () => {
+    const projectRoot = '/my/project';
+    const legacyPath = path.join(projectRoot, '.env.test');
+
+    mockedFs.existsSync.mockImplementation((p) => {
+      return String(p) === legacyPath;
+    });
+
+    const result = resolveEnvFile('.env.test', projectRoot);
+
+    expect(result).toEqual({ path: legacyPath, location: 'legacy' });
+  });
+
+  it('should return null if file not found anywhere', () => {
+    mockedFs.existsSync.mockReturnValue(false);
+
+    const result = resolveEnvFile('.env.test', '/my/project');
+
+    expect(result).toBeNull();
+  });
+});
+
+describe('listEnvFiles', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return standard files from .fractary/env/', () => {
+    const projectRoot = '/my/project';
+    const envDir = path.join(projectRoot, '.fractary', 'env');
+
+    mockedFs.existsSync.mockImplementation((p) => {
+      const pathStr = String(p);
+      return pathStr === envDir || pathStr === projectRoot;
+    });
+    mockedFs.readdirSync.mockImplementation(((p: string) => {
+      if (String(p) === envDir) return ['.env', '.env.test', '.env.prod'] as any;
+      return [] as any;
+    }) as any);
+
+    const result = listEnvFiles(projectRoot);
+
+    expect(result).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: '(default)', location: 'standard' }),
+      expect.objectContaining({ name: 'prod', location: 'standard' }),
+      expect.objectContaining({ name: 'test', location: 'standard' }),
+    ]));
+  });
+
+  it('should return legacy files from project root', () => {
+    const projectRoot = '/my/project';
+
+    mockedFs.existsSync.mockImplementation((p) => {
+      const pathStr = String(p);
+      return pathStr === projectRoot; // envDir does not exist
+    });
+    mockedFs.readdirSync.mockImplementation(((p: string) => {
+      if (String(p) === projectRoot) return ['.env', '.env.prod'] as any;
+      return [] as any;
+    }) as any);
+
+    const result = listEnvFiles(projectRoot);
+
+    expect(result).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: '(default)', file: '.env', location: 'legacy' }),
+      expect.objectContaining({ name: 'prod', file: '.env.prod', location: 'legacy' }),
+    ]));
+  });
+
+  it('should deduplicate (standard wins over legacy)', () => {
+    const projectRoot = '/my/project';
+    const envDir = path.join(projectRoot, '.fractary', 'env');
+
+    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.readdirSync.mockImplementation(((p: string) => {
+      if (String(p) === envDir) return ['.env', '.env.test'] as any;
+      if (String(p) === projectRoot) return ['.env', '.env.test', '.env.prod'] as any;
+      return [] as any;
+    }) as any);
+
+    const result = listEnvFiles(projectRoot);
+
+    // .env and .env.test should be standard, .env.prod should be legacy
+    const envDefault = result.find((e) => e.name === '(default)');
+    const envTest = result.find((e) => e.name === 'test');
+    const envProd = result.find((e) => e.name === 'prod');
+
+    expect(envDefault?.location).toBe('standard');
+    expect(envTest?.location).toBe('standard');
+    expect(envProd?.location).toBe('legacy');
+  });
+
+  it('should exclude .env.example', () => {
+    const projectRoot = '/my/project';
+    const envDir = path.join(projectRoot, '.fractary', 'env');
+
+    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.readdirSync.mockImplementation(((p: string) => {
+      if (String(p) === envDir) return ['.env', '.env.example'] as any;
+      return [] as any;
+    }) as any);
+
+    const result = listEnvFiles(projectRoot);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe('(default)');
+  });
+});
+
+describe('readManagedSection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should parse a plugin section correctly', () => {
+    const filePath = '/my/project/.fractary/env/.env.test';
+    const content = [
+      '# ===== fractary-core (managed) =====',
+      'GITHUB_TOKEN=ghp_abc123',
+      'AWS_REGION=us-east-1',
+      '# ===== end fractary-core =====',
+    ].join('\n');
+
+    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.readFileSync.mockReturnValue(content);
+
+    const result = readManagedSection(filePath, 'fractary-core');
+
+    expect(result).toEqual({
+      GITHUB_TOKEN: 'ghp_abc123',
+      AWS_REGION: 'us-east-1',
+    });
+  });
+
+  it('should return null for missing section', () => {
+    const filePath = '/my/project/.fractary/env/.env.test';
+    const content = [
+      '# ===== fractary-other (managed) =====',
+      'KEY=value',
+      '# ===== end fractary-other =====',
+    ].join('\n');
+
+    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.readFileSync.mockReturnValue(content);
+
+    const result = readManagedSection(filePath, 'fractary-core');
+
+    expect(result).toBeNull();
+  });
+
+  it('should return null for missing file', () => {
+    mockedFs.existsSync.mockReturnValue(false);
+
+    const result = readManagedSection('/nonexistent', 'fractary-core');
+
+    expect(result).toBeNull();
+  });
+
+  it('should skip comment lines within section', () => {
+    const content = [
+      '# ===== fractary-core (managed) =====',
+      'GITHUB_TOKEN=ghp_abc123',
+      '# This is a comment',
+      '# AWS_ACCESS_KEY_ID=',
+      'AWS_REGION=us-east-1',
+      '# ===== end fractary-core =====',
+    ].join('\n');
+
+    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.readFileSync.mockReturnValue(content);
+
+    const result = readManagedSection('/file', 'fractary-core');
+
+    expect(result).toEqual({
+      GITHUB_TOKEN: 'ghp_abc123',
+      AWS_REGION: 'us-east-1',
+    });
+  });
+
+  it('should handle multiple sections in same file', () => {
+    const content = [
+      '# ===== fractary-core (managed) =====',
+      'GITHUB_TOKEN=ghp_abc123',
+      '# ===== end fractary-core =====',
+      '',
+      '# ===== fractary-faber-cloud (managed) =====',
+      'FABER_CLOUD_AWS_ACCOUNT_ID=123456789012',
+      '# ===== end fractary-faber-cloud =====',
+    ].join('\n');
+
+    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.readFileSync.mockReturnValue(content);
+
+    const core = readManagedSection('/file', 'fractary-core');
+    const cloud = readManagedSection('/file', 'fractary-faber-cloud');
+
+    expect(core).toEqual({ GITHUB_TOKEN: 'ghp_abc123' });
+    expect(cloud).toEqual({ FABER_CLOUD_AWS_ACCOUNT_ID: '123456789012' });
+  });
+});
+
+describe('writeManagedSection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should create file with section if file does not exist', () => {
+    mockedFs.existsSync.mockReturnValue(false);
+
+    writeManagedSection('/file', 'fractary-core', {
+      GITHUB_TOKEN: 'ghp_abc123',
+    });
+
+    expect(mockedFs.mkdirSync).toHaveBeenCalled();
+    expect(mockedFs.writeFileSync).toHaveBeenCalledWith(
+      '/file',
+      expect.stringContaining('# ===== fractary-core (managed) ====='),
+      'utf-8'
+    );
+    expect(mockedFs.writeFileSync).toHaveBeenCalledWith(
+      '/file',
+      expect.stringContaining('GITHUB_TOKEN=ghp_abc123'),
+      'utf-8'
+    );
+  });
+
+  it('should append section if it does not exist in file', () => {
+    mockedFs.existsSync.mockImplementation((_p) => {
+      // Parent dir exists, file exists
+      return true;
+    });
+    mockedFs.readFileSync.mockReturnValue('EXISTING_VAR=value\n');
+
+    writeManagedSection('/file', 'fractary-core', {
+      GITHUB_TOKEN: 'ghp_abc123',
+    });
+
+    const written = (mockedFs.writeFileSync as jest.Mock).mock.calls[0][1];
+    expect(written).toContain('EXISTING_VAR=value');
+    expect(written).toContain('# ===== fractary-core (managed) =====');
+    expect(written).toContain('GITHUB_TOKEN=ghp_abc123');
+    expect(written).toContain('# ===== end fractary-core =====');
+  });
+
+  it('should replace existing section without touching others', () => {
+    const existingContent = [
+      '# ===== fractary-core (managed) =====',
+      'GITHUB_TOKEN=old_token',
+      '# ===== end fractary-core =====',
+      '',
+      '# ===== fractary-faber-cloud (managed) =====',
+      'FABER_CLOUD_AWS_ACCOUNT_ID=123456789012',
+      '# ===== end fractary-faber-cloud =====',
+    ].join('\n');
+
+    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.readFileSync.mockReturnValue(existingContent);
+
+    writeManagedSection('/file', 'fractary-core', {
+      GITHUB_TOKEN: 'new_token',
+      AWS_REGION: 'eu-west-1',
+    });
+
+    const written = (mockedFs.writeFileSync as jest.Mock).mock.calls[0][1];
+    // New values in core section
+    expect(written).toContain('GITHUB_TOKEN=new_token');
+    expect(written).toContain('AWS_REGION=eu-west-1');
+    // Old core value gone
+    expect(written).not.toContain('old_token');
+    // Other section untouched
+    expect(written).toContain('FABER_CLOUD_AWS_ACCOUNT_ID=123456789012');
+    expect(written).toContain('# ===== fractary-faber-cloud (managed) =====');
+  });
+});
+
 describe('edge cases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.FRACTARY_ENV;
+    clearEnv();
   });
 
   it('should still work when FRACTARY_ENV file does not exist', () => {
     const projectRoot = process.cwd();
     process.env.FRACTARY_ENV = 'nonexistent';
 
-    // Only .env exists, not .env.nonexistent
     mockedFs.existsSync.mockImplementation((p) => {
       const pathStr = String(p);
-      return pathStr === path.join(projectRoot, '.env');
+      return pathStr === path.join(projectRoot, '.fractary', 'env', '.env');
     });
 
     const result = loadEnv({ force: true });
 
     expect(result).toBe(true);
     expect(getCurrentEnv()).toBe('nonexistent');
-    // Should have loaded .env but not .env.nonexistent
     expect(mockedDotenv.config).toHaveBeenCalledWith({
-      path: path.join(projectRoot, '.env'),
+      path: path.join(projectRoot, '.fractary', 'env', '.env'),
       override: true,
     });
   });
@@ -369,11 +786,10 @@ describe('edge cases', () => {
 
     mockedFs.existsSync.mockImplementation((p) => {
       const pathStr = String(p);
-      // All three files exist
       return (
-        pathStr === path.join(projectRoot, '.env') ||
-        pathStr === path.join(projectRoot, '.env.prod') ||
-        pathStr === path.join(projectRoot, '.env.local')
+        pathStr === path.join(projectRoot, '.fractary', 'env', '.env') ||
+        pathStr === path.join(projectRoot, '.fractary', 'env', '.env.prod') ||
+        pathStr === path.join(projectRoot, '.fractary', 'env', '.env.local')
       );
     });
 
@@ -381,7 +797,6 @@ describe('edge cases', () => {
 
     const calls = mockedDotenv.config.mock.calls.map((c) => String(c[0]?.path || ''));
 
-    // Verify order: .env → .env.prod → .env.local
     const envIndex = calls.findIndex((p) => p.endsWith('.env') && !p.includes('.prod') && !p.includes('.local'));
     const prodIndex = calls.findIndex((p) => p.endsWith('.env.prod'));
     const localIndex = calls.findIndex((p) => p.endsWith('.env.local'));
@@ -394,16 +809,13 @@ describe('edge cases', () => {
   it('should allow loadEnv after clearEnv to reload files', () => {
     mockedFs.existsSync.mockReturnValue(true);
 
-    // Initial load
     loadEnv({ force: true });
     expect(isEnvLoaded()).toBe(true);
     const initialCallCount = mockedDotenv.config.mock.calls.length;
 
-    // Clear
     clearEnv();
     expect(isEnvLoaded()).toBe(false);
 
-    // Reload should work without force (since envLoaded is false)
     loadEnv();
     expect(isEnvLoaded()).toBe(true);
     expect(mockedDotenv.config.mock.calls.length).toBeGreaterThan(initialCallCount);

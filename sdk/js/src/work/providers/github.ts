@@ -128,7 +128,6 @@ export class GitHubWorkProvider implements WorkProvider {
         throw new IssueCreateError(error.stderr);
       }
       const err = error as { status?: number; stderr?: Buffer | string };
-      const exitCode = err.status || 1;
       const stderr = err.stderr?.toString() || '';
       if (stderr.includes('authentication') || stderr.includes('auth')) {
         throw new AuthenticationError('github', 'GitHub authentication failed. Run "gh auth login"');
