@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "3.3.16",
+      "version": "3.3.17",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -50,7 +50,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "3.0.17",
+        "version": "3.0.18",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -93,7 +93,7 @@
         "name": "fractary-work",
         "source": "./plugins/work",
         "description": "GitHub Issues management with bulk creation, refinement, and streamlined commands for creating, listing, searching, and updating issues",
-        "version": "3.0.19",
+        "version": "3.0.20",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
