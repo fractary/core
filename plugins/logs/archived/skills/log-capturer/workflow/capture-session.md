@@ -28,7 +28,7 @@ issue_title: (fetched from GitHub if available)
 issue_url: https://github.com/org/repo/issues/123
 started: 2025-01-15T09:00:00Z
 participant: Claude Code
-model: claude-sonnet-4-5-20250929
+model: claude-sonnet-4-6
 log_type: session
 status: active
 ---

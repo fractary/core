@@ -84,7 +84,7 @@ AI summaries incur API costs and are **disabled by default**. Enable only if you
   "summarization": {
     "enabled": true,  // Set to true to enable
     "auto_generate_on_archive": true,
-    "model": "claude-sonnet-4-5-20250929",
+    "model": "claude-sonnet-4-6",
     "separate_paths": true
   }
 }

@@ -7,7 +7,7 @@ description: |
   Use PROACTIVELY when user requests PR review/analysis.
 tools: Bash
 color: orange
-model: claude-haiku-4-5
+model: claude-sonnet-4-6
 ---
 
 # PR Review Agent

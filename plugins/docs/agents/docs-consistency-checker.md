@@ -5,7 +5,7 @@ description: |
   Use PROACTIVELY when user mentions "docs out of date", "update docs", "docs consistent", "stale documentation".
   Triggers: check consistency, docs stale, sync docs, documentation drift
 color: orange
-model: claude-haiku-4-5
+model: claude-sonnet-4-6
 ---
 
 <CONTEXT>

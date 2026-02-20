@@ -5,7 +5,7 @@ description: |
   Use PROACTIVELY when user mentions "analyze logs", "find errors", "log patterns", "time analysis".
   Triggers: analyze, errors, patterns, time spent, summarize logs
 color: orange
-model: claude-haiku-4-5
+model: claude-sonnet-4-6
 ---
 
 <CONTEXT>

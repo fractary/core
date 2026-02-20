@@ -46,7 +46,7 @@ You receive a **natural language request** containing:
     "status": "active",
     "conversation_content": "User reported login issues...",
     "repository": "acme/webapp",
-    "model": "claude-sonnet-4.5"
+    "model": "claude-sonnet-4-6"
   }
 }
 ```

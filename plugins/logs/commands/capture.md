@@ -17,7 +17,7 @@ Parse arguments:
 
 Examples:
 - `fractary-core logs capture 42`
-- `fractary-core logs capture 15 --model claude-sonnet-4-20250514 --json`
+- `fractary-core logs capture 15 --model claude-sonnet-4-6 --json`
 - `fractary-core logs capture 99 --json`
 
 You have the capability to call multiple tools in a single response. Execute the capture operation in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.

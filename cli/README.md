@@ -166,7 +166,7 @@ fractary-core logs type-info session
 fractary-core logs validate ./logs/session-2024-01-15.md
 
 # Start session capture
-fractary-core logs capture 123 --model claude-3.5-sonnet
+fractary-core logs capture 123 --model claude-sonnet-4-6
 
 # Stop session capture
 fractary-core logs stop

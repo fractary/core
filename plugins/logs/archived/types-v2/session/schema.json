@@ -44,7 +44,7 @@
     },
     "model": {
       "type": "string",
-      "description": "AI model used (e.g., claude-sonnet-4-5)"
+      "description": "AI model used (e.g., claude-sonnet-4-6)"
     },
     "token_count": {
       "type": "integer",
