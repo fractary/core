@@ -80,7 +80,7 @@ Session logs require these frontmatter fields (from `fractary-core logs type-inf
 - conversation_id: Claude Code conversation ID
 - repository: Repository path
 - branch: Branch name
-- model: Model name (e.g., claude-sonnet-4-20250514)
+- model: Model name (e.g., claude-sonnet-4-6)
 - token_count: Total tokens used
 - duration_seconds: Session duration
 - work_id: Associated work item

@@ -20,7 +20,7 @@ started: 2025-01-15T09:00:00Z
 ended: 2025-01-15T11:30:00Z
 duration_minutes: 150
 participant: Claude Code
-model: claude-sonnet-4-5-20250929
+model: claude-sonnet-4-6
 log_type: session
 status: completed
 tags: [authentication, oauth, security]

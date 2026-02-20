@@ -62,7 +62,7 @@ Build data object for log-writer:
   "status": "active",
   "repository": "fractary/claude-plugins",
   "branch": "feat/119-refactor-docs-plugin",
-  "model": "claude-sonnet-4.5",
+  "model": "claude-sonnet-4-6",
   "conversation_content": ""
 }
 ```

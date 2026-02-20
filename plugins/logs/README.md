@@ -510,7 +510,7 @@ For configuration details, see the [Configuration Guide](../../docs/guides/confi
   "summarization": {
     "enabled": false,  // Set to true to enable (incurs API costs)
     "auto_generate_on_archive": false,
-    "model": "claude-sonnet-4-5-20250929",
+    "model": "claude-sonnet-4-6",
     "store_with_logs": false,
     "separate_paths": true,
     "format": "markdown"

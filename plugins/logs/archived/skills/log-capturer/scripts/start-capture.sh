@@ -23,7 +23,7 @@ LOG_DIR=$(jq -r '.storage.local_path // "/logs"' "$CONFIG_FILE")
 SESSION_DIR="$LOG_DIR/sessions"
 
 # Get model name from config or environment, fallback to default
-MODEL_NAME="${CLAUDE_MODEL:-$(jq -r '.session_logging.model_name // "claude-sonnet-4-5-20250929"' "$CONFIG_FILE")}"
+MODEL_NAME="${CLAUDE_MODEL:-$(jq -r '.session_logging.model_name // "claude-sonnet-4-6"' "$CONFIG_FILE")}"
 
 # Create session directory if needed
 mkdir -p "$SESSION_DIR"
