@@ -5,7 +5,7 @@ description: |
   Use PROACTIVELY when user mentions "write docs", "create documentation", "document this", "add docs".
   Triggers: write, create docs, document, generate documentation
 color: orange
-model: claude-haiku-4-5
+model: claude-sonnet-4-6
 ---
 
 <CONTEXT>

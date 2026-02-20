@@ -5,7 +5,7 @@ description: |
   Use PROACTIVELY when user mentions "audit docs", "check documentation", "find doc issues", "documentation quality".
   Triggers: audit, scan, review docs, doc health, find gaps
 color: orange
-model: claude-haiku-4-5
+model: claude-sonnet-4-6
 ---
 
 <CONTEXT>

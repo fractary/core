@@ -5,7 +5,7 @@ description: |
   Use PROACTIVELY when user mentions "audit logs", "log health check", "find unmanaged logs", "log compliance".
   Triggers: audit, health check, compliance, log management
 color: orange
-model: claude-haiku-4-5
+model: claude-sonnet-4-6
 ---
 
 <CONTEXT>

@@ -7,7 +7,7 @@
     },
     "metadata": {
       "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
-      "version": "3.3.17",
+      "version": "3.3.18",
       "pluginRoot": "./plugins"
     },
     "plugins": [
@@ -50,7 +50,7 @@
         "name": "fractary-repo",
         "source": "./plugins/repo",
         "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "3.0.18",
+        "version": "3.0.19",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -171,7 +171,7 @@
         "name": "fractary-logs",
         "source": "./plugins/logs",
         "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
-        "version": "4.1.6",
+        "version": "4.1.7",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
@@ -250,7 +250,7 @@
         "name": "fractary-docs",
         "source": "./plugins/docs",
         "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-        "version": "4.0.9",
+        "version": "4.0.10",
         "author": {
           "name": "The Fractary",
           "url": "https://github.com/fractary"
