@@ -10,6 +10,10 @@ argument-hint: '<number> [--verbose] [--json] [--context "<text>"]'
 
 - Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
 
+## Rules
+
+- You MUST only use the Bash tool to call `fractary-core work issue-fetch`. Do NOT use the Skill tool. Do NOT call yourself recursively.
+
 ## Your task
 
 Fetch issue details using the CLI command `fractary-core work issue-fetch`.
@@ -24,4 +28,4 @@ Examples:
 - `fractary-core work issue-fetch 123 --verbose`
 - `fractary-core work issue-fetch 123 --json`
 
-Execute in a single message. Do not use any other tools. Do not send any other text.
+Call `fractary-core work issue-fetch` with Bash exactly once. Do not use any other tools.
