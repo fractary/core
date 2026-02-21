@@ -10,6 +10,10 @@ argument-hint: '--query "<query>" [--state <state>] [--labels <labels>] [--limit
 
 - Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
 
+## Rules
+
+- You MUST only use the Bash tool to call `fractary-core work issue-search`. Do NOT use the Skill tool. Do NOT call yourself recursively.
+
 ## Your task
 
 Search issues using the CLI command `fractary-core work issue-search`.
@@ -26,4 +30,4 @@ Examples:
 - `fractary-core work issue-search --query "timeout" --state open --limit 20`
 - `fractary-core work issue-search --query "feature" --labels enhancement --json`
 
-Execute in a single message. Do not use any other tools. Do not send any other text.
+Call `fractary-core work issue-search` with Bash exactly once. Do not use any other tools.

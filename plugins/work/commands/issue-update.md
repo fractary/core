@@ -10,6 +10,10 @@ argument-hint: '<number> [--title "<title>"] [--body "<text>"] [--state <state>]
 
 - Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
 
+## Rules
+
+- You MUST only use the Bash tool to call `fractary-core work issue-update`. Do NOT use the Skill tool. Do NOT call yourself recursively.
+
 ## Your task
 
 Update an issue using the CLI command `fractary-core work issue-update`.
@@ -26,4 +30,4 @@ Examples:
 - `fractary-core work issue-update 123 --state closed`
 - `fractary-core work issue-update 123 --title "New title" --body "New body" --json`
 
-Execute in a single message. Do not use any other tools. Do not send any other text.
+Call `fractary-core work issue-update` with Bash exactly once. Do not use any other tools.
