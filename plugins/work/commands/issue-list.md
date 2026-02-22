@@ -10,6 +10,10 @@ argument-hint: '[--state <open|closed|all>] [--labels <labels>] [--limit <n>] [-
 
 - Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
 
+## Rules
+
+- You MUST only use the Bash tool to call `fractary-core work issue-search`. Do NOT use the Skill tool. Do NOT call yourself recursively.
+
 ## Your task
 
 List issues using the CLI command `fractary-core work issue-search`.
@@ -27,4 +31,4 @@ Examples:
 - `fractary-core work issue-search --query "" --labels bug --limit 10`
 - `fractary-core work issue-search --query "" --state all --json`
 
-Execute in a single message. Do not use any other tools. Do not send any other text.
+Call `fractary-core work issue-search` with Bash exactly once. Do not use any other tools.
