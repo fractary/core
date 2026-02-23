@@ -332,7 +332,8 @@ async function configureCommand(options: ConfigureOptions): Promise<void> {
     }
     if (config.file) {
       const fileType = config.file.handlers?.['docs-write']?.type || 'local';
-      console.log(chalk.gray(`  File storage: ${fileType}`));
+      const bucket = config.file.handlers?.['docs-write']?.bucket;
+      console.log(chalk.gray(`  File storage: ${fileType}${bucket ? ` (bucket: ${bucket})` : ''}`));
     }
 
     if (validation.warnings.length > 0) {

@@ -220,7 +220,31 @@ describe('getDefaultConfig', () => {
       expect(config.file?.handlers?.['docs-archive']?.prefix).toBe('docs/_archive/');
     });
 
-    it('falls back to local when s3 specified without bucket', () => {
+    it('auto-derives bucket as dev.{repo} when s3 specified with repo but no bucket', () => {
+      const config = getDefaultConfig({
+        fileHandler: 's3',
+        repo: 'my-project',
+      });
+
+      expect(config.file?.handlers?.['logs-write']?.type).toBe('s3');
+      expect(config.file?.handlers?.['logs-write']?.bucket).toBe('dev.my-project');
+      expect(config.file?.handlers?.['logs-archive']?.bucket).toBe('dev.my-project');
+      expect(config.file?.handlers?.['docs-write']?.bucket).toBe('dev.my-project');
+      expect(config.file?.handlers?.['docs-archive']?.bucket).toBe('dev.my-project');
+    });
+
+    it('uses explicit bucket over auto-derived dev.{repo}', () => {
+      const config = getDefaultConfig({
+        fileHandler: 's3',
+        repo: 'my-project',
+        s3Bucket: 'custom-bucket',
+      });
+
+      expect(config.file?.handlers?.['logs-write']?.bucket).toBe('custom-bucket');
+      expect(config.file?.handlers?.['docs-archive']?.bucket).toBe('custom-bucket');
+    });
+
+    it('falls back to local when s3 specified without bucket and without repo', () => {
       const config = getDefaultConfig({ fileHandler: 's3' });
 
       expect(config.file?.handlers?.['logs-write']?.type).toBe('local');

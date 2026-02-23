@@ -21,7 +21,12 @@ export interface DefaultConfigOptions {
   owner?: string;
   /** Repository name */
   repo?: string;
-  /** S3 bucket name (if using S3) */
+  /**
+   * S3 bucket name (if using S3).
+   * When not provided and fileHandler is 's3', defaults to `dev.{repo}`.
+   * The dev bucket is intended for development artifacts (docs, logs, specs)
+   * that don't belong to test or production environments.
+   */
   s3Bucket?: string;
   /** AWS region (if using S3) */
   awsRegion?: string;
@@ -122,15 +127,18 @@ function getDefaultLogsConfig(): LogsConfig {
  * fallback path, and the archive handler uses a separate S3 prefix.
  */
 function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
-  const { fileHandler = 'local', s3Bucket, awsRegion = 'us-east-1' } = options;
+  const { fileHandler = 'local', s3Bucket, awsRegion = 'us-east-1', repo } = options;
 
-  if (fileHandler === 's3' && s3Bucket) {
+  // When S3 is selected, derive bucket from repo name if not explicitly provided
+  const resolvedBucket = s3Bucket || (fileHandler === 's3' && repo ? `dev.${repo}` : undefined);
+
+  if (fileHandler === 's3' && resolvedBucket) {
     return {
       schema_version: '2.0',
       handlers: {
         'logs-write': {
           type: 's3',
-          bucket: s3Bucket,
+          bucket: resolvedBucket,
           prefix: 'logs/',
           region: awsRegion,
           local: {
@@ -139,7 +147,7 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
         },
         'logs-archive': {
           type: 's3',
-          bucket: s3Bucket,
+          bucket: resolvedBucket,
           prefix: 'logs/_archive/',
           region: awsRegion,
           local: {
@@ -148,7 +156,7 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
         },
         'docs-write': {
           type: 's3',
-          bucket: s3Bucket,
+          bucket: resolvedBucket,
           prefix: 'docs/',
           region: awsRegion,
           local: {
@@ -157,7 +165,7 @@ function getDefaultFileConfig(options: DefaultConfigOptions): FileConfig {
         },
         'docs-archive': {
           type: 's3',
-          bucket: s3Bucket,
+          bucket: resolvedBucket,
           prefix: 'docs/_archive/',
           region: awsRegion,
           local: {
@@ -222,12 +230,20 @@ function getDefaultDocsConfig(): DocsConfig {
  *
  * @example
  * ```typescript
+ * // With explicit bucket
  * const config = getDefaultConfig({
  *   workPlatform: 'github',
  *   owner: 'myorg',
  *   repo: 'my-project',
  *   fileHandler: 's3',
  *   s3Bucket: 'my-bucket',
+ * });
+ *
+ * // Bucket auto-derived as 'dev.my-project' from repo name
+ * const config2 = getDefaultConfig({
+ *   owner: 'myorg',
+ *   repo: 'my-project',
+ *   fileHandler: 's3',
  * });
  * ```
  */
