@@ -52,10 +52,12 @@ describe('loadEnv', () => {
   describe('standard location (.fractary/env/)', () => {
     it('should load .env from .fractary/env/ when present', () => {
       const projectRoot = process.cwd();
-      const standardPath = path.join(projectRoot, '.fractary', 'env', '.env');
+      const envDir = path.join(projectRoot, '.fractary', 'env');
+      const standardPath = path.join(envDir, '.env');
 
       mockedFs.existsSync.mockImplementation((p) => {
-        return String(p) === standardPath;
+        const pathStr = String(p);
+        return pathStr === envDir || pathStr === standardPath;
       });
 
       const result = loadEnv({ force: true });
@@ -70,12 +72,13 @@ describe('loadEnv', () => {
     it('should load environment-specific file from .fractary/env/', () => {
       process.env.FRACTARY_ENV = 'prod';
       const projectRoot = process.cwd();
-      const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
-      const standardProd = path.join(projectRoot, '.fractary', 'env', '.env.prod');
+      const envDir = path.join(projectRoot, '.fractary', 'env');
+      const standardEnv = path.join(envDir, '.env');
+      const standardProd = path.join(envDir, '.env.prod');
 
       mockedFs.existsSync.mockImplementation((p) => {
         const pathStr = String(p);
-        return pathStr === standardEnv || pathStr === standardProd;
+        return pathStr === envDir || pathStr === standardEnv || pathStr === standardProd;
       });
 
       const result = loadEnv({ force: true });
@@ -148,43 +151,66 @@ describe('loadEnv', () => {
     });
   });
 
-  describe('mixed standard and legacy', () => {
-    it('should load .env from standard and .env.prod from legacy', () => {
+  describe('standard dir gate (no root fallback when .fractary/env/ exists)', () => {
+    it('should NOT fall back to root when .fractary/env/ exists', () => {
       const projectRoot = process.cwd();
       process.env.FRACTARY_ENV = 'prod';
-      const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
+      const envDir = path.join(projectRoot, '.fractary', 'env');
+      const standardEnv = path.join(envDir, '.env');
       const legacyProd = path.join(projectRoot, '.env.prod');
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
       mockedFs.existsSync.mockImplementation((p) => {
         const pathStr = String(p);
-        return pathStr === standardEnv || pathStr === legacyProd;
+        // .fractary/env/ dir exists, .env exists in standard,
+        // .env.prod exists ONLY at root (not in standard)
+        return pathStr === envDir || pathStr === standardEnv || pathStr === legacyProd;
       });
 
       const result = loadEnv({ force: true });
 
       expect(result).toBe(true);
+      // .env loaded from standard
       expect(mockedDotenv.config).toHaveBeenCalledWith({
         path: standardEnv,
         override: true,
       });
-      expect(mockedDotenv.config).toHaveBeenCalledWith({
+      // .env.prod at root should NOT be loaded
+      expect(mockedDotenv.config).not.toHaveBeenCalledWith({
         path: legacyProd,
         override: true,
       });
-      // Deprecation fired for legacy .env.prod
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Deprecation')
+      // No deprecation warning
+      const deprecationCalls = warnSpy.mock.calls.filter(
+        (c) => String(c[0]).includes('Deprecation')
       );
+      expect(deprecationCalls.length).toBe(0);
       warnSpy.mockRestore();
+    });
+
+    it('should return false when standard dir exists but no files match', () => {
+      const projectRoot = process.cwd();
+      const envDir = path.join(projectRoot, '.fractary', 'env');
+
+      mockedFs.existsSync.mockImplementation((p) => {
+        // Only the directory exists, no files
+        return String(p) === envDir;
+      });
+
+      const result = loadEnv({ force: true });
+
+      expect(result).toBe(false);
+      expect(mockedDotenv.config).not.toHaveBeenCalled();
     });
   });
 
   describe('existing behavior', () => {
     it('should not load again if already loaded', () => {
       const projectRoot = process.cwd();
+      const envDir = path.join(projectRoot, '.fractary', 'env');
       mockedFs.existsSync.mockImplementation((p) => {
-        return String(p) === path.join(projectRoot, '.fractary', 'env', '.env');
+        const pathStr = String(p);
+        return pathStr === envDir || pathStr === path.join(envDir, '.env');
       });
 
       loadEnv({ force: true });
@@ -197,9 +223,10 @@ describe('loadEnv', () => {
 
     it('should reload with force option', () => {
       const projectRoot = process.cwd();
+      const envDir = path.join(projectRoot, '.fractary', 'env');
       mockedFs.existsSync.mockImplementation((p) => {
         const pathStr = String(p);
-        return pathStr === path.join(projectRoot, '.fractary', 'env', '.env');
+        return pathStr === envDir || pathStr === path.join(envDir, '.env');
       });
 
       loadEnv({ force: true });
@@ -220,12 +247,13 @@ describe('loadEnv', () => {
 
     it('should load .env.local last for local overrides', () => {
       const projectRoot = process.cwd();
-      const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
-      const standardLocal = path.join(projectRoot, '.fractary', 'env', '.env.local');
+      const envDir = path.join(projectRoot, '.fractary', 'env');
+      const standardEnv = path.join(envDir, '.env');
+      const standardLocal = path.join(envDir, '.env.local');
 
       mockedFs.existsSync.mockImplementation((p) => {
         const pathStr = String(p);
-        return pathStr === standardEnv || pathStr === standardLocal;
+        return pathStr === envDir || pathStr === standardEnv || pathStr === standardLocal;
       });
 
       loadEnv({ force: true });
@@ -288,8 +316,10 @@ describe('isEnvLoaded', () => {
 
   it('should return true after successful loadEnv', () => {
     const projectRoot = process.cwd();
+    const envDir = path.join(projectRoot, '.fractary', 'env');
     mockedFs.existsSync.mockImplementation((p) => {
-      return String(p) === path.join(projectRoot, '.fractary', 'env', '.env');
+      const pathStr = String(p);
+      return pathStr === envDir || pathStr === path.join(envDir, '.env');
     });
 
     loadEnv({ force: true });
@@ -307,12 +337,13 @@ describe('switchEnv', () => {
 
   it('should set FRACTARY_ENV and reload environment', () => {
     const projectRoot = process.cwd();
-    const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
-    const standardTest = path.join(projectRoot, '.fractary', 'env', '.env.test');
+    const envDir = path.join(projectRoot, '.fractary', 'env');
+    const standardEnv = path.join(envDir, '.env');
+    const standardTest = path.join(envDir, '.env.test');
 
     mockedFs.existsSync.mockImplementation((p) => {
       const pathStr = String(p);
-      return pathStr === standardEnv || pathStr === standardTest;
+      return pathStr === envDir || pathStr === standardEnv || pathStr === standardTest;
     });
 
     const result = switchEnv('test');
@@ -328,13 +359,15 @@ describe('switchEnv', () => {
 
   it('should allow switching between environments (FABR workflow)', () => {
     const projectRoot = process.cwd();
-    const standardEnv = path.join(projectRoot, '.fractary', 'env', '.env');
-    const standardTest = path.join(projectRoot, '.fractary', 'env', '.env.test');
-    const standardProd = path.join(projectRoot, '.fractary', 'env', '.env.prod');
+    const envDir = path.join(projectRoot, '.fractary', 'env');
+    const standardEnv = path.join(envDir, '.env');
+    const standardTest = path.join(envDir, '.env.test');
+    const standardProd = path.join(envDir, '.env.prod');
 
     mockedFs.existsSync.mockImplementation((p) => {
       const pathStr = String(p);
       return (
+        pathStr === envDir ||
         pathStr === standardEnv ||
         pathStr === standardTest ||
         pathStr === standardProd
@@ -402,8 +435,10 @@ describe('clearEnv', () => {
 
   it('should reset getCurrentEnv to undefined', () => {
     const projectRoot = process.cwd();
+    const envDir = path.join(projectRoot, '.fractary', 'env');
     mockedFs.existsSync.mockImplementation((p) => {
-      return String(p) === path.join(projectRoot, '.fractary', 'env', '.env');
+      const pathStr = String(p);
+      return pathStr === envDir || pathStr === path.join(envDir, '.env');
     });
 
     process.env.FRACTARY_ENV = 'test';
@@ -468,10 +503,12 @@ describe('resolveEnvFile', () => {
 
   it('should prefer standard location', () => {
     const projectRoot = '/my/project';
-    const standardPath = path.join(projectRoot, '.fractary', 'env', '.env.test');
+    const envDir = path.join(projectRoot, '.fractary', 'env');
+    const standardPath = path.join(envDir, '.env.test');
 
     mockedFs.existsSync.mockImplementation((p) => {
-      return String(p) === standardPath;
+      const pathStr = String(p);
+      return pathStr === envDir || pathStr === standardPath;
     });
 
     const result = resolveEnvFile('.env.test', projectRoot);
@@ -479,17 +516,35 @@ describe('resolveEnvFile', () => {
     expect(result).toEqual({ path: standardPath, location: 'standard' });
   });
 
-  it('should fall back to legacy location', () => {
+  it('should fall back to legacy location when standard dir does not exist', () => {
     const projectRoot = '/my/project';
     const legacyPath = path.join(projectRoot, '.env.test');
 
     mockedFs.existsSync.mockImplementation((p) => {
+      // envDir does not exist, only legacy file exists
       return String(p) === legacyPath;
     });
 
     const result = resolveEnvFile('.env.test', projectRoot);
 
     expect(result).toEqual({ path: legacyPath, location: 'legacy' });
+  });
+
+  it('should NOT fall back to legacy when standard dir exists', () => {
+    const projectRoot = '/my/project';
+    const envDir = path.join(projectRoot, '.fractary', 'env');
+    const legacyPath = path.join(projectRoot, '.env.test');
+
+    mockedFs.existsSync.mockImplementation((p) => {
+      const pathStr = String(p);
+      // envDir exists, file only at root (not in standard)
+      return pathStr === envDir || pathStr === legacyPath;
+    });
+
+    const result = resolveEnvFile('.env.test', projectRoot);
+
+    // Should return null, not the legacy path
+    expect(result).toBeNull();
   });
 
   it('should return null if file not found anywhere', () => {
@@ -763,11 +818,12 @@ describe('edge cases', () => {
 
   it('should still work when FRACTARY_ENV file does not exist', () => {
     const projectRoot = process.cwd();
+    const envDir = path.join(projectRoot, '.fractary', 'env');
     process.env.FRACTARY_ENV = 'nonexistent';
 
     mockedFs.existsSync.mockImplementation((p) => {
       const pathStr = String(p);
-      return pathStr === path.join(projectRoot, '.fractary', 'env', '.env');
+      return pathStr === envDir || pathStr === path.join(envDir, '.env');
     });
 
     const result = loadEnv({ force: true });
@@ -775,21 +831,23 @@ describe('edge cases', () => {
     expect(result).toBe(true);
     expect(getCurrentEnv()).toBe('nonexistent');
     expect(mockedDotenv.config).toHaveBeenCalledWith({
-      path: path.join(projectRoot, '.fractary', 'env', '.env'),
+      path: path.join(envDir, '.env'),
       override: true,
     });
   });
 
   it('should load all three files in correct order when all exist', () => {
     const projectRoot = process.cwd();
+    const envDir = path.join(projectRoot, '.fractary', 'env');
     process.env.FRACTARY_ENV = 'prod';
 
     mockedFs.existsSync.mockImplementation((p) => {
       const pathStr = String(p);
       return (
-        pathStr === path.join(projectRoot, '.fractary', 'env', '.env') ||
-        pathStr === path.join(projectRoot, '.fractary', 'env', '.env.prod') ||
-        pathStr === path.join(projectRoot, '.fractary', 'env', '.env.local')
+        pathStr === envDir ||
+        pathStr === path.join(envDir, '.env') ||
+        pathStr === path.join(envDir, '.env.prod') ||
+        pathStr === path.join(envDir, '.env.local')
       );
     });
 

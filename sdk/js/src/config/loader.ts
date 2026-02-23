@@ -155,17 +155,21 @@ export function resolveEnvFile(
   projectRoot?: string
 ): { path: string; location: 'standard' | 'legacy' } | null {
   const root = projectRoot || findProjectRoot();
+  const envDir = path.join(root, '.fractary', 'env');
+  const hasStandardDir = fs.existsSync(envDir);
 
   // Try .fractary/env/ first (standard)
-  const standardPath = path.join(root, '.fractary', 'env', fileName);
+  const standardPath = path.join(envDir, fileName);
   if (fs.existsSync(standardPath)) {
     return { path: standardPath, location: 'standard' };
   }
 
-  // Fallback to project root (legacy)
-  const legacyPath = path.join(root, fileName);
-  if (fs.existsSync(legacyPath)) {
-    return { path: legacyPath, location: 'legacy' };
+  // Only fall back to legacy root if standard directory doesn't exist
+  if (!hasStandardDir) {
+    const legacyPath = path.join(root, fileName);
+    if (fs.existsSync(legacyPath)) {
+      return { path: legacyPath, location: 'legacy' };
+    }
   }
 
   return null;
@@ -309,14 +313,16 @@ export function writeManagedSection(
  *
  * All files are optional. Missing files are silently skipped.
  *
- * ## File Locations (per file, checked in order)
+ * ## File Locations
  *
- * 1. `.fractary/env/<file>` — standard location (preferred)
- * 2. `<projectRoot>/<file>` — legacy fallback (with deprecation warning)
- * 3. `<cwd>/<file>` — if cwd differs from projectRoot
+ * When `.fractary/env/` directory exists (standard mode):
+ *   - Only `.fractary/env/<file>` is checked
+ *   - Missing files are silently skipped (all files are optional)
+ *   - No fallback to project root or cwd
  *
- * Each file is resolved independently, so `.fractary/env/.env` can coexist
- * with a legacy `<root>/.env.prod`.
+ * When `.fractary/env/` does NOT exist (legacy mode):
+ *   1. `<projectRoot>/<file>` — with deprecation warning
+ *   2. `<cwd>/<file>` — if cwd differs from projectRoot
  *
  * @param options Loading options
  * @returns true if any .env file was loaded, false if no .env files found
@@ -372,40 +378,45 @@ export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolea
 
   let anyLoaded = false;
 
-  // For each env file, resolve independently:
-  //   1. .fractary/env/<file>  (standard)
-  //   2. <projectRoot>/<file>  (legacy, with deprecation warning)
-  //   3. <cwd>/<file>          (if cwd != projectRoot)
+  // Determine if the project has adopted the standard .fractary/env/ structure.
+  // When this directory exists, we ONLY load from it — no root fallback.
+  // This prevents mixed sourcing when the standard dir exists but not all files are there.
+  const envDir = path.join(projectRoot, '.fractary', 'env');
+  const hasStandardDir = fs.existsSync(envDir);
+
   for (const envFile of envFiles) {
-    // Try standard location first
-    const standardPath = path.join(projectRoot, '.fractary', 'env', envFile);
-    if (fs.existsSync(standardPath)) {
-      dotenv.config({ path: standardPath, override: true });
-      anyLoaded = true;
-      continue;
-    }
-
-    // Fallback to project root (legacy)
-    const rootPath = path.join(projectRoot, envFile);
-    if (fs.existsSync(rootPath)) {
-      if (!deprecationWarned) {
-        console.warn(
-          `[fractary] Deprecation: Loading ${envFile} from project root. ` +
-          `Move env files to .fractary/env/ for the standard location.`
-        );
-        deprecationWarned = true;
-      }
-      dotenv.config({ path: rootPath, override: true });
-      anyLoaded = true;
-      continue;
-    }
-
-    // Fallback to cwd if different from projectRoot
-    if (cwd !== projectRoot) {
-      const cwdPath = path.join(cwd, envFile);
-      if (fs.existsSync(cwdPath)) {
-        dotenv.config({ path: cwdPath, override: true });
+    if (hasStandardDir) {
+      // Standard mode: only load from .fractary/env/
+      const standardPath = path.join(envDir, envFile);
+      if (fs.existsSync(standardPath)) {
+        dotenv.config({ path: standardPath, override: true });
         anyLoaded = true;
+      }
+      // If not found in standard dir, silently skip (all files are optional)
+    } else {
+      // Legacy mode: no .fractary/env/ directory exists
+      // Try project root first
+      const rootPath = path.join(projectRoot, envFile);
+      if (fs.existsSync(rootPath)) {
+        if (!deprecationWarned) {
+          console.warn(
+            `[fractary] Deprecation: Loading ${envFile} from project root. ` +
+            `Move env files to .fractary/env/ for the standard location.`
+          );
+          deprecationWarned = true;
+        }
+        dotenv.config({ path: rootPath, override: true });
+        anyLoaded = true;
+        continue;
+      }
+
+      // Fallback to cwd if different from projectRoot
+      if (cwd !== projectRoot) {
+        const cwdPath = path.join(cwd, envFile);
+        if (fs.existsSync(cwdPath)) {
+          dotenv.config({ path: cwdPath, override: true });
+          anyLoaded = true;
+        }
       }
     }
   }
