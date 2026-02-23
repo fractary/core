@@ -1,0 +1,47 @@
+# Fractary Cloud Storage - Shared Variables
+#
+# Variables used by the Fractary cloud storage Terraform configuration.
+# Override defaults via terraform.tfvars or -var flags.
+
+# --- Common Variables ---
+
+variable "project_name" {
+  description = "Project name (used for resource naming and tags)"
+  type        = string
+  default     = "{{repo}}"
+}
+
+variable "bucket_name" {
+  description = "Name of the storage bucket"
+  type        = string
+  default     = "{{bucket}}"
+}
+
+# --- AWS S3 Variables ---
+
+variable "aws_region" {
+  description = "AWS region for the S3 bucket"
+  type        = string
+  default     = "{{region}}"
+}
+
+# --- Cloudflare R2 Variables ---
+
+variable "cloudflare_account_id" {
+  description = "Cloudflare account ID"
+  type        = string
+  default     = "{{account_id}}"
+}
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token with R2 permissions"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "r2_location" {
+  description = "R2 bucket location hint (auto, wnam, enam, weur, eeur, apac)"
+  type        = string
+  default     = "auto"
+}

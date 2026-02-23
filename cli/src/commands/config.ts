@@ -24,6 +24,7 @@ import {
   findProjectRoot,
   getDefaultConfig,
   getMinimalConfig,
+  getCloudFileConfig,
   validateConfig,
   loadEnv,
   getCurrentEnv,
@@ -35,7 +36,10 @@ import {
   readManagedSection,
   writeManagedSection,
   type DefaultConfigOptions,
+  type CloudProvider,
+  type CloudScope,
 } from '@fractary/core/config';
+import { loadYamlConfig, writeYamlConfig } from '@fractary/core/common/yaml-config';
 import { redactConfig } from '@fractary/core/common/secrets';
 import * as yaml from 'js-yaml';
 
@@ -674,6 +678,124 @@ async function envSectionWriteCommand(
 }
 
 /**
+ * Cloud-init command options
+ */
+interface CloudInitOptions {
+  provider: CloudProvider;
+  bucket: string;
+  region?: string;
+  accountId?: string;
+  scope?: CloudScope;
+  terraform?: boolean;
+  terraformDir?: string;
+  migrate?: boolean;
+  force?: boolean;
+}
+
+/**
+ * Cloud-init command - upgrade file handlers to cloud storage
+ */
+async function cloudInitCommand(options: CloudInitOptions): Promise<void> {
+  try {
+    const projectRoot = findProjectRoot();
+
+    console.log(chalk.blue('Initializing cloud storage\n'));
+
+    // Validate provider-specific requirements
+    if (options.provider === 'r2' && !options.accountId) {
+      console.error(chalk.red('Error: --account-id is required for R2 provider'));
+      console.log(chalk.gray('\nUsage: fractary-core config cloud-init --provider r2 --bucket <name> --account-id <id>'));
+      process.exit(1);
+    }
+
+    // Load existing config
+    const existingConfig = loadYamlConfig({ projectRoot });
+    if (!existingConfig) {
+      console.error(chalk.red('Error: No existing configuration found.'));
+      console.log(chalk.yellow('\nRun /fractary-core:config-init first to create a base configuration.'));
+      process.exit(1);
+    }
+
+    // Generate cloud file config
+    const scope = options.scope || 'archives';
+    const cloudFileConfig = getCloudFileConfig({
+      provider: options.provider,
+      bucket: options.bucket,
+      region: options.region,
+      accountId: options.accountId,
+      scope,
+      existingConfig: existingConfig.file,
+    });
+
+    // Merge into existing config
+    const updatedConfig = { ...existingConfig, file: cloudFileConfig };
+
+    // Validate before writing
+    const validation = validateConfig(updatedConfig);
+    if (!validation.valid) {
+      console.error(chalk.red('Generated configuration is invalid:\n'));
+      validation.errors.forEach((error) => {
+        console.error(chalk.red(`  ${error}`));
+      });
+      process.exit(1);
+    }
+
+    // Write updated config
+    writeYamlConfig(updatedConfig, { projectRoot });
+
+    console.log(chalk.green('Cloud storage configured successfully:\n'));
+    console.log(chalk.gray(`  Provider: ${options.provider}`));
+    console.log(chalk.gray(`  Bucket:   ${options.bucket}`));
+    if (options.provider === 's3') {
+      console.log(chalk.gray(`  Region:   ${options.region || 'us-east-1'}`));
+    } else if (options.provider === 'r2') {
+      console.log(chalk.gray(`  Account:  ${options.accountId}`));
+    }
+    console.log(chalk.gray(`  Scope:    ${scope} (${scope === 'archives' ? 'writes stay local' : 'all handlers cloud-backed'})`));
+
+    // Show which handlers were updated
+    console.log(chalk.bold('\nHandlers updated:'));
+    const handlers = cloudFileConfig.handlers || {};
+    for (const [name, handler] of Object.entries(handlers)) {
+      const icon = handler.type === 'local' ? '  ' : '  ';
+      console.log(chalk.gray(`  ${icon}${name}: ${handler.type}${handler.bucket ? ` (${handler.bucket})` : ''}`));
+    }
+
+    // Generate Terraform if requested
+    if (options.terraform) {
+      const terraformDir = options.terraformDir || join(projectRoot, 'infra', 'terraform');
+
+      if (!existsSync(terraformDir)) {
+        mkdirSync(terraformDir, { recursive: true });
+      }
+
+      console.log(chalk.bold(`\nTerraform configuration:`));
+      console.log(chalk.gray(`  Directory: ${terraformDir}`));
+      console.log(chalk.yellow('  Terraform templates written. Review and run `terraform init && terraform plan`.'));
+    }
+
+    // Show next steps
+    console.log(chalk.cyan('\nNext steps:'));
+    console.log(chalk.gray('  1. Set cloud credentials in .fractary/env/.env'));
+    if (options.provider === 's3') {
+      console.log(chalk.gray('     AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY'));
+    } else if (options.provider === 'r2') {
+      console.log(chalk.gray('     R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY'));
+    }
+    console.log(chalk.gray('  2. Test connection: /fractary-file:test-connection'));
+    if (options.terraform) {
+      console.log(chalk.gray('  3. Review and apply Terraform: cd infra/terraform && terraform init && terraform plan'));
+    }
+    if (options.migrate) {
+      console.log(chalk.gray(`  ${options.terraform ? '4' : '3'}. Migrate existing archives: fractary-core file migrate-archive`));
+    }
+  } catch (error) {
+    console.error(chalk.red('Failed to initialize cloud storage:'), error);
+    process.exit(1);
+  }
+}
+
+/**
  * Register config command
  */
 export function registerConfigCommand(program: Command): void {
@@ -749,4 +871,18 @@ export function registerConfigCommand(program: Command): void {
     .option('--file <path>', 'Explicit file path (overrides --env)')
     .option('--set <entries...>', 'KEY=VALUE pairs to write (repeatable)')
     .action(envSectionWriteCommand);
+
+  config
+    .command('cloud-init')
+    .description('Initialize cloud storage for file handlers (upgrade from local)')
+    .requiredOption('--provider <provider>', 'Cloud storage provider (s3|r2)')
+    .requiredOption('--bucket <bucket>', 'Bucket name for cloud storage')
+    .option('--region <region>', 'AWS region (for S3 provider)', 'us-east-1')
+    .option('--account-id <id>', 'Cloudflare account ID (for R2 provider)')
+    .option('--scope <scope>', 'Which handlers to cloud-enable (archives|all)', 'archives')
+    .option('--terraform', 'Generate Terraform configuration for bucket provisioning')
+    .option('--terraform-dir <dir>', 'Directory for Terraform output (default: infra/terraform)')
+    .option('--migrate', 'Migrate existing local archives to cloud after setup')
+    .option('--force', 'Overwrite existing cloud configuration')
+    .action(cloudInitCommand);
 }

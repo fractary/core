@@ -7,6 +7,7 @@
 import {
   getDefaultConfig,
   getMinimalConfig,
+  getCloudFileConfig,
   type DefaultConfigOptions,
 } from './defaults';
 
@@ -369,5 +370,244 @@ describe('DefaultConfigOptions', () => {
     expect(config.work?.active_handler).toBe('linear');
     expect(config.file?.handlers?.['logs-write']?.bucket).toBe('custom-bucket');
     expect(config.file?.handlers?.['logs-write']?.region).toBe('eu-west-1');
+  });
+});
+
+describe('getCloudFileConfig', () => {
+  describe('S3 provider with archives scope (default)', () => {
+    it('upgrades only archive handlers to S3', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+        region: 'us-east-1',
+      });
+
+      // Archive handlers should be S3
+      expect(config.handlers?.['logs-archive']?.type).toBe('s3');
+      expect(config.handlers?.['logs-archive']?.bucket).toBe('dev.my-project');
+      expect(config.handlers?.['logs-archive']?.region).toBe('us-east-1');
+      expect(config.handlers?.['docs-archive']?.type).toBe('s3');
+      expect(config.handlers?.['docs-archive']?.bucket).toBe('dev.my-project');
+
+      // Write handlers should remain local
+      expect(config.handlers?.['logs-write']?.type).toBe('local');
+      expect(config.handlers?.['docs-write']?.type).toBe('local');
+    });
+
+    it('preserves local base paths on write handlers', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+      });
+
+      expect(config.handlers?.['logs-write']?.local?.base_path).toBe('logs');
+      expect(config.handlers?.['docs-write']?.local?.base_path).toBe('docs');
+    });
+
+    it('sets correct S3 prefixes on archive handlers', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+      });
+
+      expect(config.handlers?.['logs-archive']?.prefix).toBe('logs/_archive/');
+      expect(config.handlers?.['docs-archive']?.prefix).toBe('docs/_archive/');
+    });
+
+    it('includes local fallback paths on cloud archive handlers', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+      });
+
+      expect(config.handlers?.['logs-archive']?.local?.base_path).toBe('logs/_archive');
+      expect(config.handlers?.['docs-archive']?.local?.base_path).toBe('docs/_archive');
+    });
+
+    it('uses default region when not specified', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+      });
+
+      expect(config.handlers?.['logs-archive']?.region).toBe('us-east-1');
+    });
+
+    it('uses custom region when specified', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+        region: 'eu-west-1',
+      });
+
+      expect(config.handlers?.['logs-archive']?.region).toBe('eu-west-1');
+      expect(config.handlers?.['docs-archive']?.region).toBe('eu-west-1');
+    });
+  });
+
+  describe('S3 provider with all scope', () => {
+    it('upgrades all handlers to S3', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+        region: 'us-east-1',
+        scope: 'all',
+      });
+
+      expect(config.handlers?.['logs-write']?.type).toBe('s3');
+      expect(config.handlers?.['logs-archive']?.type).toBe('s3');
+      expect(config.handlers?.['docs-write']?.type).toBe('s3');
+      expect(config.handlers?.['docs-archive']?.type).toBe('s3');
+    });
+
+    it('sets correct S3 prefixes for all handlers', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+        scope: 'all',
+      });
+
+      expect(config.handlers?.['logs-write']?.prefix).toBe('logs/');
+      expect(config.handlers?.['logs-archive']?.prefix).toBe('logs/_archive/');
+      expect(config.handlers?.['docs-write']?.prefix).toBe('docs/');
+      expect(config.handlers?.['docs-archive']?.prefix).toBe('docs/_archive/');
+    });
+
+    it('includes bucket on all handlers', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'my-bucket',
+        scope: 'all',
+      });
+
+      expect(config.handlers?.['logs-write']?.bucket).toBe('my-bucket');
+      expect(config.handlers?.['logs-archive']?.bucket).toBe('my-bucket');
+      expect(config.handlers?.['docs-write']?.bucket).toBe('my-bucket');
+      expect(config.handlers?.['docs-archive']?.bucket).toBe('my-bucket');
+    });
+  });
+
+  describe('R2 provider', () => {
+    it('sets type to r2 on archive handlers', () => {
+      const config = getCloudFileConfig({
+        provider: 'r2',
+        bucket: 'dev.my-project',
+        accountId: 'abc123',
+      });
+
+      expect(config.handlers?.['logs-archive']?.type).toBe('r2');
+      expect(config.handlers?.['docs-archive']?.type).toBe('r2');
+    });
+
+    it('includes accountId in auth on cloud handlers', () => {
+      const config = getCloudFileConfig({
+        provider: 'r2',
+        bucket: 'dev.my-project',
+        accountId: 'abc123',
+      });
+
+      expect(config.handlers?.['logs-archive']?.auth?.accountId).toBe('abc123');
+      expect(config.handlers?.['docs-archive']?.auth?.accountId).toBe('abc123');
+    });
+
+    it('uses env var placeholder when accountId not provided', () => {
+      const config = getCloudFileConfig({
+        provider: 'r2',
+        bucket: 'dev.my-project',
+      });
+
+      expect(config.handlers?.['logs-archive']?.auth?.accountId).toBe('${R2_ACCOUNT_ID}');
+    });
+
+    it('does not set region on R2 handlers', () => {
+      const config = getCloudFileConfig({
+        provider: 'r2',
+        bucket: 'dev.my-project',
+        accountId: 'abc123',
+      });
+
+      expect(config.handlers?.['logs-archive']?.region).toBeUndefined();
+    });
+
+    it('keeps writes local in archives scope', () => {
+      const config = getCloudFileConfig({
+        provider: 'r2',
+        bucket: 'dev.my-project',
+        accountId: 'abc123',
+      });
+
+      expect(config.handlers?.['logs-write']?.type).toBe('local');
+      expect(config.handlers?.['docs-write']?.type).toBe('local');
+    });
+
+    it('cloud-enables all handlers in all scope', () => {
+      const config = getCloudFileConfig({
+        provider: 'r2',
+        bucket: 'dev.my-project',
+        accountId: 'abc123',
+        scope: 'all',
+      });
+
+      expect(config.handlers?.['logs-write']?.type).toBe('r2');
+      expect(config.handlers?.['docs-write']?.type).toBe('r2');
+      expect(config.handlers?.['logs-write']?.auth?.accountId).toBe('abc123');
+    });
+  });
+
+  describe('existing config preservation', () => {
+    it('preserves existing write handlers in archives scope', () => {
+      const existingConfig = getDefaultConfig({ fileHandler: 'local' }).file!;
+
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+        scope: 'archives',
+        existingConfig,
+      });
+
+      // Write handlers should be preserved from existing config
+      expect(config.handlers?.['logs-write']?.type).toBe('local');
+      expect(config.handlers?.['logs-write']?.local?.base_path).toBe('logs');
+      expect(config.handlers?.['docs-write']?.type).toBe('local');
+      expect(config.handlers?.['docs-write']?.local?.base_path).toBe('docs');
+    });
+
+    it('preserves schema_version from existing config', () => {
+      const existingConfig = { schema_version: '2.0', handlers: {} };
+
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+        existingConfig,
+      });
+
+      expect(config.schema_version).toBe('2.0');
+    });
+
+    it('overrides all handlers in all scope regardless of existing config', () => {
+      const existingConfig = getDefaultConfig({ fileHandler: 'local' }).file!;
+
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+        scope: 'all',
+        existingConfig,
+      });
+
+      // All handlers should be S3 now
+      expect(config.handlers?.['logs-write']?.type).toBe('s3');
+      expect(config.handlers?.['docs-write']?.type).toBe('s3');
+    });
+  });
+
+  describe('schema version', () => {
+    it('defaults to 2.0 when no existing config', () => {
+      const config = getCloudFileConfig({
+        provider: 's3',
+        bucket: 'dev.my-project',
+      });
+
+      expect(config.schema_version).toBe('2.0');
+    });
   });
 });

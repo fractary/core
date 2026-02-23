@@ -61,7 +61,11 @@ export {
 export {
   getDefaultConfig,
   getMinimalConfig,
+  getCloudFileConfig,
   type DefaultConfigOptions,
+  type CloudConfigOptions,
+  type CloudProvider,
+  type CloudScope,
 } from './defaults';
 
 // Re-export validation schemas and utilities
