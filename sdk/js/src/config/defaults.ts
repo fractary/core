@@ -5,7 +5,7 @@
  * Used by both CLI and agents to ensure consistent config generation.
  */
 
-import type { CoreYamlConfig, WorkConfig, RepoConfig, LogsConfig, FileConfig, DocsConfig } from '../common/yaml-config';
+import type { CoreYamlConfig, WorkConfig, RepoConfig, LogsConfig, FileConfig, DocsConfig, FileSource } from '../common/yaml-config';
 
 /**
  * Options for generating default configuration
@@ -30,6 +30,44 @@ export interface DefaultConfigOptions {
   s3Bucket?: string;
   /** AWS region (if using S3) */
   awsRegion?: string;
+}
+
+/**
+ * Supported cloud storage providers for cloud-init
+ */
+export type CloudProvider = 's3' | 'r2';
+
+/**
+ * Scope of cloud storage enablement
+ *
+ * - 'archives': Only archive handlers are cloud-backed (writes stay local for speed)
+ * - 'all': Both write and archive handlers are cloud-backed
+ */
+export type CloudScope = 'archives' | 'all';
+
+/**
+ * Options for generating cloud-enabled file handler configuration.
+ *
+ * Used by the `cloud-init` command to upgrade an existing local-storage
+ * configuration to use a cloud provider (S3 or R2).
+ */
+export interface CloudConfigOptions {
+  /** Cloud storage provider */
+  provider: CloudProvider;
+  /** Bucket name for storage */
+  bucket: string;
+  /** AWS region (required for S3, ignored for R2) */
+  region?: string;
+  /** Cloudflare account ID (required for R2, ignored for S3) */
+  accountId?: string;
+  /**
+   * Which handlers to cloud-enable.
+   * - 'archives' (default): Only archive handlers use cloud storage; writes stay local for speed.
+   * - 'all': Both write and archive handlers use cloud storage.
+   */
+  scope?: CloudScope;
+  /** Existing FileConfig to merge with (preserves local paths for write handlers in 'archives' scope) */
+  existingConfig?: FileConfig;
 }
 
 /**
@@ -278,5 +316,113 @@ export function getMinimalConfig(options: DefaultConfigOptions = {}): CoreYamlCo
     version: '2.0',
     repo: getDefaultRepoConfig(options),
     work: getDefaultWorkConfig(options),
+  };
+}
+
+/**
+ * Build a cloud-backed FileSource for a given handler category.
+ *
+ * @param provider Cloud provider type
+ * @param bucket Bucket name
+ * @param prefix S3/R2 object key prefix (e.g. 'logs/')
+ * @param localBasePath Local fallback path
+ * @param options Additional provider-specific options
+ */
+function buildCloudHandler(
+  provider: CloudProvider,
+  bucket: string,
+  prefix: string,
+  localBasePath: string,
+  options: { region?: string; accountId?: string },
+): FileSource {
+  const handler: FileSource = {
+    type: provider,
+    bucket,
+    prefix,
+    local: { base_path: localBasePath },
+  };
+
+  if (provider === 's3') {
+    handler.region = options.region || 'us-east-1';
+  } else if (provider === 'r2') {
+    handler.auth = {
+      accountId: options.accountId || '${R2_ACCOUNT_ID}',
+    };
+  }
+
+  return handler;
+}
+
+/**
+ * Generate a cloud-enabled file configuration by upgrading existing handlers.
+ *
+ * When scope is 'archives' (the default), only the archive handlers (logs-archive,
+ * docs-archive) are switched to the cloud provider. Write handlers remain local,
+ * preserving fast local writes while ensuring durable cloud-backed archival.
+ *
+ * When scope is 'all', both write and archive handlers use cloud storage.
+ *
+ * @param options Cloud configuration options
+ * @returns FileConfig with cloud-backed handlers
+ *
+ * @example
+ * ```typescript
+ * // Upgrade archives to S3 (writes stay local)
+ * const fileConfig = getCloudFileConfig({
+ *   provider: 's3',
+ *   bucket: 'dev.my-project',
+ *   region: 'us-east-1',
+ *   scope: 'archives',
+ * });
+ *
+ * // Upgrade everything to R2
+ * const fileConfig2 = getCloudFileConfig({
+ *   provider: 'r2',
+ *   bucket: 'my-project-files',
+ *   accountId: 'abc123',
+ *   scope: 'all',
+ * });
+ * ```
+ */
+export function getCloudFileConfig(options: CloudConfigOptions): FileConfig {
+  const {
+    provider,
+    bucket,
+    region,
+    accountId,
+    scope = 'archives',
+    existingConfig,
+  } = options;
+
+  const providerOpts = { region, accountId };
+
+  // Start from existing config or a local default
+  const baseHandlers = existingConfig?.handlers || getDefaultFileConfig({}).handlers || {};
+
+  const handlers: Record<string, FileSource> = {};
+
+  if (scope === 'all') {
+    // Cloud-enable everything
+    handlers['logs-write'] = buildCloudHandler(provider, bucket, 'logs/', 'logs', providerOpts);
+    handlers['logs-archive'] = buildCloudHandler(provider, bucket, 'logs/_archive/', 'logs/_archive', providerOpts);
+    handlers['docs-write'] = buildCloudHandler(provider, bucket, 'docs/', 'docs', providerOpts);
+    handlers['docs-archive'] = buildCloudHandler(provider, bucket, 'docs/_archive/', 'docs/_archive', providerOpts);
+  } else {
+    // Archives-only: keep writes local, upgrade archives to cloud
+    handlers['logs-write'] = baseHandlers['logs-write'] || {
+      type: 'local',
+      local: { base_path: 'logs' },
+    };
+    handlers['logs-archive'] = buildCloudHandler(provider, bucket, 'logs/_archive/', 'logs/_archive', providerOpts);
+    handlers['docs-write'] = baseHandlers['docs-write'] || {
+      type: 'local',
+      local: { base_path: 'docs' },
+    };
+    handlers['docs-archive'] = buildCloudHandler(provider, bucket, 'docs/_archive/', 'docs/_archive', providerOpts);
+  }
+
+  return {
+    schema_version: existingConfig?.schema_version || '2.0',
+    handlers,
   };
 }
