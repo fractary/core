@@ -307,13 +307,12 @@ export class LogTypeRegistry {
   private findCoreTypesPath(): string {
     // Try common locations
     const candidates = [
-      // Development: relative to SDK source
+      // Installed package: templates bundled at package root
+      path.resolve(__dirname, '../../templates/logs'),
+      // Development: relative to SDK source/dist
       path.resolve(__dirname, '../../../../templates/logs'),
-      // Development: from repo root
+      // Development: from repo root via cwd
       path.resolve(process.cwd(), 'templates/logs'),
-      // Installed package: look in parent directories
-      path.resolve(__dirname, '../../../../../templates/logs'),
-      path.resolve(__dirname, '../../../../../../templates/logs'),
     ];
 
     for (const candidate of candidates) {

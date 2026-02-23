@@ -940,10 +940,7 @@ plugins/docs/                          # Plugin directory
 ├── docs/                              # Plugin documentation
 ├── examples/                          # Usage examples
 ├── samples/                           # Sample documents
-├── schemas/                           # JSON schemas for doc types
 ├── skills/
-│   ├── _shared/                       # Shared utilities
-│   ├── common/                        # Common skills
 │   └── doc-type-selector/             # Type selection (uses CLI)
 
 templates/docs/                        # Core doc types (in repo root)

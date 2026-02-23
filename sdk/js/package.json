@@ -79,17 +79,19 @@
   },
   "files": [
     "dist",
+    "templates",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "dev": "tsc --watch",
+    "prebuild": "node scripts/copy-templates.js",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist templates",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
