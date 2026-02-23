@@ -319,9 +319,20 @@ File storage configuration.
 | `active_handler` | Active handler: `local`, `s3` | Yes |
 | `handlers.local.base_path` | Base directory | No (default: .) |
 | `handlers.local.create_directories` | Auto-create directories | No (default: true) |
-| `handlers.s3.bucket` | S3 bucket name | Yes (S3) |
+| `handlers.s3.bucket` | S3 bucket name | No (default: `dev.{repo}`) |
 | `handlers.s3.region` | AWS region | Yes (S3) |
 | `handlers.s3.prefix` | Key prefix | No |
+
+#### Cloud Storage Bucket Convention
+
+When cloud storage (S3) is selected without an explicit bucket name, the default bucket is `dev.{repo}` (e.g., `dev.core` for a repository named "core"). This "dev" bucket is intended for development artifacts such as documentation, logs, and specs that don't belong to test or production environments.
+
+The naming convention follows the pattern used by other environments:
+- `dev.{repo}` — development artifacts (docs, logs, specs, archives)
+- `test.{repo}` — test environment artifacts
+- `prod.{repo}` — production environment artifacts
+
+You can override this default by providing an explicit `--s3-bucket` argument during configuration.
 
 ```yaml
 file:
@@ -331,7 +342,7 @@ file:
       base_path: .
       create_directories: true
     s3:
-      bucket: my-bucket
+      bucket: dev.my-project
       region: us-east-1
       prefix: data/
 ```

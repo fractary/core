@@ -110,7 +110,7 @@ Call AskUserQuestion once with all of these questions (omit any where the user p
 
 Based on Round 1 answers, call AskUserQuestion again if needed:
 
-- **If S3 selected**: Ask for bucket name (derive from project name) and AWS region
+- **If S3 selected**: Ask for bucket name and AWS region. The recommended default bucket is `dev.{repo}` (e.g., `dev.core` for a repo named "core"). This "dev" bucket is for development artifacts (docs, logs, specs) that don't belong to test or production environments. Present `dev.{detected_repo}` as the recommended option.
 - **If Jira selected**: Ask for Jira project key (derive from repo name)
 - **If Linear selected**: Ask for Linear team key (derive from org name)
 
