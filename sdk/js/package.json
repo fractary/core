@@ -1,6 +1,6 @@
 {
   "name": "@fractary/core",
-  "version": "0.7.23",
+  "version": "0.7.25",
   "description": "Fractary Core SDK - Primitive operations for work tracking, repository management, logging, file storage, and documentation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -79,17 +79,19 @@
   },
   "files": [
     "dist",
+    "templates",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "dev": "tsc --watch",
+    "prebuild": "node scripts/copy-templates.js",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist templates",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [

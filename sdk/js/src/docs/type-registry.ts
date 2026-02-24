@@ -275,13 +275,12 @@ export class DocTypeRegistry {
   private findCoreTypesPath(): string {
     // Try common locations
     const candidates = [
-      // Development: relative to SDK source
+      // Installed package: templates bundled at package root
+      path.resolve(__dirname, '../../templates/docs'),
+      // Development: relative to SDK source/dist
       path.resolve(__dirname, '../../../../templates/docs'),
-      // Development: from repo root
+      // Development: from repo root via cwd
       path.resolve(process.cwd(), 'templates/docs'),
-      // Installed package: look in parent directories
-      path.resolve(__dirname, '../../../../../templates/docs'),
-      path.resolve(__dirname, '../../../../../../templates/docs'),
     ];
 
     for (const candidate of candidates) {
