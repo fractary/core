@@ -14,6 +14,13 @@
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
+  "dependencies": {
+    "node-domexception": "file:./scripts/stubs/node-domexception"
+  },
+  "overrides": {
+    "glob": "^13.0.0",
+    "node-domexception": "$node-domexception"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
