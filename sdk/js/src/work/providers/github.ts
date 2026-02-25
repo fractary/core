@@ -112,7 +112,7 @@ export class GitHubWorkProvider implements WorkProvider {
     }
 
     try {
-      const cmd = `gh issue create ${args.join(' ')} --json number,title,body,state,labels,assignees,milestone,createdAt,updatedAt,url`;
+      const cmd = `gh issue create ${args.join(' ')}`;
       const execOptions: ExecSyncOptions = {
         encoding: 'utf-8' as BufferEncoding,
         maxBuffer: 10 * 1024 * 1024,
@@ -123,8 +123,16 @@ export class GitHubWorkProvider implements WorkProvider {
       }
       const result = execSync(cmd, execOptions);
       const output = (typeof result === 'string' ? result : result.toString()).trim();
-      return this.parseIssue(JSON.parse(output));
+      // gh issue create returns a URL like "https://github.com/owner/repo/issues/123"
+      const match = output.match(/\/issues\/(\d+)/);
+      if (!match) {
+        throw new IssueCreateError(`Could not parse issue number from output: ${output}`);
+      }
+      return this.fetchIssue(match[1]);
     } catch (error) {
+      if (error instanceof IssueCreateError) {
+        throw error;
+      }
       if (error instanceof CommandExecutionError) {
         throw new IssueCreateError(error.stderr);
       }
