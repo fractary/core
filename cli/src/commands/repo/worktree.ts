@@ -4,8 +4,45 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import * as fs from 'fs';
+import * as path from 'path';
 import { getRepoManager } from '../../sdk/factory';
 import { handleError } from '../../utils/errors';
+
+function copyEnvFiles(cwd: string, worktreePath: string): void {
+  // Copy .fractary/env/.env* files (standard location)
+  const fractaryEnvDir = path.join(cwd, '.fractary', 'env');
+  if (fs.existsSync(fractaryEnvDir) && fs.statSync(fractaryEnvDir).isDirectory()) {
+    const destEnvDir = path.join(worktreePath, '.fractary', 'env');
+    try {
+      fs.mkdirSync(destEnvDir, { recursive: true });
+    } catch (e) {
+      console.error(`Warning: failed to create ${destEnvDir}`);
+    }
+    for (const file of fs.readdirSync(fractaryEnvDir)) {
+      if (!file.startsWith('.env') || file === '.env.example') continue;
+      const src = path.join(fractaryEnvDir, file);
+      if (!fs.statSync(src).isFile()) continue;
+      try {
+        fs.copyFileSync(src, path.join(destEnvDir, file));
+      } catch (e) {
+        console.error(`Warning: failed to copy ${file} to worktree`);
+      }
+    }
+  }
+
+  // Copy root .env* files (legacy location)
+  for (const file of fs.readdirSync(cwd)) {
+    if (!file.startsWith('.env') || file === '.env.example') continue;
+    const src = path.join(cwd, file);
+    try {
+      if (!fs.statSync(src).isFile()) continue;
+      fs.copyFileSync(src, path.join(worktreePath, file));
+    } catch {
+      // Silently skip legacy root .env files that fail
+    }
+  }
+}
 
 export function createWorktreeCreateCommand(): Command {
   return new Command('worktree-create')
@@ -26,6 +63,8 @@ export function createWorktreeCreateCommand(): Command {
           workId: options.workId,
           baseBranch: options.base,
         });
+
+        copyEnvFiles(process.cwd(), worktree.path);
 
         if (options.json) {
           console.log(JSON.stringify({ status: 'success', data: worktree }, null, 2));
