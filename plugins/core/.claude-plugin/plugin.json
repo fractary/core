@@ -15,5 +15,6 @@
     "./agents/config-initializer.md",
     "./agents/config-updater.md",
     "./agents/env-switcher.md"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json"
 }
