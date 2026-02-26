@@ -17,7 +17,7 @@ export interface WorktreeConfig {
 /**
  * Extended repository configuration with worktree support
  */
-export interface RepoConfigExtended extends BaseRepoConfig {
+export interface RepoConfigExtended extends Omit<BaseRepoConfig, 'worktree'> {
   worktree?: WorktreeConfig;
 }
 
@@ -45,6 +45,21 @@ export function getDefaultWorktreeConfig(): WorktreeConfig {
   return {
     defaultLocation: DEFAULT_WORKTREE_LOCATION,
     pathPattern: DEFAULT_WORKTREE_PATH_PATTERN,
+  };
+}
+
+/**
+ * Convert a WorktreeConfig (SDK runtime) back into a RepoWorktreeConfig (for YAML)
+ *
+ * @param worktree The SDK worktree config to convert
+ * @returns RepoWorktreeConfig suitable for writing to config.yaml
+ */
+function toYamlWorktreeConfig(worktree: WorktreeConfig): RepoWorktreeConfig {
+  return {
+    location: worktree.defaultLocation,
+    naming: {
+      with_work_id: worktree.pathPattern.replace('{work-id}', '{id}'),
+    },
   };
 }
 
@@ -137,8 +152,12 @@ export async function saveRepoConfig(cwd: string, config: RepoConfigExtended): P
     };
   }
 
-  // Update repo section
-  yamlConfig.repo = config;
+  // Convert SDK config back to YAML format (WorktreeConfig → RepoWorktreeConfig)
+  const yamlRepoConfig: BaseRepoConfig = {
+    ...config,
+    worktree: config.worktree ? toYamlWorktreeConfig(config.worktree) : undefined,
+  };
+  yamlConfig.repo = yamlRepoConfig;
 
   // Write back to file
   writeYamlConfig(yamlConfig, cwd);
