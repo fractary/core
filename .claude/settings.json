@@ -2,8 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "deny": [
-      "Read(./.fractary/specs/archive/**)",
-      "Read(./.fractary/logs/archive/**)"
+      "Read(./docs/_archive/**)"
     ],
     "bash": {
       "allow": [
@@ -119,10 +118,6 @@
       ]
     }
   },
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/plugins/marketplaces/fractary-core/plugins/status/scripts/status-line.sh"
-  },
   "enabledPlugins": {
     "fractary-core@fractary-core": true,
     "fractary-repo@fractary-core": true,
@@ -159,6 +154,5 @@
         "repo": "fractary/faber"
       }
     }
-  },
-  "description": "Claude Code project settings for fractary plugin marketplace"
+  }
 }
