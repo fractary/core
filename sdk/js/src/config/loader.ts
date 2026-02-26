@@ -357,6 +357,18 @@ export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolea
     projectRoot = cwd;
   }
 
+  // Restore persisted environment selection (written by switchEnv).
+  // An explicit shell-level FRACTARY_ENV always takes precedence.
+  if (!process.env.FRACTARY_ENV) {
+    const activeEnvFile = path.join(projectRoot, '.fractary', 'env', '.env-active');
+    if (fs.existsSync(activeEnvFile)) {
+      const savedEnv = fs.readFileSync(activeEnvFile, 'utf-8').trim();
+      if (savedEnv && /^[a-zA-Z0-9_-]+$/.test(savedEnv)) {
+        process.env.FRACTARY_ENV = savedEnv;
+      }
+    }
+  }
+
   // Get the target environment from FRACTARY_ENV
   const fractaryEnv = process.env.FRACTARY_ENV;
   currentEnv = fractaryEnv;
@@ -506,6 +518,17 @@ export function switchEnv(
   // Set the new environment
   process.env.FRACTARY_ENV = envName;
 
+  // Persist the selected environment so subsequent CLI processes auto-restore it.
+  try {
+    const projectRoot = findProjectRoot(options.cwd);
+    const envDir = path.join(projectRoot, '.fractary', 'env');
+    if (fs.existsSync(envDir)) {
+      fs.writeFileSync(path.join(envDir, '.env-active'), envName, 'utf-8');
+    }
+  } catch {
+    // Non-fatal: best-effort persistence
+  }
+
   // Force reload environment variables
   const result = loadEnv({ cwd: options.cwd, force: true });
 
@@ -587,6 +610,18 @@ export function clearEnv(variablesToClear?: string[]): void {
   currentEnv = undefined;
   envLoaded = false;
   deprecationWarned = false;
+
+  // Remove persisted environment so the next process starts fresh.
+  try {
+    const projectRoot = findProjectRoot();
+    const activeEnvFile = path.join(projectRoot, '.fractary', 'env', '.env-active');
+    if (fs.existsSync(activeEnvFile)) {
+      fs.unlinkSync(activeEnvFile);
+    }
+  } catch {
+    // Non-fatal
+  }
+  delete process.env.FRACTARY_ENV;
 }
 
 /**
