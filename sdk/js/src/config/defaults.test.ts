@@ -127,6 +127,16 @@ describe('getDefaultConfig', () => {
       expect(github.api_url).toBe('https://api.github.com');
     });
 
+    it('includes worktree configuration', () => {
+      const config = getDefaultConfig();
+      const worktree = (config.repo as any)?.worktree;
+
+      expect(worktree).toBeDefined();
+      expect(worktree.location).toBe('.claude/worktrees');
+      expect(worktree.naming?.with_work_id).toBe('work-id-{id}');
+      expect(worktree.naming?.default).toBe('random-words');
+    });
+
     it('includes only essential repo defaults', () => {
       const config = getDefaultConfig();
       const defaults = config.repo?.defaults;

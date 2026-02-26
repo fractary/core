@@ -20,13 +20,13 @@ export interface PathGenerationOptions {
 }
 
 /**
- * Generate a worktree path following SPEC-00030 pattern
+ * Generate a worktree path from configuration
  *
  * Path generation logic:
  * 1. If customPath is provided, use it directly
  * 2. Load configuration (or use provided config)
- * 3. Extract organization and project from git remote (if not provided)
- * 4. Generate path using SPEC-00030 pattern: `{defaultLocation}/{org}-{project}-{workId}`
+ * 3. Resolve the worktree base location (relative to cwd or absolute)
+ * 4. Generate the worktree name using the pathPattern with substitutions
  * 5. Return resolved absolute path
  *
  * @param cwd Current working directory (git repository root)
@@ -36,11 +36,11 @@ export interface PathGenerationOptions {
  * @example
  * ```typescript
  * // Auto-detect organization and project
- * const path = await generateWorktreePath('/path/to/repo', { workId: '258' });
- * // Returns: /home/user/.claude-worktrees/fractary-core-258
+ * const worktreePath = await generateWorktreePath('/path/to/repo', { workId: '258' });
+ * // Returns: /path/to/repo/.claude/worktrees/work-id-258
  *
  * // Custom path
- * const path = await generateWorktreePath('/path/to/repo', {
+ * const worktreePath = await generateWorktreePath('/path/to/repo', {
  *   workId: '258',
  *   customPath: '/custom/path'
  * });
@@ -73,8 +73,13 @@ export async function generateWorktreePath(
     proj = proj || remoteInfo?.project || path.basename(cwd);
   }
 
-  // Generate path using SPEC-00030 pattern
-  const location = expandTilde(config.defaultLocation);
+  // Resolve worktree base location
+  let location = expandTilde(config.defaultLocation);
+  // Resolve relative paths against the project root (cwd)
+  if (!path.isAbsolute(location)) {
+    location = path.resolve(cwd, location);
+  }
+
   const name = applyPathPattern(config.pathPattern, {
     organization: org,
     project: proj,

@@ -1,14 +1,16 @@
 import * as path from 'path';
 import * as os from 'os';
-import { loadYamlConfig, writeYamlConfig, RepoConfig as BaseRepoConfig } from '../common/yaml-config.js';
+import { loadYamlConfig, writeYamlConfig, RepoConfig as BaseRepoConfig, RepoWorktreeConfig } from '../common/yaml-config.js';
 
 /**
- * Worktree configuration options
+ * Worktree configuration options (SDK runtime representation)
+ *
+ * Maps from config.yaml's repo.worktree section into SDK-friendly fields.
  */
 export interface WorktreeConfig {
-  /** Default location for worktrees (e.g., "~/.claude-worktrees/") */
+  /** Base directory for worktrees (relative to project root or absolute) */
   defaultLocation: string;
-  /** Path pattern template (e.g., "{organization}-{project}-{work-id}") */
+  /** Path pattern template for work-item worktrees (e.g., "work-id-{work-id}") */
   pathPattern: string;
 }
 
@@ -20,21 +22,51 @@ export interface RepoConfigExtended extends BaseRepoConfig {
 }
 
 /**
+ * Default worktree location relative to project root.
+ * Matches the Claude Code convention of .claude/worktrees/.
+ */
+const DEFAULT_WORKTREE_LOCATION = '.claude/worktrees';
+
+/**
+ * Default path pattern for work-item worktrees.
+ * Produces directories like: work-id-258
+ */
+const DEFAULT_WORKTREE_PATH_PATTERN = 'work-id-{work-id}';
+
+/**
  * Get default worktree configuration
  *
- * @returns Default worktree configuration with SPEC-00030 path pattern
+ * Uses .claude/worktrees as the base location (inside the project)
+ * and work-id-{work-id} as the naming pattern for work-item worktrees.
+ *
+ * @returns Default worktree configuration
  */
 export function getDefaultWorktreeConfig(): WorktreeConfig {
   return {
-    defaultLocation: path.join(os.homedir(), '.claude-worktrees'),
-    pathPattern: '{organization}-{project}-{work-id}'
+    defaultLocation: DEFAULT_WORKTREE_LOCATION,
+    pathPattern: DEFAULT_WORKTREE_PATH_PATTERN,
+  };
+}
+
+/**
+ * Convert a RepoWorktreeConfig (from YAML) into a WorktreeConfig (SDK runtime)
+ *
+ * @param yamlWorktree The worktree section from config.yaml
+ * @returns WorktreeConfig with SDK-friendly fields
+ */
+function fromYamlWorktreeConfig(yamlWorktree: RepoWorktreeConfig): WorktreeConfig {
+  return {
+    defaultLocation: yamlWorktree.location || DEFAULT_WORKTREE_LOCATION,
+    pathPattern: yamlWorktree.naming?.with_work_id
+      ? yamlWorktree.naming.with_work_id.replace('{id}', '{work-id}')
+      : DEFAULT_WORKTREE_PATH_PATTERN,
   };
 }
 
 /**
  * Load repository configuration with worktree support
  *
- * Loads from `.fractary/core/config.yaml` and returns the repo section
+ * Loads from `.fractary/config.yaml` and returns the repo section
  * with worktree configuration. Falls back to defaults if not configured.
  *
  * @param cwd Working directory to start searching for config (default: process.cwd())
@@ -51,11 +83,11 @@ export async function loadRepoConfig(cwd: string = process.cwd()): Promise<RepoC
     const yamlConfig = loadYamlConfig({ projectRoot: cwd });
 
     if (yamlConfig?.repo) {
-      // Merge with defaults to ensure all fields are present
-      const worktreeConfig = {
-        ...getDefaultWorktreeConfig(),
-        ...(yamlConfig.repo as RepoConfigExtended).worktree
-      };
+      // Convert YAML worktree config to SDK format, merge with defaults
+      const yamlWorktree = yamlConfig.repo.worktree as RepoWorktreeConfig | undefined;
+      const worktreeConfig = yamlWorktree
+        ? fromYamlWorktreeConfig(yamlWorktree)
+        : getDefaultWorktreeConfig();
 
       return {
         ...yamlConfig.repo,
@@ -77,7 +109,7 @@ export async function loadRepoConfig(cwd: string = process.cwd()): Promise<RepoC
 /**
  * Save repository configuration with worktree support
  *
- * Saves to `.fractary/core/config.yaml`, merging with existing configuration.
+ * Saves to `.fractary/config.yaml`, merging with existing configuration.
  *
  * @param cwd Working directory to save config to
  * @param config Repository configuration to save
@@ -88,10 +120,8 @@ export async function loadRepoConfig(cwd: string = process.cwd()): Promise<RepoC
  *   active_handler: 'github',
  *   handlers: {},
  *   worktree: {
- *     defaultLocation: '~/my-worktrees',
- *     pathPattern: '{organization}-{project}-{work-id}',
- *     legacySupport: true,
- *     autoMigrate: false
+ *     defaultLocation: '.claude/worktrees',
+ *     pathPattern: 'work-id-{work-id}',
  *   }
  * });
  * ```

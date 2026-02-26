@@ -121,6 +121,13 @@ function getDefaultRepoConfig(options: DefaultConfigOptions): RepoConfig {
         api_url: 'https://api.github.com',
       },
     },
+    worktree: {
+      location: '.claude/worktrees',
+      naming: {
+        with_work_id: 'work-id-{id}',
+        default: 'random-words',
+      },
+    },
     defaults: {
       environments: {
         production: {

@@ -160,5 +160,18 @@
       }
     }
   },
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/worktree-create.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
   "description": "Claude Code project settings for fractary plugin marketplace"
 }
