@@ -39,6 +39,8 @@ if [ -f "$CONFIG_FILE" ]; then
   ) || true
 fi
 WORKTREE_BASE="${WORKTREE_BASE:-.claude/worktrees}"
+# Expand ~ if present (grep/sed output is not shell-expanded)
+WORKTREE_BASE="${WORKTREE_BASE/#\~/$HOME}"
 
 # Resolve to absolute path
 if [[ "$WORKTREE_BASE" != /* ]]; then
@@ -58,12 +60,16 @@ git -C "$CWD" worktree add --detach "$WORKTREE_PATH" HEAD >&2 2>&1
 FRACTARY_ENV_DIR="$CWD/.fractary/env"
 if [ -d "$FRACTARY_ENV_DIR" ]; then
   DEST_ENV_DIR="$WORKTREE_PATH/.fractary/env"
-  mkdir -p "$DEST_ENV_DIR"
+  mkdir -p "$DEST_ENV_DIR" || echo "Warning: failed to create $DEST_ENV_DIR" >&2
   for f in "$FRACTARY_ENV_DIR"/.env*; do
     [ -f "$f" ] || continue
     # Skip .env.example - it's tracked by git and already in the worktree
     [[ "$(basename "$f")" == ".env.example" ]] && continue
-    cp "$f" "$DEST_ENV_DIR/" 2>/dev/null || true
+    if cp -f "$f" "$DEST_ENV_DIR/"; then
+      echo "Copied $(basename "$f") to worktree" >&2
+    else
+      echo "Warning: failed to copy $(basename "$f")" >&2
+    fi
   done
 fi
 
@@ -71,7 +77,7 @@ fi
 for f in "$CWD"/.env*; do
   [ -f "$f" ] || continue
   [[ "$(basename "$f")" == ".env.example" ]] && continue
-  cp "$f" "$WORKTREE_PATH/" 2>/dev/null || true
+  cp -f "$f" "$WORKTREE_PATH/" 2>/dev/null || true
 done
 
 # --- Return the worktree path ---
