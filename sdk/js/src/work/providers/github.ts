@@ -111,6 +111,12 @@ export class GitHubWorkProvider implements WorkProvider {
       args.push(`--milestone "${options.milestone}"`);
     }
 
+    if (options.labels && options.labels.length > 0) {
+      for (const label of options.labels) {
+        this.ensureLabel(label, targetRepo);
+      }
+    }
+
     try {
       const cmd = `gh issue create ${args.join(' ')}`;
       const execOptions: ExecSyncOptions = {
@@ -128,7 +134,7 @@ export class GitHubWorkProvider implements WorkProvider {
       if (!match) {
         throw new IssueCreateError(`Could not parse issue number from output: ${output}`);
       }
-      return this.fetchIssue(match[1]);
+      return this.fetchIssue(match[1], targetRepo);
     } catch (error) {
       if (error instanceof IssueCreateError) {
         throw error;
@@ -145,10 +151,11 @@ export class GitHubWorkProvider implements WorkProvider {
     }
   }
 
-  async fetchIssue(issueId: string | number): Promise<Issue> {
+  async fetchIssue(issueId: string | number, repo?: string): Promise<Issue> {
+    const repoArg = repo || this.getRepoArg();
     try {
       const result = exec(
-        `gh issue view ${issueId} --repo ${this.getRepoArg()} --json number,title,body,state,labels,assignees,milestone,createdAt,updatedAt,closedAt,url`
+        `gh issue view ${issueId} --repo ${repoArg} --json number,title,body,state,labels,assignees,milestone,createdAt,updatedAt,closedAt,url`
       );
       return this.parseIssue(JSON.parse(result));
     } catch (error) {
@@ -445,6 +452,14 @@ export class GitHubWorkProvider implements WorkProvider {
   // =========================================================================
   // HELPERS
   // =========================================================================
+
+  private ensureLabel(labelName: string, repo: string): void {
+    try {
+      exec(`gh label create "${labelName}" --repo ${repo} --force`);
+    } catch {
+      // label already exists or creation failed — continue
+    }
+  }
 
   private parseIssue(raw: unknown): Issue {
     const data = raw as Record<string, unknown>;

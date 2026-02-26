@@ -3,7 +3,7 @@ name: fractary-work:issue-create
 allowed-tools: Bash(fractary-core work issue-create:*)
 description: Create new issue
 model: claude-haiku-4-5
-argument-hint: '--title "<title>" [--body "<text>"] [--labels <labels>] [--assignees <users>] [--json] [--context "<text>"]'
+argument-hint: '--title "<title>" [--body "<text>"] [--labels <labels>] [--assignees <users>] [--repo <owner/repo>] [--json] [--context "<text>"]'
 ---
 
 ## Context
@@ -24,6 +24,7 @@ Parse arguments:
 - --body: Issue description
 - --labels: Comma-separated labels to add
 - --assignees: Comma-separated users to assign
+- --repo: Target repository as owner/repo (e.g. "corthosai/lake.corthonomy.ai"). Pass through to CLI if provided.
 - --json: Output as JSON for structured data
 
 If --context is provided but --title or --body are missing, synthesize a clear, specific title and detailed body from the context. The title should be concise and the body should expand on the context with actionable details.
