@@ -126,14 +126,12 @@ describe('applyPathPattern', () => {
 });
 
 describe('getDefaultWorktreeConfig', () => {
-  it('should return default configuration', () => {
+  it('should return default configuration with .claude/worktrees location', () => {
     const config = getDefaultWorktreeConfig();
 
     expect(config).toEqual({
-      defaultLocation: '~/.claude-worktrees/',
-      pathPattern: '{organization}-{project}-{work-id}',
-      legacySupport: true,
-      autoMigrate: false,
+      defaultLocation: '.claude/worktrees',
+      pathPattern: 'work-id-{work-id}',
     });
   });
 
@@ -172,18 +170,15 @@ describe('Integration tests', () => {
         project: 'core',
         'work-id': '258',
       });
-      const location = expandTilde(config.defaultLocation);
 
-      expect(location).toContain('.claude-worktrees');
-      expect(pattern).toBe('fractary-core-258');
+      expect(config.defaultLocation).toBe('.claude/worktrees');
+      expect(pattern).toBe('work-id-258');
     });
 
     it('should generate correct path with custom config', () => {
       const customConfig = {
         defaultLocation: '~/my-worktrees/',
         pathPattern: '{project}/{work-id}',
-        legacySupport: true,
-        autoMigrate: false,
       };
 
       const pattern = applyPathPattern(customConfig.pathPattern, {
@@ -197,12 +192,12 @@ describe('Integration tests', () => {
     });
   });
 
-  describe('SPEC-00030 compliance', () => {
-    it('should generate SPEC-00030 pattern with defaults', () => {
+  describe('default worktree config', () => {
+    it('should use .claude/worktrees as default location', () => {
       const config = getDefaultWorktreeConfig();
 
-      expect(config.pathPattern).toBe('{organization}-{project}-{work-id}');
-      expect(config.defaultLocation).toBe('~/.claude-worktrees/');
+      expect(config.pathPattern).toBe('work-id-{work-id}');
+      expect(config.defaultLocation).toBe('.claude/worktrees');
     });
   });
 });

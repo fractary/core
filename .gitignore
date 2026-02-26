@@ -22,6 +22,9 @@ Thumbs.db
 # Fractary-specific directories
 .fractary/codex/cache/
 
+# Claude Code worktrees (ephemeral, machine-local)
+.claude/worktrees/
+
 # ===== fractary-logs (managed) =====
 logs/_archive/
 # ===== end fractary-logs =====

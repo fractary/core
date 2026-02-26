@@ -3,6 +3,17 @@
   "$comment": "Fractary Repo Plugin Configuration",
   "version": "2.0.0",
 
+  "worktree": {
+    "location": ".claude/worktrees",
+    "$comment_location": "Relative path from project root where worktrees are created. Used by both Claude Code WorktreeCreate hook and fractary worktree commands.",
+    "naming": {
+      "with_work_id": "work-id-{id}",
+      "$comment_with_work_id": "Directory naming pattern when a work item ID is provided (e.g., work-id-258)",
+      "default": "random-words",
+      "$comment_default": "Naming strategy when no work ID: 'random-words' follows Claude Code's default 3-word naming scheme"
+    }
+  },
+
   "handlers": {
     "source_control": {
       "active": "github",

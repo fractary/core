@@ -177,7 +177,50 @@ docs/_archive/
 # ===== end fractary-docs =====
 ```
 
-## 6. Verify Root .gitignore
+## 6. Set Up Worktree Hooks (repo plugin)
+
+Set up the Claude Code WorktreeCreate hook so that worktrees created via `--worktree`
+automatically receive copies of gitignored `.fractary/env/.env*` credential files.
+
+### 6a. Ensure .claude/worktrees/ is in .gitignore
+
+Check and add `.claude/worktrees/` to the root `.gitignore` if not already present:
+```bash
+grep -q "^\.claude/worktrees/" .gitignore 2>/dev/null || echo -e "\n# Claude Code worktrees (ephemeral, machine-local)\n.claude/worktrees/" >> .gitignore
+```
+
+### 6b. Create the worktree-create hook script
+
+Create `.claude/hooks/worktree-create.sh` (executable). This script:
+- Reads JSON stdin from Claude Code (`cwd`, `name`)
+- Reads worktree location from `.fractary/config.yaml` `repo.worktree.location` (default: `.claude/worktrees`)
+- Creates git worktree at `{location}/{name}` using `git worktree add --detach`
+- Copies `.fractary/env/.env*` files (excluding `.env.example`) to the worktree
+- Copies root `.env*` files (legacy location, excluding `.env.example`) to the worktree
+- Prints absolute worktree path to stdout
+
+Use the Write tool to create `.claude/hooks/worktree-create.sh` from the template at
+`plugins/repo/config/worktree-create.sh.template` if it exists, or write it directly.
+Then make it executable: `chmod +x .claude/hooks/worktree-create.sh`.
+
+### 6c. Register the hook in .claude/settings.json
+
+Read `.claude/settings.json`, add the `hooks.WorktreeCreate` section if not present:
+```json
+"hooks": {
+  "WorktreeCreate": [{
+    "hooks": [{
+      "type": "command",
+      "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/worktree-create.sh",
+      "timeout": 30
+    }]
+  }]
+}
+```
+
+Use the Edit tool to add this section to `.claude/settings.json`. Be careful to maintain valid JSON.
+
+## 7. Verify Root .gitignore
 
 Ensure root `.gitignore` excludes `.env` files:
 ```bash
@@ -185,7 +228,7 @@ Ensure root `.gitignore` excludes `.env` files:
 grep -q "^\.env$" .gitignore 2>/dev/null || echo -e "\n.env\n.env.*\n!.env.example" >> .gitignore
 ```
 
-## 7. Final Confirmation Before Applying
+## 8. Final Confirmation Before Applying
 
 Unless --yes is set, you MUST call AskUserQuestion to present a summary and get final approval before generating config:
 
@@ -198,14 +241,14 @@ Handle responses:
 - "No, let me change something" → Re-ask the relevant questions via AskUserQuestion
 - "Cancel" → Exit without changes
 
-## 8. Validate
+## 9. Validate
 
 Run validation:
 ```bash
 fractary-core config validate
 ```
 
-## 9. Report Results
+## 10. Report Results
 
 Show configuration summary and next steps.
 

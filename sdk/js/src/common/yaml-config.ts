@@ -107,11 +107,27 @@ export interface RepoDefaults {
 }
 
 /**
+ * Worktree configuration within the repo section of config.yaml
+ */
+export interface RepoWorktreeConfig {
+  /** Relative path (from project root) where worktrees are created */
+  location: string;
+  /** Naming conventions for worktree directories */
+  naming?: {
+    /** Pattern when associated with a work item (e.g., "work-id-{id}") */
+    with_work_id?: string;
+    /** Strategy when no work ID: "random-words" */
+    default?: string;
+  };
+}
+
+/**
  * Repository management configuration
  */
 export interface RepoConfig {
   active_handler: string;
   handlers: Record<string, any>;
+  worktree?: RepoWorktreeConfig;
   defaults?: RepoDefaults;
   faber_integration?: Record<string, any>;
   hooks?: Record<string, any>;

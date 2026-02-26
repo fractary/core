@@ -41,15 +41,22 @@ Create a new git worktree for isolated work.
 
 #### Path Generation
 
-If `--path` is not provided, the path is automatically generated:
+If `--path` is not provided, the path is read from the `repo.worktree.location` setting
+in `.fractary/config.yaml` (default: `.claude/worktrees`). The naming pattern uses
+`repo.worktree.naming.with_work_id` (default: `work-id-{id}`):
+
 ```
-../{project-name}-{work-id}
+.claude/worktrees/work-id-{work-id}
 ```
 
 For example, in project `fractary-core` with `--work-id 258`:
 ```
-../fractary-core-258
+.claude/worktrees/work-id-258
 ```
+
+> **Note**: The `.claude/worktrees/` directory is gitignored. Worktrees are ephemeral
+> and machine-local. The same location is used by Claude Code's `--worktree` flag
+> (via the WorktreeCreate hook) for parallel session worktrees.
 
 #### Branch Behavior
 
@@ -66,10 +73,10 @@ For example, in project `fractary-core` with `--work-id 258`:
 Output:
 ```
 Creating new branch 'feature/258' from 'main'...
-✓ Worktree created: ../fractary-core-258
+✓ Worktree created: .claude/worktrees/work-id-258
 ✓ Branch: feature/258
 ✓ Based on: main
-✓ Current directory: /mnt/c/GitHub/fractary/fractary-core-258
+✓ Current directory: /mnt/c/GitHub/fractary/core/.claude/worktrees/work-id-258
 ```
 
 **Custom path**:
@@ -587,30 +594,21 @@ Clean up stale worktrees regularly:
 
 ### Path Organization
 
-Keep worktrees at the same level as main repository:
+Worktrees are stored inside the project under `.claude/worktrees/` (gitignored):
 ```
-/projects/
-  myproject/           (main worktree)
-  myproject-258/       (feature worktree)
-  myproject-259/       (feature worktree)
+myproject/
+  .claude/
+    worktrees/
+      work-id-258/     (fractary worktree with work ID)
+      work-id-259/     (fractary worktree with work ID)
+      bold-oak-a3f2/   (Claude Code auto-created worktree)
 ```
 
 This makes:
-- Easy to find all worktrees
-- Relative paths work consistently
-- Auto-generated paths are predictable
-
-### Avoid Nesting
-
-Don't create worktrees inside other worktrees:
-```bash
-# BAD
-/project/features/feature-258/
-
-# GOOD
-/project/
-/project-258/
-```
+- All worktrees in one place, easy to find
+- Gitignored automatically - no clutter in version control
+- Shared location for both fractary commands and Claude Code `--worktree`
+- The location is configurable via `repo.worktree.location` in `.fractary/config.yaml`
 
 ---
 
@@ -668,6 +666,37 @@ A: No! Fetch happens at the repository level. Just do `git fetch` in any worktre
 
 ---
 
+## Claude Code WorktreeCreate Hook
+
+When Claude Code's `--worktree` flag is used (or the Task tool with `isolation: "worktree"`),
+a custom `WorktreeCreate` hook handles worktree creation. This hook:
+
+1. Creates the git worktree under `.claude/worktrees/{name}` (configurable via `repo.worktree.location`)
+2. Copies `.fractary/env/.env*` credential files (gitignored) into the new worktree
+3. Copies root-level `.env*` files (legacy location) into the new worktree
+
+This ensures that parallel Claude sessions have access to the same credentials and
+environment settings as the main repository.
+
+**Hook location**: `.claude/hooks/worktree-create.sh`
+**Hook registration**: `.claude/settings.json` → `hooks.WorktreeCreate`
+**WorktreeRemove**: Not overridden. The default `git worktree remove` cleans up correctly
+since the copied env files are inside the worktree directory.
+
+### Configuration
+
+Worktree settings in `.fractary/config.yaml`:
+```yaml
+repo:
+  worktree:
+    location: .claude/worktrees     # where worktrees are created
+    naming:
+      with_work_id: 'work-id-{id}'  # naming for fractary commands
+      default: random-words          # naming for Claude Code auto-creation
+```
+
+---
+
 ## See Also
 
 - [Git Worktree Documentation](https://git-scm.com/docs/git-worktree)
@@ -676,5 +705,5 @@ A: No! Fetch happens at the repository level. Just do `git fetch` in any worktre
 
 ---
 
-**Version**: 1.0.0
-**Last Updated**: 2026-01-06
+**Version**: 1.1.0
+**Last Updated**: 2026-02-26

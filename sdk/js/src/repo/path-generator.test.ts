@@ -1,7 +1,7 @@
 /**
  * @fractary/sdk - Path Generator Tests
  *
- * Tests for worktree path generation following SPEC-00030 pattern.
+ * Tests for worktree path generation.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -10,9 +10,15 @@ import { generateWorktreePath } from './path-generator.js';
 import * as organization from './organization.js';
 import * as config from './config.js';
 
-// Mock modules
+// Mock modules - partial mock config to keep expandTilde and applyPathPattern real
 vi.mock('./organization.js');
-vi.mock('./config.js');
+vi.mock('./config.js', async () => {
+  const actual = await vi.importActual('./config.js');
+  return {
+    ...actual as object,
+    loadRepoConfig: vi.fn(),
+  };
+});
 
 describe('generateWorktreePath', () => {
   const HOME = '/home/testuser';
@@ -22,15 +28,13 @@ describe('generateWorktreePath', () => {
     // Mock HOME environment variable
     process.env.HOME = HOME;
 
-    // Default config mock
+    // Default config mock - returns RepoConfigExtended with worktree at top level
     vi.mocked(config.loadRepoConfig).mockResolvedValue({
-      repo: {
-        worktree: {
-          defaultLocation: '~/.claude-worktrees/',
-          pathPattern: '{organization}-{project}-{work-id}',
-          legacySupport: true,
-          autoMigrate: false,
-        },
+      active_handler: 'github',
+      handlers: {},
+      worktree: {
+        defaultLocation: '.claude/worktrees',
+        pathPattern: 'work-id-{work-id}',
       },
     } as any);
   });
@@ -39,7 +43,7 @@ describe('generateWorktreePath', () => {
     vi.clearAllMocks();
   });
 
-  describe('SPEC-00030 path pattern', () => {
+  describe('default path pattern (work-id-{id})', () => {
     beforeEach(() => {
       vi.mocked(organization.getRemoteInfo).mockResolvedValue({
         name: 'origin',
@@ -49,60 +53,31 @@ describe('generateWorktreePath', () => {
       });
     });
 
-    it('should generate SPEC-00030 path with organization and project', async () => {
+    it('should generate path under .claude/worktrees with work-id prefix', async () => {
       const path = await generateWorktreePath(CWD, {
         workId: '258',
       });
 
-      expect(path).toBe(join(HOME, '.claude-worktrees', 'fractary-core-258'));
+      expect(path).toBe(join(CWD, '.claude', 'worktrees', 'work-id-258'));
     });
 
-    it('should use provided organization', async () => {
+    it('should resolve relative location against cwd', async () => {
       const path = await generateWorktreePath(CWD, {
-        workId: '258',
-        organization: 'mycompany',
-      });
-
-      expect(path).toBe(join(HOME, '.claude-worktrees', 'mycompany-core-258'));
-    });
-
-    it('should use provided project', async () => {
-      const path = await generateWorktreePath(CWD, {
-        workId: '258',
-        project: 'backend',
-      });
-
-      expect(path).toBe(join(HOME, '.claude-worktrees', 'fractary-backend-258'));
-    });
-
-    it('should use both provided organization and project', async () => {
-      const path = await generateWorktreePath(CWD, {
-        workId: '258',
-        organization: 'acme',
-        project: 'webapp',
-      });
-
-      expect(path).toBe(join(HOME, '.claude-worktrees', 'acme-webapp-258'));
-    });
-
-    it('should fallback to "local" organization if no remote', async () => {
-      vi.mocked(organization.getRemoteInfo).mockResolvedValue(null);
-
-      const path = await generateWorktreePath(CWD, {
-        workId: '258',
-      });
-
-      expect(path).toBe(join(HOME, '.claude-worktrees', 'local-repo-258'));
-    });
-
-    it('should use directory basename as project if no remote', async () => {
-      vi.mocked(organization.getRemoteInfo).mockResolvedValue(null);
-
-      const path = await generateWorktreePath('/home/user/my-project', {
         workId: '123',
       });
 
-      expect(path).toBe(join(HOME, '.claude-worktrees', 'local-my-project-123'));
+      expect(path).toBe(join(CWD, '.claude', 'worktrees', 'work-id-123'));
+    });
+
+    it('should fallback to defaults if no remote', async () => {
+      vi.mocked(organization.getRemoteInfo).mockResolvedValue(null);
+
+      const path = await generateWorktreePath(CWD, {
+        workId: '258',
+      });
+
+      // Pattern is work-id-{work-id} so org/project don't matter
+      expect(path).toBe(join(CWD, '.claude', 'worktrees', 'work-id-258'));
     });
   });
 
@@ -131,13 +106,11 @@ describe('generateWorktreePath', () => {
   describe('Custom configuration', () => {
     it('should use custom defaultLocation from config', async () => {
       vi.mocked(config.loadRepoConfig).mockResolvedValue({
-        repo: {
-          worktree: {
-            defaultLocation: '~/my-worktrees/',
-            pathPattern: '{organization}-{project}-{work-id}',
-            legacySupport: true,
-            autoMigrate: false,
-          },
+        active_handler: 'github',
+        handlers: {},
+        worktree: {
+          defaultLocation: '~/my-worktrees/',
+          pathPattern: '{organization}-{project}-{work-id}',
         },
       } as any);
 
@@ -157,13 +130,11 @@ describe('generateWorktreePath', () => {
 
     it('should use custom pathPattern from config', async () => {
       vi.mocked(config.loadRepoConfig).mockResolvedValue({
-        repo: {
-          worktree: {
-            defaultLocation: '~/.claude-worktrees/',
-            pathPattern: '{project}/{work-id}',
-            legacySupport: true,
-            autoMigrate: false,
-          },
+        active_handler: 'github',
+        handlers: {},
+        worktree: {
+          defaultLocation: '.claude/worktrees',
+          pathPattern: '{project}/{work-id}',
         },
       } as any);
 
@@ -178,15 +149,13 @@ describe('generateWorktreePath', () => {
         workId: '258',
       });
 
-      expect(path).toBe(join(HOME, '.claude-worktrees', 'core', '258'));
+      expect(path).toBe(join(CWD, '.claude', 'worktrees', 'core', '258'));
     });
 
     it('should pass through custom config in options', async () => {
       const customConfig = {
         defaultLocation: '/tmp/worktrees/',
         pathPattern: 'wt-{work-id}',
-        legacySupport: false,
-        autoMigrate: false,
       };
 
       vi.mocked(organization.getRemoteInfo).mockResolvedValue({
@@ -207,7 +176,16 @@ describe('generateWorktreePath', () => {
   });
 
   describe('Tilde expansion', () => {
-    it('should expand ~ to HOME directory', async () => {
+    it('should expand ~ in tilde-prefixed location', async () => {
+      vi.mocked(config.loadRepoConfig).mockResolvedValue({
+        active_handler: 'github',
+        handlers: {},
+        worktree: {
+          defaultLocation: '~/my-worktrees',
+          pathPattern: 'work-id-{work-id}',
+        },
+      } as any);
+
       vi.mocked(organization.getRemoteInfo).mockResolvedValue({
         name: 'origin',
         url: 'git@github.com:fractary/core.git',
@@ -221,17 +199,16 @@ describe('generateWorktreePath', () => {
 
       expect(path).not.toContain('~');
       expect(path).toContain(HOME);
+      expect(path).toBe(join(HOME, 'my-worktrees', 'work-id-258'));
     });
 
-    it('should handle paths without tilde', async () => {
+    it('should handle absolute paths without tilde', async () => {
       vi.mocked(config.loadRepoConfig).mockResolvedValue({
-        repo: {
-          worktree: {
-            defaultLocation: '/absolute/path/',
-            pathPattern: '{organization}-{project}-{work-id}',
-            legacySupport: true,
-            autoMigrate: false,
-          },
+        active_handler: 'github',
+        handlers: {},
+        worktree: {
+          defaultLocation: '/absolute/path/',
+          pathPattern: '{organization}-{project}-{work-id}',
         },
       } as any);
 
@@ -253,13 +230,11 @@ describe('generateWorktreePath', () => {
   describe('Pattern substitution', () => {
     it('should handle pattern with only work-id', async () => {
       vi.mocked(config.loadRepoConfig).mockResolvedValue({
-        repo: {
-          worktree: {
-            defaultLocation: '~/.worktrees/',
-            pathPattern: '{work-id}',
-            legacySupport: true,
-            autoMigrate: false,
-          },
+        active_handler: 'github',
+        handlers: {},
+        worktree: {
+          defaultLocation: '~/.worktrees/',
+          pathPattern: '{work-id}',
         },
       } as any);
 
@@ -272,13 +247,11 @@ describe('generateWorktreePath', () => {
 
     it('should handle pattern with prefix and suffix', async () => {
       vi.mocked(config.loadRepoConfig).mockResolvedValue({
-        repo: {
-          worktree: {
-            defaultLocation: '~/.worktrees/',
-            pathPattern: 'issue-{work-id}-branch',
-            legacySupport: true,
-            autoMigrate: false,
-          },
+        active_handler: 'github',
+        handlers: {},
+        worktree: {
+          defaultLocation: '~/.worktrees/',
+          pathPattern: 'issue-{work-id}-branch',
         },
       } as any);
 
