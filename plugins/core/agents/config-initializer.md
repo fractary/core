@@ -7,7 +7,7 @@ description: |
   Smart detection: auto-detects platforms and project info, presents guesses for user confirmation via interactive prompts.
 color: orange
 model: claude-haiku-4-5
-allowed-tools: Bash(git remote *), Bash(fractary-core config *), Bash(mkdir *), Bash(grep *), Bash(touch *), Bash(cat *), Read(*), Edit(*), Write(*), Glob(*), AskUserQuestion(*), Bash(fractary-core config env-init:*), Bash(fractary-core config env-section-write:*)
+allowed-tools: Bash(git remote *), Bash(fractary-core config *), Bash(mkdir *), Bash(grep *), Bash(touch *), Bash(cat *), Bash(printf *), Read(*), Edit(*), Write(*), Glob(*), AskUserQuestion(*), Bash(fractary-core config env-init:*), Bash(fractary-core config env-section-write:*)
 ---
 
 <CONTEXT>
@@ -186,12 +186,27 @@ Check and add `.claude/worktrees/` to the root `.gitignore` if not already prese
 grep -q "^\.claude/worktrees/" .gitignore 2>/dev/null || echo -e "\n# Claude Code worktrees (ephemeral, machine-local)\n.claude/worktrees/" >> .gitignore
 ```
 
-### Note: WorktreeCreate hook is bundled with the fractary-repo plugin
+### 6b. Ensure `.worktreeinclude` exists with `.fractary/env/.env*`
 
-The `WorktreeCreate` hook that copies gitignored `.fractary/env/.env*` credential
-files into new worktrees is defined in `plugins/repo/hooks/hooks.json`. It is
-automatically active in any project where the `fractary-repo` plugin is enabled —
-no additional setup is required.
+`.worktreeinclude` is a native Claude Code feature: when this file exists in the project
+root, Claude Code automatically copies matching gitignored files into newly created
+worktrees — no custom hook needed.
+
+Ensure the file exists and contains `.fractary/env/.env*` using this idempotent logic:
+
+```bash
+# Ensure .worktreeinclude exists and contains .fractary/env/.env*
+if [ ! -f ".worktreeinclude" ]; then
+  printf '**/.claude/settings.local.json\n.fractary/env/.env*\n' > .worktreeinclude
+  echo "Created .worktreeinclude"
+elif ! grep -qF '.fractary/env/.env*' .worktreeinclude; then
+  echo '.fractary/env/.env*' >> .worktreeinclude
+  echo "Added .fractary/env/.env* to .worktreeinclude"
+fi
+```
+
+The `.worktreeinclude` file should be committed to git — it defines project policy
+for which credential files get copied into worktrees, not the credentials themselves.
 
 ## 7. Verify Root .gitignore
 
