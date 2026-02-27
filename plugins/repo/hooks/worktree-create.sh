@@ -24,9 +24,19 @@ if [ -z "$CWD" ] || [ "$CWD" = "null" ] || [ -z "$NAME" ] || [ "$NAME" = "null" 
   exit 2
 fi
 
+# --- Log hook invocation for debugging ---
+HOOK_LOG="$CWD/.claude/worktree-create.log"
+mkdir -p "$(dirname "$HOOK_LOG")" 2>/dev/null || true
+echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') [WorktreeCreate] name=$NAME cwd=$CWD" \
+  >> "$HOOK_LOG" 2>/dev/null || true
+echo "WorktreeCreate hook running: name=$NAME" >&2
+
+# --- Resolve git repo root ---
+REPO_ROOT=$(git -C "$CWD" rev-parse --show-toplevel 2>/dev/null || echo "$CWD")
+
 # --- Read worktree location from config ---
 WORKTREE_BASE=""
-CONFIG_FILE="$CWD/.fractary/config.yaml"
+CONFIG_FILE="$REPO_ROOT/.fractary/config.yaml"
 if [ -f "$CONFIG_FILE" ]; then
   # Extract repo.worktree.location from YAML using grep/awk
   # Look for 'worktree:' under repo section, then 'location:' under that
@@ -44,20 +54,23 @@ WORKTREE_BASE="${WORKTREE_BASE/#\~/$HOME}"
 
 # Resolve to absolute path
 if [[ "$WORKTREE_BASE" != /* ]]; then
-  WORKTREE_BASE="$CWD/$WORKTREE_BASE"
+  WORKTREE_BASE="$REPO_ROOT/$WORKTREE_BASE"
 fi
 
 WORKTREE_PATH="$WORKTREE_BASE/$NAME"
 
 # --- Create the worktree ---
-mkdir -p "$WORKTREE_BASE"
-
-# Create a new detached worktree from HEAD
-# Claude Code manages branch creation within the session
-git -C "$CWD" worktree add --detach "$WORKTREE_PATH" HEAD >&2 2>&1
+if [ -d "$WORKTREE_PATH" ]; then
+  echo "Worktree path already exists at $WORKTREE_PATH (may have been pre-created)" >&2
+else
+  mkdir -p "$WORKTREE_BASE"
+  # Create a new detached worktree from HEAD
+  # Claude Code manages branch creation within the session
+  git -C "$REPO_ROOT" worktree add --detach "$WORKTREE_PATH" HEAD 2>&1 >&2
+fi
 
 # --- Copy .fractary/env files (standard location) ---
-FRACTARY_ENV_DIR="$CWD/.fractary/env"
+FRACTARY_ENV_DIR="$REPO_ROOT/.fractary/env"
 if [ -d "$FRACTARY_ENV_DIR" ]; then
   DEST_ENV_DIR="$WORKTREE_PATH/.fractary/env"
   mkdir -p "$DEST_ENV_DIR" || echo "Warning: failed to create $DEST_ENV_DIR" >&2
@@ -71,13 +84,17 @@ if [ -d "$FRACTARY_ENV_DIR" ]; then
       echo "Warning: failed to copy $(basename "$f")" >&2
     fi
   done
+else
+  echo "No .fractary/env/ directory found at $REPO_ROOT — skipping credential copy" >&2
 fi
 
 # --- Copy root .env files (legacy location) ---
-for f in "$CWD"/.env*; do
+for f in "$REPO_ROOT"/.env*; do
   [ -f "$f" ] || continue
   [[ "$(basename "$f")" == ".env.example" ]] && continue
-  cp -f "$f" "$WORKTREE_PATH/" 2>/dev/null || true
+  cp -f "$f" "$WORKTREE_PATH/" 2>/dev/null \
+    && echo "Copied root $(basename "$f") to worktree" >&2 \
+    || true
 done
 
 # --- Return the worktree path ---
