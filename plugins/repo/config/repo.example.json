@@ -52,7 +52,7 @@
 
   "defaults": {
     "environments": {
-      "production": {
+      "prod": {
         "branch": "main",
         "protected": true,
         "$comment_protected": "Require approval for direct push to production branch"
@@ -70,7 +70,7 @@
       }
     },
     "$comment_environments": "Maps environment IDs to their branch and protection settings. Protection is derived from these entries.",
-    "default_environment": "production",
+    "default_environment": "test",
     "$comment_default_environment": "Which environment is the default context. The production branch is resolved from this.",
 
     "branch_naming": {

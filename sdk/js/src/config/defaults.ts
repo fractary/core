@@ -130,7 +130,7 @@ function getDefaultRepoConfig(options: DefaultConfigOptions): RepoConfig {
     },
     defaults: {
       environments: {
-        production: {
+        prod: {
           branch: 'main',
           protected: true,
         },
@@ -139,7 +139,7 @@ function getDefaultRepoConfig(options: DefaultConfigOptions): RepoConfig {
           protected: false,
         },
       },
-      default_environment: 'production',
+      default_environment: 'test',
       pr: {
         merge: {
           strategy: 'squash',
