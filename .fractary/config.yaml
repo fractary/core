@@ -14,13 +14,13 @@ repo:
       default: random-words
   defaults:
     environments:
-      production:
+      prod:
         branch: main
         protected: true
       test:
         branch: test
         protected: false
-    default_environment: production
+    default_environment: test
     pr:
       merge:
         strategy: squash

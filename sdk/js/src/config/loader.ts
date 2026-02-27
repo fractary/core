@@ -369,6 +369,19 @@ export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolea
     }
   }
 
+  // Fall back to repo.defaults.default_environment from config.yaml
+  if (!process.env.FRACTARY_ENV) {
+    try {
+      const cfg = loadYamlConfig({ projectRoot, warnMissingEnvVars: false });
+      const defaultEnv = (cfg as any)?.repo?.defaults?.default_environment;
+      if (defaultEnv && /^[a-zA-Z0-9_-]+$/.test(defaultEnv)) {
+        process.env.FRACTARY_ENV = defaultEnv;
+      }
+    } catch {
+      // Non-fatal: config may not exist yet
+    }
+  }
+
   // Get the target environment from FRACTARY_ENV
   const fractaryEnv = process.env.FRACTARY_ENV;
   currentEnv = fractaryEnv;
