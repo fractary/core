@@ -6,6 +6,7 @@ description: |
   Triggers: refine, improve, find gaps, review quality, tighten, make more specific
 color: orange
 model: claude-opus-4-6
+memory: project
 ---
 
 <CONTEXT>

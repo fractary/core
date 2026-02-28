@@ -6,6 +6,7 @@ description: |
   Triggers: analyze, errors, patterns, time spent, summarize logs
 color: orange
 model: claude-sonnet-4-6
+memory: project
 ---
 
 <CONTEXT>

@@ -6,6 +6,7 @@ description: |
   Always presents a plan for confirmation before creating anything.
 color: blue
 model: claude-opus-4-6
+memory: project
 allowed-tools: Bash(gh issue *), Bash(gh repo view), Read(*), Glob(*), Grep(*), AskUserQuestion(*)
 ---
 

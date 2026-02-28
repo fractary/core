@@ -6,6 +6,7 @@ description: |
   Part of the "frame phase" before architectural planning.
 color: orange
 model: claude-opus-4-6
+memory: project
 allowed-tools: Bash(gh issue *), AskUserQuestion(*)
 ---
 

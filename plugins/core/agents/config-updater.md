@@ -6,6 +6,7 @@ description: |
   Interprets natural language descriptions and applies targeted changes to .fractary/config.yaml.
 color: orange
 model: claude-haiku-4-5
+memory: project
 ---
 
 <CONTEXT>

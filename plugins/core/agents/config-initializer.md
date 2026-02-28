@@ -7,6 +7,7 @@ description: |
   Smart detection: auto-detects platforms and project info, presents guesses for user confirmation via interactive prompts.
 color: orange
 model: claude-haiku-4-5
+memory: project
 allowed-tools: Bash(git remote *), Bash(fractary-core config *), Bash(mkdir *), Bash(grep *), Bash(touch *), Bash(cat *), Bash(printf *), Read(*), Edit(*), Write(*), Glob(*), AskUserQuestion(*), Bash(fractary-core config env-init:*), Bash(fractary-core config env-section-write:*)
 ---
 
