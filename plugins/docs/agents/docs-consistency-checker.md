@@ -6,6 +6,7 @@ description: |
   Triggers: check consistency, docs stale, sync docs, documentation drift
 color: orange
 model: claude-sonnet-4-6
+memory: project
 ---
 
 <CONTEXT>

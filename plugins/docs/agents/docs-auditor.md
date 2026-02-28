@@ -6,6 +6,7 @@ description: |
   Triggers: audit, scan, review docs, doc health, find gaps
 color: orange
 model: claude-sonnet-4-6
+memory: project
 ---
 
 <CONTEXT>

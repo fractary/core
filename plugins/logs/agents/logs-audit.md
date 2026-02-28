@@ -6,6 +6,7 @@ description: |
   Triggers: audit, health check, compliance, log management
 color: orange
 model: claude-sonnet-4-6
+memory: project
 ---
 
 <CONTEXT>

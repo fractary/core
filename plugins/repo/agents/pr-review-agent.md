@@ -8,6 +8,7 @@ description: |
 tools: Bash
 color: orange
 model: claude-sonnet-4-6
+memory: project
 ---
 
 # PR Review Agent
