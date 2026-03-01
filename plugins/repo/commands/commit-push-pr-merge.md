@@ -3,7 +3,7 @@ name: fractary-repo:commit-push-pr-merge
 allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*), Bash(fractary-core repo pr-merge:*), Bash(gh pr view:*), Bash(gh api:*), Bash(fractary-core repo pull:*), Bash(git checkout:*)
 description: Commit, push, create PR, merge, and cleanup branch
 model: claude-haiku-4-5
-argument-hint: '[--squash|--merge|--rebase] [--wait-for-checks] [--context "<text>"]'
+argument-hint: '[--squash|--merge|--rebase] [--skip-ci] [--context "<text>"]'
 ---
 
 ## Context
@@ -16,7 +16,7 @@ argument-hint: '[--squash|--merge|--rebase] [--wait-for-checks] [--context "<tex
 
 **IMPORTANT: The CLI binary is `fractary-core`, NOT `fractary`. Always use `fractary-core` as the command prefix.**
 
-**SAFETY WARNING**: This command auto-merges PRs. Only use for solo development, hotfixes, documentation, or repos without branch protection requiring reviews.
+**SAFETY WARNING**: This command auto-merges PRs. Only use for solo development, hotfixes, documentation, or repos without branch protection requiring reviews. CI checks are waited on by default — pass `--skip-ci` to force merge without waiting.
 
 Use the **Bash** tool for each step below. Do NOT use the Skill tool.
 
@@ -33,8 +33,9 @@ Based on the above changes:
    `fractary-core repo pr-create --title "<title>" --body "<body>" --json`
 6. Check branch protection — if reviews required > 0, STOP with error:
    `gh api repos/{owner}/{repo}/branches/main/protection --jq '.required_pull_request_reviews.required_approving_review_count' 2>/dev/null || echo "0"`
-7. If `--wait-for-checks` passed, poll every 10s for max 5 minutes:
+7. Unless `--skip-ci` passed, poll every 10s for max 10 minutes until all checks complete or fail:
    `gh pr view <number> --json statusCheckRollup`
+   If any check fails, STOP with error — fix CI before merging (or re-run with --skip-ci to force)
 8. Merge the PR with the requested strategy (default: merge):
    `fractary-core repo pr-merge <number> --delete-branch`
 9. Checkout the base branch and pull:
