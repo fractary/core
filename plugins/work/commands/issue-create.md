@@ -13,8 +13,9 @@ argument-hint: '[--title "<title>"] [--body "<text>"] [--labels "<label1,label2>
 ## Rules
 
 - You MUST only use the Bash tool to call `fractary-core work issue-create`. Do NOT use the Skill tool. Do NOT call yourself recursively.
-- If --title is explicitly provided, use it as the title template. Substitute any `{placeholder}` variables with appropriate values from context, but preserve the overall format, structure, and prefix exactly. Do NOT rewrite, restructure, or generate a different title based on --context.
+- If --title is explicitly provided, use it as the title template. Substitute any `{placeholder}` variables with appropriate values from context. The resulting title MUST match the substituted template character-for-character. --context MUST NOT add suffixes, prefixes, parenthetical qualifications, descriptive labels, or any other words beyond the substituted placeholders. The title is a contract — not a starting point.
 - If --labels is provided, pass it to the CLI exactly as a quoted comma-separated string: `--labels "label1,label2"`.
+- If --repo is provided, you MUST pass it to the CLI as `--repo "owner/repo"`. The `## Context` Repository field shows only the calling project — it is NOT the target repository and must not be used as the default when --repo is explicitly provided.
 
 ## Your task
 
