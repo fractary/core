@@ -3,7 +3,7 @@ name: fractary-repo:commit-push-pr
 allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*)
 description: Commit, push, and open a PR
 model: claude-haiku-4-5
-argument-hint: '[--context "<text>"]'
+argument-hint: '[--work-id <id>] [--context "<text>"]'
 ---
 
 ## Context
@@ -27,6 +27,11 @@ Based on the above changes:
 3. Push the branch to origin:
    `fractary-core repo push --set-upstream`
 4. Create a pull request:
+   When `--work-id` is provided, remove any existing closing keyword line from the body
+   (any line matching `/(closes|fixes|resolves):?\s*#\d+/i`, including bold variants),
+   then append `\n\nCloses #<id>` as plain text at the end of the body before calling:
+   `fractary-core repo pr-create --title "<title>" --body "<body with Closes #N appended>"`
+   Without `--work-id`, call as normal:
    `fractary-core repo pr-create --title "<title>" --body "<body>"`
 
 You MUST use the Bash tool for all commands above. Do NOT use the Skill tool. Execute all steps in a single message.

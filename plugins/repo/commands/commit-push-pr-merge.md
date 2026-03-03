@@ -3,7 +3,7 @@ name: fractary-repo:commit-push-pr-merge
 allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*), Bash(fractary-core repo pr-merge:*), Bash(gh pr view:*), Bash(gh api:*), Bash(fractary-core repo pull:*), Bash(git checkout:*)
 description: Commit, push, create PR, merge, and cleanup branch
 model: claude-haiku-4-5
-argument-hint: '[--squash|--merge|--rebase] [--skip-ci] [--context "<text>"]'
+argument-hint: '[--work-id <id>] [--squash|--merge|--rebase] [--skip-ci] [--context "<text>"]'
 ---
 
 ## Context
@@ -30,6 +30,11 @@ Based on the above changes:
 4. Push the branch to origin:
    `fractary-core repo push --set-upstream`
 5. Create a pull request (extract PR number from output):
+   When `--work-id` is provided, remove any existing closing keyword line from the body
+   (any line matching `/(closes|fixes|resolves):?\s*#\d+/i`, including bold variants),
+   then append `\n\nCloses #<id>` as plain text at the end of the body before calling:
+   `fractary-core repo pr-create --title "<title>" --body "<body with Closes #N appended>" --json`
+   Without `--work-id`, call as normal:
    `fractary-core repo pr-create --title "<title>" --body "<body>" --json`
 6. Check branch protection — if reviews required > 0, STOP with error:
    `gh api repos/{owner}/{repo}/branches/main/protection --jq '.required_pull_request_reviews.required_approving_review_count' 2>/dev/null || echo "0"`
