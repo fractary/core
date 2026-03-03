@@ -12,6 +12,7 @@ import type {
   IssueCreateOptions,
   IssueUpdateOptions,
   IssueFilters,
+  IssueUpsertResult,
   WorkType,
   ClassifyResult,
   ClassifySignals,
@@ -30,6 +31,7 @@ export type {
   IssueCreateOptions,
   IssueUpdateOptions,
   IssueFilters,
+  IssueUpsertResult,
   WorkType,
   ClassifyResult,
   ClassifySignals,
@@ -70,7 +72,8 @@ export interface WorkProvider {
   createComment(
     issueId: string | number,
     body: string,
-    faberContext?: FaberContext
+    faberContext?: FaberContext,
+    repo?: string
   ): Promise<Comment>;
   listComments(
     issueId: string | number,

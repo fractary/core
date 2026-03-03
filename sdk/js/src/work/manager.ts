@@ -11,6 +11,7 @@ import {
   IssueCreateOptions,
   IssueUpdateOptions,
   IssueFilters,
+  IssueUpsertResult,
   WorkType,
   ClassifyResult,
   Comment,
@@ -118,6 +119,60 @@ export class WorkManager {
   }
 
   /**
+   * Find an existing matching issue and comment on it, or create a new one.
+   *
+   * When `updateExisting` is false (or not set), behaves identically to `createIssue`.
+   * When `updateExisting` is true, searches for an open issue matching the title and labels,
+   * then adds the body as a comment instead of creating a duplicate.
+   */
+  async findOrCreateIssue(options: IssueCreateOptions): Promise<IssueUpsertResult> {
+    if (!options.updateExisting) {
+      const issue = await this.provider.createIssue(options);
+      return { action: 'created', issue, matchCount: 0 };
+    }
+
+    const matchLabels = options.matchLabels || options.labels || [];
+    const matchTitle = options.matchTitle || options.title;
+    const excludeLabels = options.excludeLabels || [];
+    const targetRepo = options.repo;
+
+    // Phase 1: Server-side search (narrows candidates)
+    const candidates = await this.provider.searchIssues(matchTitle, {
+      state: 'open',
+      labels: matchLabels.length > 0 ? matchLabels : undefined,
+      repo: targetRepo,
+    });
+
+    // Phase 2: Exact title match
+    let matches = candidates.filter(issue => issue.title === matchTitle);
+
+    // Phase 3: Exclude forbidden labels
+    if (excludeLabels.length > 0) {
+      matches = matches.filter(issue => {
+        const issueLabels = issue.labels.map(l => l.name);
+        return !excludeLabels.some(excl => issueLabels.includes(excl));
+      });
+    }
+
+    if (matches.length === 0) {
+      const issue = await this.provider.createIssue(options);
+      return { action: 'created', issue, matchCount: 0 };
+    }
+
+    if (matches.length > 1) {
+      console.error(`Warning: found ${matches.length} matching issues for "${matchTitle}", commenting on most recent`);
+    }
+
+    // Comment on the most recently updated match
+    const existing = matches[0];
+    const comment = await this.provider.createComment(
+      existing.number, options.body || '', undefined, targetRepo
+    );
+
+    return { action: 'commented', issue: existing, comment, matchCount: matches.length };
+  }
+
+  /**
    * Fetch an issue by ID
    */
   async fetchIssue(issueId: string | number): Promise<Issue> {
@@ -185,9 +240,10 @@ export class WorkManager {
   async createComment(
     issueId: string | number,
     body: string,
-    faberContext?: FaberContext
+    faberContext?: FaberContext,
+    repo?: string
   ): Promise<Comment> {
-    return this.provider.createComment(issueId, body, faberContext);
+    return this.provider.createComment(issueId, body, faberContext, repo);
   }
 
   /**
