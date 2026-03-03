@@ -3,7 +3,7 @@ name: fractary-repo:commit-push-pr-review
 allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*), Bash(gh pr view:*), Bash(gh api:*), Task(fractary-repo:pr-review-agent)
 description: Commit, push, create PR, wait for CI, then run full pr-review-agent analysis
 model: claude-haiku-4-5
-argument-hint: '[--context "<text>"]'
+argument-hint: '[--work-id <id>] [--context "<text>"]'
 ---
 
 ## Context
@@ -32,6 +32,11 @@ Based on the above context:
    `fractary-core repo push --set-upstream`
 
 4. If no PR exists for this branch, create one (extract PR number from output):
+   When `--work-id` is provided, remove any existing closing keyword line from the body
+   (any line matching `/(closes|fixes|resolves):?\s*#\d+/i`, including bold variants),
+   then append `\n\nCloses #<id>` as plain text at the end of the body before calling:
+   `fractary-core repo pr-create --title "<title>" --body "<body with Closes #N appended>" --json`
+   Without `--work-id`, call as normal:
    `fractary-core repo pr-create --title "<title>" --body "<body>" --json`
    If a PR already exists, use the existing PR number from context.
 
