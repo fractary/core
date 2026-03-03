@@ -222,7 +222,7 @@ export class GitHubWorkProvider implements WorkProvider {
     query: string,
     filters?: IssueFilters
   ): Promise<Issue[]> {
-    const args = [`--repo ${this.getRepoArg()}`];
+    const args = [`--repo ${filters?.repo || this.getRepoArg()}`];
 
     if (filters?.state && filters.state !== 'all') {
       args.push(`--state ${filters.state}`);
@@ -269,8 +269,11 @@ export class GitHubWorkProvider implements WorkProvider {
   async createComment(
     issueId: string | number,
     body: string,
-    faberContext?: FaberContext
+    faberContext?: FaberContext,
+    repo?: string
   ): Promise<Comment> {
+    const repoArg = repo || this.getRepoArg();
+
     // Add FABER context to comment if provided
     let finalBody = body;
     if (faberContext) {
@@ -278,7 +281,7 @@ export class GitHubWorkProvider implements WorkProvider {
     }
 
     try {
-      execSync(`gh issue comment ${issueId} --repo ${this.getRepoArg()} --body-file -`, {
+      execSync(`gh issue comment ${issueId} --repo ${repoArg} --body-file -`, {
         input: finalBody,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -294,7 +297,7 @@ export class GitHubWorkProvider implements WorkProvider {
       }
 
       throw new CommandExecutionError(
-        `gh issue comment ${issueId} --repo ${this.getRepoArg()} --body-file -`,
+        `gh issue comment ${issueId} --repo ${repoArg} --body-file -`,
         exitCode,
         stderr
       );

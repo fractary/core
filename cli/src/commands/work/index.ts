@@ -94,22 +94,40 @@ function createIssueCreateCommand(): Command {
     .option('--labels <labels>', 'Comma-separated labels')
     .option('--assignees <assignees>', 'Comma-separated assignees')
     .option('--repo <repo>', 'Target repository as owner/repo (e.g., "corthosai/lake.corthonomy.ai")')
+    .option('--update-existing', 'Find existing open issue and add comment instead of creating duplicate')
+    .option('--match-labels <labels>', 'Labels for matching (comma-separated). Defaults to --labels')
+    .option('--match-title <title>', 'Title to match on. Defaults to --title')
+    .option('--exclude-labels <labels>', 'Skip issues with any of these labels (comma-separated)')
     .option('--json', 'Output as JSON')
     .action(async (options) => {
       try {
         const workManager = await getWorkManager();
-        const issue = await workManager.createIssue({
+        const result = await workManager.findOrCreateIssue({
           title: options.title,
           body: options.body,
           labels: options.labels?.split(',').map((l: string) => l.trim()),
           assignees: options.assignees?.split(',').map((a: string) => a.trim()),
           repo: options.repo,
+          updateExisting: options.updateExisting || false,
+          matchLabels: options.matchLabels?.split(',').map((l: string) => l.trim()),
+          matchTitle: options.matchTitle,
+          excludeLabels: options.excludeLabels?.split(',').map((l: string) => l.trim()),
         });
 
         if (options.json) {
-          console.log(JSON.stringify({ status: 'success', data: issue }, null, 2));
+          console.log(JSON.stringify({
+            status: 'success',
+            action: result.action,
+            matchCount: result.matchCount,
+            data: result.issue,
+            comment: result.comment,
+          }, null, 2));
         } else {
-          console.log(chalk.green(`✓ Created issue #${issue.number}: ${issue.title}`));
+          if (result.action === 'commented') {
+            console.log(chalk.yellow(`→ Commented on existing issue #${result.issue.number}: ${result.issue.title}`));
+          } else {
+            console.log(chalk.green(`✓ Created issue #${result.issue.number}: ${result.issue.title}`));
+          }
         }
       } catch (error) {
         handleError(error, options);

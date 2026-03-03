@@ -72,6 +72,14 @@ export interface IssueCreateOptions {
   milestone?: string;
   /** Override target repository as "owner/repo" (e.g., "corthosai/lake.corthonomy.ai") */
   repo?: string;
+  /** When true, search for existing matching issue; if found, add body as comment */
+  updateExisting?: boolean;
+  /** Labels to match when searching (defaults to `labels`) */
+  matchLabels?: string[];
+  /** Title to match when searching (defaults to `title`) */
+  matchTitle?: string;
+  /** Exclude issues with any of these labels from matching */
+  excludeLabels?: string[];
 }
 
 export interface IssueUpdateOptions {
@@ -86,6 +94,8 @@ export interface IssueFilters {
   assignee?: string;
   milestone?: string;
   since?: string;
+  /** Override target repository for search */
+  repo?: string;
 }
 
 export type WorkType = 'feature' | 'bug' | 'chore' | 'patch' | 'infrastructure' | 'api';
@@ -148,6 +158,13 @@ export interface CommentCreateOptions {
 }
 
 export type FaberContext = 'frame' | 'architect' | 'build' | 'evaluate' | 'release' | 'ops';
+
+export interface IssueUpsertResult {
+  action: 'created' | 'commented';
+  issue: Issue;
+  comment?: Comment;
+  matchCount: number;
+}
 
 // ============================================================================
 // Repo Module Types

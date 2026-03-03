@@ -3,7 +3,7 @@ name: fractary-work:issue-create-bulk
 description: Create multiple issues at once using AI analysis
 allowed-tools: Task(fractary-work:issue-bulk-creator)
 model: claude-opus-4-6
-argument-hint: '[--title "<title template>"] [--body "<body template>"] [--repo <owner/repo>] [--context <description>] [--type <type>] [--label <label>] [--template <name>] [--assignee <user>]'
+argument-hint: '[--title "<title template>"] [--body "<body template>"] [--repo <owner/repo>] [--context <description>] [--type <type>] [--label <label>] [--template <name>] [--assignee <user>] [--update-existing] [--match-labels "<labels>"] [--exclude-labels "<labels>"]'
 ---
 
 Delegates to fractary-work:issue-bulk-creator agent for creating multiple related issues at once.
@@ -45,6 +45,9 @@ This command uses AI to intelligently create multiple related issues (datasets, 
 - `--label <label>`: Additional labels to apply (repeatable)
 - `--template <name>`: GitHub issue template from `.github/ISSUE_TEMPLATE/` (if project has templates)
 - `--assignee <user>`: Assign all issues to user
+- `--update-existing`: Find existing open issues and add comments instead of creating duplicates. When set, each issue is checked for a matching open issue (by title and labels) before creation.
+- `--match-labels <labels>`: Comma-separated labels for matching existing issues (defaults to the issue's labels if omitted)
+- `--exclude-labels <labels>`: Comma-separated labels that disqualify an issue from matching (e.g., `faber-in-progress`)
 
 **Note**: The `--type` parameter adds a label with that name (e.g., `--type feature` adds the "feature" label). GitHub issues don't have a separate type field.
 

@@ -7,7 +7,7 @@ description: |
 color: blue
 model: claude-opus-4-6
 memory: project
-allowed-tools: Bash(gh issue *), Bash(gh repo view), Read(*), Glob(*), Grep(*), AskUserQuestion(*)
+allowed-tools: Bash(gh issue *), Bash(gh repo view), Bash(fractary-core work issue-create:*), Read(*), Glob(*), Grep(*), AskUserQuestion(*)
 ---
 
 **Security Note**: This agent has broad filesystem read access (`Read(*)`, `Glob(*)`, `Grep(*)`) to enable project structure discovery (datasets, API endpoints, templates). This is necessary for intelligent issue creation but means the agent can read any file in the project. Only use this agent in trusted repositories.
@@ -38,6 +38,7 @@ This tool is designed for:
 11. If --title is explicitly provided, treat it as an immutable template — substitute `{placeholder}` variables per-issue but do NOT rewrite, restructure, or add content beyond the substituted placeholders. The title is a contract.
 12. If --body is explicitly provided, treat it as an immutable template — substitute `{placeholder}` variables per-issue but do NOT synthesize new body content or modify the template structure. The body is a contract.
 13. If --repo is explicitly provided, pass it to every `gh issue create` command. Do NOT use the current project repo as a fallback.
+14. When --update-existing is provided, use `fractary-core work issue-create --update-existing ...` for each issue instead of `gh issue create` directly. The CLI handles the search-then-decide logic. Parse the `--json` output to determine the `action` field (`created` or `commented`).
 </CRITICAL_RULES>
 
 <ARGUMENTS>
@@ -50,6 +51,9 @@ This tool is designed for:
 - `--template <name>` - GitHub issue template to use from `.github/ISSUE_TEMPLATE/` (if exists in project)
 - `--assignee <user>` - Assign all issues to user
 - `--context "<text>"` - Optional: Additional instructions prepended to workflow
+- `--update-existing` - When set, use `fractary-core work issue-create --update-existing --json ...` for each issue instead of `gh issue create`. The CLI searches for existing open issues matching the title and labels; if found, adds body as a comment instead of creating a duplicate.
+- `--match-labels "<labels>"` - Comma-separated labels for matching existing issues (defaults to the issue's labels). Pass through to the CLI.
+- `--exclude-labels "<labels>"` - Comma-separated labels that disqualify an issue from matching (e.g., `faber-in-progress`). Pass through to the CLI.
 
 **Note on --type**: GitHub issues don't have a native "type" field. The `--type` parameter is a convenience that adds the specified value as a label (e.g., `--type feature` adds label "feature"). This helps categorize issues consistently.
 </ARGUMENTS>
@@ -159,6 +163,22 @@ Common settings for all issues:
 - Workflow: <workflow-name> (if same for all, otherwise shown per-issue)
 ```
 
+When `--update-existing` is set, show per-issue disposition (the CLI determines this at execution time, but if you pre-checked existing issues in Step 1, reflect likely outcomes):
+
+```
+I will process <N> issues (--update-existing enabled):
+
+[1] [CREATE] <Title>
+    Labels: <label1>, <label2>
+
+[2] [COMMENT ON #45] <Title>
+    Existing issue: #45 (open)
+    Comment: <body preview>
+
+[3] [CREATE] <Title>
+    Labels: <label1>, <label2>
+```
+
 **Use AskUserQuestion tool** to get approval:
 
 ```
@@ -185,14 +205,28 @@ AskUserQuestion(
 
 For each issue in the approved plan:
 
-1. **Create the issue using gh CLI**:
+1. **Create the issue**:
 
    If `--title` was provided, substitute `{placeholder}` variables with this issue's values. Otherwise, use the generated title.
    If `--body` was provided, substitute `{placeholder}` variables with this issue's values. Otherwise, use the generated description.
    If `--repo` was provided, include `--repo "<owner/repo>"` in the command.
 
+   **When `--update-existing` is set**, use the fractary-core CLI which handles find-or-comment:
    ```bash
-   # Create issue with title and body (add --repo if provided)
+   result=$(fractary-core work issue-create \
+     --title "<substituted-title>" \
+     --body "<substituted-body>" \
+     --labels "<label1,label2>" \
+     --update-existing \
+     [--match-labels "<match-labels>"] \
+     [--exclude-labels "<exclude-labels>"] \
+     [--repo "<owner/repo>"] \
+     --json)
+   # Parse result: action field is "created" or "commented"
+   ```
+
+   **When `--update-existing` is NOT set**, use gh directly:
+   ```bash
    issue_number=$(gh issue create \
      --title "<substituted-title>" \
      --body "<substituted-body>" \
@@ -200,7 +234,7 @@ For each issue in the approved plan:
      --json number -q .number)
    ```
 
-2. **Apply labels**:
+2. **Apply labels** (only when NOT using --update-existing, since CLI handles labels):
    ```bash
    # Apply type label if --type was specified (e.g., "feature", "bug", "chore", "patch")
    gh issue edit $issue_number --add-label "<type>"
@@ -218,7 +252,7 @@ For each issue in the approved plan:
    ```
 
 4. **Track results**:
-   - Record issue number and URL on success
+   - Record issue number, URL, and action (created/commented) on success
    - Record error message on failure
    - Continue with remaining issues even if some fail
 
@@ -243,6 +277,19 @@ After all issue creation attempts, provide a comprehensive summary:
 All issues labeled with: <labels>
 Workflow: <workflow-name> (if applicable)
 Assigned to: <assignee> (if specified)
+```
+
+**Success Response with --update-existing** (separate created vs. commented):
+```
+✓ Processed <N> issue(s) successfully:
+
+Created (<M> new):
+- #123: <Title> - <URL>
+- #126: <Title> - <URL>
+
+Commented on existing (<K> updated):
+- #45: <Title> - <URL> (added comment)
+- #67: <Title> - <URL> (added comment)
 ```
 
 **Partial Success Response** (some failed):
