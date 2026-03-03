@@ -99,7 +99,7 @@ Strengthen to explicitly close the suffix/qualification loophole:
 
 **Rationale:** In WORK-192, the orchestrator appended `(VERSION_ONLY updates)` to an explicit `--title`. The existing rule prohibited rewriting the title but did not explicitly prohibit additive modification. This closes the gap.
 
-**Scope note:** Body synthesis verbosity is NOT constrained globally — body content remains fully driven by `--context`. Workflow steps that want concise issues should write concise `--context` text; steps that want detailed issues write detailed `--context` text. Only the title is a contract.
+**Scope note:** When `--body` is explicitly provided, it is a contract — just like `--title`. The body template supports `{placeholder}` substitution, and `--context` MUST NOT modify it. When `--body` is NOT provided, body synthesis remains driven by `--context`. Workflow steps that want specific body content should provide `--body` with template variables; steps that want AI-generated bodies should omit `--body` and provide `--context`.
 
 ---
 

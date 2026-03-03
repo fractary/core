@@ -14,6 +14,7 @@ argument-hint: '[--title "<title>"] [--body "<text>"] [--labels "<label1,label2>
 
 - You MUST only use the Bash tool to call `fractary-core work issue-create`. Do NOT use the Skill tool. Do NOT call yourself recursively.
 - If --title is explicitly provided, use it as the title template. Substitute any `{placeholder}` variables with appropriate values from context. The resulting title MUST match the substituted template character-for-character. --context MUST NOT add suffixes, prefixes, parenthetical qualifications, descriptive labels, or any other words beyond the substituted placeholders. The title is a contract — not a starting point.
+- If --body is explicitly provided, use it as the body template. Substitute any `{placeholder}` variables with appropriate values from context. The resulting body MUST preserve the substituted template's structure and content. --context MUST NOT modify, append to, or rewrite the body when --body is explicitly provided. The body is a contract — not a starting point.
 - If --labels is provided, pass it to the CLI exactly as a quoted comma-separated string: `--labels "label1,label2"`.
 - If --repo is provided, you MUST pass it to the CLI as `--repo "owner/repo"`. The `## Context` Repository field shows only the calling project — it is NOT the target repository and must not be used as the default when --repo is explicitly provided.
 
@@ -23,7 +24,7 @@ Create a new issue using the CLI command `fractary-core work issue-create`.
 
 Parse arguments:
 - --title: Issue title template. If provided, substitute any `{placeholder}` variables with values from context, then use the result as the title. Preserve the format exactly — do not restructure or rewrite it based on --context.
-- --body: Issue description. If provided, use it as-is.
+- --body: Issue description template. If provided, substitute any `{placeholder}` variables with values from context, then use the result as the body. Preserve the structure exactly — do not restructure or rewrite it based on --context.
 - --labels: Comma-separated labels (e.g. "bug,enhancement"). Pass through to CLI as `--labels "..."`.
 - --assignees: Comma-separated users to assign.
 - --repo: Target repository as owner/repo (e.g. "corthosai/lake.corthonomy.ai"). Pass through to CLI if provided.

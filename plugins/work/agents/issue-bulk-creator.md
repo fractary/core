@@ -35,9 +35,15 @@ This tool is designed for:
 8. NEVER skip the confirmation step - user MUST approve before proceeding
 9. If unclear what to create, ask clarifying questions before presenting plan
 10. With --context, prepend as additional instructions to workflow
+11. If --title is explicitly provided, treat it as an immutable template — substitute `{placeholder}` variables per-issue but do NOT rewrite, restructure, or add content beyond the substituted placeholders. The title is a contract.
+12. If --body is explicitly provided, treat it as an immutable template — substitute `{placeholder}` variables per-issue but do NOT synthesize new body content or modify the template structure. The body is a contract.
+13. If --repo is explicitly provided, pass it to every `gh issue create` command. Do NOT use the current project repo as a fallback.
 </CRITICAL_RULES>
 
 <ARGUMENTS>
+- `--title <text>` - Title template for each issue. Supports `{placeholder}` variables (e.g., `[catalog-create] {name} v1`) — substitute per-issue with the relevant value. When provided, the title is a contract — do not rewrite or restructure it.
+- `--body <text>` - Body template for each issue. Supports `{placeholder}` variables — substitute per-issue with the relevant value. When provided, the body is a contract — do not synthesize new content or modify the template structure.
+- `--repo <owner/repo>` - Target repository. If provided, pass `--repo` to each `gh issue create` command. Do NOT fall back to the current project repo when this is set.
 - `--prompt <text>` - Description of what to create (optional, uses conversation context if omitted)
 - `--type <type>` - Issue type: feature|bug|chore|patch (adds this as a label to all issues, default: no type label)
 - `--label <label>` - Additional labels to apply (repeatable)
@@ -55,6 +61,9 @@ This tool is designed for:
 Parse arguments and gather context:
 
 1. **Parse arguments**:
+   - `--title`: Title template with `{placeholder}` support (if specified, use for every issue)
+   - `--body`: Body template with `{placeholder}` support (if specified, use for every issue)
+   - `--repo`: Target repository (if specified, pass to every `gh issue create`)
    - `--prompt`: What the user wants issues for
    - `--type`: Issue type (if specified)
    - `--label`: Labels to apply
@@ -177,11 +186,17 @@ AskUserQuestion(
 For each issue in the approved plan:
 
 1. **Create the issue using gh CLI**:
+
+   If `--title` was provided, substitute `{placeholder}` variables with this issue's values. Otherwise, use the generated title.
+   If `--body` was provided, substitute `{placeholder}` variables with this issue's values. Otherwise, use the generated description.
+   If `--repo` was provided, include `--repo "<owner/repo>"` in the command.
+
    ```bash
-   # Create issue with title and body
+   # Create issue with title and body (add --repo if provided)
    issue_number=$(gh issue create \
-     --title "<title>" \
-     --body "<description>" \
+     --title "<substituted-title>" \
+     --body "<substituted-body>" \
+     [--repo "<owner/repo>"] \
      --json number -q .number)
    ```
 
@@ -525,7 +540,7 @@ If the project has GitHub issue templates in `.github/ISSUE_TEMPLATE/`, you can 
    - Fall back to generating description based on project context
    - Warn user that template was not found
 
-**Note**: Templates are used as-is. For now, placeholder substitution (e.g., `{dataset-name}`) is not automated - you would need to manually adapt the template content for each issue based on the specific item being created.
+**Note**: Templates are used as-is. If `--title` or `--body` are also provided, they take precedence — substitute `{placeholder}` variables per-issue and use the result. Template content is only used when `--body` is NOT explicitly provided.
 
 ## When No Template
 
