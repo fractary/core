@@ -3,7 +3,7 @@ name: fractary-work:issue-create-bulk
 description: Create multiple issues at once using AI analysis
 allowed-tools: Task(fractary-work:issue-bulk-creator)
 model: claude-opus-4-6
-argument-hint: '[--context <description>] [--type <type>] [--label <label>] [--template <name>] [--assignee <user>]'
+argument-hint: '[--title "<title template>"] [--body "<body template>"] [--repo <owner/repo>] [--context <description>] [--type <type>] [--label <label>] [--template <name>] [--assignee <user>]'
 ---
 
 Delegates to fractary-work:issue-bulk-creator agent for creating multiple related issues at once.
@@ -37,6 +37,9 @@ This command uses AI to intelligently create multiple related issues (datasets, 
 
 ## Arguments
 
+- `--title <text>`: Title template for each issue. Supports `{placeholder}` variables substituted per-issue (e.g., `--title "[catalog-create] {name} v1"`). When provided, the agent must use this as the title pattern — it is a contract, not a starting point.
+- `--body <text>`: Body template for each issue. Supports `{placeholder}` variables substituted per-issue. When provided, the agent must use this as the body for each issue — not synthesize new content.
+- `--repo <owner/repo>`: Target repository. Overrides the current project repo for all created issues.
 - `--prompt <text>`: Description of what to create (optional, uses conversation context if omitted)
 - `--type <type>`: Issue type label to apply: feature|bug|chore|patch (default: no type label)
 - `--label <label>`: Additional labels to apply (repeatable)
