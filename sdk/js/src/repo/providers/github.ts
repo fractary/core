@@ -4,7 +4,7 @@
  * Repository operations via GitHub CLI (gh).
  */
 
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import {
   RepoConfig,
   PullRequest,
@@ -45,7 +45,7 @@ function gh<T>(args: string, cwd?: string): T {
 /**
  * Execute a gh command without JSON parsing
  */
-function ghRaw(args: string, cwd?: string): string {
+function ghRaw(args: string[], cwd?: string): string {
   const execOptions = {
     encoding: 'utf-8' as const,
     cwd: cwd || findProjectRoot(),
@@ -54,7 +54,7 @@ function ghRaw(args: string, cwd?: string): string {
   };
 
   try {
-    return execSync(`gh ${args}`, execOptions).toString().trim();
+    return execFileSync('gh', args, execOptions).toString().trim();
   } catch (error: unknown) {
     const err = error as { stderr?: Buffer | string; message?: string };
     const stderr = err.stderr?.toString() || err.message || 'Unknown error';
@@ -180,7 +180,7 @@ export class GitHubRepoProvider implements RepoProvider {
 
     if (location === 'remote' || location === 'both') {
       try {
-        ghRaw(`api repos/${this.owner}/${this.repo}/git/refs/heads/${name} -X DELETE`, this.cwd);
+        ghRaw(['api', `repos/${this.owner}/${this.repo}/git/refs/heads/${name}`, '-X', 'DELETE'], this.cwd);
       } catch {
         // Ignore if branch doesn't exist remotely
       }
@@ -228,10 +228,10 @@ export class GitHubRepoProvider implements RepoProvider {
   async createPR(options: PRCreateOptions): Promise<PullRequest> {
     const args: string[] = ['pr', 'create'];
 
-    args.push('--title', `"${options.title.replace(/"/g, '\\"')}"`);
+    args.push('--title', options.title);
 
     if (options.body) {
-      args.push('--body', `"${options.body.replace(/"/g, '\\"')}"`);
+      args.push('--body', options.body);
     }
 
     if (options.base) {
@@ -259,7 +259,7 @@ export class GitHubRepoProvider implements RepoProvider {
     }
 
     // Create the PR and get back the URL
-    const url = ghRaw(args.join(' '), this.cwd);
+    const url = ghRaw(args, this.cwd);
 
     // Extract PR number from URL
     const match = url.match(/\/pull\/(\d+)/);
@@ -291,18 +291,18 @@ export class GitHubRepoProvider implements RepoProvider {
     const args: string[] = ['pr', 'edit', number.toString()];
 
     if (options.title) {
-      args.push('--title', `"${options.title.replace(/"/g, '\\"')}"`);
+      args.push('--title', options.title);
     }
 
     if (options.body) {
-      args.push('--body', `"${options.body.replace(/"/g, '\\"')}"`);
+      args.push('--body', options.body);
     }
 
     if (options.base) {
       args.push('--base', options.base);
     }
 
-    ghRaw(args.join(' '), this.cwd);
+    ghRaw(args, this.cwd);
     return this.getPR(number);
   }
 
@@ -353,30 +353,30 @@ export class GitHubRepoProvider implements RepoProvider {
     }
 
     if (options?.commitTitle) {
-      args.push('--subject', `"${options.commitTitle.replace(/"/g, '\\"')}"`);
+      args.push('--subject', options.commitTitle);
     }
 
     if (options?.commitBody) {
-      args.push('--body', `"${options.commitBody.replace(/"/g, '\\"')}"`);
+      args.push('--body', options.commitBody);
     }
 
-    ghRaw(args.join(' '), this.cwd);
+    ghRaw(args, this.cwd);
     return this.getPR(number);
   }
 
   async addPRComment(number: number, body: string): Promise<void> {
-    ghRaw(`pr comment ${number} --body "${body.replace(/"/g, '\\"')}"`, this.cwd);
+    ghRaw(['pr', 'comment', String(number), '--body', body], this.cwd);
   }
 
   async requestReview(number: number, reviewers: string[]): Promise<void> {
-    ghRaw(`pr edit ${number} --add-reviewer ${reviewers.join(',')}`, this.cwd);
+    ghRaw(['pr', 'edit', String(number), '--add-reviewer', reviewers.join(',')], this.cwd);
   }
 
   async approvePR(number: number, comment?: string): Promise<void> {
     const args = ['pr', 'review', number.toString(), '--approve'];
     if (comment) {
-      args.push('--body', `"${comment.replace(/"/g, '\\"')}"`);
+      args.push('--body', comment);
     }
-    ghRaw(args.join(' '), this.cwd);
+    ghRaw(args, this.cwd);
   }
 }
