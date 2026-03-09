@@ -8,6 +8,7 @@
 
 import { Command } from 'commander';
 import { createBranchCreateCommand, createBranchDeleteCommand, createBranchListCommand } from './branch';
+import { createBranchForwardCommand } from './branch-forward';
 import { createCommitCommand } from './commit';
 import { createPRCreateCommand, createPRListCommand, createPRMergeCommand, createPRReviewCommand } from './pr';
 import { createTagCreateCommand, createTagPushCommand, createTagListCommand } from './tag';
@@ -29,6 +30,7 @@ export function createRepoCommand(): Command {
   repo.addCommand(createBranchCreateCommand());
   repo.addCommand(createBranchDeleteCommand());
   repo.addCommand(createBranchListCommand());
+  repo.addCommand(createBranchForwardCommand());
 
   // Commit
   repo.addCommand(createCommitCommand());

@@ -87,9 +87,16 @@ export function createPRMergeCommand(): Command {
     .argument('<number>', 'PR number')
     .option('--strategy <strategy>', 'Merge strategy (merge, squash, rebase)', 'merge')
     .option('--delete-branch', 'Delete branch after merge')
+    .option('--to-branch <branch>', '(unsupported — PRs merge into their base branch)')
     .option('--json', 'Output as JSON')
     .action(async (number: string, options) => {
       try {
+        if (options.toBranch) {
+          console.error(chalk.red('Error: --to-branch is not supported. PRs merge into their configured base branch.'));
+          console.error(chalk.yellow('To forward changes to a different branch, use: fractary-core repo branch-forward --target <branch>'));
+          process.exit(1);
+        }
+
         const repoManager = await getRepoManager();
 
         const result = await repoManager.mergePR(parseInt(number, 10), {
