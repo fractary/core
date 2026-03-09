@@ -345,6 +345,21 @@ export interface PRReviewOptions {
   comment?: string;
 }
 
+export interface BranchForwardOptions {
+  source?: string;       // Branch to merge from (default: current branch)
+  target: string;        // Branch to merge into (required)
+  createFrom?: string;   // Create target from this base if it doesn't exist
+  push?: boolean;        // Push target branch after merge
+}
+
+export interface BranchForwardResult {
+  source: string;
+  target: string;
+  created: boolean;      // Whether target was newly created
+  pushed: boolean;
+  mergeCommitSha: string;
+}
+
 export interface Tag {
   name: string;
   sha: string;

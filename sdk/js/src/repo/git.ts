@@ -311,6 +311,24 @@ export class Git {
     }
   }
 
+  /**
+   * Merge a branch into the current branch
+   */
+  merge(branch: string, options?: { noFf?: boolean; message?: string }): string {
+    const args: string[] = [];
+    if (options?.noFf) args.push('--no-ff');
+    if (options?.message) args.push('-m', `"${options.message.replace(/"/g, '\\"')}"`);
+    args.push(branch);
+    return git(`merge ${args.join(' ')}`, this.cwd);
+  }
+
+  /**
+   * Abort an in-progress merge
+   */
+  abortMerge(): void {
+    git('merge --abort', this.cwd);
+  }
+
   // =========================================================================
   // COMMITS
   // =========================================================================

@@ -10,6 +10,8 @@ import {
   BranchCreateOptions,
   BranchDeleteOptions,
   BranchListOptions,
+  BranchForwardOptions,
+  BranchForwardResult,
   Commit,
   CommitOptions,
   CommitListOptions,
@@ -436,6 +438,66 @@ export class RepoManager {
     } else if (options.comment) {
       await this.provider.addPRComment(number, options.comment);
     }
+  }
+
+  // =========================================================================
+  // BRANCH FORWARDING
+  // =========================================================================
+
+  /**
+   * Forward (merge) a source branch into a target branch.
+   * The source branch and any open PRs remain untouched.
+   */
+  async forwardBranch(options: BranchForwardOptions): Promise<BranchForwardResult> {
+    const source = options.source || this.git.getCurrentBranch();
+    const originalBranch = this.git.getCurrentBranch();
+    let created = false;
+
+    // Fetch to ensure we have latest remote state
+    try { this.git.fetch(); } catch { /* offline ok */ }
+
+    // Ensure target branch exists
+    if (!this.git.branchExists(options.target)) {
+      // Try checking out from remote
+      try {
+        this.git.exec(`checkout --track origin/${options.target}`);
+        this.git.checkout(originalBranch);
+      } catch {
+        // Truly doesn't exist — create if createFrom specified
+        if (!options.createFrom) {
+          throw new Error(`Target branch '${options.target}' does not exist. Use --create-from to auto-create.`);
+        }
+        this.git.createBranch(options.target, options.createFrom);
+        created = true;
+        this.git.checkout(originalBranch);
+      }
+    }
+
+    // Checkout target, pull latest, merge source
+    this.git.checkout(options.target);
+    try { this.git.pull({ branch: options.target }); } catch { /* no remote tracking */ }
+
+    try {
+      this.git.merge(source, { noFf: true, message: `Merge ${source} into ${options.target}` });
+    } catch (error) {
+      this.git.abortMerge();
+      this.git.checkout(originalBranch);
+      throw new Error(`Merge conflict merging ${source} into ${options.target}. Resolve manually.`);
+    }
+
+    const mergeCommitSha = this.git.exec('rev-parse HEAD').trim();
+
+    // Push if requested
+    let pushed = false;
+    if (options.push) {
+      this.git.push({ branch: options.target, setUpstream: created });
+      pushed = true;
+    }
+
+    // Return to original branch
+    this.git.checkout(originalBranch);
+
+    return { source, target: options.target, created, pushed, mergeCommitSha };
   }
 
   // =========================================================================
