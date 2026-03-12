@@ -456,48 +456,58 @@ export class RepoManager {
     // Fetch to ensure we have latest remote state
     try { this.git.fetch(); } catch { /* offline ok */ }
 
-    // Ensure target branch exists
-    if (!this.git.branchExists(options.target)) {
-      // Try checking out from remote
-      try {
-        this.git.exec(`checkout --track origin/${options.target}`);
-        this.git.checkout(originalBranch);
-      } catch {
-        // Truly doesn't exist — create if createFrom specified
-        if (!options.createFrom) {
-          throw new Error(`Target branch '${options.target}' does not exist. Use --create-from to auto-create.`);
-        }
-        this.git.createBranch(options.target, options.createFrom);
-        created = true;
-        this.git.checkout(originalBranch);
-      }
-    }
-
-    // Checkout target, pull latest, merge source
-    this.git.checkout(options.target);
-    try { this.git.pull({ branch: options.target }); } catch { /* no remote tracking */ }
+    // Stash any uncommitted changes before switching branches
+    const stashed = this.git.isDirty() ? this.git.stash('branch-forward: auto-stash') : false;
 
     try {
-      this.git.merge(source, { noFf: true, message: `Merge ${source} into ${options.target}` });
-    } catch (error) {
-      this.git.abortMerge();
+      // Ensure target branch exists
+      if (!this.git.branchExists(options.target)) {
+        // Try checking out from remote
+        try {
+          this.git.exec(`checkout --track origin/${options.target}`);
+          this.git.checkout(originalBranch);
+        } catch {
+          // Truly doesn't exist — create if createFrom specified
+          if (!options.createFrom) {
+            throw new Error(`Target branch '${options.target}' does not exist. Use --create-from to auto-create.`);
+          }
+          this.git.createBranch(options.target, options.createFrom);
+          created = true;
+          this.git.checkout(originalBranch);
+        }
+      }
+
+      // Checkout target, pull latest, merge source
+      this.git.checkout(options.target);
+      try { this.git.pull({ branch: options.target }); } catch { /* no remote tracking */ }
+
+      try {
+        this.git.merge(source, { noFf: true, message: `Merge ${source} into ${options.target}` });
+      } catch (error) {
+        this.git.abortMerge();
+        this.git.checkout(originalBranch);
+        throw new Error(`Merge conflict merging ${source} into ${options.target}. Resolve manually.`);
+      }
+
+      const mergeCommitSha = this.git.exec('rev-parse HEAD').trim();
+
+      // Push if requested
+      let pushed = false;
+      if (options.push) {
+        this.git.push({ branch: options.target, setUpstream: created });
+        pushed = true;
+      }
+
+      // Return to original branch
       this.git.checkout(originalBranch);
-      throw new Error(`Merge conflict merging ${source} into ${options.target}. Resolve manually.`);
+
+      return { source, target: options.target, created, pushed, mergeCommitSha };
+    } finally {
+      // Always restore stashed changes when back on original branch
+      if (stashed) {
+        try { this.git.stashPop(); } catch { /* stash pop can fail if merge changed overlapping files */ }
+      }
     }
-
-    const mergeCommitSha = this.git.exec('rev-parse HEAD').trim();
-
-    // Push if requested
-    let pushed = false;
-    if (options.push) {
-      this.git.push({ branch: options.target, setUpstream: created });
-      pushed = true;
-    }
-
-    // Return to original branch
-    this.git.checkout(originalBranch);
-
-    return { source, target: options.target, created, pushed, mergeCommitSha };
   }
 
   // =========================================================================

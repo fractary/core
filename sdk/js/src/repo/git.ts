@@ -174,6 +174,26 @@ export class Git {
   }
 
   // =========================================================================
+  // STASH
+  // =========================================================================
+
+  /**
+   * Stash uncommitted changes. Returns true if something was stashed.
+   */
+  stash(message?: string): boolean {
+    const args = message ? `stash push -m "${message.replace(/"/g, '\\"')}"` : 'stash push';
+    const result = git(args, this.cwd);
+    return !result.includes('No local changes');
+  }
+
+  /**
+   * Pop the most recent stash entry
+   */
+  stashPop(): void {
+    git('stash pop', this.cwd);
+  }
+
+  // =========================================================================
   // BRANCHES
   // =========================================================================
 
