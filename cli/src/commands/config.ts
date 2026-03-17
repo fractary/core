@@ -10,6 +10,7 @@
  * - env-show: Show current environment status
  * - env-clear: Clear environment credentials
  * - env-init: Initialize .fractary/env/ directory
+ * - env-vars: Print active environment variables as shell export statements
  * - env-section-read: Read a plugin's managed section from an env file
  * - env-section-write: Write a plugin's managed section to an env file
  */
@@ -42,6 +43,7 @@ import {
 import { loadYamlConfig, writeYamlConfig } from '@fractary/core/common/yaml-config';
 import { redactConfig } from '@fractary/core/common/secrets';
 import * as yaml from 'js-yaml';
+import * as dotenv from 'dotenv';
 
 /**
  * Validate configuration command
@@ -499,6 +501,74 @@ async function envShowCommand(): Promise<void> {
 }
 
 /**
+ * Environment vars command — print active env variables as shell export statements (stdout only)
+ */
+async function configEnvVarsCommand(): Promise<void> {
+  try {
+    let projectRoot: string;
+    try {
+      projectRoot = findProjectRoot();
+    } catch {
+      console.error('Could not find project root (.fractary/ directory not found)');
+      process.exit(1);
+      return;
+    }
+
+    // Determine active environment — FRACTARY_ENV takes priority over .env-active
+    // Same resolution logic as loadEnv() in sdk/js/src/config/loader.ts
+    let activeEnv: string | undefined = process.env.FRACTARY_ENV;
+    if (!activeEnv) {
+      const activeEnvFile = join(projectRoot, '.fractary', 'env', '.env-active');
+      if (existsSync(activeEnvFile)) {
+        const saved = readFileSync(activeEnvFile, 'utf-8').trim();
+        if (saved && /^[a-zA-Z0-9_-]+$/.test(saved)) {
+          activeEnv = saved;
+        }
+      }
+    }
+
+    if (!activeEnv) {
+      console.error('No active environment set. Run: fractary-core config env-switch <environment>');
+      process.exit(1);
+      return;
+    }
+
+    // Verify the required environment-specific file exists
+    const envDir = join(projectRoot, '.fractary', 'env');
+    const requiredFile = join(envDir, `.env.${activeEnv}`);
+    if (!existsSync(requiredFile)) {
+      console.error(
+        `Environment file not found: .fractary/env/.env.${activeEnv}\n` +
+          `Run: fractary-core config env-init  (to create the template)`
+      );
+      process.exit(1);
+      return;
+    }
+
+    // Parse files in priority order (later overrides earlier) — no process.env mutation
+    // Mirrors loadEnv() priority: .env → .env.{activeEnv} → .env.local
+    const merged: Record<string, string> = {};
+    for (const fileName of ['.env', `.env.${activeEnv}`, '.env.local']) {
+      const filePath = join(envDir, fileName);
+      if (existsSync(filePath)) {
+        const content = readFileSync(filePath, 'utf-8');
+        Object.assign(merged, dotenv.parse(content));
+      }
+    }
+
+    // Print as POSIX-safe shell export statements (stdout only — nothing written to disk)
+    // export prefix is required so variables are visible to child processes (e.g. terraform)
+    for (const [key, value] of Object.entries(merged)) {
+      const escaped = value.replace(/'/g, "'\\''");
+      console.log(`export ${key}='${escaped}'`);
+    }
+  } catch (error) {
+    console.error('Failed to read environment variables:', error);
+    process.exit(1);
+  }
+}
+
+/**
  * Environment clear command
  */
 async function envClearCommand(options: { vars?: string }): Promise<void> {
@@ -843,6 +913,11 @@ export function registerConfigCommand(program: Command): void {
     .command('env-show')
     .description('Show current environment status')
     .action(envShowCommand);
+
+  config
+    .command('env-vars')
+    .description('Print active environment variables as shell export statements')
+    .action(() => void configEnvVarsCommand());
 
   config
     .command('env-clear')
