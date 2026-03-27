@@ -668,7 +668,7 @@ A: No! Fetch happens at the repository level. Just do `git fetch` in any worktre
 
 ## Claude Code WorktreeCreate Hook
 
-When Claude Code's `--worktree` flag is used (or the Task tool with `isolation: "worktree"`),
+When Claude Code's `--worktree` flag is used (or the Agent tool with `isolation: "worktree"`),
 a custom `WorktreeCreate` hook handles worktree creation. This hook:
 
 1. Creates the git worktree under `.claude/worktrees/{name}` (configurable via `repo.worktree.location`)

@@ -55,19 +55,19 @@ The existing anti-pattern block (added after WORK-192) prevented the Bash bypass
 
 ## Required Changes
 
-### Part 1: Add Agent/Task bypass anti-pattern
+### Part 1: Add Agent tool bypass anti-pattern
 
 **File:** `plugins/faber/docs/workflow-orchestration-protocol.md`
 
 After the existing ANTI-PATTERN block (line ~42), add:
 
 ```markdown
-> **ANTI-PATTERN: Never invoke step prompts via Agent/Task tool.**
+> **ANTI-PATTERN: Never invoke step prompts via Agent/Agent tool.**
 >
 > Slash command steps MUST go through `Skill` tool, not `Agent` tool. Commands are skills, not agents.
 > If a command internally delegates to an agent (e.g., `/fractary-repo:pr-review` invokes
-> `fractary-repo:pr-review-agent` via Task), the Skill handles that delegation transparently.
-> The orchestrator NEVER calls Agent/Task directly for step execution.
+> `fractary-repo:pr-review-agent` via Agent), the Skill handles that delegation transparently.
+> The orchestrator NEVER calls Agent tool directly for step execution.
 >
 > The naming pattern `fractary-*:*` does NOT imply an agent type. Most `fractary-*:*` names
 > are skills (commands), not agents. Only names explicitly ending in `-agent` are agent types.
@@ -107,7 +107,7 @@ as the command to execute.
 
 | Project | File | Change |
 |---------|------|--------|
-| fractary-faber | `plugins/faber/docs/workflow-orchestration-protocol.md` | Add Agent/Task anti-pattern block + prompt-verbatim reminder |
+| fractary-faber | `plugins/faber/docs/workflow-orchestration-protocol.md` | Add Agent tool anti-pattern block + prompt-verbatim reminder |
 | fractary-faber | `plugins/faber/commands/workflow-run.md` | Add CRITICAL_RULE #13 |
 
 No changes to workflow definitions, core.json, or code in fractary-core.

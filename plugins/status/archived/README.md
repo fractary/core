@@ -30,7 +30,7 @@ Command → Dedicated Agent → Scripts/MCP Tools
 
 1. **Orchestration skills are anti-pattern in v3.0**: Skills should only provide expertise (standards, templates), not execute operations
 2. **Dedicated agents provide isolation**: Each agent runs in isolated context, improving reliability
-3. **Parameter-based tool restrictions**: Commands now use `allowed-tools: Task(agent-name)` for type safety
+3. **Parameter-based tool restrictions**: Commands now use `allowed-tools: Agent(agent-name)` for type safety
 
 ## Rollback Instructions
 
