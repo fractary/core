@@ -7,7 +7,7 @@ This directory contains skills that were used in the v2.0 skill-based architectu
 As part of the v3.0 Claude Plugin Framework migration, the docs plugin was restructured:
 
 ### What Changed
-- **Commands**: Now ultra-lightweight (8-10 lines) with `allowed-tools: Task(fractary-docs:*)` restrictions
+- **Commands**: Now ultra-lightweight (8-10 lines) with `allowed-tools: Agent(fractary-docs:*)` restrictions
 - **Agents**: 5 dedicated agents (1:1 with commands) replace the single docs-manager agent
 - **Skills**: Orchestration skills archived; common utilities remain active
 

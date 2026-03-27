@@ -1,7 +1,7 @@
 ---
 name: fractary-work:issue-create-bulk
 description: Create multiple issues at once using AI analysis
-allowed-tools: Task(fractary-work:issue-bulk-creator)
+allowed-tools: Agent(fractary-work:issue-bulk-creator)
 model: claude-opus-4-6
 argument-hint: '[--title "<title template>"] [--body "<body template>"] [--repo <owner/repo>] [--context <description>] [--type <type>] [--label <label>] [--template <name>] [--assignee <user>] [--update-existing] [--match-labels "<labels>"] [--exclude-labels "<labels>"]'
 ---
@@ -13,7 +13,7 @@ This command uses AI to intelligently create multiple related issues (datasets, 
 ## How It Works
 
 1. Command captures arguments and conversation context
-2. Task tool invokes `issue-bulk-creator` agent
+2. Agent tool invokes `issue-bulk-creator` agent
 3. Agent analyzes project structure, conversation, and prompt
 4. Agent presents plan showing all issues it will create
 5. After user confirmation, agent creates issues
@@ -63,10 +63,10 @@ If no template specified:
 - Agent generates appropriate titles and descriptions based on project context
 - Uses discovered information (datasets, endpoints, etc.) for structure
 
-Use **Task** tool with `fractary-work:issue-bulk-creator` agent to create bulk issues:
+Use **Agent** tool with `fractary-work:issue-bulk-creator` agent to create bulk issues:
 
 ```
-Task(
+Agent(
   subagent_type="fractary-work:issue-bulk-creator",
   description="Create multiple issues",
   prompt="Create multiple issues based on the user's request: $ARGUMENTS"

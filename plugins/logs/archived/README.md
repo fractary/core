@@ -7,7 +7,7 @@ This directory contains skills that were used in the v2.0 skill-based architectu
 As part of the v3.0 Claude Plugin Framework migration, the logs plugin was restructured:
 
 ### What Changed
-- **Commands**: Now ultra-lightweight (8-10 lines) with `allowed-tools: Task(fractary-logs:*)` restrictions
+- **Commands**: Now ultra-lightweight (8-10 lines) with `allowed-tools: Agent(fractary-logs:*)` restrictions
 - **Agents**: 10 dedicated agents (1:1 with commands) replace the single log-manager agent
 - **Skills**: Orchestration skills archived; workflow utilities remain active
 

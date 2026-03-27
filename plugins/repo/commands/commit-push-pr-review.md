@@ -1,6 +1,6 @@
 ---
 name: fractary-repo:commit-push-pr-review
-allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*), Bash(gh pr view:*), Bash(gh api:*), Task(fractary-repo:pr-review-agent)
+allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*), Bash(gh pr view:*), Bash(gh api:*), Agent(fractary-repo:pr-review-agent)
 description: Commit, push, create PR, wait for CI, then run full pr-review-agent analysis
 model: claude-haiku-4-5
 argument-hint: '[--work-id <id>] [--context "<text>"]'
@@ -17,7 +17,7 @@ argument-hint: '[--work-id <id>] [--context "<text>"]'
 
 **IMPORTANT: The CLI binary is `fractary-core`, NOT `fractary`. Always use `fractary-core` as the command prefix.**
 
-Use the **Bash** tool for steps 1–6. Use the **Task** tool for step 7. Do NOT use the Skill tool.
+Use the **Bash** tool for steps 1–6. Use the **Agent** tool for step 7. Do NOT use the Skill tool.
 
 Based on the above context:
 
@@ -48,7 +48,7 @@ Based on the above context:
 
 6. Delegate the PR review to the pr-review-agent:
    ```
-   Task(
+   Agent(
      subagent_type="fractary-repo:pr-review-agent",
      prompt="Analyze PR #<number>. After completing analysis, if recommendation is P3 (ready to approve), explicitly state: 'RECOMMENDATION: PROCEED WITH MERGE — run /fractary-repo:pr-merge <number>'. If blocking issues found, provide specific fix recommendations."
    )

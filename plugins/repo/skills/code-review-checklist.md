@@ -23,7 +23,7 @@ Use this checklist when reviewing pull requests to ensure code quality, security
 
 **v3.0 Plugin Architecture:**
 - [ ] Commands are ultra-lightweight (8-15 lines)
-- [ ] Commands restricted with `allowed-tools: Task`
+- [ ] Commands restricted with `allowed-tools: Agent`
 - [ ] Agents are self-sufficient and focused (60-100 lines)
 - [ ] Agents use MCP tools (not CLI bash scripts)
 - [ ] No manager agents or routing logic
@@ -161,7 +161,7 @@ Use this checklist when reviewing pull requests to ensure code quality, security
 - [ ] Arguments table clear (conditional vs required)
 
 **Command Design:**
-- [ ] Command uses `allowed-tools: Task` restriction
+- [ ] Command uses `allowed-tools: Agent` restriction
 - [ ] Command provides clear invocation instructions
 - [ ] Command references expertise skills where appropriate
 - [ ] Argument hints are accurate
