@@ -1,5 +1,5 @@
 ---
-name: fractary-file:write
+name: fractary-file-write
 allowed-tools: Bash(fractary-core file write:*)
 description: Write content to a storage path
 model: claude-haiku-4-5

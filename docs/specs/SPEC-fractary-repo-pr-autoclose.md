@@ -47,7 +47,7 @@ recognised** and silently fail to close the issue:
 
 ### How the broken format gets introduced
 
-When the FABER orchestrator bypasses the `/fractary-repo:commit-push-pr` Skill tool and calls
+When the FABER orchestrator bypasses the `/fractary-repo-commit-push-pr` Skill tool and calls
 `gh pr create` directly (see SPEC-issue-skill-invocation-integrity for that failure mode), it
 synthesises a PR body from context. The synthesised body often uses markdown formatting:
 

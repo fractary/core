@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-comment
+name: fractary-work-issue-comment
 allowed-tools: Bash(fractary-core work issue-comment:*)
 description: Post a comment on an issue
 model: claude-haiku-4-5

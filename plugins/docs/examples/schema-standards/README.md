@@ -182,7 +182,7 @@ Edit the files to match your project's needs:
 
 ```bash
 # Generate new schema doc
-/fractary-docs:generate schema "User API Schema" \
+/fractary-docs-generate schema "User API Schema" \
   --version "1.0.0" \
   --schema-format "json-schema" \
   --namespace "com.example.api.user"
@@ -196,7 +196,7 @@ Edit the files to match your project's needs:
 
 ```bash
 # Validate single schema doc
-/fractary-docs:validate docs/api/schemas/user-schema.md
+/fractary-docs-validate docs/api/schemas/user-schema.md
 
 # Validation runs in this order:
 # 1. Pre-validate hook (custom project-specific validation)
@@ -208,7 +208,7 @@ Edit the files to match your project's needs:
 
 ```bash
 # Update existing schema
-/fractary-docs:update docs/api/schemas/user-schema.md \
+/fractary-docs-update docs/api/schemas/user-schema.md \
   --section "Fields" \
   --content "New field documentation..."
 

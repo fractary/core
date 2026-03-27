@@ -2,7 +2,7 @@
 
 ## Overview
 
-This test plan verifies the `fractary-work:issue-create-bulk` command and `issue-bulk-creator` agent implementation according to the specification in `SPEC-20260108-bulk-issue-creation.md`.
+This test plan verifies the `fractary-work-issue-create-bulk` command and `issue-bulk-creator` agent implementation according to the specification in `SPEC-20260108-bulk-issue-creation.md`.
 
 ## Test Environment Setup
 
@@ -72,7 +72,7 @@ EOF
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create test issues for: test1, test2, test3" \
   --type feature \
   --label test
@@ -120,7 +120,7 @@ In conversation, discuss:
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk
+/fractary-work-issue-create-bulk
 ```
 
 **Expected Behavior**:
@@ -153,7 +153,7 @@ gh issue list --limit 10
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: feature1, feature2" \
   --template test.md \
   --label test
@@ -197,7 +197,7 @@ cd test-project  # Contains datasets/ipeds/*.csv
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for all datasets in the ipeds folder" \
   --label dataset --label test
 ```
@@ -238,7 +238,7 @@ cd test-project  # Contains src/api/v1/*.ts
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for all v1 API endpoints" \
   --label api --label test
 ```
@@ -269,7 +269,7 @@ gh issue list --label api,test
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for nonexistent datasets in missing-folder/"
 ```
 
@@ -303,7 +303,7 @@ gh issue list --limit 5
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: test1, test2" \
   --label "workflow:etl" \
   --label test
@@ -334,7 +334,7 @@ gh issue view <number> --json labels | grep workflow:etl
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: test1, test2" \
   --label dataset \
   --label etl \
@@ -371,7 +371,7 @@ gh issue create --title "Load IPEDS hd dataset" --body "Test" --label test
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for IPEDS datasets: hd, ic, enrollment" \
   --label test
 ```
@@ -403,7 +403,7 @@ Based on user choice, verify appropriate issues created.
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: test1, test2" \
   --assignee @me \
   --label test
@@ -432,7 +432,7 @@ gh issue view <number> --json assignees
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: bug1, bug2" \
   --type bug \
   --label test
@@ -484,7 +484,7 @@ This test may require simulating failures (rate limits, invalid labels, etc.)
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: test1, test2, test3" \
   --label test
 ```
@@ -515,7 +515,7 @@ gh issue list --label test
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: test1, test2" \
   --context "Make these issues high priority with detailed acceptance criteria" \
   --label test

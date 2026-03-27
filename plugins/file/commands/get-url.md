@@ -1,5 +1,5 @@
 ---
-name: fractary-file:get-url
+name: fractary-file-get-url
 allowed-tools: Bash(fractary-core file get-url:*)
 description: Get a URL for a file in storage
 model: claude-haiku-4-5

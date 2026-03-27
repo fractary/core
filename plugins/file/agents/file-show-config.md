@@ -1,5 +1,5 @@
 ---
-name: file-show-config
+name: fractary-file-show-config
 description: Shows file plugin configuration using the CLI
 model: claude-haiku-4-5
 ---

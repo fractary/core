@@ -1,5 +1,5 @@
 ---
-name: handler-work-tracker-github
+name: fractary-work-handler-work-tracker-github
 description: "[DEPRECATED] GitHub Issues handler - Use Fractary Core CLI instead"
 model: haiku
 handler_type: work-tracker

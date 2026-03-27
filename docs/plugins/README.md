@@ -34,7 +34,7 @@ Plugins are installed via `.claude/settings.json`. The exact installation method
 All plugins read configuration from `.fractary/config.yaml`. Initialize with:
 
 ```
-/fractary-core:config-init
+/fractary-core-config-init
 ```
 
 ---
@@ -47,13 +47,13 @@ Configuration and environment management for all Fractary plugins.
 
 | Command | Description |
 |---------|-------------|
-| `/fractary-core:config-init` | Initialize `.fractary/config.yaml` for all plugins |
-| `/fractary-core:config-update` | Update existing configuration incrementally |
-| `/fractary-core:config-validate` | Validate configuration |
-| `/fractary-core:config-show` | Display configuration (sensitive values redacted) |
-| `/fractary-core:env-switch` | Switch environment (test, staging, prod) |
-| `/fractary-core:env-list` | List available environments |
-| `/fractary-core:env-show` | Show current environment status |
+| `/fractary-core-config-init` | Initialize `.fractary/config.yaml` for all plugins |
+| `/fractary-core-config-update` | Update existing configuration incrementally |
+| `/fractary-core-config-validate` | Validate configuration |
+| `/fractary-core-config-show` | Display configuration (sensitive values redacted) |
+| `/fractary-core-env-switch` | Switch environment (test, staging, prod) |
+| `/fractary-core-env-list` | List available environments |
+| `/fractary-core-env-show` | Show current environment status |
 
 ### Agents
 
@@ -73,14 +73,14 @@ Work item management. Currently supports GitHub Issues (Jira and Linear provider
 
 | Command | Description |
 |---------|-------------|
-| `/fractary-work:issue-create` | Create a new issue |
-| `/fractary-work:issue-fetch` | Fetch issue details by number |
-| `/fractary-work:issue-list` | List issues |
-| `/fractary-work:issue-update` | Update an existing issue |
-| `/fractary-work:issue-search` | Search issues by query |
-| `/fractary-work:issue-comment` | Post a comment on an issue |
-| `/fractary-work:issue-create-bulk` | Create multiple related issues at once using AI analysis |
-| `/fractary-work:issue-refine` | Refine issue requirements through clarifying questions |
+| `/fractary-work-issue-create` | Create a new issue |
+| `/fractary-work-issue-fetch` | Fetch issue details by number |
+| `/fractary-work-issue-list` | List issues |
+| `/fractary-work-issue-update` | Update an existing issue |
+| `/fractary-work-issue-search` | Search issues by query |
+| `/fractary-work-issue-comment` | Post a comment on an issue |
+| `/fractary-work-issue-create-bulk` | Create multiple related issues at once using AI analysis |
+| `/fractary-work-issue-refine` | Refine issue requirements through clarifying questions |
 
 ### Agents
 
@@ -93,13 +93,13 @@ Work item management. Currently supports GitHub Issues (Jira and Linear provider
 
 ```
 User: Create an issue for adding OAuth support
-Claude: /fractary-work:issue-create
+Claude: /fractary-work-issue-create
 
 User: This issue is too vague, help me refine it
 Claude: [Uses issue-refine-agent to ask targeted questions about requirements]
 
 User: Break this epic into individual issues
-Claude: /fractary-work:issue-create-bulk
+Claude: /fractary-work-issue-create-bulk
 ```
 
 ---
@@ -112,19 +112,19 @@ Source control operations. Currently supports GitHub (GitLab and Bitbucket provi
 
 | Command | Description |
 |---------|-------------|
-| `/fractary-repo:branch-create` | Create a new git branch |
-| `/fractary-repo:commit` | Create a git commit with conventional format |
-| `/fractary-repo:commit-push` | Commit and push in one step |
-| `/fractary-repo:commit-push-pr` | Commit, push, and open a PR |
-| `/fractary-repo:commit-push-pr-merge` | Full workflow: commit, push, create PR, merge, cleanup branch |
-| `/fractary-repo:pr-create` | Create a pull request |
-| `/fractary-repo:pr-merge` | Merge a pull request |
-| `/fractary-repo:pr-review` | Review a pull request (delegates to pr-review-agent) |
-| `/fractary-repo:pull` | Pull from remote |
-| `/fractary-repo:worktree-create` | Create a git worktree |
-| `/fractary-repo:worktree-list` | List all worktrees with metadata |
-| `/fractary-repo:worktree-remove` | Safely remove a worktree |
-| `/fractary-repo:worktree-cleanup` | Clean up stale and orphaned worktrees |
+| `/fractary-repo-branch-create` | Create a new git branch |
+| `/fractary-repo-commit` | Create a git commit with conventional format |
+| `/fractary-repo-commit-push` | Commit and push in one step |
+| `/fractary-repo-commit-push-pr` | Commit, push, and open a PR |
+| `/fractary-repo-commit-push-pr-merge` | Full workflow: commit, push, create PR, merge, cleanup branch |
+| `/fractary-repo-pr-create` | Create a pull request |
+| `/fractary-repo-pr-merge` | Merge a pull request |
+| `/fractary-repo-pr-review` | Review a pull request (delegates to pr-review-agent) |
+| `/fractary-repo-pull` | Pull from remote |
+| `/fractary-repo-worktree-create` | Create a git worktree |
+| `/fractary-repo-worktree-list` | List all worktrees with metadata |
+| `/fractary-repo-worktree-remove` | Safely remove a worktree |
+| `/fractary-repo-worktree-cleanup` | Clean up stale and orphaned worktrees |
 
 ### Agents
 
@@ -136,13 +136,13 @@ Source control operations. Currently supports GitHub (GitLab and Bitbucket provi
 
 ```
 User: Commit my changes and create a PR
-Claude: /fractary-repo:commit-push-pr
+Claude: /fractary-repo-commit-push-pr
 
 User: Review PR #42
 Claude: [Uses pr-review-agent for comprehensive analysis]
 
 User: Ship it - commit, PR, and merge
-Claude: /fractary-repo:commit-push-pr-merge
+Claude: /fractary-repo-commit-push-pr-merge
 ```
 
 ---
@@ -208,21 +208,21 @@ Log management with per-type classification, session capture, and analysis.
 
 | Command | Description |
 |---------|-------------|
-| `/fractary-logs:log` | Log a specific message or decision to an issue's log |
-| `/fractary-logs:list` | List logs with optional filters |
-| `/fractary-logs:read` | Read a log entry |
-| `/fractary-logs:search` | Search across logs |
-| `/fractary-logs:write` | Write a log entry |
-| `/fractary-logs:analyze` | Analyze logs for patterns and errors |
-| `/fractary-logs:audit` | Audit logs in project and generate management plan |
-| `/fractary-logs:capture` | Start session capture |
-| `/fractary-logs:cleanup` | Clean up old logs based on age threshold |
-| `/fractary-logs:delete` | Delete a log entry |
-| `/fractary-logs:archive` | Archive old logs |
-| `/fractary-logs:stop` | Stop active session capture |
-| `/fractary-logs:validate` | Validate a log file against its type schema |
-| `/fractary-logs:types` | List available log types |
-| `/fractary-logs:type-info` | Get detailed information about a log type |
+| `/fractary-logs-log` | Log a specific message or decision to an issue's log |
+| `/fractary-logs-list` | List logs with optional filters |
+| `/fractary-logs-read` | Read a log entry |
+| `/fractary-logs-search` | Search across logs |
+| `/fractary-logs-write` | Write a log entry |
+| `/fractary-logs-analyze` | Analyze logs for patterns and errors |
+| `/fractary-logs-audit` | Audit logs in project and generate management plan |
+| `/fractary-logs-capture` | Start session capture |
+| `/fractary-logs-cleanup` | Clean up old logs based on age threshold |
+| `/fractary-logs-delete` | Delete a log entry |
+| `/fractary-logs-archive` | Archive old logs |
+| `/fractary-logs-stop` | Stop active session capture |
+| `/fractary-logs-validate` | Validate a log file against its type schema |
+| `/fractary-logs-types` | List available log types |
+| `/fractary-logs-type-info` | Get detailed information about a log type |
 
 ### Agents
 
@@ -249,19 +249,19 @@ Multi-provider file storage with a unified interface.
 
 | Command | Description |
 |---------|-------------|
-| `/fractary-file:upload` | Upload a local file to storage |
-| `/fractary-file:download` | Download a file from storage |
-| `/fractary-file:list` | List files in storage |
-| `/fractary-file:read` | Read content from a storage path |
-| `/fractary-file:write` | Write content to a storage path |
-| `/fractary-file:delete` | Delete a file from storage |
-| `/fractary-file:copy` | Copy a file within storage |
-| `/fractary-file:move` | Move a file within storage |
-| `/fractary-file:exists` | Check if a file exists |
-| `/fractary-file:get-url` | Get a URL for a file |
-| `/fractary-file:show-config` | Show file plugin configuration |
-| `/fractary-file:switch-handler` | Switch active storage provider |
-| `/fractary-file:test-connection` | Test storage connection |
+| `/fractary-file-upload` | Upload a local file to storage |
+| `/fractary-file-download` | Download a file from storage |
+| `/fractary-file-list` | List files in storage |
+| `/fractary-file-read` | Read content from a storage path |
+| `/fractary-file-write` | Write content to a storage path |
+| `/fractary-file-delete` | Delete a file from storage |
+| `/fractary-file-copy` | Copy a file within storage |
+| `/fractary-file-move` | Move a file within storage |
+| `/fractary-file-exists` | Check if a file exists |
+| `/fractary-file-get-url` | Get a URL for a file |
+| `/fractary-file-show-config` | Show file plugin configuration |
+| `/fractary-file-switch-handler` | Switch active storage provider |
+| `/fractary-file-test-connection` | Test storage connection |
 
 ### Agents
 
@@ -283,20 +283,20 @@ Documentation system with per-type skills, archival, refinement, and fulfillment
 
 | Command | Description |
 |---------|-------------|
-| `/fractary-docs:doc-create` | Create a new document |
-| `/fractary-docs:doc-get` | Get a document by ID |
-| `/fractary-docs:doc-list` | List documents |
-| `/fractary-docs:doc-update` | Update a document |
-| `/fractary-docs:doc-delete` | Delete a document |
-| `/fractary-docs:doc-search` | Search documents |
-| `/fractary-docs:write` | Write documentation (delegates to docs-writer agent) |
-| `/fractary-docs:validate` | Validate documentation against type-specific rules |
-| `/fractary-docs:refine` | Refine a document by scanning for gaps |
-| `/fractary-docs:archive` | Archive a document |
-| `/fractary-docs:audit` | Audit documentation quality across the project |
-| `/fractary-docs:check-consistency` | Check if docs are consistent with code changes |
-| `/fractary-docs:type-list` | List available document types |
-| `/fractary-docs:type-info` | Get detailed information about a document type |
+| `/fractary-docs-doc-create` | Create a new document |
+| `/fractary-docs-doc-get` | Get a document by ID |
+| `/fractary-docs-doc-list` | List documents |
+| `/fractary-docs-doc-update` | Update a document |
+| `/fractary-docs-doc-delete` | Delete a document |
+| `/fractary-docs-doc-search` | Search documents |
+| `/fractary-docs-write` | Write documentation (delegates to docs-writer agent) |
+| `/fractary-docs-validate` | Validate documentation against type-specific rules |
+| `/fractary-docs-refine` | Refine a document by scanning for gaps |
+| `/fractary-docs-archive` | Archive a document |
+| `/fractary-docs-audit` | Audit documentation quality across the project |
+| `/fractary-docs-check-consistency` | Check if docs are consistent with code changes |
+| `/fractary-docs-type-list` | List available document types |
+| `/fractary-docs-type-info` | Get detailed information about a document type |
 
 ### Agents
 
@@ -323,8 +323,8 @@ Custom Claude Code status line showing git status, issue numbers, PR numbers, an
 
 | Command | Description |
 |---------|-------------|
-| `/fractary-status:install` | Install and configure the status line |
-| `/fractary-status:sync` | Force-refresh the status line cache |
+| `/fractary-status-install` | Install and configure the status line |
+| `/fractary-status-sync` | Force-refresh the status line cache |
 
 ### Agents
 
@@ -340,7 +340,7 @@ Custom Claude Code status line showing git status, issue numbers, PR numbers, an
 **Commands** are direct actions you invoke explicitly with `/plugin:command`. They execute a specific operation and return results.
 
 **Agents** are autonomous task handlers that Claude triggers proactively based on conversation context. They handle complex, multi-step workflows and make decisions about how to accomplish a goal. Agents are triggered either:
-- Explicitly via a command that delegates to them (e.g., `/fractary-repo:pr-review` delegates to `pr-review-agent`)
+- Explicitly via a command that delegates to them (e.g., `/fractary-repo-pr-review` delegates to `pr-review-agent`)
 - Proactively when Claude detects matching trigger phrases in your conversation
 
 ## Other Interfaces

@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:search
+name: fractary-logs-search
 allowed-tools: Bash(fractary-core logs search:*)
 description: Search logs
 model: claude-haiku-4-5

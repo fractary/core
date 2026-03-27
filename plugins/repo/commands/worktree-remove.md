@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:worktree-remove
+name: fractary-repo-worktree-remove
 allowed-tools: Bash(fractary-core repo worktree-remove:*)
 description: Safely remove a git worktree
 model: claude-haiku-4-5

@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:capture
+name: fractary-logs-capture
 allowed-tools: Bash(fractary-core logs capture:*)
 description: Start session capture
 model: claude-haiku-4-5

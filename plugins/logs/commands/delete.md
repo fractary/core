@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:delete
+name: fractary-logs-delete
 allowed-tools: Bash(fractary-core logs delete:*)
 description: Delete a log entry
 model: claude-haiku-4-5

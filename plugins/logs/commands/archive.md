@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:archive
+name: fractary-logs-archive
 allowed-tools: Bash(fractary-core logs archive:*)
 description: Archive old logs
 model: claude-haiku-4-5

@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:doc-delete
+name: fractary-docs-doc-delete
 allowed-tools: Bash(fractary-core docs doc-delete:*)
 description: Delete a document
 model: claude-haiku-4-5

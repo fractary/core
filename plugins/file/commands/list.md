@@ -1,5 +1,5 @@
 ---
-name: fractary-file:list
+name: fractary-file-list
 allowed-tools: Bash(fractary-core file list:*)
 description: List files in storage
 model: claude-haiku-4-5

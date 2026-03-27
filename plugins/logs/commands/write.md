@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:write
+name: fractary-logs-write
 allowed-tools: Bash(fractary-core logs write:*)
 description: Write a log entry
 model: claude-haiku-4-5

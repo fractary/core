@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:type-info
+name: fractary-docs-type-info
 allowed-tools: Bash(fractary-core docs type-info:*)
 description: Get detailed information about a document type
 model: claude-haiku-4-5

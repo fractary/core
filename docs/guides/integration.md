@@ -252,11 +252,11 @@ claude-code plugin install fractary-repo
 
 ```bash
 # Work plugin
-/fractary-work:issue-create "Add feature" --type feature
+/fractary-work-issue-create "Add feature" --type feature
 
 # Repo plugin
-/fractary-repo:branch-create "feature/new-ui"
-/fractary-repo:commit "Add login" --type feat
+/fractary-repo-branch-create "feature/new-ui"
+/fractary-repo-commit "Add login" --type feat
 
 # Spec plugin
 /fractary-spec:create "API Design" --type feature
@@ -278,7 +278,7 @@ work:
       token: ${GITHUB_TOKEN}
 ```
 
-Initialize with: `fractary-core:config-init`
+Initialize with: `fractary-core-config-init`
 
 ## CI/CD Integration
 

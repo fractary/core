@@ -1,5 +1,5 @@
 ---
-name: config-updater
+name: fractary-core-config-updater
 description: |
   MUST BE USED when user wants to incrementally update existing Fractary Core configuration.
   Use PROACTIVELY when user mentions "change config", "update config", "switch to jira", "enable S3", or "modify configuration".

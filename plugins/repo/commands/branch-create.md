@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:branch-create
+name: fractary-repo-branch-create
 allowed-tools: Bash(fractary-core repo branch-create:*)
 description: Create a new git branch
 model: claude-haiku-4-5

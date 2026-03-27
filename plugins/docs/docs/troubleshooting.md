@@ -27,7 +27,7 @@ Common issues and their solutions when using the fractary-docs plugin.
 
 **Symptoms**:
 ```bash
-/fractary-docs:generate adr
+/fractary-docs-generate adr
 # Error: Command not found
 ```
 
@@ -57,7 +57,7 @@ ls -la commands/ agents/ skills/
 
 **Symptoms**:
 ```bash
-/fractary-docs:init
+/fractary-docs-init
 # Error: Config directory not found
 ```
 
@@ -96,7 +96,7 @@ find plugins/docs/skills -name "*.sh" -exec ls -l {} \;
 
 **Symptoms**:
 ```bash
-/fractary-docs:generate adr --title "Test" --output test.md
+/fractary-docs-generate adr --title "Test" --output test.md
 # Error: Template not found: adr
 ```
 
@@ -116,7 +116,7 @@ ls plugins/docs/skills/doc-generator/templates/
 #              troubleshooting, postmortem
 
 # Check spelling in command
-/fractary-docs:generate adr --title "..." --output ...
+/fractary-docs-generate adr --title "..." --output ...
 #                       ^^^ Correct: all lowercase
 ```
 
@@ -159,7 +159,7 @@ date:  # Empty date
 **Solution**:
 ```bash
 # Always provide required parameters
-/fractary-docs:generate adr \
+/fractary-docs-generate adr \
   --title "Proper Title" \
   --output docs/adrs/ADR-001.md \
   --author "Your Name" \
@@ -177,7 +177,7 @@ jq '.frontmatter.default_author = "Engineering Team"' \
 
 **Symptoms**:
 ```bash
-/fractary-docs:validate doc.md
+/fractary-docs-validate doc.md
 # Error: Missing required field: type
 # Error: Missing required field: date
 ```
@@ -201,15 +201,15 @@ head -20 doc.md
 vim doc.md
 
 # Or use update command
-/fractary-docs:update doc.md --field type --value "adr"
-/fractary-docs:update doc.md --field date --value "$(date +%Y-%m-%d)"
+/fractary-docs-update doc.md --field type --value "adr"
+/fractary-docs-update doc.md --field date --value "$(date +%Y-%m-%d)"
 ```
 
 ### Issue: "Invalid document type" error
 
 **Symptoms**:
 ```bash
-/fractary-docs:validate doc.md
+/fractary-docs-validate doc.md
 # Error: Invalid document type: 'ADR'. Must be one of: adr, design, ...
 ```
 
@@ -220,14 +220,14 @@ vim doc.md
 # Valid:   type: adr
 
 # Fix with:
-/fractary-docs:update doc.md --field type --value "adr"
+/fractary-docs-update doc.md --field type --value "adr"
 ```
 
 ### Issue: "Missing required section" errors
 
 **Symptoms**:
 ```bash
-/fractary-docs:validate docs/adrs/ADR-001.md
+/fractary-docs-validate docs/adrs/ADR-001.md
 # Error: Missing required section: Context
 # Error: Missing required section: Decision
 ```
@@ -267,7 +267,7 @@ vim docs/adrs/ADR-001.md
 jq '.validation.enabled' .fractary/config.yaml
 
 # Check validation mode
-/fractary-docs:validate doc.md --format json | jq '.total_issues'
+/fractary-docs-validate doc.md --format json | jq '.total_issues'
 ```
 
 **Solution**:
@@ -278,7 +278,7 @@ jq '.validation.strict_mode = true' \
   mv tmp.$$ .fractary/config.yaml
 
 # Run with strict validation
-/fractary-docs:validate docs/ --strict
+/fractary-docs-validate docs/ --strict
 ```
 
 ## Link Management Issues
@@ -287,7 +287,7 @@ jq '.validation.strict_mode = true' \
 
 **Symptoms**:
 ```bash
-/fractary-docs:validate doc.md
+/fractary-docs-validate doc.md
 # Error: Broken internal link: ../missing.md (file not found)
 ```
 
@@ -338,14 +338,14 @@ jq '.linking.bidirectional_links = true' \
   mv tmp.$$ .fractary/config.yaml
 
 # Re-create link
-/fractary-docs:link source.md target.md
+/fractary-docs-link source.md target.md
 ```
 
 ### Issue: "Related array not found"
 
 **Symptoms**:
 ```bash
-/fractary-docs:link source.md target.md
+/fractary-docs-link source.md target.md
 # Warning: source.md has no front matter, skipping
 ```
 
@@ -366,7 +366,7 @@ related: []
 EOF
 
 # Then retry linking
-/fractary-docs:link source.md target.md
+/fractary-docs-link source.md target.md
 ```
 
 ### Issue: Circular reference detected
@@ -380,11 +380,11 @@ EOF
 **Solution**:
 ```bash
 # Identify the cycle
-/fractary-docs:generate-graph docs/ --output graph.json --format json
+/fractary-docs-generate-graph docs/ --output graph.json --format json
 jq '.edges' graph.json | grep -E '(A|B|C)'
 
 # Break the cycle by removing one link
-/fractary-docs:update C.md \
+/fractary-docs-update C.md \
   --field related \
   --value '[]'  # Remove link back to A
 ```
@@ -395,7 +395,7 @@ jq '.edges' graph.json | grep -E '(A|B|C)'
 
 **Symptoms**:
 ```bash
-/fractary-docs:update doc.md --field status --value "accepted"
+/fractary-docs-update doc.md --field status --value "accepted"
 # Front matter becomes invalid YAML
 ```
 
@@ -414,7 +414,7 @@ ls -la doc.md.backup.*
 mv doc.md.backup.20250115120000 doc.md
 
 # Use proper JSON format for complex values
-/fractary-docs:update doc.md \
+/fractary-docs-update doc.md \
   --field tags \
   --value '["tag1", "tag2"]'  # Valid JSON array
 ```
@@ -423,7 +423,7 @@ mv doc.md.backup.20250115120000 doc.md
 
 **Symptoms**:
 ```bash
-/fractary-docs:update doc.md --section "Missing Section" --content "..."
+/fractary-docs-update doc.md --section "Missing Section" --content "..."
 # Error: Section not found: Missing Section
 ```
 
@@ -436,10 +436,10 @@ grep "^##" doc.md
 **Solution**:
 ```bash
 # Use exact section name (case-sensitive)
-/fractary-docs:update doc.md --section "Context" --content "..."
+/fractary-docs-update doc.md --section "Context" --content "..."
 
 # Or create new section with append mode
-/fractary-docs:update doc.md \
+/fractary-docs-update doc.md \
   --section "New Section" \
   --content "## New Section\n\nContent here" \
   --mode append
@@ -474,7 +474,7 @@ jq '.updates.create_backup = false' \
 
 **Symptoms**:
 ```bash
-time /fractary-docs:validate docs/
+time /fractary-docs-validate docs/
 # Takes > 5 minutes for 100 documents
 ```
 
@@ -496,7 +496,7 @@ jq '.validation.check_external_links = false' \
 
 # Or validate in batches
 find docs -name "*.md" | head -50 | while read f; do
-  /fractary-docs:validate "$f"
+  /fractary-docs-validate "$f"
 done
 ```
 
@@ -504,7 +504,7 @@ done
 
 **Symptoms**:
 ```bash
-/fractary-docs:create-index docs/ --output README.md
+/fractary-docs-create-index docs/ --output README.md
 # Hangs indefinitely
 ```
 
@@ -526,25 +526,25 @@ find docs -name "*.md" -size 0 -delete
 find docs -type l -delete
 
 # Retry index generation
-/fractary-docs:create-index docs/ --output README.md
+/fractary-docs-create-index docs/ --output README.md
 ```
 
 ### Issue: Graph generation fails with large dataset
 
 **Symptoms**:
 ```bash
-/fractary-docs:generate-graph docs/ --output graph.json
+/fractary-docs-generate-graph docs/ --output graph.json
 # Error: Out of memory
 ```
 
 **Solution**:
 ```bash
 # Generate in smaller batches
-/fractary-docs:generate-graph docs/adrs/ --output adrs-graph.json
-/fractary-docs:generate-graph docs/designs/ --output designs-graph.json
+/fractary-docs-generate-graph docs/adrs/ --output adrs-graph.json
+/fractary-docs-generate-graph docs/designs/ --output designs-graph.json
 
 # Or exclude tags to reduce graph size
-/fractary-docs:generate-graph docs/ \
+/fractary-docs-generate-graph docs/ \
   --output graph.json \
   --format json
   # Without --include-tags
@@ -585,7 +585,7 @@ cp plugins/docs/config/config.example.json \
 
 **Symptoms**:
 ```bash
-/fractary-docs:validate docs/
+/fractary-docs-validate docs/
 # Error: Failed to parse config: Unexpected token
 ```
 
@@ -622,7 +622,7 @@ jq '.debug = true' .fractary/config.yaml > tmp.$$ && \
   mv tmp.$$ .fractary/config.yaml
 
 # Run command with verbose output
-/fractary-docs:validate docs/ 2>&1 | tee debug.log
+/fractary-docs-validate docs/ 2>&1 | tee debug.log
 ```
 
 ### Test Individual Scripts
@@ -752,19 +752,19 @@ EOF
 1. **Always validate after changes**:
    ```bash
    vim doc.md
-   /fractary-docs:validate doc.md
+   /fractary-docs-validate doc.md
    ```
 
 2. **Use backups for updates**:
    ```bash
-   /fractary-docs:update doc.md --field ... --backup
+   /fractary-docs-update doc.md --field ... --backup
    ```
 
 3. **Test on samples first**:
    ```bash
    # Test on sample before real docs
-   /fractary-docs:validate samples/
-   /fractary-docs:validate docs/
+   /fractary-docs-validate samples/
+   /fractary-docs-validate docs/
    ```
 
 4. **Keep configuration simple**:
@@ -777,10 +777,10 @@ EOF
 5. **Regular maintenance**:
    ```bash
    # Weekly: Check links
-   /fractary-docs:link-check docs/
+   /fractary-docs-link-check docs/
 
    # Monthly: Full validation
-   /fractary-docs:validate docs/ --strict
+   /fractary-docs-validate docs/ --strict
    ```
 
 ## Common Workflows Checklist

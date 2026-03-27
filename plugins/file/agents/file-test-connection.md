@@ -1,5 +1,5 @@
 ---
-name: file-test-connection
+name: fractary-file-test-connection
 description: Tests storage connection using the CLI
 model: claude-haiku-4-5
 ---

@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking Changes
 
 - **Frontmatter field change**: `type:` → `fractary_doc_type:` in all documents
-- **Command names**: `/fractary-docs:*` → `/fractary-docs:*` (shorter, cleaner)
+- **Command names**: `/fractary-docs-*` → `/fractary-docs-*` (shorter, cleaner)
 - **Skill architecture**: Type-specific skills removed, operation-specific skills introduced
 
 ### Added
@@ -48,10 +48,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Content-based document type classification (fallback)
 
 #### Commands
-- `/fractary-docs:write` - Create or update documentation (replaces multiple commands)
-- `/fractary-docs:validate` - Validate documentation (streamlined from v1.x)
-- `/fractary-docs:list` - List and filter documentation (new)
-- `/fractary-docs:audit` - Audit documentation quality (streamlined from v1.x)
+- `/fractary-docs-write` - Create or update documentation (replaces multiple commands)
+- `/fractary-docs-validate` - Validate documentation (streamlined from v1.x)
+- `/fractary-docs-list` - List and filter documentation (new)
+- `/fractary-docs-audit` - Audit documentation quality (streamlined from v1.x)
 
 #### Documentation
 - Comprehensive README.md with v2.0 architecture overview
@@ -109,20 +109,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `doc-updater` (deprecated, replaced by doc-writer)
 
 #### Commands (14 total)
-- `/fractary-docs:manage-api` → `/fractary-docs:write api`
-- `/fractary-docs:manage-adr` → `/fractary-docs:write adr`
-- `/fractary-docs:manage-architecture` → `/fractary-docs:write architecture`
-- `/fractary-docs:manage-architecture-adr` → `/fractary-docs:write adr`
-- `/fractary-docs:manage-audit` → `/fractary-docs:write audit`
-- `/fractary-docs:manage-dataset` → `/fractary-docs:write dataset`
-- `/fractary-docs:manage-etl` → `/fractary-docs:write etl`
-- `/fractary-docs:manage-guide` → `/fractary-docs:write guides`
-- `/fractary-docs:manage-infrastructure` → `/fractary-docs:write infrastructure`
-- `/fractary-docs:manage-standard` → `/fractary-docs:write standards`
-- `/fractary-docs:manage-testing` → `/fractary-docs:write testing`
-- `/fractary-docs:generate` → `/fractary-docs:write`
-- `/fractary-docs:update` → `/fractary-docs:write` (with update context)
-- `/fractary-docs:init` (removed, configuration handled automatically)
+- `/fractary-docs-manage-api` → `/fractary-docs-write api`
+- `/fractary-docs-manage-adr` → `/fractary-docs-write adr`
+- `/fractary-docs-manage-architecture` → `/fractary-docs-write architecture`
+- `/fractary-docs-manage-architecture-adr` → `/fractary-docs-write adr`
+- `/fractary-docs-manage-audit` → `/fractary-docs-write audit`
+- `/fractary-docs-manage-dataset` → `/fractary-docs-write dataset`
+- `/fractary-docs-manage-etl` → `/fractary-docs-write etl`
+- `/fractary-docs-manage-guide` → `/fractary-docs-write guides`
+- `/fractary-docs-manage-infrastructure` → `/fractary-docs-write infrastructure`
+- `/fractary-docs-manage-standard` → `/fractary-docs-write standards`
+- `/fractary-docs-manage-testing` → `/fractary-docs-write testing`
+- `/fractary-docs-generate` → `/fractary-docs-write`
+- `/fractary-docs-update` → `/fractary-docs-write` (with update context)
+- `/fractary-docs-init` (removed, configuration handled automatically)
 
 ### Fixed
 
@@ -154,16 +154,16 @@ fractary_doc_type: api
 
 **Before (v1.x)**:
 ```bash
-/fractary-docs:generate api "User Login"
-/fractary-docs:manage-api "Update endpoint"
-/fractary-docs:validate docs/api/
+/fractary-docs-generate api "User Login"
+/fractary-docs-manage-api "Update endpoint"
+/fractary-docs-validate docs/api/
 ```
 
 **After (v2.0)**:
 ```bash
-/fractary-docs:write api
-/fractary-docs:write api  # same command for create/update
-/fractary-docs:validate docs/api/
+/fractary-docs-write api
+/fractary-docs-write api  # same command for create/update
+/fractary-docs-validate docs/api/
 ```
 
 #### Configuration Updates

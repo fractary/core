@@ -35,7 +35,7 @@ ls -la samples/
 
 1. Generate an ADR:
 ```bash
-/fractary-docs:generate adr --title "ADR-002: Use Redis for Caching" --output samples/adrs/ADR-002-redis.md
+/fractary-docs-generate adr --title "ADR-002: Use Redis for Caching" --output samples/adrs/ADR-002-redis.md
 
 # Verify front matter is present
 head -20 samples/adrs/ADR-002-redis.md
@@ -45,7 +45,7 @@ head -20 samples/adrs/ADR-002-redis.md
 
 2. Generate a design document:
 ```bash
-/fractary-docs:generate design --title "Caching Architecture" --output samples/designs/caching-architecture.md
+/fractary-docs-generate design --title "Caching Architecture" --output samples/designs/caching-architecture.md
 
 # Verify template structure
 grep -E "^##" samples/designs/caching-architecture.md
@@ -55,7 +55,7 @@ grep -E "^##" samples/designs/caching-architecture.md
 
 3. Generate a runbook:
 ```bash
-/fractary-docs:generate runbook --title "Cache Invalidation" --output samples/runbooks/cache-invalidation.md
+/fractary-docs-generate runbook --title "Cache Invalidation" --output samples/runbooks/cache-invalidation.md
 
 # Check sections
 grep -E "^##" samples/runbooks/cache-invalidation.md
@@ -78,7 +78,7 @@ grep -E "^##" samples/runbooks/cache-invalidation.md
 1. Update front matter metadata:
 ```bash
 # Update status of ADR-001
-/fractary-docs:update samples/adrs/ADR-001-postgresql.md \
+/fractary-docs-update samples/adrs/ADR-001-postgresql.md \
   --field status \
   --value "superseded"
 
@@ -90,7 +90,7 @@ grep "status:" samples/adrs/ADR-001-postgresql.md
 2. Update section content:
 ```bash
 # Add new consequence to ADR
-/fractary-docs:update samples/adrs/ADR-001-postgresql.md \
+/fractary-docs-update samples/adrs/ADR-001-postgresql.md \
   --section "Consequences" \
   --content "### Cost Optimization\n\nRDS Reserved Instances provide 40% cost savings over on-demand." \
   --mode append
@@ -102,7 +102,7 @@ grep -A 3 "Cost Optimization" samples/adrs/ADR-001-postgresql.md
 3. Replace content with pattern:
 ```bash
 # Update author information
-/fractary-docs:update samples/designs/database-architecture.md \
+/fractary-docs-update samples/designs/database-architecture.md \
   --pattern "Platform Team" \
   --replacement "Database Team" \
   --backup
@@ -125,7 +125,7 @@ ls -la samples/designs/database-architecture.md.backup.*
 
 1. Validate individual document:
 ```bash
-/fractary-docs:validate samples/adrs/ADR-001-postgresql.md
+/fractary-docs-validate samples/adrs/ADR-001-postgresql.md
 
 # Expected output:
 # ✅ Front matter: valid
@@ -136,7 +136,7 @@ ls -la samples/designs/database-architecture.md.backup.*
 
 2. Validate entire directory:
 ```bash
-/fractary-docs:validate samples/
+/fractary-docs-validate samples/
 
 # Expected summary:
 # Total files: 5
@@ -147,14 +147,14 @@ ls -la samples/designs/database-architecture.md.backup.*
 
 3. Strict mode validation:
 ```bash
-/fractary-docs:validate samples/ --strict
+/fractary-docs-validate samples/ --strict
 
 # Expected: Additional warnings for missing optional fields
 ```
 
 4. Validate with external link checking:
 ```bash
-/fractary-docs:validate samples/adrs/ADR-001-postgresql.md --check-external
+/fractary-docs-validate samples/adrs/ADR-001-postgresql.md --check-external
 
 # Note: This may be slow, verifies HTTP/HTTPS links
 ```
@@ -173,7 +173,7 @@ ls -la samples/designs/database-architecture.md.backup.*
 
 1. Create bidirectional link:
 ```bash
-/fractary-docs:link \
+/fractary-docs-link \
   samples/adrs/ADR-001-postgresql.md \
   samples/designs/database-architecture.md
 
@@ -187,11 +187,11 @@ grep "related:" samples/designs/database-architecture.md
 2. Add multiple relationships:
 ```bash
 # Link design to runbooks
-/fractary-docs:link \
+/fractary-docs-link \
   samples/designs/database-architecture.md \
   samples/runbooks/database-failover.md
 
-/fractary-docs:link \
+/fractary-docs-link \
   samples/designs/database-architecture.md \
   samples/runbooks/database-maintenance.md
 
@@ -201,7 +201,7 @@ grep -A 5 "related:" samples/designs/database-architecture.md
 
 3. Check for broken links:
 ```bash
-/fractary-docs:link-check samples/
+/fractary-docs-link-check samples/
 
 # Expected: Report showing all links healthy
 # Total links: ~15
@@ -222,7 +222,7 @@ grep -A 5 "related:" samples/designs/database-architecture.md
 
 1. Create type-based index:
 ```bash
-/fractary-docs:create-index samples/ \
+/fractary-docs-create-index samples/ \
   --output samples/README.md \
   --title "Sample Documentation" \
   --group-by type
@@ -239,7 +239,7 @@ cat samples/README.md
 
 2. Create tag-based index:
 ```bash
-/fractary-docs:create-index samples/ \
+/fractary-docs-create-index samples/ \
   --output samples/INDEX-BY-TAG.md \
   --group-by tag
 
@@ -251,7 +251,7 @@ cat samples/INDEX-BY-TAG.md
 
 3. Create flat index:
 ```bash
-/fractary-docs:create-index samples/ \
+/fractary-docs-create-index samples/ \
   --output samples/INDEX-FLAT.md \
   --group-by flat
 
@@ -273,7 +273,7 @@ grep -E "^-" samples/INDEX-FLAT.md
 
 1. Generate Mermaid graph:
 ```bash
-/fractary-docs:generate-graph samples/ \
+/fractary-docs-generate-graph samples/ \
   --output samples/GRAPH.md \
   --format mermaid
 
@@ -285,7 +285,7 @@ cat samples/GRAPH.md
 
 2. Generate DOT format:
 ```bash
-/fractary-docs:generate-graph samples/ \
+/fractary-docs-generate-graph samples/ \
   --output samples/graph.dot \
   --format dot
 
@@ -295,7 +295,7 @@ dot -Tpng samples/graph.dot -o samples/graph.png
 
 3. Generate JSON graph:
 ```bash
-/fractary-docs:generate-graph samples/ \
+/fractary-docs-generate-graph samples/ \
   --output samples/graph.json \
   --format json
 
@@ -306,7 +306,7 @@ cat samples/graph.json | jq '.edges | length'
 
 4. Include tag relationships:
 ```bash
-/fractary-docs:generate-graph samples/ \
+/fractary-docs-generate-graph samples/ \
   --output samples/GRAPH-TAGS.md \
   --format mermaid \
   --include-tags
@@ -330,17 +330,17 @@ diff samples/GRAPH.md samples/GRAPH-TAGS.md
 1. **Generate Base Documents**:
 ```bash
 # Create ADR
-/fractary-docs:generate adr \
+/fractary-docs-generate adr \
   --title "ADR-003: Implement Circuit Breaker" \
   --output samples/adrs/ADR-003-circuit-breaker.md
 
 # Create Design
-/fractary-docs:generate design \
+/fractary-docs-generate design \
   --title "Circuit Breaker Design" \
   --output samples/designs/circuit-breaker.md
 
 # Create Runbook
-/fractary-docs:generate runbook \
+/fractary-docs-generate runbook \
   --title "Circuit Breaker Operations" \
   --output samples/runbooks/circuit-breaker-ops.md
 ```
@@ -348,12 +348,12 @@ diff samples/GRAPH.md samples/GRAPH-TAGS.md
 2. **Update Content**:
 ```bash
 # Update ADR status
-/fractary-docs:update samples/adrs/ADR-003-circuit-breaker.md \
+/fractary-docs-update samples/adrs/ADR-003-circuit-breaker.md \
   --field status \
   --value "accepted"
 
 # Add tags
-/fractary-docs:update samples/adrs/ADR-003-circuit-breaker.md \
+/fractary-docs-update samples/adrs/ADR-003-circuit-breaker.md \
   --field tags \
   --value '["reliability", "patterns"]'
 ```
@@ -361,12 +361,12 @@ diff samples/GRAPH.md samples/GRAPH-TAGS.md
 3. **Create Relationships**:
 ```bash
 # Link ADR to Design
-/fractary-docs:link \
+/fractary-docs-link \
   samples/adrs/ADR-003-circuit-breaker.md \
   samples/designs/circuit-breaker.md
 
 # Link Design to Runbook
-/fractary-docs:link \
+/fractary-docs-link \
   samples/designs/circuit-breaker.md \
   samples/runbooks/circuit-breaker-ops.md
 ```
@@ -374,18 +374,18 @@ diff samples/GRAPH.md samples/GRAPH-TAGS.md
 4. **Validate**:
 ```bash
 # Validate all new documents
-/fractary-docs:validate samples/adrs/ADR-003-circuit-breaker.md
-/fractary-docs:validate samples/designs/circuit-breaker.md
-/fractary-docs:validate samples/runbooks/circuit-breaker-ops.md
+/fractary-docs-validate samples/adrs/ADR-003-circuit-breaker.md
+/fractary-docs-validate samples/designs/circuit-breaker.md
+/fractary-docs-validate samples/runbooks/circuit-breaker-ops.md
 
 # Check links
-/fractary-docs:link-check samples/
+/fractary-docs-link-check samples/
 ```
 
 5. **Update Index**:
 ```bash
 # Regenerate index
-/fractary-docs:create-index samples/ \
+/fractary-docs-create-index samples/ \
   --output samples/README.md \
   --group-by type
 
@@ -396,7 +396,7 @@ grep "Circuit Breaker" samples/README.md
 6. **Update Graph**:
 ```bash
 # Regenerate graph
-/fractary-docs:generate-graph samples/ \
+/fractary-docs-generate-graph samples/ \
   --output samples/GRAPH.md \
   --format mermaid
 
@@ -427,7 +427,7 @@ FAILED=0
 
 # Test 1: Validate all samples
 echo "Test 1: Validating samples..."
-if /fractary-docs:validate $TEST_DIR > /dev/null 2>&1; then
+if /fractary-docs-validate $TEST_DIR > /dev/null 2>&1; then
   echo "✅ Validation passed"
 else
   echo "❌ Validation failed"
@@ -436,7 +436,7 @@ fi
 
 # Test 2: Check links
 echo "Test 2: Checking links..."
-RESULT=$(/fractary-docs:link-check $TEST_DIR)
+RESULT=$(/fractary-docs-link-check $TEST_DIR)
 BROKEN=$(echo "$RESULT" | jq -r '.summary.total_broken_links')
 if [[ "$BROKEN" -eq 0 ]]; then
   echo "✅ All links valid"
@@ -447,7 +447,7 @@ fi
 
 # Test 3: Generate index
 echo "Test 3: Generating index..."
-if /fractary-docs:create-index $TEST_DIR --output $TEST_DIR/README.md > /dev/null 2>&1; then
+if /fractary-docs-create-index $TEST_DIR --output $TEST_DIR/README.md > /dev/null 2>&1; then
   echo "✅ Index generated"
 else
   echo "❌ Index generation failed"
@@ -456,7 +456,7 @@ fi
 
 # Test 4: Generate graph
 echo "Test 4: Generating graph..."
-if /fractary-docs:generate-graph $TEST_DIR --output $TEST_DIR/GRAPH.md > /dev/null 2>&1; then
+if /fractary-docs-generate-graph $TEST_DIR --output $TEST_DIR/GRAPH.md > /dev/null 2>&1; then
   echo "✅ Graph generated"
 else
   echo "❌ Graph generation failed"
@@ -482,19 +482,19 @@ Test plugin performance with larger documentation sets:
 ```bash
 # Generate 100 sample documents
 for i in {1..100}; do
-  /fractary-docs:generate adr \
+  /fractary-docs-generate adr \
     --title "ADR-$i: Sample Decision" \
     --output test/adrs/ADR-$(printf "%03d" $i).md
 done
 
 # Measure validation time
-time /fractary-docs:validate test/
+time /fractary-docs-validate test/
 
 # Measure index generation time
-time /fractary-docs:create-index test/ --output test/README.md
+time /fractary-docs-create-index test/ --output test/README.md
 
 # Measure graph generation time
-time /fractary-docs:generate-graph test/ --output test/GRAPH.md
+time /fractary-docs-generate-graph test/ --output test/GRAPH.md
 ```
 
 **Performance Targets**:
@@ -509,25 +509,25 @@ Before releases, run complete regression suite:
 
 ```bash
 # 1. Validate all samples
-/fractary-docs:validate samples/ --strict
+/fractary-docs-validate samples/ --strict
 
 # 2. Check all links (including external)
-/fractary-docs:link-check samples/ --check-external
+/fractary-docs-link-check samples/ --check-external
 
 # 3. Generate all output formats
-/fractary-docs:create-index samples/ --output samples/README.md --group-by type
-/fractary-docs:create-index samples/ --output samples/INDEX-TAG.md --group-by tag
-/fractary-docs:generate-graph samples/ --output samples/GRAPH.md --format mermaid
-/fractary-docs:generate-graph samples/ --output samples/graph.dot --format dot
-/fractary-docs:generate-graph samples/ --output samples/graph.json --format json
+/fractary-docs-create-index samples/ --output samples/README.md --group-by type
+/fractary-docs-create-index samples/ --output samples/INDEX-TAG.md --group-by tag
+/fractary-docs-generate-graph samples/ --output samples/GRAPH.md --format mermaid
+/fractary-docs-generate-graph samples/ --output samples/graph.dot --format dot
+/fractary-docs-generate-graph samples/ --output samples/graph.json --format json
 
 # 4. Test error handling
-/fractary-docs:validate nonexistent.md  # Should fail gracefully
-/fractary-docs:link missing1.md missing2.md  # Should error clearly
+/fractary-docs-validate nonexistent.md  # Should fail gracefully
+/fractary-docs-link missing1.md missing2.md  # Should error clearly
 
 # 5. Test edge cases
 touch samples/empty.md  # Empty file
-/fractary-docs:validate samples/empty.md  # Should handle gracefully
+/fractary-docs-validate samples/empty.md  # Should handle gracefully
 ```
 
 ## Troubleshooting Tests
@@ -557,7 +557,7 @@ Enable verbose output:
 jq '.debug = true' .fractary/config.yaml
 
 # Run with verbose logging
-/fractary-docs:validate samples/ --verbose
+/fractary-docs-validate samples/ --verbose
 ```
 
 ## CI/CD Integration
@@ -583,16 +583,16 @@ jobs:
 
       - name: Validate documentation
         run: |
-          /fractary-docs:validate docs/
+          /fractary-docs-validate docs/
 
       - name: Check links
         run: |
-          /fractary-docs:link-check docs/
+          /fractary-docs-link-check docs/
 
       - name: Generate artifacts
         run: |
-          /fractary-docs:create-index docs/ --output docs/README.md
-          /fractary-docs:generate-graph docs/ --output docs/GRAPH.md
+          /fractary-docs-create-index docs/ --output docs/README.md
+          /fractary-docs-generate-graph docs/ --output docs/GRAPH.md
 
       - name: Commit updates
         run: |

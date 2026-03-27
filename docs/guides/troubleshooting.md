@@ -14,7 +14,7 @@ Common issues and solutions for Fractary Core.
 
 1. Initialize configuration:
    ```bash
-   fractary-core:config-init
+   fractary-core-config-init
    ```
 
 2. Check file exists:
@@ -66,7 +66,7 @@ Common issues and solutions for Fractary Core.
 
 1. Validate YAML syntax:
    ```bash
-   fractary-core:config-validate
+   fractary-core-config-validate
    ```
 
 2. Common YAML issues:
@@ -214,7 +214,7 @@ Common issues and solutions for Fractary Core.
 ### Command Not Found
 
 **Symptoms:**
-- Error: "fractary-core: command not found"
+- Error: "fractary-core- command not found"
 
 **Solutions:**
 
@@ -299,7 +299,7 @@ Common issues and solutions for Fractary Core.
 
 3. Verify configuration is correct:
    ```bash
-   fractary-core:config-validate
+   fractary-core-config-validate
    ```
 
 ## Plugin Issues
@@ -337,7 +337,7 @@ Common issues and solutions for Fractary Core.
 
 2. Check configuration:
    ```bash
-   fractary-core:config-validate
+   fractary-core-config-validate
    ```
 
 ## Common Error Messages

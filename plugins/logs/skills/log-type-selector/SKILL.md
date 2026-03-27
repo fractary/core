@@ -1,5 +1,5 @@
 ---
-name: fractary-log-type-selector
+name: fractary-logs-log-type-selector
 description: Helps select the right log type. Use when creating logs without a specific type indicated.
 model: claude-haiku-4-5
 ---

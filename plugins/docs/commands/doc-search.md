@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:doc-search
+name: fractary-docs-doc-search
 allowed-tools: Bash(fractary-core docs doc-search:*)
 description: Search documents
 model: claude-haiku-4-5

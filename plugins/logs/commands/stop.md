@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:stop
+name: fractary-logs-stop
 allowed-tools: Bash(fractary-core logs stop:*)
 description: Stop session capture
 model: claude-haiku-4-5

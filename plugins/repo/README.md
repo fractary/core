@@ -24,7 +24,7 @@ The plugin uses an **agents + commands + skills** pattern with MCP-first archite
 ```
 ┌─────────────────────────────────────────┐
 │  Commands (User Interface)             │
-│  /fractary-repo:branch-create, etc.    │
+│  /fractary-repo-branch-create, etc.    │
 └─────────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────────┐
@@ -53,7 +53,7 @@ claude plugin install fractary/repo
 The fastest way to get started:
 
 ```bash
-fractary-core:config-init
+fractary-core-config-init
 ```
 
 This initializes the unified `.fractary/config.yaml` configuration, which includes repo plugin settings.
@@ -91,7 +91,7 @@ repo:
 
 ```bash
 # Setup permissions once per project
-/fractary-repo:init-permissions
+/fractary-repo-init-permissions
 ```
 
 This configures `.claude/settings.json` with a **branch-aware permission system**:
@@ -132,33 +132,33 @@ See [Branch-Aware Permissions Guide](docs/branch-aware-permissions.md) for full 
 
 ```bash
 # Create a feature branch
-/fractary-repo:branch-create create 123 "add user export feature"
+/fractary-repo-branch-create create 123 "add user export feature"
 
 # Make commits
-/fractary-repo:commit "Add CSV export functionality" --type feat --work-id 123
+/fractary-repo-commit "Add CSV export functionality" --type feat --work-id 123
 
 # Push changes
-/fractary-repo:push --set-upstream
+/fractary-repo-push --set-upstream
 
 # Create pull request
-/fractary-repo:pr create "feat: Add user export feature" --work-id 123
+/fractary-repo-pr create "feat: Add user export feature" --work-id 123
 ```
 
 ## User Commands
 
-### /fractary-repo:init-permissions - Permission Management ⚡
+### /fractary-repo-init-permissions - Permission Management ⚡
 
 Configure Claude Code permissions with **branch-aware intelligence**.
 
 ```bash
 # Setup permissions (first time or update)
-/fractary-repo:init-permissions
+/fractary-repo-init-permissions
 
 # Validate current permissions
-/fractary-repo:init-permissions --mode validate
+/fractary-repo-init-permissions --mode validate
 
 # Reset to defaults
-/fractary-repo:init-permissions --mode reset
+/fractary-repo-init-permissions --mode reset
 ```
 
 **What It Does:**
@@ -204,107 +204,107 @@ git push origin main → ⚠️ Approve? (only this one)
 - [Permission Behavior](docs/permissions-behavior.md) - Technical details
 - [Original Guide](docs/permissions-guide.md) - Historical reference
 
-### /fractary-repo:branch-create - Branch Management
+### /fractary-repo-branch-create - Branch Management
 
 Create, delete, and manage Git branches.
 
 ```bash
 # Create feature branch
-/fractary-repo:branch-create create 123 "add export feature"
+/fractary-repo-branch-create create 123 "add export feature"
 
 # Delete old branch
-/fractary-repo:branch-create delete feat/old-feature
+/fractary-repo-branch-create delete feat/old-feature
 
 # List stale branches
-/fractary-repo:branch-create list --stale --merged
+/fractary-repo-branch-create list --stale --merged
 ```
 
 [Full documentation](commands/branch.md)
 
-### /fractary-repo:commit - Semantic Commits
+### /fractary-repo-commit - Semantic Commits
 
 Create commits with conventional format and FABER metadata.
 
 ```bash
 # Feature commit
-/fractary-repo:commit "Add CSV export" --type feat --work-id 123
+/fractary-repo-commit "Add CSV export" --type feat --work-id 123
 
 # Bug fix
-/fractary-repo:commit "Fix auth timeout" --type fix --scope auth --work-id 456
+/fractary-repo-commit "Fix auth timeout" --type fix --scope auth --work-id 456
 
 # Breaking change
-/fractary-repo:commit "Change API signature" --type feat --breaking --work-id 789
+/fractary-repo-commit "Change API signature" --type feat --breaking --work-id 789
 ```
 
 [Full documentation](commands/commit.md)
 
-### /fractary-repo:push - Push Branches
+### /fractary-repo-push - Push Branches
 
 Push branches to remote with safety checks.
 
 ```bash
 # Push current branch
-/fractary-repo:push
+/fractary-repo-push
 
 # Push with upstream tracking
-/fractary-repo:push feat/123-export --set-upstream
+/fractary-repo-push feat/123-export --set-upstream
 
 # Safe force push
-/fractary-repo:push feat/456-refactor --force
+/fractary-repo-push feat/456-refactor --force
 ```
 
 [Full documentation](commands/push.md)
 
-### /fractary-repo:pr - Pull Request Management
+### /fractary-repo-pr - Pull Request Management
 
 Create, comment, review, and merge pull requests.
 
 ```bash
 # Create PR
-/fractary-repo:pr create "feat: Add user export" --work-id 123
+/fractary-repo-pr create "feat: Add user export" --work-id 123
 
 # Add comment
-/fractary-repo:pr comment 456 "LGTM! Tests passing."
+/fractary-repo-pr comment 456 "LGTM! Tests passing."
 
 # Approve PR
-/fractary-repo:pr review 456 approve
+/fractary-repo-pr review 456 approve
 
 # Merge PR
-/fractary-repo:pr merge 456 --strategy no-ff --delete-branch
+/fractary-repo-pr merge 456 --strategy no-ff --delete-branch
 ```
 
 [Full documentation](commands/pr.md)
 
-### /fractary-repo:tag - Version Tags
+### /fractary-repo-tag - Version Tags
 
 Create and push semantic version tags.
 
 ```bash
 # Create release tag
-/fractary-repo:tag create v1.2.3 --message "Release version 1.2.3"
+/fractary-repo-tag create v1.2.3 --message "Release version 1.2.3"
 
 # Create signed tag
-/fractary-repo:tag create v2.0.0 --message "Major release" --sign
+/fractary-repo-tag create v2.0.0 --message "Major release" --sign
 
 # Push tag
-/fractary-repo:tag push v1.2.3
+/fractary-repo-tag push v1.2.3
 ```
 
 [Full documentation](commands/tag.md)
 
-### /fractary-repo:cleanup - Branch Cleanup
+### /fractary-repo-cleanup - Branch Cleanup
 
 Clean up stale and merged branches.
 
 ```bash
 # Preview stale branches
-/fractary-repo:cleanup --merged
+/fractary-repo-cleanup --merged
 
 # Delete merged branches
-/fractary-repo:cleanup --delete --merged
+/fractary-repo-cleanup --delete --merged
 
 # Delete old inactive branches
-/fractary-repo:cleanup --delete --inactive --days 60
+/fractary-repo-cleanup --delete --inactive --days 60
 ```
 
 [Full documentation](commands/cleanup.md)
@@ -323,13 +323,13 @@ This argument is always optional and appears as the final argument. When provide
 
 ```bash
 # Guide commit message style
-/fractary-repo:commit "Add feature" --context "Ensure conventional commit format with scope"
+/fractary-repo-commit "Add feature" --context "Ensure conventional commit format with scope"
 
 # Customize PR creation
-/fractary-repo:pr-create --context "Include performance impact section in PR body"
+/fractary-repo-pr-create --context "Include performance impact section in PR body"
 
 # Focus branch naming
-/fractary-repo:init --context "Use company-specific branch naming conventions"
+/fractary-repo-init --context "Use company-specific branch naming conventions"
 ```
 
 Context arguments follow the `--context` flag pattern as described above.
@@ -551,7 +551,7 @@ This means even `rm -rf /` will execute without protection.
 ```bash
 # Run once per project
 cd your-project
-/fractary-repo:init-permissions
+/fractary-repo-init-permissions
 
 # Output shows:
 # - ~50 auto-allowed commands
@@ -564,7 +564,7 @@ cd your-project
 - **[Branch-Aware Permissions Guide](docs/branch-aware-permissions.md)** - Comprehensive guide with examples
 - **[Permission Behavior](docs/permissions-behavior.md)** - Technical details and edge cases
 - **[Permission Guide](docs/permissions-guide.md)** - Original permission system documentation
-- **[Command Reference](commands/init-permissions.md)** - `/fractary-repo:init-permissions` command details
+- **[Command Reference](commands/init-permissions.md)** - `/fractary-repo-init-permissions` command details
 
 ### Benefits
 

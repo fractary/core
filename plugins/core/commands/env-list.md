@@ -1,5 +1,5 @@
 ---
-name: fractary-core:env-list
+name: fractary-core-env-list
 allowed-tools: Bash(fractary-core config env-list:*)
 description: List available environments
 model: claude-haiku-4-5

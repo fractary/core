@@ -19,13 +19,13 @@
 - ✅ **Security**: Secure temp directories, input validation, concurrency control
 
 ### Commands Available
-- `/fractary-logs:init` - Initialize configuration
-- `/fractary-logs:capture <issue>` - Start session capture
-- `/fractary-logs:stop` - Stop capture
-- `/fractary-logs:log <issue> "message"` - Log specific message
-- `/fractary-logs:search "query"` - Search logs
-- `/fractary-logs:analyze <type>` - Analyze logs
-- `/fractary-logs:read <issue>` - Read logs
+- `/fractary-logs-init` - Initialize configuration
+- `/fractary-logs-capture <issue>` - Start session capture
+- `/fractary-logs-stop` - Stop capture
+- `/fractary-logs-log <issue> "message"` - Log specific message
+- `/fractary-logs-search "query"` - Search logs
+- `/fractary-logs-analyze <type>` - Analyze logs
+- `/fractary-logs-read <issue>` - Read logs
 
 ## New Features in v1.1.0 🎉
 
@@ -138,12 +138,12 @@ AI summaries incur API costs and are **disabled by default**. Enable only if you
 2. Use environment variables for cloud credentials
 3. Set up centralized S3/R2 bucket for all team logs
 4. Enable GitHub comments: `"integration.github.comment_on_archive": true`
-5. Regular search for learnings: `/fractary-logs:search "gotcha"`
+5. Regular search for learnings: `/fractary-logs-search "gotcha"`
 
 **For Organizations**:
 1. Configure retention policies per compliance requirements
 2. Use separate buckets per team/project
-3. Enable audit logging: `/fractary-logs:audit`
+3. Enable audit logging: `/fractary-logs-audit`
 4. Review summaries in retrospectives
 5. Build knowledge base from session insights
 
@@ -157,12 +157,12 @@ If upgrading from alpha version:
    - Add `cloud_logs_path` and `cloud_summaries_path`
 
 2. **Existing local logs**:
-   - Run `/fractary-logs:init` to trigger auto-backup
+   - Run `/fractary-logs-init` to trigger auto-backup
    - Old logs will be detected and archived automatically
    - Summaries will be generated for all archived sessions
 
 3. **Verify**:
-   - Search archived logs: `/fractary-logs:search "test"`
+   - Search archived logs: `/fractary-logs-search "test"`
    - Review summaries in cloud storage
 
 **Your data is safe**: All local logs are preserved and will be automatically uploaded on next init.

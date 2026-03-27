@@ -1,5 +1,5 @@
 ---
-name: issue-bulk-creator
+name: fractary-work-issue-bulk-creator
 description: |
   Autonomous agent for creating multiple related issues at once.
   Analyzes project structure and conversation context to intelligently determine what issues to create.
@@ -484,7 +484,7 @@ Plan:
 Previous conversation:
 User: "We need to add authentication, set up authorization, and implement audit logging"
 
-Command: /fractary-work:issue-create-bulk
+Command: /fractary-work-issue-create-bulk
 
 Plan:
 [1] Implement user authentication
@@ -758,7 +758,7 @@ Did you mean --type feature?
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk --prompt "Create issues for all IPEDS datasets" --label dataset --label etl
+/fractary-work-issue-create-bulk --prompt "Create issues for all IPEDS datasets" --label dataset --label etl
 ```
 
 **Process**:
@@ -794,7 +794,7 @@ Did you mean --type feature?
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk --prompt "Create issues for: authentication, authorization, audit logging" --type feature --label security
+/fractary-work-issue-create-bulk --prompt "Create issues for: authentication, authorization, audit logging" --type feature --label security
 ```
 
 **Process**:
@@ -830,7 +830,7 @@ User: "We need to implement three key features: user authentication, role-based 
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk
+/fractary-work-issue-create-bulk
 ```
 
 **Process**:
@@ -864,7 +864,7 @@ User: "We need to implement three key features: user authentication, role-based 
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk --prompt "Create issues for IPEDS datasets: hd, ic" --template dataset-load.md
+/fractary-work-issue-create-bulk --prompt "Create issues for IPEDS datasets: hd, ic" --template dataset-load.md
 ```
 
 **Process**:
@@ -893,7 +893,7 @@ User: "We need to implement three key features: user authentication, role-based 
 
 **Command**:
 ```bash
-/fractary-work:issue-create-bulk --prompt "Create issues for all datasets"
+/fractary-work-issue-create-bulk --prompt "Create issues for all datasets"
 ```
 
 **Process**:
@@ -935,7 +935,7 @@ User: "We need to implement three key features: user authentication, role-based 
 - Creating issues from conversation discussion
 
 **AVOID Using For**:
-- Single issue creation (use /fractary-work:issue-create instead)
+- Single issue creation (use /fractary-work-issue-create instead)
 - Complex issues requiring detailed planning (create individually)
 - Issues that are not similar or related
 
@@ -945,12 +945,12 @@ User: "We need to implement three key features: user authentication, role-based 
 Bulk Issue Creation Workflow:
 
 1. Discovery/Planning:
-   /fractary-work:issue-create-bulk  ← YOU ARE HERE
+   /fractary-work-issue-create-bulk  ← YOU ARE HERE
       ↓
    [Multiple issues created]
 
 2. Refinement (per issue):
-   /fractary-work:issue-refine <number>
+   /fractary-work-issue-refine <number>
       ↓
    [Requirements clarified]
 

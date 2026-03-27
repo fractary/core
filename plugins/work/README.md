@@ -33,7 +33,7 @@ The **Fractary Work Plugin** provides a unified interface for managing issues, t
 
 ```
 Layer 1: Commands (User Interface)
-   /fractary-work:issue, /fractary-work:comment, etc.
+   /fractary-work-issue, /fractary-work-comment, etc.
    ↓
 Layer 2: Agents (Orchestration)
    issue-refine, issue-bulk-creator
@@ -64,14 +64,14 @@ Layer 4: Scripts (Deterministic Operations)
 
 #### Handler Skills (3)
 
-- **handler-work-tracker-github** - GitHub Issues adapter (gh CLI)
-- **handler-work-tracker-jira** - Jira Cloud adapter (REST API v3)
-- **handler-work-tracker-linear** - Linear adapter (GraphQL)
+- **fractary-work-handler-work-tracker-github** - GitHub Issues adapter (gh CLI)
+- **fractary-work-handler-work-tracker-jira** - Jira Cloud adapter (REST API v3)
+- **fractary-work-handler-work-tracker-linear** - Linear adapter (GraphQL)
 
 #### Utility Skills
 
-- **work-common** - Shared utilities (config loading, format conversion)
-- **work-initializer** - Plugin initialization
+- **fractary-work-common** - Shared utilities (config loading, format conversion)
+- **fractary-work-initializer** - Plugin initialization
 
 ## Prerequisites
 
@@ -154,58 +154,58 @@ The work plugin provides user-facing commands for common operations:
 
 ### Setup
 
-- **`fractary-core:config-init`** - Initialize unified configuration
+- **`fractary-core-config-init`** - Initialize unified configuration
   ```bash
-  fractary-core:config-init              # Interactive mode
+  fractary-core-config-init              # Interactive mode
   ```
 
 ### Issue Management
 
-- **`/fractary-work:issue`** - Create, fetch, update, search, and manage issues
+- **`/fractary-work-issue`** - Create, fetch, update, search, and manage issues
   ```bash
-  /fractary-work:issue create "Add feature" --type feature
-  /fractary-work:issue fetch 123
-  /fractary-work:issue list --state open --label bug
-  /fractary-work:issue update 123 --title "New title"
-  /fractary-work:issue assign 123 @me
-  /fractary-work:issue search "authentication"
+  /fractary-work-issue create "Add feature" --type feature
+  /fractary-work-issue fetch 123
+  /fractary-work-issue list --state open --label bug
+  /fractary-work-issue update 123 --title "New title"
+  /fractary-work-issue assign 123 @me
+  /fractary-work-issue search "authentication"
   ```
 
 ### Comments
 
-- **`/fractary-work:comment`** - Create and manage comments
+- **`/fractary-work-comment`** - Create and manage comments
   ```bash
-  /fractary-work:comment create 123 "Working on this"
-  /fractary-work:comment list 123
+  /fractary-work-comment create 123 "Working on this"
+  /fractary-work-comment list 123
   ```
 
 ### State Management
 
-- **`/fractary-work:state`** - Manage issue lifecycle states
+- **`/fractary-work-state`** - Manage issue lifecycle states
   ```bash
-  /fractary-work:state close 123 --comment "Fixed in PR #456"
-  /fractary-work:state reopen 123
-  /fractary-work:state transition 123 in_progress
+  /fractary-work-state close 123 --comment "Fixed in PR #456"
+  /fractary-work-state reopen 123
+  /fractary-work-state transition 123 in_progress
   ```
 
 ### Labels
 
-- **`/fractary-work:label`** - Add, remove, and manage labels
+- **`/fractary-work-label`** - Add, remove, and manage labels
   ```bash
-  /fractary-work:label add 123 bug
-  /fractary-work:label remove 123 wontfix
-  /fractary-work:label list 123
-  /fractary-work:label set 123 bug high-priority
+  /fractary-work-label add 123 bug
+  /fractary-work-label remove 123 wontfix
+  /fractary-work-label list 123
+  /fractary-work-label set 123 bug high-priority
   ```
 
 ### Milestones
 
-- **`/fractary-work:milestone`** - Create and manage milestones
+- **`/fractary-work-milestone`** - Create and manage milestones
   ```bash
-  /fractary-work:milestone create "v1.0" --due 2025-12-31
-  /fractary-work:milestone list
-  /fractary-work:milestone set 123 "v1.0"
-  /fractary-work:milestone remove 123
+  /fractary-work-milestone create "v1.0" --due 2025-12-31
+  /fractary-work-milestone list
+  /fractary-work-milestone set 123 "v1.0"
+  /fractary-work-milestone remove 123
   ```
 
 **Command Documentation:** See `commands/*.md` for detailed command documentation and examples.
@@ -224,13 +224,13 @@ This argument is always optional and appears as the final argument. When provide
 
 ```bash
 # Guide issue creation
-/fractary-work:issue-create "Add feature" --context "Follow team's issue template"
+/fractary-work-issue-create "Add feature" --context "Follow team's issue template"
 
 # Focus issue refinement
-/fractary-work:issue-refine 123 --context "Emphasize performance requirements"
+/fractary-work-issue-refine 123 --context "Emphasize performance requirements"
 
 # Customize search behavior
-/fractary-work:issue-search "auth" --context "Focus on security-related issues"
+/fractary-work-issue-search "auth" --context "Focus on security-related issues"
 ```
 
 Context arguments follow the `--context` flag pattern as described above.
@@ -591,7 +591,7 @@ See `docs/TESTING.md` for:
 **Total Implementation:**
 - **2 Agents:** issue-refine, issue-bulk-creator
 - **8 Commands:** Full issue management interface
-- **5 Skills:** 3 handlers + work-common + work-initializer
+- **5 Skills:** 3 handlers + fractary-work-common + fractary-work-initializer
 - **3 Platforms:** GitHub, Jira, Linear with 100% parity
 
 ## Version History

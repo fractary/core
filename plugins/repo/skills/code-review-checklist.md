@@ -1,5 +1,5 @@
 ---
-name: fractary-code-review-checklist
+name: fractary-repo-code-review-checklist
 description: Comprehensive code review checklist for Fractary projects covering architecture, security, performance, and quality
 ---
 

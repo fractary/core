@@ -1,5 +1,5 @@
 ---
-name: docs-archiver
+name: fractary-docs-archiver
 description: |
   MUST BE USED when user wants to archive documentation.
   Use PROACTIVELY when user mentions "archive doc", "archive spec", "move to archive", "clean up old docs".

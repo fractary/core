@@ -1,5 +1,5 @@
 ---
-name: docs-writer
+name: fractary-docs-writer
 description: |
   MUST BE USED when user wants to create or update documentation.
   Use PROACTIVELY when user mentions "write docs", "create documentation", "document this", "add docs".

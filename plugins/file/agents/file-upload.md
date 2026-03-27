@@ -1,5 +1,5 @@
 ---
-name: file-upload
+name: fractary-file-upload
 description: Uploads a local file to storage using the CLI
 model: claude-haiku-4-5
 ---

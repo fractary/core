@@ -12,10 +12,10 @@
 
 During the catalog-integrate #328 workflow, the FABER orchestrator committed two errors during `architect-commit-and-push`:
 
-1. **Used Agent tool instead of Skill tool** — invoked `Agent(subagent_type="fractary-repo:branch-forward")` instead of `Skill("fractary-repo:commit-push")`
+1. **Used Agent tool instead of Skill tool** — invoked `Agent(subagent_type="fractary-repo-branch-forward")` instead of `Skill("fractary-repo-commit-push")`
 2. **Used wrong command name** — substituted `branch-forward` (from a later evaluate phase step) for `commit-push` (the actual step prompt)
 
-The orchestrator self-corrected after the Agent error and used `Skill(fractary-repo:commit-push)` successfully. No lasting damage, but the error wasted time and tokens.
+The orchestrator self-corrected after the Agent error and used `Skill(fractary-repo-commit-push)` successfully. No lasting damage, but the error wasted time and tokens.
 
 ---
 
@@ -28,17 +28,17 @@ The plan step is:
 {
   "id": "architect-commit-and-push",
   "name": "Commit and Push Changes",
-  "prompt": "/fractary-repo:commit-push --work-id {work_id}"
+  "prompt": "/fractary-repo-commit-push --work-id {work_id}"
 }
 ```
 
 The orchestration protocol (line 24) states: "If the prompt starts with `/`, invoke it as a slash command (Skill tool)." The ANTI-PATTERN block (line 37) added after SPEC-issue-skill-invocation-integrity further states: "Do NOT call the underlying CLI directly via Bash."
 
-However, the current anti-pattern only covers the **Bash bypass** path. The orchestrator found a new bypass path: **Agent tool**. The `fractary-repo:branch-forward` naming pattern matches agent naming conventions (e.g., `fractary-repo:pr-review-agent`), which likely contributed to the model treating it as an agent type.
+However, the current anti-pattern only covers the **Bash bypass** path. The orchestrator found a new bypass path: **Agent tool**. The `fractary-repo-branch-forward` naming pattern matches agent naming conventions (e.g., `fractary-repo-pr-review-agent`), which likely contributed to the model treating it as an agent type.
 
 ### Secondary: Orchestrator read step name instead of step prompt
 
-The invocation `Agent(subagent_type="fractary-repo:branch-forward", prompt="Commit and push architect phase changes")` shows the model used the step's **name** ("Commit and Push Changes") and **description** rather than the step's **prompt** field (`/fractary-repo:commit-push --work-id {work_id}`). It then associated "branch-forward" with the task — likely because `branch-forward` exists later in the plan (in the `evaluate-forward-to-test` step) and is conceptually related to branch operations.
+The invocation `Agent(subagent_type="fractary-repo-branch-forward", prompt="Commit and push architect phase changes")` shows the model used the step's **name** ("Commit and Push Changes") and **description** rather than the step's **prompt** field (`/fractary-repo-commit-push --work-id {work_id}`). It then associated "branch-forward" with the task — likely because `branch-forward` exists later in the plan (in the `evaluate-forward-to-test` step) and is conceptually related to branch operations.
 
 ### Pattern: Recurring Skill bypass class
 
@@ -65,8 +65,8 @@ After the existing ANTI-PATTERN block (line ~42), add:
 > **ANTI-PATTERN: Never invoke step prompts via Agent/Agent tool.**
 >
 > Slash command steps MUST go through `Skill` tool, not `Agent` tool. Commands are skills, not agents.
-> If a command internally delegates to an agent (e.g., `/fractary-repo:pr-review` invokes
-> `fractary-repo:pr-review-agent` via Agent), the Skill handles that delegation transparently.
+> If a command internally delegates to an agent (e.g., `/fractary-repo-pr-review` invokes
+> `fractary-repo-pr-review-agent` via Agent), the Skill handles that delegation transparently.
 > The orchestrator NEVER calls Agent tool directly for step execution.
 >
 > The naming pattern `fractary-*:*` does NOT imply an agent type. Most `fractary-*:*` names
@@ -116,6 +116,6 @@ No changes to workflow definitions, core.json, or code in fractary-core.
 
 ## Verification
 
-1. Run a FABER workflow through the architect phase — confirm `architect-commit-and-push` uses `Skill(fractary-repo:commit-push)` and NOT `Agent(fractary-repo:*)`
-2. Run through the evaluate phase — confirm `evaluate-forward-to-test` uses `Skill(fractary-repo:branch-forward)` (not Agent)
+1. Run a FABER workflow through the architect phase — confirm `architect-commit-and-push` uses `Skill(fractary-repo-commit-push)` and NOT `Agent(fractary-repo-*)`
+2. Run through the evaluate phase — confirm `evaluate-forward-to-test` uses `Skill(fractary-repo-branch-forward)` (not Agent)
 3. Grep orchestrator logs for `Agent(subagent_type="fractary-` to detect any remaining bypass patterns

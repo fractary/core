@@ -27,14 +27,14 @@ mkdir -p .fractary/docs
 cp config/config.example.json .fractary/config.yaml
 
 # Or initialize with command
-/fractary-docs:init
+/fractary-docs-init
 ```
 
 ### 3. Verify Installation
 
 ```bash
 # List available commands
-/fractary-docs:help
+/fractary-docs-help
 
 # Check sample documentation
 ls samples/
@@ -46,7 +46,7 @@ ls samples/
 
 ```bash
 # Create an ADR
-/fractary-docs:generate adr \
+/fractary-docs-generate adr \
   --title "ADR-001: Use PostgreSQL" \
   --output docs/adrs/ADR-001.md
 
@@ -86,7 +86,7 @@ status: proposed
 
 ```bash
 # Run validation
-/fractary-docs:validate docs/adrs/ADR-001.md
+/fractary-docs-validate docs/adrs/ADR-001.md
 
 # Expected output:
 # ✅ Front matter: valid
@@ -103,26 +103,26 @@ For a new feature, create ADR → Design → Runbook:
 
 ```bash
 # 1. Create ADR
-/fractary-docs:generate adr \
+/fractary-docs-generate adr \
   --title "ADR-003: Add Caching Layer" \
   --output docs/adrs/ADR-003-caching.md
 
 # 2. Create design doc
-/fractary-docs:generate design \
+/fractary-docs-generate design \
   --title "Caching Architecture" \
   --output docs/designs/caching-arch.md
 
 # 3. Create runbook
-/fractary-docs:generate runbook \
+/fractary-docs-generate runbook \
   --title "Cache Operations" \
   --output docs/runbooks/cache-ops.md
 
 # 4. Link them together
-/fractary-docs:link docs/adrs/ADR-003-caching.md docs/designs/caching-arch.md
-/fractary-docs:link docs/designs/caching-arch.md docs/runbooks/cache-ops.md
+/fractary-docs-link docs/adrs/ADR-003-caching.md docs/designs/caching-arch.md
+/fractary-docs-link docs/designs/caching-arch.md docs/runbooks/cache-ops.md
 
 # 5. Validate everything
-/fractary-docs:validate docs/
+/fractary-docs-validate docs/
 ```
 
 ### Workflow 2: Update Existing Docs
@@ -131,23 +131,23 @@ Update metadata and content:
 
 ```bash
 # Update front matter status
-/fractary-docs:update docs/adrs/ADR-003-caching.md \
+/fractary-docs-update docs/adrs/ADR-003-caching.md \
   --field status \
   --value "accepted"
 
 # Add tags
-/fractary-docs:update docs/adrs/ADR-003-caching.md \
+/fractary-docs-update docs/adrs/ADR-003-caching.md \
   --field tags \
   --value '["performance", "caching"]'
 
 # Append to section
-/fractary-docs:update docs/adrs/ADR-003-caching.md \
+/fractary-docs-update docs/adrs/ADR-003-caching.md \
   --section "Consequences" \
   --content "### Performance Impact\n\nExpected 50% reduction in database load." \
   --mode append
 
 # Validate changes
-/fractary-docs:validate docs/adrs/ADR-003-caching.md
+/fractary-docs-validate docs/adrs/ADR-003-caching.md
 ```
 
 ### Workflow 3: Generate Index
@@ -156,7 +156,7 @@ Create a browsable index:
 
 ```bash
 # Generate by document type
-/fractary-docs:create-index docs/ \
+/fractary-docs-create-index docs/ \
   --output docs/README.md \
   --title "Project Documentation"
 
@@ -185,7 +185,7 @@ Create a relationship graph:
 
 ```bash
 # Generate Mermaid diagram
-/fractary-docs:generate-graph docs/ \
+/fractary-docs-generate-graph docs/ \
   --output docs/GRAPH.md \
   --format mermaid
 
@@ -217,7 +217,7 @@ graph TB
 Document important architectural decisions:
 
 ```bash
-/fractary-docs:generate adr --title "ADR-XXX: Decision" --output docs/adrs/
+/fractary-docs-generate adr --title "ADR-XXX: Decision" --output docs/adrs/
 ```
 
 **Sections**: Status, Context, Decision, Consequences, Alternatives
@@ -229,7 +229,7 @@ Document important architectural decisions:
 Document system/feature designs:
 
 ```bash
-/fractary-docs:generate design --title "Feature Design" --output docs/designs/
+/fractary-docs-generate design --title "Feature Design" --output docs/designs/
 ```
 
 **Sections**: Overview, Architecture, Requirements, Implementation
@@ -241,7 +241,7 @@ Document system/feature designs:
 Operational procedures:
 
 ```bash
-/fractary-docs:generate runbook --title "Operations Guide" --output docs/runbooks/
+/fractary-docs-generate runbook --title "Operations Guide" --output docs/runbooks/
 ```
 
 **Sections**: Purpose, Prerequisites, Steps, Troubleshooting, Rollback
@@ -253,7 +253,7 @@ Operational procedures:
 API documentation:
 
 ```bash
-/fractary-docs:generate api-spec --title "API Documentation" --output docs/api/
+/fractary-docs-generate api-spec --title "API Documentation" --output docs/api/
 ```
 
 **Sections**: Overview, Authentication, Endpoints, Models, Errors
@@ -337,7 +337,7 @@ Edit `.fractary/config.yaml`:
 ### Generate Documents
 
 ```bash
-/fractary-docs:generate <type> [options]
+/fractary-docs-generate <type> [options]
 
 Options:
   --title <title>      Document title
@@ -350,7 +350,7 @@ Options:
 ### Update Documents
 
 ```bash
-/fractary-docs:update <file> [options]
+/fractary-docs-update <file> [options]
 
 Options:
   --field <field>      Front matter field to update
@@ -364,7 +364,7 @@ Options:
 ### Validate Documents
 
 ```bash
-/fractary-docs:validate <path> [options]
+/fractary-docs-validate <path> [options]
 
 Options:
   --strict             Enable strict validation
@@ -375,7 +375,7 @@ Options:
 ### Link Documents
 
 ```bash
-/fractary-docs:link <source> <target> [options]
+/fractary-docs-link <source> <target> [options]
 
 Options:
   --one-way            Disable bidirectional linking
@@ -385,7 +385,7 @@ Options:
 ### Check Links
 
 ```bash
-/fractary-docs:link-check <directory> [options]
+/fractary-docs-link-check <directory> [options]
 
 Options:
   --recursive          Scan subdirectories (default: true)
@@ -396,7 +396,7 @@ Options:
 ### Create Index
 
 ```bash
-/fractary-docs:create-index <directory> [options]
+/fractary-docs-create-index <directory> [options]
 
 Options:
   --output <file>      Output file path
@@ -407,7 +407,7 @@ Options:
 ### Generate Graph
 
 ```bash
-/fractary-docs:generate-graph <directory> [options]
+/fractary-docs-generate-graph <directory> [options]
 
 Options:
   --output <file>      Output file path
@@ -422,7 +422,7 @@ Options:
 Always use templates for consistency:
 ```bash
 # Good: Use template
-/fractary-docs:generate adr --title "..." --output ...
+/fractary-docs-generate adr --title "..." --output ...
 
 # Avoid: Creating from scratch
 vim docs/adrs/new-adr.md
@@ -433,12 +433,12 @@ vim docs/adrs/new-adr.md
 Validate as you write:
 ```bash
 # After creating
-/fractary-docs:generate adr --title "..." --output docs/adrs/ADR-001.md
-/fractary-docs:validate docs/adrs/ADR-001.md
+/fractary-docs-generate adr --title "..." --output docs/adrs/ADR-001.md
+/fractary-docs-validate docs/adrs/ADR-001.md
 
 # After editing
 vim docs/adrs/ADR-001.md
-/fractary-docs:validate docs/adrs/ADR-001.md
+/fractary-docs-validate docs/adrs/ADR-001.md
 ```
 
 ### 3. Link Related Documents
@@ -446,10 +446,10 @@ vim docs/adrs/ADR-001.md
 Create semantic relationships:
 ```bash
 # ADR leads to Design
-/fractary-docs:link adrs/ADR-001.md designs/implementation.md
+/fractary-docs-link adrs/ADR-001.md designs/implementation.md
 
 # Design leads to Runbook
-/fractary-docs:link designs/implementation.md runbooks/deployment.md
+/fractary-docs-link designs/implementation.md runbooks/deployment.md
 ```
 
 ### 4. Keep Indexes Updated
@@ -457,7 +457,7 @@ Create semantic relationships:
 Regenerate indexes after changes:
 ```bash
 # After adding new docs
-/fractary-docs:create-index docs/ --output docs/README.md
+/fractary-docs-create-index docs/ --output docs/README.md
 
 # Commit with changes
 git add docs/
@@ -468,7 +468,7 @@ git commit -m "Add new documentation"
 
 Add relevant tags:
 ```bash
-/fractary-docs:update docs/adrs/ADR-001.md \
+/fractary-docs-update docs/adrs/ADR-001.md \
   --field tags \
   --value '["database", "postgresql", "infrastructure"]'
 ```
@@ -478,10 +478,10 @@ Add relevant tags:
 Check links periodically:
 ```bash
 # Weekly: Internal links only (fast)
-/fractary-docs:link-check docs/
+/fractary-docs-link-check docs/
 
 # Monthly: Include external links (slow)
-/fractary-docs:link-check docs/ --check-external
+/fractary-docs-link-check docs/ --check-external
 ```
 
 ## Troubleshooting
@@ -544,7 +544,7 @@ ls plugins/docs/commands/
 
 ```bash
 # Step 1: Create decision record
-/fractary-docs:generate adr \
+/fractary-docs-generate adr \
   --title "ADR-010: Add Rate Limiting" \
   --output docs/adrs/ADR-010-rate-limiting.md
 
@@ -553,38 +553,38 @@ vim docs/adrs/ADR-010-rate-limiting.md
 # [Edit content]
 
 # Step 3: Mark as accepted
-/fractary-docs:update docs/adrs/ADR-010-rate-limiting.md \
+/fractary-docs-update docs/adrs/ADR-010-rate-limiting.md \
   --field status --value "accepted"
 
 # Step 4: Create implementation design
-/fractary-docs:generate design \
+/fractary-docs-generate design \
   --title "Rate Limiting Implementation" \
   --output docs/designs/rate-limiting.md
 
 # Step 5: Link ADR to Design
-/fractary-docs:link \
+/fractary-docs-link \
   docs/adrs/ADR-010-rate-limiting.md \
   docs/designs/rate-limiting.md
 
 # Step 6: Validate
-/fractary-docs:validate docs/
+/fractary-docs-validate docs/
 
 # Step 7: Update index
-/fractary-docs:create-index docs/ --output docs/README.md
+/fractary-docs-create-index docs/ --output docs/README.md
 ```
 
 ### Example 2: Maintain Documentation
 
 ```bash
 # Weekly: Check links
-/fractary-docs:link-check docs/
+/fractary-docs-link-check docs/
 
 # Monthly: Full validation
-/fractary-docs:validate docs/ --strict
+/fractary-docs-validate docs/ --strict
 
 # Quarterly: Update indexes and graphs
-/fractary-docs:create-index docs/ --output docs/README.md
-/fractary-docs:generate-graph docs/ --output docs/GRAPH.md
+/fractary-docs-create-index docs/ --output docs/README.md
+/fractary-docs-generate-graph docs/ --output docs/GRAPH.md
 
 # Commit updates
 git add docs/README.md docs/GRAPH.md
@@ -612,5 +612,5 @@ git commit -m "Update documentation index and graph"
 **Ready to start?** Create your first document:
 
 ```bash
-/fractary-docs:generate adr --title "Your First ADR" --output docs/adrs/ADR-001.md
+/fractary-docs-generate adr --title "Your First ADR" --output docs/adrs/ADR-001.md
 ```

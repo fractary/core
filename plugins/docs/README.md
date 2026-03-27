@@ -42,64 +42,64 @@ The `fractary-docs` plugin provides a flexible documentation management system w
 
 ```bash
 # Create API documentation
-/fractary-docs:write api
+/fractary-docs-write api
 
 # Create ADR
-/fractary-docs:write adr
+/fractary-docs-write adr
 
 # Create dataset documentation
-/fractary-docs:write dataset
+/fractary-docs-write dataset
 
 # Batch create multiple docs
-/fractary-docs:write api docs/api/**/*.md --batch
+/fractary-docs-write api docs/api/**/*.md --batch
 ```
 
 ### 2. Validate Documentation
 
 ```bash
 # Validate all documentation
-/fractary-docs:validate
+/fractary-docs-validate
 
 # Validate specific file
-/fractary-docs:validate docs/api/user-api/README.md
+/fractary-docs-validate docs/api/user-api/README.md
 
 # Validate specific type
-/fractary-docs:validate --doc-type api
+/fractary-docs-validate --doc-type api
 
 # Validate and fix
-/fractary-docs:validate docs/ --fix
+/fractary-docs-validate docs/ --fix
 ```
 
 ### 3. List Documentation
 
 ```bash
 # List all documentation
-/fractary-docs:list
+/fractary-docs-list
 
 # List API docs only
-/fractary-docs:list --doc-type api
+/fractary-docs-list --doc-type api
 
 # List draft documents
-/fractary-docs:list --status draft
+/fractary-docs-list --status draft
 
 # Output as JSON
-/fractary-docs:list --format json
+/fractary-docs-list --format json
 
 # Output as markdown
-/fractary-docs:list --format markdown
+/fractary-docs-list --format markdown
 ```
 
 ### 4. Audit Documentation
 
 ```bash
 # Audit all documentation
-/fractary-docs:audit
+/fractary-docs-audit
 
 # Audit specific directory
-/fractary-docs:audit docs/api
+/fractary-docs-audit docs/api
 
 # Audit specific type
-/fractary-docs:audit --doc-type dataset
+/fractary-docs-audit --doc-type dataset
 ```
 
 ## Architecture
@@ -369,12 +369,12 @@ Create or update documentation with automatic validation and indexing.
 
 **Single document**:
 ```bash
-/fractary-docs:write api
+/fractary-docs-write api
 ```
 
 **Batch operation**:
 ```bash
-/fractary-docs:write api docs/api/**/*.md --batch
+/fractary-docs-write api docs/api/**/*.md --batch
 ```
 
 **Pipeline**:
@@ -397,7 +397,7 @@ Validate documentation against schema and quality rules.
 
 **Example**:
 ```bash
-/fractary-docs:validate docs/api/user-login/README.md
+/fractary-docs-validate docs/api/user-login/README.md
 ```
 
 ### Classify Operation (doc-classifier)
@@ -412,7 +412,7 @@ Auto-detect document type from path or content.
 **Example**:
 ```bash
 # Automatically detects "api" from path
-/fractary-docs:write docs/api/new-endpoint/README.md
+/fractary-docs-write docs/api/new-endpoint/README.md
 ```
 
 ### List Operation (doc-lister)
@@ -431,7 +431,7 @@ List and filter documentation with various output formats.
 
 **Example**:
 ```bash
-/fractary-docs:list --doc-type api --status published --format markdown
+/fractary-docs-list --doc-type api --status published --format markdown
 ```
 
 ### Audit Operation (docs-director)
@@ -480,7 +480,7 @@ Orchestrates write → validate → index pipeline for single documents.
 
 **Example invocation**:
 ```
-Use the @agent-fractary-docs:docs-manager agent with:
+Use the @agent-fractary-docs-manager agent with:
 {
   "operation": "write",
   "file_path": "docs/api/user-login/README.md",
@@ -511,7 +511,7 @@ Handles batch operations with pattern matching and parallel execution.
 
 **Example**:
 ```bash
-/fractary-docs:write api docs/api/**/README.md --batch
+/fractary-docs-write api docs/api/**/README.md --batch
 ```
 
 ## Agent Invocation
@@ -519,7 +519,7 @@ Handles batch operations with pattern matching and parallel execution.
 Use declarative invocation to interact with the docs-manager agent:
 
 ```
-Use the @agent-fractary-docs:docs-manager agent to write API documentation:
+Use the @agent-fractary-docs-manager agent to write API documentation:
 {
   "operation": "write",
   "doc_type": "api",
@@ -660,7 +660,7 @@ Use semantic versioning (semver.org)
 fractary-core docs types
 
 # Create a changelog
-/fractary-docs:write changelog
+/fractary-docs-write changelog
 ```
 
 The CLI and plugin automatically discover custom types from the configured manifest path.
@@ -687,14 +687,14 @@ fractary_doc_type: api
 
 **v1.x**:
 ```bash
-/fractary-docs:generate api "..."
-/fractary-docs:manage-api "..."
+/fractary-docs-generate api "..."
+/fractary-docs-manage-api "..."
 ```
 
 **v2.0**:
 ```bash
-/fractary-docs:write api
-/fractary-docs:validate --doc-type api
+/fractary-docs-write api
+/fractary-docs-validate --doc-type api
 ```
 
 ### Skill Changes
@@ -786,11 +786,11 @@ service: AuthService
 
 ## Commands
 
-- `/fractary-docs:write <doc_type>` - Create or update documentation
-- `/fractary-docs:validate [path]` - Validate documentation
-- `/fractary-docs:list [options]` - List and filter documentation
-- `/fractary-docs:audit [directory]` - Audit documentation quality
-- `/fractary-docs:check-consistency` - Check documentation consistency
+- `/fractary-docs-write <doc_type>` - Create or update documentation
+- `/fractary-docs-validate [path]` - Validate documentation
+- `/fractary-docs-list [options]` - List and filter documentation
+- `/fractary-docs-audit [directory]` - Audit documentation quality
+- `/fractary-docs-check-consistency` - Check documentation consistency
 
 See individual command files in `commands/` for detailed usage.
 
@@ -808,13 +808,13 @@ This argument is always optional and appears as the final argument. When provide
 
 ```bash
 # Focus validation on specific aspects
-/fractary-docs:validate --context "Be strict about code examples"
+/fractary-docs-validate --context "Be strict about code examples"
 
 # Guide documentation generation
-/fractary-docs:write api --context "Focus on error handling and include rate limiting info"
+/fractary-docs-write api --context "Focus on error handling and include rate limiting info"
 
 # Customize audit behavior
-/fractary-docs:audit --context "Focus on structure, ignore minor style issues"
+/fractary-docs-audit --context "Focus on structure, ignore minor style issues"
 ```
 
 Context arguments follow the `--context` flag pattern as described above.
@@ -922,20 +922,20 @@ plugins/docs/                          # Plugin directory
 │   ├── skills/                        # Old operation skills (v2.0-v3.1)
 │   └── types-v2/                      # Old type definitions
 ├── commands/
-│   ├── archive.md                     # /fractary-docs:archive
-│   ├── audit.md                       # /fractary-docs:audit
-│   ├── check-consistency.md           # /fractary-docs:check-consistency
-│   ├── doc-create.md                  # /fractary-docs:doc-create
-│   ├── doc-delete.md                  # /fractary-docs:doc-delete
-│   ├── doc-get.md                     # /fractary-docs:doc-get
-│   ├── doc-list.md                    # /fractary-docs:doc-list
-│   ├── doc-search.md                  # /fractary-docs:doc-search
-│   ├── doc-update.md                  # /fractary-docs:doc-update
-│   ├── refine.md                      # /fractary-docs:refine
-│   ├── type-info.md                   # /fractary-docs:type-info
-│   ├── type-list.md                   # /fractary-docs:type-list
-│   ├── validate.md                    # /fractary-docs:validate
-│   └── write.md                       # /fractary-docs:write
+│   ├── archive.md                     # /fractary-docs-archive
+│   ├── audit.md                       # /fractary-docs-audit
+│   ├── check-consistency.md           # /fractary-docs-check-consistency
+│   ├── doc-create.md                  # /fractary-docs-doc-create
+│   ├── doc-delete.md                  # /fractary-docs-doc-delete
+│   ├── doc-get.md                     # /fractary-docs-doc-get
+│   ├── doc-list.md                    # /fractary-docs-doc-list
+│   ├── doc-search.md                  # /fractary-docs-doc-search
+│   ├── doc-update.md                  # /fractary-docs-doc-update
+│   ├── refine.md                      # /fractary-docs-refine
+│   ├── type-info.md                   # /fractary-docs-type-info
+│   ├── type-list.md                   # /fractary-docs-type-list
+│   ├── validate.md                    # /fractary-docs-validate
+│   └── write.md                       # /fractary-docs-write
 ├── config/                            # Configuration templates
 ├── docs/                              # Plugin documentation
 ├── examples/                          # Usage examples

@@ -1,5 +1,5 @@
 ---
-name: fractary-file:read
+name: fractary-file-read
 allowed-tools: Bash(fractary-core file read:*)
 description: Read content from a storage path
 model: claude-haiku-4-5

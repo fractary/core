@@ -89,7 +89,7 @@ findAllLegacyWorktrees(cwd: string): Promise<Array<{ path: string; workId: strin
 
 **Usage**:
 ```bash
-/fractary-repo:branch-create <branch-name> [--from <base>] [--format json]
+/fractary-repo-branch-create <branch-name> [--from <base>] [--format json]
 ```
 
 **Features**:
@@ -130,7 +130,7 @@ findAllLegacyWorktrees(cwd: string): Promise<Array<{ path: string; workId: strin
 
 **Usage**:
 ```bash
-/fractary-repo:worktree-migrate [--dry-run] [--auto]
+/fractary-repo-worktree-migrate [--dry-run] [--auto]
 ```
 
 **Features**:
