@@ -220,7 +220,7 @@
     "step_2": "Set 'handlers.work-tracker.active' to your platform (github, jira, linear)",
     "step_3": "Configure platform-specific settings under handlers.work-tracker.{platform}",
     "step_4": "Set environment variables for authentication (see environment sections)",
-    "step_5": "Test configuration: plugins/work/skills/work-common/scripts/config-loader.sh",
+    "step_5": "Test configuration: plugins/work/skills/fractary-work-common/scripts/config-loader.sh",
     "step_6": "Test connection: Create test issue or fetch existing issue"
   },
 

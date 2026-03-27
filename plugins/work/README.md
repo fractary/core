@@ -490,11 +490,11 @@ work/
 │   ├── generate-session-summary.sh              # Session summary generation
 │   └── process-comment-queue.sh                 # Comment queue processing
 └── skills/
-    ├── handler-work-tracker-github/             # GitHub adapter
-    ├── handler-work-tracker-jira/               # Jira adapter
-    ├── handler-work-tracker-linear/             # Linear adapter
-    ├── work-common/                             # Shared utilities
-    └── work-initializer/                        # Plugin initialization
+    ├── fractary-work-handler-work-tracker-github/   # GitHub adapter
+    ├── fractary-work-handler-work-tracker-jira/    # Jira adapter
+    ├── fractary-work-handler-work-tracker-linear/  # Linear adapter
+    ├── fractary-work-common/                       # Shared utilities
+    └── fractary-work-initializer/                  # Plugin initialization
 ```
 
 ## Platform Comparison
@@ -516,7 +516,7 @@ To add support for a new platform:
 
 1. **Create handler directory:**
    ```bash
-   mkdir -p skills/handler-work-tracker-{platform}/{scripts,docs}
+   mkdir -p skills/fractary-work-handler-work-tracker-{platform}/{scripts,docs}
    ```
 
 2. **Implement 18 scripts** matching existing handlers:

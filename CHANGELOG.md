@@ -211,7 +211,7 @@ These removals are intentional to enforce the unified configuration standard.
 - `plugins/spec/agents/spec-init.md` - Add deprecation notice
 - `plugins/logs/agents/logs-init.md` - Add deprecation notice
 - `plugins/file/agents/file-init.md` - Add deprecation notice
-- `plugins/work/skills/work-common/scripts/config-loader.sh` - Use Python for YAML
+- `plugins/work/skills/fractary-work-common/scripts/config-loader.sh` - Use Python for YAML
 
 #### Configuration
 - `.fractary/core/config.example.yaml` - **NEW** - Comprehensive example (700+ lines)

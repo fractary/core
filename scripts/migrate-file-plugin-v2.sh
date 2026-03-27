@@ -175,7 +175,7 @@ else
     echo ""
     echo "Next steps:"
     echo "1. Review .fractary/config.yaml for schema version 2.0"
-    echo "2. Test: bash plugins/file/skills/file-manager/scripts/push.sh <file> <source>"
+    echo "2. Test: bash plugins/file/skills/fractary-file-file-manager/scripts/push.sh <file> <source>"
     echo "3. Commit changes to git"
 fi
 echo "========================================="

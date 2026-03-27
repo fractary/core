@@ -3,18 +3,18 @@
   "version": "3.6.0",
   "description": "Core configuration and environment management for Fractary plugins",
   "commands": [
-    "./commands/config-init.md",
-    "./commands/config-update.md",
-    "./commands/config-validate.md",
-    "./commands/config-show.md",
-    "./commands/env-switch.md",
-    "./commands/env-list.md",
-    "./commands/env-show.md"
+    "./commands/fractary-core-config-init.md",
+    "./commands/fractary-core-config-update.md",
+    "./commands/fractary-core-config-validate.md",
+    "./commands/fractary-core-config-show.md",
+    "./commands/fractary-core-env-switch.md",
+    "./commands/fractary-core-env-list.md",
+    "./commands/fractary-core-env-show.md"
   ],
   "agents": [
-    "./agents/config-initializer.md",
-    "./agents/config-updater.md",
-    "./agents/env-switcher.md"
+    "./agents/fractary-core-config-initializer.md",
+    "./agents/fractary-core-config-updater.md",
+    "./agents/fractary-core-env-switcher.md"
   ],
   "hooks": "./hooks/hooks.json"
 }
