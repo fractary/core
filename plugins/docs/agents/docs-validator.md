@@ -1,5 +1,5 @@
 ---
-name: docs-validator
+name: fractary-docs-validator
 description: |
   MUST BE USED when user wants to validate documentation against type-specific rules.
   Use PROACTIVELY when user mentions "validate docs", "check doc format", "doc errors", "lint documentation".

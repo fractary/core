@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:pr-create
+name: fractary-repo-pr-create
 allowed-tools: Bash(fractary-core repo pr-create:*)
 description: Create pull requests
 model: claude-haiku-4-5

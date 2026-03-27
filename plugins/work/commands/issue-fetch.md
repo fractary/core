@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-fetch
+name: fractary-work-issue-fetch
 allowed-tools: Bash(fractary-core work issue-fetch:*)
 description: Fetch issue details
 model: claude-haiku-4-5

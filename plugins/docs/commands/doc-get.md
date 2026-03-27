@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:doc-get
+name: fractary-docs-doc-get
 allowed-tools: Bash(fractary-core docs doc-get:*)
 description: Get a document by ID
 model: claude-haiku-4-5

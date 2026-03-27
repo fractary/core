@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:read
+name: fractary-logs-read
 allowed-tools: Bash(fractary-core logs read:*)
 description: Read a log entry
 model: claude-haiku-4-5

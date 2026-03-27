@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:worktree-create
+name: fractary-repo-worktree-create
 allowed-tools: Bash(fractary-core repo worktree-create:*)
 description: Create a new git worktree for workflow execution
 model: claude-haiku-4-5

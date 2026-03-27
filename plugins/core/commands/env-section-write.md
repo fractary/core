@@ -1,5 +1,5 @@
 ---
-name: fractary-core:env-section-write
+name: fractary-core-env-section-write
 allowed-tools: Bash(fractary-core config env-section-write:*)
 description: Write a plugin's managed section to an env file
 model: claude-haiku-4-5

@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:pull
+name: fractary-repo-pull
 allowed-tools: Bash(fractary-core repo pull:*)
 description: Pull branches from remote
 model: claude-haiku-4-5

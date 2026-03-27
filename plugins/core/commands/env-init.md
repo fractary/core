@@ -1,5 +1,5 @@
 ---
-name: fractary-core:env-init
+name: fractary-core-env-init
 allowed-tools: Bash(fractary-core config env-init:*)
 description: Initialize .fractary/env/ directory with template files
 model: claude-haiku-4-5

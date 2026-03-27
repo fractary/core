@@ -53,10 +53,10 @@ This argument is always optional and appears as the final argument. When provide
 
 ```bash
 # Guide installation with specific preferences
-/fractary-status:install --context "Enable verbose output during installation"
+/fractary-status-install --context "Enable verbose output during installation"
 
 # Customize sync behavior
-/fractary-status:sync --context "Force full refresh of all cached data"
+/fractary-status-sync --context "Force full refresh of all cached data"
 ```
 
 Context arguments follow the `--context` flag pattern as described above.

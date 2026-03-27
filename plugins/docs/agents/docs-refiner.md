@@ -1,5 +1,5 @@
 ---
-name: docs-refiner
+name: fractary-docs-refiner
 description: |
   MUST BE USED when user wants to refine or improve documentation quality.
   Use PROACTIVELY when user mentions "refine doc", "improve spec", "find gaps", "review documentation", "tighten spec".

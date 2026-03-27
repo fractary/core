@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:type-list
+name: fractary-docs-type-list
 allowed-tools: Bash(fractary-core docs type-list:*)
 description: List available document types
 model: claude-haiku-4-5

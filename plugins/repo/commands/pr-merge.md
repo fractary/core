@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:pr-merge
+name: fractary-repo-pr-merge
 allowed-tools: Bash(fractary-core repo pr-merge:*), Bash(gh pr view:*)
 description: Merge pull requests
 model: claude-haiku-4-5

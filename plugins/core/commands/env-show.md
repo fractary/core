@@ -1,5 +1,5 @@
 ---
-name: fractary-core:env-show
+name: fractary-core-env-show
 allowed-tools: Bash(fractary-core config env-show:*)
 description: Show current environment status and credential availability
 model: claude-haiku-4-5

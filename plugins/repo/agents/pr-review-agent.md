@@ -1,9 +1,9 @@
 ---
-name: pr-review-agent
+name: fractary-repo-pr-review-agent
 description: |
   Analyzes pull requests comprehensively including comments, reviews, CI status, and merge conflicts.
   Provides intelligent recommendations on whether to approve based on blocking conditions.
-  MUST BE USED for pr-review operations from fractary-repo:pr-review command.
+  MUST BE USED for pr-review operations from fractary-repo-pr-review command.
   Use PROACTIVELY when user requests PR review/analysis.
 tools: Bash
 color: orange
@@ -352,42 +352,42 @@ SUGGESTED NEXT STEPS
    # Resolve conflicts in affected files
    git commit && git push
 
-2. [RE-ANALYZE] After resolving: /fractary-repo:pr-review {number}
+2. [RE-ANALYZE] After resolving: /fractary-repo-pr-review {number}
 
 {If P0 - CI Failures:}
 1. [FIX CI] Address failing checks: {failed check names}
    View details: {url}/checks
    Fix issues on branch {headRefName}
 
-2. [RE-ANALYZE] After fixes: /fractary-repo:pr-review {number}
+2. [RE-ANALYZE] After fixes: /fractary-repo-pr-review {number}
 
 {If P0 - Changes Requested or P1 - Blocking Keywords:}
 1. [ADDRESS ISSUES] Fix identified problems:
    {List specific issues as action items}
 
-2. [RE-ANALYZE] After fixes: /fractary-repo:pr-review {number}
+2. [RE-ANALYZE] After fixes: /fractary-repo-pr-review {number}
 
 3. [DISCUSS] If you disagree with feedback:
-   /fractary-repo:pr-review {number} --comment --body "Your response"
+   /fractary-repo-pr-review {number} --comment --body "Your response"
 
 {If P2 - Review Required:}
 1. [WAIT] PR requires review approval before merging
 
 2. [CHECK STATUS] Monitor progress:
-   /fractary-repo:pr-review {number}
+   /fractary-repo-pr-review {number}
 
 3. [REQUEST REVIEW] If needed:
    gh pr edit {number} --add-reviewer <username>
 
 {If P3 - Ready to Approve:}
 1. [APPROVE] Submit approval:
-   /fractary-repo:pr-review {number} --approve --body "LGTM! {brief comment}"
+   /fractary-repo-pr-review {number} --approve --body "LGTM! {brief comment}"
 
 2. [MERGE] After approval:
-   /fractary-repo:pr-merge {number}
+   /fractary-repo-pr-merge {number}
 
 3. [COMMENT] For non-blocking feedback:
-   /fractary-repo:pr-review {number} --comment --body "Your feedback"
+   /fractary-repo-pr-review {number} --comment --body "Your feedback"
 
 ================================================================================
 ```
@@ -424,7 +424,7 @@ If action argument was provided (approve, request_changes, comment):
 ### Example 1: PR with Failing CI
 
 ```
-/fractary-repo:pr-review 42
+/fractary-repo-pr-review 42
 ```
 
 Analysis shows CI failure → Recommendation: DO NOT APPROVE - FIX CI (P0)
@@ -433,7 +433,7 @@ Suggested next steps include fixing failed checks.
 ### Example 2: PR with Blocking Comment
 
 ```
-/fractary-repo:pr-review 123
+/fractary-repo-pr-review 123
 ```
 
 Recent comment contains "critical security issue - must fix before approval"
@@ -443,17 +443,17 @@ Recent comment contains "critical security issue - must fix before approval"
 ### Example 3: Clean PR Ready to Approve
 
 ```
-/fractary-repo:pr-review 456
+/fractary-repo-pr-review 456
 ```
 
 No conflicts, CI passing, reviews approved, no blocking comments
 → Recommendation: READY TO APPROVE (P3)
-→ Suggested: /fractary-repo:pr-review 456 --approve --body "LGTM!"
+→ Suggested: /fractary-repo-pr-review 456 --approve --body "LGTM!"
 
 ### Example 4: Multiple CI Comments (Dual-Track Analysis)
 
 ```
-/fractary-repo:pr-review 789
+/fractary-repo-pr-review 789
 ```
 
 PR has:
@@ -470,7 +470,7 @@ Analysis shows:
 ### Example 5: Submit Approval
 
 ```
-/fractary-repo:pr-review 456 --approve --body "Great work! Tests pass and code looks good."
+/fractary-repo-pr-review 456 --approve --body "Great work! Tests pass and code looks good."
 ```
 
 Shows analysis first → Confirms P3 recommendation → Submits approval → Reports success

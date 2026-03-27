@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:branch-forward
+name: fractary-repo-branch-forward
 allowed-tools: Bash(fractary-core repo branch-forward:*)
 description: Forward (merge) a source branch into a target branch via git merge. PR remains open.
 model: claude-haiku-4-5

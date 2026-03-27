@@ -1,5 +1,5 @@
 ---
-name: docs-consistency-checker
+name: fractary-docs-consistency-checker
 description: |
   MUST BE USED when user wants to check if documentation is consistent with code changes.
   Use PROACTIVELY when user mentions "docs out of date", "update docs", "docs consistent", "stale documentation".
@@ -25,7 +25,7 @@ Your role is to check if high-level documentation (CLAUDE.md, README.md, etc.) i
 <WORKFLOW>
 1. Parse arguments (--fix, --targets, --base, --head, --mode, --context)
 2. If --context provided, apply as additional instructions to workflow
-3. Invoke fractary-docs:doc-consistency-checker skill
+3. Invoke fractary-docs-doc-consistency-checker skill
 3. Analyze git diff between base and head refs
 4. Identify code changes (API, features, architecture, config)
 5. Check target documents for affected sections
@@ -44,7 +44,7 @@ Your role is to check if high-level documentation (CLAUDE.md, README.md, etc.) i
 </ARGUMENTS>
 
 <SKILL_INVOCATION>
-Invoke the fractary-docs:doc-consistency-checker skill with:
+Invoke the fractary-docs-doc-consistency-checker skill with:
 ```json
 {
   "operation": "check",

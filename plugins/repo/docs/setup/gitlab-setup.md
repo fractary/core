@@ -258,22 +258,22 @@ GitLab uses "Merge Requests" (MRs) instead of "Pull Requests" (PRs), but the con
 cd /path/to/your/repo
 
 # 2. Test branch creation
-/fractary-repo:branch create 1 "test setup"
+/fractary-repo-branch create 1 "test setup"
 
 # 3. Make changes and commit
 echo "test" > test.txt
 git add test.txt
-/fractary-repo:commit "Test commit" --type test --work-id 1
+/fractary-repo-commit "Test commit" --type test --work-id 1
 
 # 4. Push
-/fractary-repo:push --set-upstream
+/fractary-repo-push --set-upstream
 
 # 5. Create MR
-/fractary-repo:pr create "feat: Test MR" --work-id 1
+/fractary-repo-pr create "feat: Test MR" --work-id 1
 
 # 6. Clean up
 git checkout main
-/fractary-repo:branch delete test/1-test-setup
+/fractary-repo-branch delete test/1-test-setup
 ```
 
 ## How to Contribute

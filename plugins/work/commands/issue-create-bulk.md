@@ -1,12 +1,12 @@
 ---
-name: fractary-work:issue-create-bulk
+name: fractary-work-issue-create-bulk
 description: Create multiple issues at once using AI analysis
-allowed-tools: Agent(fractary-work:issue-bulk-creator)
+allowed-tools: Agent(fractary-work-issue-bulk-creator)
 model: claude-opus-4-6
 argument-hint: '[--title "<title template>"] [--body "<body template>"] [--repo <owner/repo>] [--context <description>] [--type <type>] [--label <label>] [--template <name>] [--assignee <user>] [--update-existing] [--match-labels "<labels>"] [--exclude-labels "<labels>"]'
 ---
 
-Delegates to fractary-work:issue-bulk-creator agent for creating multiple related issues at once.
+Delegates to fractary-work-issue-bulk-creator agent for creating multiple related issues at once.
 
 This command uses AI to intelligently create multiple related issues (datasets, endpoints, templates, etc.). The agent analyzes your project structure and conversation context to determine what issues to create, presents a plan for your approval, and then creates the issues.
 
@@ -23,16 +23,16 @@ This command uses AI to intelligently create multiple related issues (datasets, 
 
 ```bash
 # Explicit prompt
-/fractary-work:issue-create-bulk --prompt "Create issues for IPEDS datasets: hd, ic, enrollment"
+/fractary-work-issue-create-bulk --prompt "Create issues for IPEDS datasets: hd, ic, enrollment"
 
 # With labels and type
-/fractary-work:issue-create-bulk --prompt "Create issues for API endpoints" --type feature --label api
+/fractary-work-issue-create-bulk --prompt "Create issues for API endpoints" --type feature --label api
 
 # With template
-/fractary-work:issue-create-bulk --prompt "Create issues for datasets" --template dataset-load.md
+/fractary-work-issue-create-bulk --prompt "Create issues for datasets" --template dataset-load.md
 
 # Using conversation context (after discussing what needs to be done)
-/fractary-work:issue-create-bulk
+/fractary-work-issue-create-bulk
 ```
 
 ## Arguments
@@ -63,11 +63,11 @@ If no template specified:
 - Agent generates appropriate titles and descriptions based on project context
 - Uses discovered information (datasets, endpoints, etc.) for structure
 
-Use **Agent** tool with `fractary-work:issue-bulk-creator` agent to create bulk issues:
+Use **Agent** tool with `fractary-work-issue-bulk-creator` agent to create bulk issues:
 
 ```
 Agent(
-  subagent_type="fractary-work:issue-bulk-creator",
+  subagent_type="fractary-work-issue-bulk-creator",
   description="Create multiple issues",
   prompt="Create multiple issues based on the user's request: $ARGUMENTS"
 )

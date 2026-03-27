@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:doc-update
+name: fractary-docs-doc-update
 allowed-tools: Bash(fractary-core docs doc-update:*)
 description: Update a document
 model: claude-haiku-4-5

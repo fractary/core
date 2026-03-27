@@ -1,5 +1,5 @@
 ---
-name: fractary-file:move
+name: fractary-file-move
 allowed-tools: Bash(fractary-core file move:*)
 description: Move a file within storage
 model: claude-haiku-4-5

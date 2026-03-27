@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:commit-push-pr
+name: fractary-repo-commit-push-pr
 allowed-tools: Bash(fractary-core repo branch-create:*), Bash(fractary-core repo commit:*), Bash(fractary-core repo push:*), Bash(fractary-core repo pr-create:*)
 description: Commit, push, and open a PR
 model: claude-haiku-4-5

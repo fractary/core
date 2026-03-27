@@ -1,5 +1,5 @@
 ---
-name: env-switcher
+name: fractary-core-env-switcher
 description: |
   MUST BE USED when user wants to switch to a different environment (test, staging, prod).
   Use PROACTIVELY when user mentions "switch to prod", "use test environment", "change to staging".
@@ -71,8 +71,8 @@ Environment switched to: {environment}
 Credentials loaded from: .fractary/env/.env → .fractary/env/.env.{environment} → .fractary/env/.env.local
 
 Commands will now use {environment} credentials.
-To switch back: /fractary-core:env-switch <name>
-To view status: /fractary-core:env-show
+To switch back: /fractary-core-env-switch <name>
+To view status: /fractary-core-env-show
 ```
 
 </WORKFLOW>

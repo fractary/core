@@ -6,14 +6,14 @@ Branch management commands for creating and managing git branches with validatio
 
 ## Commands
 
-### /fractary-repo:branch-create
+### /fractary-repo-branch-create
 
 Create a new git branch with validation and optional JSON output.
 
 #### Usage
 
 ```bash
-/fractary-repo:branch-create <branch-name> [OPTIONS]
+/fractary-repo-branch-create <branch-name> [OPTIONS]
 ```
 
 #### Parameters
@@ -26,7 +26,7 @@ Create a new git branch with validation and optional JSON output.
 
 **Create from current branch**:
 ```bash
-/fractary-repo:branch-create feature/258
+/fractary-repo-branch-create feature/258
 ```
 
 Output:
@@ -41,12 +41,12 @@ To switch to this branch:
 
 **Create from specific base**:
 ```bash
-/fractary-repo:branch-create feature/259 --from develop
+/fractary-repo-branch-create feature/259 --from develop
 ```
 
 **JSON output**:
 ```bash
-/fractary-repo:branch-create feature/260 --format json
+/fractary-repo-branch-create feature/260 --format json
 ```
 
 Output:
@@ -81,18 +81,18 @@ Output:
 **Feature branch from main**:
 ```bash
 # Create and switch to new feature branch
-/fractary-repo:branch-create feature/new-dashboard --from main
+/fractary-repo-branch-create feature/new-dashboard --from main
 git checkout feature/new-dashboard
 ```
 
 **Bugfix branch**:
 ```bash
-/fractary-repo:branch-create fix/login-error --from main
+/fractary-repo-branch-create fix/login-error --from main
 ```
 
 **Release branch**:
 ```bash
-/fractary-repo:branch-create release/v2.5.0 --from develop
+/fractary-repo-branch-create release/v2.5.0 --from develop
 ```
 
 ## Integration with Other Commands
@@ -103,10 +103,10 @@ Combine branch creation with worktree creation:
 
 ```bash
 # Create branch
-/fractary-repo:branch-create feature/258
+/fractary-repo-branch-create feature/258
 
 # Create worktree for the branch
-/fractary-repo:worktree-create --work-id 258 --branch feature/258
+/fractary-repo-worktree-create --work-id 258 --branch feature/258
 ```
 
 ### Programmatic Usage (SDK)
@@ -136,7 +136,7 @@ console.log(`Created ${result.name} at ${result.sha}`);
 git checkout feature/258
 
 # Or use a different name
-/fractary-repo:branch-create feature/258-v2
+/fractary-repo-branch-create feature/258-v2
 ```
 
 ### Error: Base branch not found
@@ -149,7 +149,7 @@ git checkout feature/258
 git branch -a
 
 # Use correct branch name
-/fractary-repo:branch-create feature/258 --from origin/main
+/fractary-repo-branch-create feature/258 --from origin/main
 ```
 
 ### Error: Invalid branch name
@@ -159,10 +159,10 @@ git branch -a
 **Solution**: Use alphanumeric characters, hyphens, and slashes only:
 ```bash
 # Bad: contains spaces
-/fractary-repo:branch-create "feature new dashboard"
+/fractary-repo-branch-create "feature new dashboard"
 
 # Good: uses hyphens
-/fractary-repo:branch-create feature/new-dashboard
+/fractary-repo-branch-create feature/new-dashboard
 ```
 
 ## Best Practices
@@ -175,6 +175,6 @@ git branch -a
 
 ## Related Commands
 
-- `/fractary-repo:worktree-create` - Create a worktree for isolated development
-- `/fractary-repo:pr-create` - Create a pull request from a branch
-- `/fractary-repo:commit` - Commit changes to a branch
+- `/fractary-repo-worktree-create` - Create a worktree for isolated development
+- `/fractary-repo-pr-create` - Create a pull request from a branch
+- `/fractary-repo-commit` - Commit changes to a branch

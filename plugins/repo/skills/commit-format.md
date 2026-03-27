@@ -1,5 +1,5 @@
 ---
-name: fractary-commit-format
+name: fractary-repo-commit-format
 description: Conventional commit format with FABER metadata standards for Fractary projects
 ---
 

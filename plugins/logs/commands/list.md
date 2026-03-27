@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:list
+name: fractary-logs-list
 allowed-tools: Bash(fractary-core logs list:*)
 description: List logs
 model: claude-haiku-4-5

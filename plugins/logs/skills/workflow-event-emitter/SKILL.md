@@ -1,5 +1,5 @@
 ---
-name: workflow-event-emitter
+name: fractary-logs-workflow-event-emitter
 description: Emits structured workflow events for cross-project visibility and downstream consumption
 model: claude-haiku-4-5
 ---
@@ -238,7 +238,7 @@ Add event emission at orchestration points in your manager skill:
 
 WORKFLOW_ID="workflow-${work_id}-$(date -u +%Y%m%dT%H%M%SZ)"
 
-Skill("fractary-logs:workflow-event-emitter", {
+Skill("fractary-logs-workflow-event-emitter", {
   "operation": "emit",
   "event_type": "workflow_start",
   "workflow_id": WORKFLOW_ID,
@@ -253,7 +253,7 @@ Skill("fractary-logs:workflow-event-emitter", {
 
 ## After Each Step
 
-Skill("fractary-logs:workflow-event-emitter", {
+Skill("fractary-logs-workflow-event-emitter", {
   "operation": "emit",
   "event_type": "step_complete",
   "workflow_id": WORKFLOW_ID,
@@ -270,7 +270,7 @@ Skill("fractary-logs:workflow-event-emitter", {
 
 ## At Workflow End
 
-Skill("fractary-logs:workflow-event-emitter", {
+Skill("fractary-logs-workflow-event-emitter", {
   "operation": "emit",
   "event_type": "workflow_complete",
   "workflow_id": WORKFLOW_ID,

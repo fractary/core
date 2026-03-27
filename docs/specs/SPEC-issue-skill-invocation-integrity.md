@@ -28,7 +28,7 @@ The orchestration protocol (`workflow-orchestration-protocol.md`, line 24) alrea
 
 The orchestrator ignored this rule and called `fractary-core work issue-create` directly via Bash, improvising `--title` and `--body` content from context and dropping the `--repo` argument entirely. The rule was violated — not missing.
 
-**Why this happened:** A sub-agent invoked earlier in the same session (for an `issue-comment` step) carries a rule "You MUST only use Bash. Do NOT use the Skill tool." The orchestrator appears to have generalized this sub-agent-scoped rule upward, applying it to itself when it later encountered the `/fractary-work:issue-create` prompt. Sub-agent rules bled into orchestrator behavior.
+**Why this happened:** A sub-agent invoked earlier in the same session (for an `issue-comment` step) carries a rule "You MUST only use Bash. Do NOT use the Skill tool." The orchestrator appears to have generalized this sub-agent-scoped rule upward, applying it to itself when it later encountered the `/fractary-work-issue-create` prompt. Sub-agent rules bled into orchestrator behavior.
 
 ### Secondary: `--repo` drops silently when Skill is bypassed
 
@@ -127,7 +127,7 @@ Companion enforcement added in `plugins/faber/commands/workflow-run.md`:
 - **CRITICAL_RULE #12**: `NEVER BYPASS SKILLS` — surfaces the prohibition before any protocol text is loaded
 - **`SKILL_BYPASS_ANTI_PATTERN` block**: names specific prohibited substitutions and provides the correct pattern
 
-### Part 2 — fractary-core: DONE
+### Part 2 — fractary-core- DONE
 
 Two rules added to the `## Rules` section of `plugins/work/commands/issue-create.md`:
 - **Title contract rule**: Strengthened the existing title rule — the resulting title MUST match the substituted template character-for-character. `--context` MUST NOT add suffixes, prefixes, parenthetical qualifications, or any other words beyond the substituted placeholders. The title is a contract, not a starting point.

@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-update
+name: fractary-work-issue-update
 allowed-tools: Bash(fractary-core work issue-update:*)
 description: Update issue
 model: claude-haiku-4-5

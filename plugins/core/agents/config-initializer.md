@@ -1,5 +1,5 @@
 ---
-name: config-initializer
+name: fractary-core-config-initializer
 description: |
   MUST BE USED when user wants to initialize or configure Fractary Core for a project.
   Use PROACTIVELY when user mentions "setup fractary", "initialize project", "configure plugins", or when commands fail due to missing configuration.
@@ -263,8 +263,8 @@ Values used:
 Next steps:
 1. Review config: fractary-core config show
 2. Set credentials in .fractary/env/.env (copy from .fractary/env/.env.example)
-3. Test: /fractary-work:issue-list
-4. For updates: /fractary-core:config-update --context "description of changes"
+3. Test: /fractary-work-issue-list
+4. For updates: /fractary-core-config-update --context "description of changes"
 ```
 
 </OUTPUT_FORMAT>

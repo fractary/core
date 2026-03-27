@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:doc-list
+name: fractary-docs-doc-list
 allowed-tools: Bash(fractary-core docs doc-list:*)
 description: List documents
 model: claude-haiku-4-5

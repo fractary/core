@@ -136,7 +136,7 @@ Logs and summaries are stored in separate, configurable paths:
 ### 1. Initialize
 
 ```bash
-fractary-core:config-init
+fractary-core-config-init
 ```
 
 Creates unified `.fractary/config.yaml` with all plugin configurations including logs.
@@ -144,7 +144,7 @@ Creates unified `.fractary/config.yaml` with all plugin configurations including
 ### 2. Capture Session
 
 ```bash
-/fractary-logs:capture 123
+/fractary-logs-capture 123
 ```
 
 Starts recording conversation for issue #123.
@@ -152,7 +152,7 @@ Starts recording conversation for issue #123.
 ### 3. Search Logs
 
 ```bash
-/fractary-logs:search "OAuth implementation"
+/fractary-logs-search "OAuth implementation"
 ```
 
 Search across all logs (local and archived).
@@ -160,7 +160,7 @@ Search across all logs (local and archived).
 ### 4. Archive Logs
 
 ```bash
-/fractary-logs:archive 123
+/fractary-logs-archive 123
 ```
 
 Archive logs for completed issue to cloud.
@@ -169,28 +169,28 @@ Archive logs for completed issue to cloud.
 
 ### Session Management
 
-- `/fractary-logs:capture <issue>` - Start capturing session
-- `/fractary-logs:stop` - Stop active capture
-- `/fractary-logs:log <issue> "<message>"` - Log specific message
+- `/fractary-logs-capture <issue>` - Start capturing session
+- `/fractary-logs-stop` - Stop active capture
+- `/fractary-logs-log <issue> "<message>"` - Log specific message
 
 ### Archival
 
-- `/fractary-logs:archive <issue>` - Archive logs for issue
-- `/fractary-logs:cleanup [--older-than 30]` - Time-based cleanup
+- `/fractary-logs-archive <issue>` - Archive logs for issue
+- `/fractary-logs-cleanup [--older-than 30]` - Time-based cleanup
 
 ### Search & Analysis
 
-- `/fractary-logs:search "<query>" [options]` - Search logs
-- `/fractary-logs:analyze <type> [options]` - Analyze logs
+- `/fractary-logs-search "<query>" [options]` - Search logs
+- `/fractary-logs-analyze <type> [options]` - Analyze logs
   - `errors` - Extract all errors
   - `patterns` - Find recurring issues
   - `session` - Summarize session
   - `time` - Analyze time spent
-- `/fractary-logs:read <issue>` - Read logs for issue
+- `/fractary-logs-read <issue>` - Read logs for issue
 
 ### Configuration
 
-- `fractary-core:config-init` - Initialize unified configuration
+- `fractary-core-config-init` - Initialize unified configuration
 
 ## Global Arguments
 
@@ -206,13 +206,13 @@ This argument is always optional and appears as the final argument. When provide
 
 ```bash
 # Guide log capture focus
-/fractary-logs:capture 123 --context "Focus on API integration decisions"
+/fractary-logs-capture 123 --context "Focus on API integration decisions"
 
 # Customize search behavior
-/fractary-logs:search "error" --context "Include full stack traces in results"
+/fractary-logs-search "error" --context "Include full stack traces in results"
 
 # Focus analysis on specific areas
-/fractary-logs:analyze errors --context "Prioritize authentication-related errors"
+/fractary-logs-analyze errors --context "Prioritize authentication-related errors"
 ```
 
 Context arguments follow the `--context` flag pattern as described above.
@@ -293,7 +293,7 @@ The archive command supports two modes:
 
 **Force Local Archive**: Use `--local` flag:
 ```bash
-/fractary-logs:archive 123 --local
+/fractary-logs-archive 123 --local
 ```
 
 ### Local Archive (Default Fallback)
@@ -394,7 +394,7 @@ This prevents Claude's search tools (Glob/Grep/Read) from accessing archived con
 
 **Hybrid Search**:
 ```bash
-/fractary-logs:search "OAuth" --issue 123
+/fractary-logs-search "OAuth" --issue 123
 ```
 
 Searches both local and cloud, aggregates results.
@@ -412,28 +412,28 @@ Searches both local and cloud, aggregates results.
 
 **Error Extraction**:
 ```bash
-/fractary-logs:analyze errors --issue 123
+/fractary-logs-analyze errors --issue 123
 ```
 
 Find all errors with context, file locations, solutions.
 
 **Pattern Detection**:
 ```bash
-/fractary-logs:analyze patterns --since 2025-01-01
+/fractary-logs-analyze patterns --since 2025-01-01
 ```
 
 Identify recurring issues across multiple logs.
 
 **Session Summary**:
 ```bash
-/fractary-logs:analyze session 123
+/fractary-logs-analyze session 123
 ```
 
 Generate concise summary: duration, decisions, files, issues.
 
 **Time Analysis**:
 ```bash
-/fractary-logs:analyze time --since 2025-01-01
+/fractary-logs-analyze time --since 2025-01-01
 ```
 
 Understand time spent by issue, type, day of week.
@@ -448,7 +448,7 @@ Understand time spent by issue, type, day of week.
 
 Initialize the unified configuration:
 ```bash
-fractary-core:config-init
+fractary-core-config-init
 ```
 
 This creates `.fractary/config.yaml` with all plugin configurations including:
@@ -552,9 +552,9 @@ The logs plugin integrates via **agent-to-agent invocation**:
 - Supports multiple providers: R2, S3, GCS, Google Drive, Local
 
 **Setup**:
-1. Initialize fractary-file: `/fractary-file:init`
+1. Initialize fractary-file- `/fractary-file-init`
 2. Configure storage provider (R2, S3, etc.)
-3. Test connection: `/fractary-file:test-connection`
+3. Test connection: `/fractary-file-test-connection`
 
 **How it works**:
 - When archiving logs, log-manager prepares metadata
@@ -646,7 +646,7 @@ plugins/logs/
 - No manual intervention
 
 **Time-based** (Safety net):
-- Run daily: `0 2 * * * /fractary-logs:cleanup`
+- Run daily: `0 2 * * * /fractary-logs-cleanup`
 - Catches abandoned work
 - Prevents storage bloat
 
@@ -681,8 +681,8 @@ plugins/logs/
 
 Combine search and read for custom analysis:
 ```bash
-/fractary-logs:search "interesting pattern" --since 2024-01-01
-/fractary-logs:read <issue>
+/fractary-logs-search "interesting pattern" --since 2024-01-01
+/fractary-logs-read <issue>
 # Manual analysis or pipe to custom scripts
 ```
 
@@ -691,7 +691,7 @@ Combine search and read for custom analysis:
 Archive multiple issues:
 ```bash
 for issue in 123 124 125; do
-  /fractary-logs:archive $issue
+  /fractary-logs-archive $issue
 done
 ```
 
@@ -701,13 +701,13 @@ done
 
 You tried to stop or append without starting capture.
 
-**Solution**: `/fractary-logs:capture <issue>` first
+**Solution**: `/fractary-logs-capture <issue>` first
 
 ### "Archive index not found"
 
 Index file missing or corrupted.
 
-**Solution**: `/fractary-logs:init` to reinitialize
+**Solution**: `/fractary-logs-init` to reinitialize
 
 ### "Upload failed"
 

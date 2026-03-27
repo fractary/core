@@ -1,5 +1,5 @@
 ---
-name: cloud-initializer
+name: fractary-core-cloud-initializer
 description: |
   MUST BE USED when user wants to add cloud storage to their project.
   Use PROACTIVELY when user mentions "setup cloud storage", "add S3", "enable cloud", "configure R2",
@@ -63,7 +63,7 @@ Check that a base configuration exists:
 fractary-core config show
 ```
 
-If no config exists, inform the user they need to run `/fractary-core:config-init` first and stop.
+If no config exists, inform the user they need to run `/fractary-core-config-init` first and stop.
 
 Also check the current file handler state:
 ```bash
@@ -242,7 +242,7 @@ Connection:  {passed|pending credentials}
 
 Next steps:
 1. Set credentials in .fractary/env/.env (see .fractary/env/.env.example)
-2. Test connection: /fractary-file:test-connection
+2. Test connection: /fractary-file-test-connection
 {3. Review and apply Terraform: cd infra/terraform && terraform init && terraform plan}
 {4. Migrate local archives: fractary-core file migrate-archive}
 ```

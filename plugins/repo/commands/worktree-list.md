@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:worktree-list
+name: fractary-repo-worktree-list
 allowed-tools: Bash(fractary-core repo worktree-list:*)
 description: List all git worktrees with metadata
 model: claude-haiku-4-5

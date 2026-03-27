@@ -78,7 +78,7 @@ git remote set-url origin git@github.com:fractary/core.git
 git remote set-url origin https://github.com/fractary/core.git
 
 # Test via worktree-create with JSON output
-/fractary-repo:worktree-create --work-id 999 --branch test/org-extraction --format json
+/fractary-repo-worktree-create --work-id 999 --branch test/org-extraction --format json
 ```
 
 **Expected JSON**:
@@ -93,7 +93,7 @@ git remote set-url origin https://github.com/fractary/core.git
 
 **Cleanup**:
 ```bash
-/fractary-repo:worktree-remove ~/.claude-worktrees/fractary-core-999 --force
+/fractary-repo-worktree-remove ~/.claude-worktrees/fractary-core-999 --force
 git branch -D test/org-extraction
 ```
 
@@ -104,7 +104,7 @@ git branch -D test/org-extraction
 git remote set-url origin git@gitlab.com:org/team/project.git
 
 # Test organization extraction
-/fractary-repo:worktree-create --work-id 888 --branch test/gitlab --format json
+/fractary-repo-worktree-create --work-id 888 --branch test/gitlab --format json
 ```
 
 **Expected**:
@@ -113,7 +113,7 @@ git remote set-url origin git@gitlab.com:org/team/project.git
 
 **Cleanup**:
 ```bash
-/fractary-repo:worktree-remove ~/.claude-worktrees/org-team-project-888 --force
+/fractary-repo-worktree-remove ~/.claude-worktrees/org-team-project-888 --force
 git branch -D test/gitlab
 git remote set-url origin git@github.com:fractary/core.git  # Restore
 ```
@@ -128,7 +128,7 @@ cd test-local-repo
 git commit --allow-empty -m "Initial commit"
 
 # Test via worktree commands
-/fractary-repo:worktree-create --work-id 777 --branch test/local --format json
+/fractary-repo-worktree-create --work-id 777 --branch test/local --format json
 ```
 
 **Expected**:
@@ -147,7 +147,7 @@ rm -rf test-local-repo
 
 ```bash
 # Create branch from current HEAD
-/fractary-repo:branch-create feature/test-258
+/fractary-repo-branch-create feature/test-258
 ```
 
 **Expected Output**:
@@ -175,7 +175,7 @@ git branch -D feature/test-258
 git branch develop
 
 # Create branch from develop
-/fractary-repo:branch-create feature/test-259 --from develop
+/fractary-repo-branch-create feature/test-259 --from develop
 ```
 
 **Expected Output**:
@@ -193,7 +193,7 @@ git branch -D feature/test-259 develop
 #### Test 2.3: Branch Create with JSON Output
 
 ```bash
-/fractary-repo:branch-create feature/test-260 --format json
+/fractary-repo-branch-create feature/test-260 --format json
 ```
 
 **Expected JSON**:
@@ -224,7 +224,7 @@ git branch -D feature/test-260
 git branch test-exists
 
 # Try to create again
-/fractary-repo:branch-create test-exists
+/fractary-repo-branch-create test-exists
 ```
 
 **Expected Output**:
@@ -242,7 +242,7 @@ git branch -D test-exists
 #### Test 2.5: Error Handling - Invalid Branch Name
 
 ```bash
-/fractary-repo:branch-create "invalid branch name"
+/fractary-repo-branch-create "invalid branch name"
 ```
 
 **Expected Output**:
@@ -255,7 +255,7 @@ Error: Invalid branch name (contains invalid characters)
 #### Test 2.6: Error Handling - Base Branch Not Found
 
 ```bash
-/fractary-repo:branch-create feature/test --from nonexistent-branch
+/fractary-repo-branch-create feature/test --from nonexistent-branch
 ```
 
 **Expected Output**:
@@ -274,7 +274,7 @@ Error: Base branch 'nonexistent-branch' not found
 rm -rf ../core-258
 
 # Create worktree
-/fractary-repo:worktree-create --work-id 258 --branch feature/258
+/fractary-repo-worktree-create --work-id 258 --branch feature/258
 ```
 
 **Expected Output**:
@@ -292,14 +292,14 @@ git worktree list | grep fractary-core-258
 
 **Cleanup**:
 ```bash
-/fractary-repo:worktree-remove ~/.claude-worktrees/fractary-core-258 --force
+/fractary-repo-worktree-remove ~/.claude-worktrees/fractary-core-258 --force
 git branch -D feature/258
 ```
 
 #### Test 3.2: Worktree Create with JSON Output
 
 ```bash
-/fractary-repo:worktree-create --work-id 259 --branch feature/259 --format json
+/fractary-repo-worktree-create --work-id 259 --branch feature/259 --format json
 ```
 
 **Expected JSON**:
@@ -318,7 +318,7 @@ git branch -D feature/258
 
 **Cleanup**:
 ```bash
-/fractary-repo:worktree-remove ~/.claude-worktrees/fractary-core-259 --force
+/fractary-repo-worktree-remove ~/.claude-worktrees/fractary-core-259 --force
 git branch -D feature/259
 ```
 
@@ -330,13 +330,13 @@ git worktree add ../core-legacy test-legacy-branch
 
 # Try to create new worktree with same work ID
 # (Assuming work ID extraction from path works)
-/fractary-repo:worktree-create --work-id legacy --branch feature/legacy
+/fractary-repo-worktree-create --work-id legacy --branch feature/legacy
 ```
 
 **Expected Output**:
 ```
 ⚠️  Warning: Found existing legacy worktree at: ../core-legacy
-   Consider running /fractary-repo:worktree-migrate
+   Consider running /fractary-repo-worktree-migrate
 
 ✓ Worktree created: ../core-legacy
 ✓ Branch: feature/legacy
@@ -355,10 +355,10 @@ git branch -D test-legacy-branch feature/legacy
 
 ```bash
 # Create a test worktree
-/fractary-repo:worktree-create --work-id 301 --branch feature/301
+/fractary-repo-worktree-create --work-id 301 --branch feature/301
 
 # List worktrees
-/fractary-repo:worktree-list
+/fractary-repo-worktree-list
 ```
 
 **Expected Output**:
@@ -379,7 +379,7 @@ Total: 2 worktrees (1 main + 1 feature)
 
 **Cleanup**:
 ```bash
-/fractary-repo:worktree-remove ~/.claude-worktrees/fractary-core-301 --force
+/fractary-repo-worktree-remove ~/.claude-worktrees/fractary-core-301 --force
 git branch -D feature/301
 ```
 
@@ -387,10 +387,10 @@ git branch -D feature/301
 
 ```bash
 # Create test worktree
-/fractary-repo:worktree-create --work-id 302 --branch feature/302
+/fractary-repo-worktree-create --work-id 302 --branch feature/302
 
 # List with JSON output
-/fractary-repo:worktree-list --format json
+/fractary-repo-worktree-list --format json
 ```
 
 **Expected JSON Structure**:
@@ -424,14 +424,14 @@ git branch -D feature/301
 
 **Cleanup**:
 ```bash
-/fractary-repo:worktree-remove ~/.claude-worktrees/fractary-core-302 --force
+/fractary-repo-worktree-remove ~/.claude-worktrees/fractary-core-302 --force
 git branch -D feature/302
 ```
 
 #### Test 4.3: List Worktrees - Simple Format
 
 ```bash
-/fractary-repo:worktree-list --format simple
+/fractary-repo-worktree-list --format simple
 ```
 
 **Expected Output** (one path per line):
@@ -455,7 +455,7 @@ repo:
 EOF
 
 # Create worktree
-/fractary-repo:worktree-create --work-id 601 --branch feature/601
+/fractary-repo-worktree-create --work-id 601 --branch feature/601
 ```
 
 **Expected Output**:
@@ -470,7 +470,7 @@ ls -la ~/custom-worktrees/fractary-core-601
 
 **Cleanup**:
 ```bash
-/fractary-repo:worktree-remove ~/custom-worktrees/fractary-core-601 --force
+/fractary-repo-worktree-remove ~/custom-worktrees/fractary-core-601 --force
 git branch -D feature/601
 rm -rf ~/custom-worktrees
 ```
@@ -488,7 +488,7 @@ repo:
 EOF
 
 # Create worktree
-/fractary-repo:worktree-create --work-id 602 --branch feature/602
+/fractary-repo-worktree-create --work-id 602 --branch feature/602
 ```
 
 **Expected Output**:
@@ -503,7 +503,7 @@ ls -la ~/.worktrees/core/602
 
 **Cleanup**:
 ```bash
-/fractary-repo:worktree-remove ~/.worktrees/core/602 --force
+/fractary-repo-worktree-remove ~/.worktrees/core/602 --force
 git branch -D feature/602
 rm -rf ~/.worktrees
 

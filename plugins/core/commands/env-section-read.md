@@ -1,5 +1,5 @@
 ---
-name: fractary-core:env-section-read
+name: fractary-core-env-section-read
 allowed-tools: Bash(fractary-core config env-section-read:*)
 description: Read a plugin's managed section from an env file
 model: claude-haiku-4-5

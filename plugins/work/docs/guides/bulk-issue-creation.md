@@ -8,13 +8,13 @@ Create multiple issues at once using AI-powered analysis of your project and req
 
 ```bash
 # Simple prompt
-/fractary-work:issue-create-bulk --prompt "Create issues for all IPEDS datasets"
+/fractary-work-issue-create-bulk --prompt "Create issues for all IPEDS datasets"
 
 # Use conversation context (after discussing what needs to be done)
-/fractary-work:issue-create-bulk
+/fractary-work-issue-create-bulk
 
 # With configuration
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for API endpoints: users, posts, comments" \
   --type feature \
   --label api \
@@ -49,7 +49,7 @@ The `issue-bulk-creator` agent follows a 4-step process:
 Create issues for a specific list of items:
 
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: authentication, authorization, audit logging" \
   --type feature \
   --label security
@@ -62,7 +62,7 @@ The agent will create 3 issues with appropriate titles and labels.
 Let the agent discover items by exploring your project:
 
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for all IPEDS datasets" \
   --label dataset --label etl
 ```
@@ -77,7 +77,7 @@ The agent will:
 Create issues for API endpoints:
 
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for all v1 API endpoints that need implementation" \
   --label api --label backend
 ```
@@ -95,7 +95,7 @@ Discuss what you need, then create issues:
 # In conversation, discuss: "We need authentication, authorization, and logging"
 
 # Then run:
-/fractary-work:issue-create-bulk
+/fractary-work-issue-create-bulk
 ```
 
 The agent uses the conversation context to determine what issues to create.
@@ -105,7 +105,7 @@ The agent uses the conversation context to determine what issues to create.
 Use a GitHub issue template for consistency:
 
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for IPEDS datasets: hd, ic, enrollment" \
   --template dataset-load.md
 ```
@@ -120,13 +120,13 @@ For data pipeline projects:
 
 ```bash
 # Discover all datasets
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for all IPEDS datasets in datasets/ipeds/" \
   --type feature \
   --label dataset --label etl
 
 # Explicit dataset list
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for IPEDS datasets: hd, ic, enrollment, completions" \
   --type feature \
   --label dataset --label etl \
@@ -139,12 +139,12 @@ For API development projects:
 
 ```bash
 # Discover incomplete endpoints
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for all v1 API endpoints that need implementation" \
   --label api --label v1
 
 # Explicit endpoint list
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for API endpoints: users, posts, comments, likes" \
   --type feature \
   --label api --label backend
@@ -156,12 +156,12 @@ For content/documentation projects:
 
 ```bash
 # Discover templates
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for content templates in the templates/ directory" \
   --label documentation --label content
 
 # Explicit template list
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for: blog post template, landing page template, docs template" \
   --type feature \
   --label template
@@ -174,7 +174,7 @@ If your project has templates in `.github/ISSUE_TEMPLATE/`, you can use them for
 ### Using Templates
 
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for datasets: hd, ic, enrollment" \
   --template dataset-load.md
 ```
@@ -247,7 +247,7 @@ Discuss what needs to be done first, then run the command:
 User: "We need to implement three features: user authentication, role-based authorization, and audit logging"
 
 # Then:
-/fractary-work:issue-create-bulk
+/fractary-work-issue-create-bulk
 ```
 
 ### 3. Review Confirmation
@@ -347,12 +347,12 @@ Chain bulk creation with refinement:
 
 ```bash
 # Create bulk issues
-/fractary-work:issue-create-bulk --prompt "Create issues for: auth, authz, logging"
+/fractary-work-issue-create-bulk --prompt "Create issues for: auth, authz, logging"
 
 # Refine each issue
-/fractary-work:issue-refine 123
-/fractary-work:issue-refine 124
-/fractary-work:issue-refine 125
+/fractary-work-issue-refine 123
+/fractary-work-issue-refine 124
+/fractary-work-issue-refine 125
 ```
 
 ### Using with Workflows
@@ -360,7 +360,7 @@ Chain bulk creation with refinement:
 Create issues with workflow labels:
 
 ```bash
-/fractary-work:issue-create-bulk \
+/fractary-work-issue-create-bulk \
   --prompt "Create issues for datasets" \
   --label "workflow:etl" \
   --label dataset
@@ -429,10 +429,10 @@ For custom titles, be specific in your prompt or edit issues after creation.
 
 ## Related Commands
 
-- **`/fractary-work:issue-create`** - Create a single issue
-- **`/fractary-work:issue-refine`** - Refine issue requirements
-- **`/fractary-work:issue-list`** - List existing issues
-- **`/fractary-work:issue-fetch`** - Fetch issue details
+- **`/fractary-work-issue-create`** - Create a single issue
+- **`/fractary-work-issue-refine`** - Refine issue requirements
+- **`/fractary-work-issue-list`** - List existing issues
+- **`/fractary-work-issue-fetch`** - Fetch issue details
 
 ## Getting Help
 
@@ -442,7 +442,7 @@ If you encounter issues or have questions:
 2. **Check the spec** at `specs/SPEC-20260108-bulk-issue-creation.md`
 3. **Run with --context** to provide additional instructions:
    ```bash
-   /fractary-work:issue-create-bulk --context "Additional context or instructions"
+   /fractary-work-issue-create-bulk --context "Additional context or instructions"
    ```
 
 ## Summary

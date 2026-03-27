@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:commit
+name: fractary-repo-commit
 allowed-tools: Bash(fractary-core repo commit:*)
 description: Create a git commit
 model: claude-haiku-4-5

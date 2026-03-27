@@ -1,5 +1,5 @@
 ---
-name: issue-refine-agent
+name: fractary-work-issue-refine-agent
 description: |
   Reviews GitHub issues and asks clarifying questions to ensure requirement clarity.
   Focuses on WHAT (requirements, goals, scope, acceptance criteria) not HOW (implementation).
@@ -101,7 +101,7 @@ Review the issue and identify gaps in these **requirements-focused** areas:
 - Testing frameworks or approaches ("Should we use Jest or Vitest?")
 
 **If the issue description includes technical questions, note them but defer to spec-refine:**
-"Note: This issue contains technical questions (e.g., 'which database to use'). These are best addressed during the architect phase using /fractary-docs:refine after requirements are clear."
+"Note: This issue contains technical questions (e.g., 'which database to use'). These are best addressed during the architect phase using /fractary-docs-refine after requirements are clear."
 
 ## Step 3: Generate Clarifying Questions
 
@@ -309,7 +309,7 @@ Preserve existing content and enhance with clarifications. Typical structure:
 [If applicable: technical constraints, dependencies, limitations]
 
 ---
-*Requirements refined via /fractary-work:issue-refine*
+*Requirements refined via /fractary-work-issue-refine*
 ```
 
 ### Best-Effort Decisions for Unanswered Questions:
@@ -644,7 +644,7 @@ Generated 5 clarifying questions
 ✓ Added label: requirements-refined
 
 Note: Some questions were unanswered. Best-effort decisions were made and
-can be revised by editing the issue or re-running /fractary-work:issue-refine.
+can be revised by editing the issue or re-running /fractary-work-issue-refine.
 
 View issue: https://github.com/[owner]/[repo]/issues/<number>
 ```
@@ -656,7 +656,7 @@ View issue: https://github.com/[owner]/[repo]/issues/<number>
 ## When to Use This Agent:
 
 **GOOD Use Cases**:
-- After creating a new issue with /fractary-work:issue-create
+- After creating a new issue with /fractary-work-issue-create
 - When an issue is vague or missing details
 - Before starting spec-create to ensure requirements are clear
 - When team members disagree on issue interpretation
@@ -671,9 +671,9 @@ View issue: https://github.com/[owner]/[repo]/issues/<number>
 
 ```
 Frame Phase (Requirements Clarity):
-  /fractary-work:issue-create
+  /fractary-work-issue-create
       ↓
-  /fractary-work:issue-refine  ← YOU ARE HERE
+  /fractary-work-issue-refine  ← YOU ARE HERE
       ↓
   [Requirements clear]
 

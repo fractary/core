@@ -1,5 +1,5 @@
 ---
-name: fractary-file:delete
+name: fractary-file-delete
 allowed-tools: Bash(fractary-core file delete:*)
 description: Delete a file from storage
 model: claude-haiku-4-5

@@ -1,5 +1,5 @@
 ---
-name: logs-log
+name: fractary-logs-log
 description: |
   MUST BE USED when user wants to log a specific message or decision to an issue's log.
   Use PROACTIVELY when user mentions "log message", "record decision", "add to log".

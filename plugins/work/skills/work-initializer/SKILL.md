@@ -1,5 +1,5 @@
 ---
-name: work-initializer
+name: fractary-work-initializer
 description: Interactive setup wizard for work plugin configuration (CLI not yet available)
 model: haiku
 ---

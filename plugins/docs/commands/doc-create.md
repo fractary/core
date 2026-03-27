@@ -1,5 +1,5 @@
 ---
-name: fractary-docs:doc-create
+name: fractary-docs-doc-create
 allowed-tools: Bash(fractary-core docs doc-create:*)
 description: Create a new document
 model: claude-haiku-4-5

@@ -1,5 +1,5 @@
 ---
-name: fractary-repo:worktree-cleanup
+name: fractary-repo-worktree-cleanup
 allowed-tools: Bash(fractary-core repo worktree-cleanup:*)
 description: Clean up stale and orphaned worktrees
 model: claude-haiku-4-5

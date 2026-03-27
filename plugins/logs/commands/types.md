@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:types
+name: fractary-logs-types
 allowed-tools: Bash(fractary-core logs types:*)
 description: List available log types
 model: claude-haiku-4-5

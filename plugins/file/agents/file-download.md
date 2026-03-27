@@ -1,5 +1,5 @@
 ---
-name: file-download
+name: fractary-file-download
 description: Downloads a file from storage to local path using the CLI
 model: claude-haiku-4-5
 ---

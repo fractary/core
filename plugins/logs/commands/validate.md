@@ -1,5 +1,5 @@
 ---
-name: fractary-logs:validate
+name: fractary-logs-validate
 allowed-tools: Bash(fractary-core logs validate:*)
 description: Validate a log file against its type schema
 model: claude-haiku-4-5

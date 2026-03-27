@@ -1,5 +1,5 @@
 ---
-name: fractary-file:copy
+name: fractary-file-copy
 allowed-tools: Bash(fractary-core file copy:*)
 description: Copy a file within storage
 model: claude-haiku-4-5

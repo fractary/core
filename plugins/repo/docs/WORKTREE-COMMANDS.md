@@ -20,13 +20,13 @@ Git worktrees allow you to work on multiple branches simultaneously without swit
 
 ## Commands
 
-### /fractary-repo:worktree-create
+### /fractary-repo-worktree-create
 
 Create a new git worktree for isolated work.
 
 #### Syntax
 ```bash
-/fractary-repo:worktree-create --work-id <id> --branch <name> [options]
+/fractary-repo-worktree-create --work-id <id> --branch <name> [options]
 ```
 
 #### Arguments
@@ -68,7 +68,7 @@ For example, in project `fractary-core` with `--work-id 258`:
 
 **Basic usage** (auto-generated path):
 ```bash
-/fractary-repo:worktree-create --work-id 258 --branch feature/258
+/fractary-repo-worktree-create --work-id 258 --branch feature/258
 ```
 Output:
 ```
@@ -81,17 +81,17 @@ Creating new branch 'feature/258' from 'main'...
 
 **Custom path**:
 ```bash
-/fractary-repo:worktree-create --work-id 259 --branch feature/259 --path ~/work/issue-259
+/fractary-repo-worktree-create --work-id 259 --branch feature/259 --path ~/work/issue-259
 ```
 
 **Specific base branch**:
 ```bash
-/fractary-repo:worktree-create --work-id 260 --branch feature/260 --base develop
+/fractary-repo-worktree-create --work-id 260 --branch feature/260 --base develop
 ```
 
 **No checkout** (faster for large repos):
 ```bash
-/fractary-repo:worktree-create --work-id 261 --branch feature/261 --no-checkout
+/fractary-repo-worktree-create --work-id 261 --branch feature/261 --no-checkout
 ```
 
 #### Error Cases
@@ -106,13 +106,13 @@ Creating new branch 'feature/258' from 'main'...
 
 ---
 
-### /fractary-repo:worktree-list
+### /fractary-repo-worktree-list
 
 List all git worktrees with metadata.
 
 #### Syntax
 ```bash
-/fractary-repo:worktree-list [--format <type>]
+/fractary-repo-worktree-list [--format <type>]
 ```
 
 #### Arguments
@@ -125,7 +125,7 @@ List all git worktrees with metadata.
 
 **Table Format** (default) - Human-readable:
 ```bash
-/fractary-repo:worktree-list
+/fractary-repo-worktree-list
 ```
 Output:
 ```
@@ -151,7 +151,7 @@ Total: 3 worktrees (1 main + 2 feature)
 
 **JSON Format** - Machine-readable:
 ```bash
-/fractary-repo:worktree-list --format json
+/fractary-repo-worktree-list --format json
 ```
 Output:
 ```json
@@ -184,7 +184,7 @@ Output:
 
 **Simple Format** - Paths only:
 ```bash
-/fractary-repo:worktree-list --format simple
+/fractary-repo-worktree-list --format simple
 ```
 Output:
 ```
@@ -204,13 +204,13 @@ For each worktree:
 
 ---
 
-### /fractary-repo:worktree-remove
+### /fractary-repo-worktree-remove
 
 Safely remove a git worktree.
 
 #### Syntax
 ```bash
-/fractary-repo:worktree-remove <path> [--force]
+/fractary-repo-worktree-remove <path> [--force]
 ```
 
 #### Arguments
@@ -233,7 +233,7 @@ The command validates before removing:
 **Basic removal** (clean worktree):
 ```bash
 cd /main-worktree
-/fractary-repo:worktree-remove ../fractary-core-258
+/fractary-repo-worktree-remove ../fractary-core-258
 ```
 Output:
 ```
@@ -242,7 +242,7 @@ Output:
 
 **With uncommitted changes** (blocks removal):
 ```bash
-/fractary-repo:worktree-remove ../fractary-core-259
+/fractary-repo-worktree-remove ../fractary-core-259
 ```
 Output:
 ```
@@ -252,12 +252,12 @@ To see changes:
   cd ../fractary-core-259 && git status
 
 To force removal:
-  /fractary-repo:worktree-remove ../fractary-core-259 --force
+  /fractary-repo-worktree-remove ../fractary-core-259 --force
 ```
 
 **Force removal** (ignores uncommitted changes):
 ```bash
-/fractary-repo:worktree-remove ../fractary-core-259 --force
+/fractary-repo-worktree-remove ../fractary-core-259 --force
 ```
 Output:
 ```
@@ -266,7 +266,7 @@ Output:
 
 **With unpushed commits** (warns and asks):
 ```bash
-/fractary-repo:worktree-remove ../fractary-core-260
+/fractary-repo-worktree-remove ../fractary-core-260
 ```
 Output:
 ```
@@ -285,20 +285,20 @@ Output:
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| Not a worktree | Path doesn't exist or isn't a worktree | Check path with `/fractary-repo:worktree-list` |
+| Not a worktree | Path doesn't exist or isn't a worktree | Check path with `/fractary-repo-worktree-list` |
 | Current worktree | Trying to remove current directory | Change to different directory first |
 | Main worktree | Trying to remove main worktree | Cannot remove main worktree |
 | Uncommitted changes | Worktree has uncommitted changes | Commit changes or use `--force` |
 
 ---
 
-### /fractary-repo:worktree-prune
+### /fractary-repo-worktree-prune
 
 Clean up stale and orphaned worktrees.
 
 #### Syntax
 ```bash
-/fractary-repo:worktree-prune [options]
+/fractary-repo-worktree-prune [options]
 ```
 
 #### Arguments
@@ -329,7 +329,7 @@ A worktree is considered **stale** or **orphaned** if:
 
 **Dry Run** (safe preview):
 ```bash
-/fractary-repo:worktree-prune --dry-run
+/fractary-repo-worktree-prune --dry-run
 ```
 Output:
 ```
@@ -350,7 +350,7 @@ Run without --dry-run to actually remove these worktrees.
 
 **Interactive** (default, prompts for each):
 ```bash
-/fractary-repo:worktree-prune
+/fractary-repo-worktree-prune
 ```
 Output:
 ```
@@ -387,7 +387,7 @@ Summary:
 
 **Auto** (removes without prompting):
 ```bash
-/fractary-repo:worktree-prune --auto
+/fractary-repo-worktree-prune --auto
 ```
 Output:
 ```
@@ -403,7 +403,7 @@ Summary:
 
 **Custom max age**:
 ```bash
-/fractary-repo:worktree-prune --max-age 7
+/fractary-repo-worktree-prune --max-age 7
 ```
 Removes worktrees with no activity for 7+ days.
 
@@ -422,7 +422,7 @@ Removes worktrees with no activity for 7+ days.
 
 1. Create worktree for new feature:
 ```bash
-/fractary-repo:worktree-create --work-id 258 --branch feature/258
+/fractary-repo-worktree-create --work-id 258 --branch feature/258
 ```
 
 2. Work in the worktree (automatically switched):
@@ -442,42 +442,42 @@ cd /path/to/main-project
 
 1. List all worktrees:
 ```bash
-/fractary-repo:worktree-list
+/fractary-repo-worktree-list
 ```
 
 2. Remove specific worktree:
 ```bash
-/fractary-repo:worktree-remove ../project-258
+/fractary-repo-worktree-remove ../project-258
 ```
 
 ### Clean Up All Stale Worktrees
 
 1. Preview what would be removed:
 ```bash
-/fractary-repo:worktree-prune --dry-run
+/fractary-repo-worktree-prune --dry-run
 ```
 
 2. Remove stale worktrees interactively:
 ```bash
-/fractary-repo:worktree-prune
+/fractary-repo-worktree-prune
 ```
 
 3. Or remove all automatically:
 ```bash
-/fractary-repo:worktree-prune --auto
+/fractary-repo-worktree-prune --auto
 ```
 
 ### Work on Multiple Features Simultaneously
 
 1. Create worktree for feature A:
 ```bash
-/fractary-repo:worktree-create --work-id 100 --branch feature/a
+/fractary-repo-worktree-create --work-id 100 --branch feature/a
 ```
 
 2. Create worktree for feature B:
 ```bash
 cd /main-project  # Return to main first
-/fractary-repo:worktree-create --work-id 101 --branch feature/b
+/fractary-repo-worktree-create --work-id 101 --branch feature/b
 ```
 
 3. Switch between them:
@@ -489,8 +489,8 @@ cd ../project-101  # Work on feature B
 4. Clean up when done:
 ```bash
 cd /main-project
-/fractary-repo:worktree-remove ../project-100
-/fractary-repo:worktree-remove ../project-101
+/fractary-repo-worktree-remove ../project-100
+/fractary-repo-worktree-remove ../project-101
 ```
 
 ---
@@ -504,7 +504,7 @@ cd /main-project
 **Solution**: Change to a different directory first:
 ```bash
 cd /path/to/main-worktree
-/fractary-repo:worktree-remove /path/to/feature-worktree
+/fractary-repo-worktree-remove /path/to/feature-worktree
 ```
 
 ### Error: Branch already exists locally
@@ -515,8 +515,8 @@ cd /path/to/main-worktree
 - Use a different branch name, or
 - Remove the existing worktree first:
 ```bash
-/fractary-repo:worktree-list
-/fractary-repo:worktree-remove <existing-worktree-path>
+/fractary-repo-worktree-list
+/fractary-repo-worktree-remove <existing-worktree-path>
 ```
 
 ### Error: Path already exists
@@ -540,17 +540,17 @@ cd /path/to/main-worktree
   ```
 - Or force removal (loses changes):
   ```bash
-  /fractary-repo:worktree-remove /path/to/worktree --force
+  /fractary-repo-worktree-remove /path/to/worktree --force
   ```
 
 ### How to find all my worktrees
 
 Use the list command:
 ```bash
-/fractary-repo:worktree-list
+/fractary-repo-worktree-list
 
 # Or simple format for scripting
-/fractary-repo:worktree-list --format simple
+/fractary-repo-worktree-list --format simple
 ```
 
 ---
@@ -588,8 +588,8 @@ hotfix/issue-number-description
 Clean up stale worktrees regularly:
 ```bash
 # Weekly cleanup
-/fractary-repo:worktree-prune --dry-run  # Preview
-/fractary-repo:worktree-prune            # Interactive cleanup
+/fractary-repo-worktree-prune --dry-run  # Preview
+/fractary-repo-worktree-prune            # Interactive cleanup
 ```
 
 ### Path Organization
@@ -618,25 +618,25 @@ This makes:
 
 Extract worktree paths:
 ```bash
-/fractary-repo:worktree-list --format json | jq -r '.worktrees[].path'
+/fractary-repo-worktree-list --format json | jq -r '.worktrees[].path'
 ```
 
 Count worktrees:
 ```bash
-/fractary-repo:worktree-list --format json | jq '.summary.total'
+/fractary-repo-worktree-list --format json | jq '.summary.total'
 ```
 
 Find worktrees with uncommitted changes:
 ```bash
-/fractary-repo:worktree-list --format json | jq -r '.worktrees[] | select(.uncommitted_changes > 0) | .path'
+/fractary-repo-worktree-list --format json | jq -r '.worktrees[] | select(.uncommitted_changes > 0) | .path'
 ```
 
 ### Batch Operations
 
 Remove all non-main worktrees:
 ```bash
-for worktree in $(/fractary-repo:worktree-list --format simple | tail -n +2); do
-  /fractary-repo:worktree-remove "$worktree" --force
+for worktree in $(/fractary-repo-worktree-list --format simple | tail -n +2); do
+  /fractary-repo-worktree-remove "$worktree" --force
 done
 ```
 

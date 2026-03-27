@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-create
+name: fractary-work-issue-create
 allowed-tools: Bash(fractary-core work issue-create:*)
 description: Create new issue
 model: claude-haiku-4-5

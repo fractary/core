@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-search
+name: fractary-work-issue-search
 allowed-tools: Bash(fractary-core work issue-search:*)
 description: Search issues
 model: claude-haiku-4-5

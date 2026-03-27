@@ -1,5 +1,5 @@
 ---
-name: fractary-file:exists
+name: fractary-file-exists
 allowed-tools: Bash(fractary-core file exists:*)
 description: Check if a file exists in storage
 model: claude-haiku-4-5

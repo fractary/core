@@ -139,7 +139,7 @@ Create `.fractary/config.yaml` (or use the CLI/plugin initializer):
 fractary-core config configure --owner myorg --repo myrepo
 
 # Via Claude Code plugin
-/fractary-core:config-init
+/fractary-core-config-init
 ```
 
 Minimal config:
@@ -173,5 +173,5 @@ See the [Configuration Guide](./guides/configuration.md) for complete options.
 | **Command group** | CLI | `fractary-core work issue-create` |
 | **Tool** | MCP Server | `fractary_work_issue_create` |
 | **Plugin** | Claude Code | `fractary-work` plugin |
-| **Command** | Plugin | `/fractary-work:issue-create` slash command |
+| **Command** | Plugin | `/fractary-work-issue-create` slash command |
 | **Agent** | Plugin | `issue-refine-agent` autonomous handler |
