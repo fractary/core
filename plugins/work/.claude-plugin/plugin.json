@@ -4,8 +4,8 @@
   "description": "Work item management across GitHub, Jira, Linear, etc.",
   "commands": "./commands/",
   "agents": [
-    "./agents/issue-refine.md",
-    "./agents/issue-bulk-creator.md"
+    "./agents/fractary-work-issue-refine-agent.md",
+    "./agents/fractary-work-issue-bulk-creator.md"
   ],
   "skills": "./skills/"
 }

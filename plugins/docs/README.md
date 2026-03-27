@@ -941,7 +941,7 @@ plugins/docs/                          # Plugin directory
 ├── examples/                          # Usage examples
 ├── samples/                           # Sample documents
 ├── skills/
-│   └── doc-type-selector/             # Type selection (uses CLI)
+│   └── fractary-docs-doc-type-selector/  # Type selection (uses CLI)
 
 templates/docs/                        # Core doc types (in repo root)
 ├── manifest.yaml                      # Lists all core types

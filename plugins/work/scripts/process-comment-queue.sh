@@ -42,7 +42,7 @@ process_comment() {
     local handler="$3"
     local retry_count="${4:-0}"
 
-    local handler_script="${WORK_PLUGIN_ROOT}/skills/handler-work-tracker-${handler}/scripts/create-comment.sh"
+    local handler_script="${WORK_PLUGIN_ROOT}/skills/fractary-work-handler-work-tracker-${handler}/scripts/create-comment.sh"
 
     if [ ! -f "$handler_script" ]; then
         log_message "ERROR" "Handler script not found: $handler_script"

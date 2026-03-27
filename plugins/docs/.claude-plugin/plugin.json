@@ -4,12 +4,12 @@
   "description": "Documentation system with per-type skills, archival, refinement, fulfillment validation, and work-linking.",
   "commands": "./commands/",
   "agents": [
-    "./agents/docs-archiver.md",
-    "./agents/docs-auditor.md",
-    "./agents/docs-consistency-checker.md",
-    "./agents/docs-refiner.md",
-    "./agents/docs-validator.md",
-    "./agents/docs-writer.md"
+    "./agents/fractary-docs-archiver.md",
+    "./agents/fractary-docs-auditor.md",
+    "./agents/fractary-docs-consistency-checker.md",
+    "./agents/fractary-docs-refiner.md",
+    "./agents/fractary-docs-validator.md",
+    "./agents/fractary-docs-writer.md"
   ],
   "skills": "./skills/"
 }

@@ -698,9 +698,9 @@ repo/
 │   └── repo.example.json            # Configuration template
 ├── docs/                            # Documentation
 └── skills/                          # Knowledge resources
-    ├── code-review-checklist.md     # Code review standards
-    ├── commit-format.md             # Commit formatting rules
-    └── pr-template.md               # PR templates
+    ├── fractary-repo-code-review-checklist.md  # Code review standards
+    ├── fractary-repo-commit-format.md          # Commit formatting rules
+    └── fractary-repo-pr-template.md            # PR templates
 ```
 
 ## Safety Features

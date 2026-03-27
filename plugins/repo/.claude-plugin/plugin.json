@@ -4,7 +4,7 @@
   "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
   "commands": "./commands/",
   "agents": [
-    "./agents/pr-review-agent.md"
+    "./agents/fractary-repo-pr-review-agent.md"
   ],
   "skills": "./skills/"
 }

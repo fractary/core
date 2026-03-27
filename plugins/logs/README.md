@@ -35,8 +35,8 @@ fractary-logs
 │   └── logs-log.md              # Log entry creation
 ├── commands/ (15 commands)      # User-facing entry points
 ├── skills/
-│   ├── log-type-selector/       # Type selection
-│   └── workflow-event-emitter/  # Workflow event handling
+│   ├── fractary-logs-log-type-selector/      # Type selection
+│   └── fractary-logs-workflow-event-emitter/ # Workflow event handling
 └── scripts/                     # Deterministic operations
 ```
 
@@ -609,8 +609,8 @@ plugins/logs/
 │   ├── prepare-upload-metadata.sh # Upload preparation
 │   └── upload-to-cloud.sh       # Cloud upload
 └── skills/
-    ├── log-type-selector/       # Log type selection
-    └── workflow-event-emitter/  # Workflow events
+    ├── fractary-logs-log-type-selector/      # Log type selection
+    └── fractary-logs-workflow-event-emitter/ # Workflow events
 ```
 
 ### Log Storage Structure
