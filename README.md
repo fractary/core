@@ -47,7 +47,7 @@ Fractary Core exposes the same functionality through four interfaces, each build
 | **SDK** | [`@fractary/core`](./sdk/js/) | `npm install -g @fractary/core` |
 | **CLI** | [`@fractary/core-cli`](./cli/) | `npm install -g @fractary/core-cli` |
 | **MCP Server** | [`@fractary/core-mcp`](./mcp/server/) | `npm install -g @fractary/core-mcp` |
-| **Plugins** | 6 Claude Code plugins | See [plugin docs](./docs/plugins/README.md) |
+| **Plugins** | 6 Claude Code plugins | See [plugin docs](./docs/interfaces/plugins.md) |
 
 ## Quick Start
 
@@ -139,13 +139,13 @@ core/
 
 | Documentation | Description |
 |---------------|-------------|
-| [SDK Reference](./docs/sdk/js/README.md) | TypeScript API - Manager classes with full method signatures |
-| [CLI Reference](./docs/cli/README.md) | Command-line reference with all arguments and options |
-| [MCP Reference](./docs/mcp/server/README.md) | MCP tools across 5 modules |
-| [Plugin Reference](./docs/plugins/README.md) | Slash commands and agents across 6 plugins |
+| [Getting Started](./docs/getting-started.md) | Install, configure, first operations |
+| [Work Tracking](./docs/features/work.md) | Issues, comments, labels, milestones |
+| [Repository Management](./docs/features/repo.md) | Branches, commits, PRs, tags, worktrees |
+| [File Storage](./docs/features/file.md) | Local, S3, R2, GCS, Google Drive operations |
+| [Log Management](./docs/features/logs.md) | Session capture, search, analysis, retention |
+| [Documentation](./docs/features/docs.md) | Type-aware docs with validation and refinement |
 | [Configuration Guide](./docs/guides/configuration.md) | `.fractary/config.yaml` reference |
-| [Integration Guide](./docs/guides/integration.md) | Integration patterns |
-| [Troubleshooting](./docs/guides/troubleshooting.md) | Common issues and solutions |
 
 ## Development
 
