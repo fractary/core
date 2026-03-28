@@ -171,6 +171,17 @@ cd cli && npm run build       # CLI
 cd mcp/server && npm run build # MCP Server
 ```
 
+## Roadmap
+
+Fractary Core is functional and used daily, but there are clear areas for growth:
+
+- **Additional platform handlers** - Only GitHub is fully implemented today. Building out Jira and Linear handlers for work tracking, and GitLab and Bitbucket handlers for repository operations, would make the generic interface promise real across platforms.
+- **Python SDK** - The current SDK is TypeScript-only. A Python SDK would open Fractary Core to the broader AI/ML ecosystem where Python is the dominant language.
+- **MCP server hardening** - The MCP server exists but hasn't been heavily used or tested in production. It needs real-world validation, better error handling, and performance testing with various MCP clients.
+- **Broader agentic framework support** - While the architecture is framework-independent by design, practical integration testing and documentation for frameworks beyond Claude Code would help make that a reality.
+
+Contributions in any of these areas are welcome.
+
 ## License
 
 MIT

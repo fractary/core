@@ -8,12 +8,10 @@ The Work plugin provides slash commands and agents for managing work items, issu
 
 ## Installation
 
-Add to your Claude Code settings:
+See the [plugin installation guide](./README.md#installation) for marketplace and settings setup. Enable this plugin with:
 
 ```json
-{
-  "plugins": ["fractary-work"]
-}
+{ "fractary-work@fractary-core": true }
 ```
 
 ## Configuration

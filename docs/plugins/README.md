@@ -25,11 +25,47 @@ Fractary plugins extend Claude Code with specialized capabilities. Each plugin m
 
 ## Installation
 
-Plugins are installed via `.claude/settings.json`. The exact installation method depends on your Claude Code setup - typically plugins are added as npm packages or local paths.
+Fractary Core plugins are installed by configuring your `.claude/settings.json` with two things:
 
-### Configuration
+### 1. Register the Marketplace
 
-All plugins read configuration from `.fractary/config.yaml`. Initialize with:
+Add the Fractary Core marketplace to `extraKnownMarketplaces` so Claude Code knows where to find the plugins:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "fractary-core": {
+      "source": {
+        "source": "github",
+        "repo": "fractary/core"
+      }
+    }
+  }
+}
+```
+
+### 2. Enable Plugins
+
+Enable individual plugins in `enabledPlugins`. Each key follows the format `plugin-name@marketplace-name`:
+
+```json
+{
+  "enabledPlugins": {
+    "fractary-core@fractary-core": true,
+    "fractary-repo@fractary-core": true,
+    "fractary-work@fractary-core": true,
+    "fractary-docs@fractary-core": true,
+    "fractary-logs@fractary-core": true,
+    "fractary-file@fractary-core": true
+  }
+}
+```
+
+You can enable all plugins or just the ones you need. The `fractary-core` plugin is recommended as a baseline since it manages shared configuration.
+
+### 3. Configure
+
+All plugins read configuration from `.fractary/config.yaml`. After enabling, initialize with:
 
 ```
 /fractary-core-config-init

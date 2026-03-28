@@ -8,12 +8,10 @@ The Docs plugin provides slash commands and agents for creating, validating, and
 
 ## Installation
 
-Add to your Claude Code settings:
+See the [plugin installation guide](./README.md#installation) for marketplace and settings setup. Enable this plugin with:
 
 ```json
-{
-  "plugins": ["fractary-docs"]
-}
+{ "fractary-docs@fractary-core": true }
 ```
 
 ## Configuration

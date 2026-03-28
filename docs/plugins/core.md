@@ -8,12 +8,10 @@ The Core plugin provides slash commands and agents for initializing, updating, v
 
 ## Installation
 
-Add to your Claude Code settings:
+See the [plugin installation guide](./README.md#installation) for marketplace and settings setup. Enable this plugin with:
 
 ```json
-{
-  "plugins": ["fractary-core"]
-}
+{ "fractary-core@fractary-core": true }
 ```
 
 ## Configuration

@@ -8,12 +8,10 @@ The Repo plugin provides slash commands and agents for Git operations, branch ma
 
 ## Installation
 
-Add to your Claude Code settings:
+See the [plugin installation guide](./README.md#installation) for marketplace and settings setup. Enable this plugin with:
 
 ```json
-{
-  "plugins": ["fractary-repo"]
-}
+{ "fractary-repo@fractary-core": true }
 ```
 
 ## Configuration
