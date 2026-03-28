@@ -95,11 +95,6 @@ repo:
   defaults:
     default_branch: main
 
-spec:
-  schema_version: "1.0"
-  storage:
-    local_path: /specs
-
 logs:
   schema_version: "2.0"
   storage:
@@ -268,25 +263,6 @@ repo:
       pattern: "{prefix}/{issue_id}-{slug}"
 ```
 
-### Spec Toolset
-
-Specification management configuration.
-
-| Setting | Description | Required |
-|---------|-------------|----------|
-| `storage.local_path` | Path for spec files | No (default: /specs) |
-| `defaults.template` | Default template | No (default: feature) |
-| `defaults.auto_validate` | Auto-validate on save | No (default: true) |
-
-```yaml
-spec:
-  schema_version: "1.0"
-  storage:
-    local_path: /specs
-  defaults:
-    template: feature
-```
-
 ### Logs Toolset
 
 Log management configuration.
@@ -325,10 +301,10 @@ File storage configuration.
 
 #### Cloud Storage Bucket Convention
 
-When cloud storage (S3) is selected without an explicit bucket name, the default bucket is `dev.{repo}` (e.g., `dev.core` for a repository named "core"). This "dev" bucket is intended for development artifacts such as documentation, logs, and specs that don't belong to test or production environments.
+When cloud storage (S3) is selected without an explicit bucket name, the default bucket is `dev.{repo}` (e.g., `dev.core` for a repository named "core"). This "dev" bucket is intended for development artifacts such as documentation and logs that don't belong to test or production environments.
 
 The naming convention follows the pattern used by other environments:
-- `dev.{repo}` — development artifacts (docs, logs, specs, archives)
+- `dev.{repo}` — development artifacts (docs, logs, archives)
 - `test.{repo}` — test environment artifacts
 - `prod.{repo}` — production environment artifacts
 
@@ -485,7 +461,6 @@ fractary-core-config-update --context "enable S3 storage for file toolset"
 | `fractary-repo-init` | `fractary-core-config-init --plugins repo` |
 | `fractary-logs-init` | `fractary-core-config-init --plugins logs` |
 | `fractary-file-init` | `fractary-core-config-init --plugins file` |
-| `fractary-spec:init` | `fractary-core-config-init --plugins spec` |
 | `fractary-core-init` | `fractary-core-config-init` |
 
 ## Related Documentation

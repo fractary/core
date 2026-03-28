@@ -6,24 +6,23 @@ Claude Code plugins providing commands, agents, and skills for software developm
 
 Fractary plugins extend Claude Code with specialized capabilities. Each plugin maps to a toolset and provides:
 
-- **Commands** - Slash commands invoked with `/plugin-name:command`
+- **Commands** - Slash commands invoked with `/plugin-name-command`
 - **Agents** - Autonomous task handlers for complex, multi-step operations
 - **Skills** - Internal capabilities used by agents (not directly user-invocable)
 
 ## Available Plugins
 
-| Plugin | Version | Commands | Agents | Description |
-|--------|---------|----------|--------|-------------|
-| [`fractary-core`](#fractary-core) | 3.5.5 | 7 | 3 | Configuration and environment management |
-| [`fractary-work`](#fractary-work) | 3.0.16 | 8 | 2 | Work item and issue tracking |
-| [`fractary-repo`](#fractary-repo) | 3.0.15 | 13 | 1 | Repository and Git operations |
-| [`fractary-spec`](#fractary-spec) | 2.0.19 | 9 | 9 | Specification management |
-| [`fractary-logs`](#fractary-logs) | 4.1.4 | 15 | 4 | Log management |
-| [`fractary-file`](#fractary-file) | 3.0.4 | 13 | 5 | Multi-provider file storage |
-| [`fractary-docs`](#fractary-docs) | 4.0.7 | 14 | 6 | Documentation management |
-| [`fractary-status`](#fractary-status) | 1.1.15 | 2 | 2 | Status line for Claude Code |
+| Plugin | Commands | Agents | Description |
+|--------|----------|--------|-------------|
+| [`fractary-core`](#fractary-core) | 11 | 4 | Configuration and environment management |
+| [`fractary-work`](#fractary-work) | 8 | 2 | Work item and issue tracking |
+| [`fractary-repo`](#fractary-repo) | 15 | 1 | Repository and Git operations |
+| [`fractary-logs`](#fractary-logs) | 15 | 4 | Log management |
+| [`fractary-file`](#fractary-file) | 13 | 5 | Multi-provider file storage |
+| [`fractary-docs`](#fractary-docs) | 14 | 6 | Documentation management |
+| [`fractary-status`](#fractary-status) | 2 | 2 | Status line for Claude Code |
 
-**Totals: 81 commands, 32 agents across 8 plugins**
+**Totals: 78 commands, 24 agents across 7 plugins**
 
 ## Installation
 
@@ -51,9 +50,13 @@ Configuration and environment management for all Fractary plugins.
 | `/fractary-core-config-update` | Update existing configuration incrementally |
 | `/fractary-core-config-validate` | Validate configuration |
 | `/fractary-core-config-show` | Display configuration (sensitive values redacted) |
+| `/fractary-core-env-init` | Initialize environment configuration |
 | `/fractary-core-env-switch` | Switch environment (test, staging, prod) |
 | `/fractary-core-env-list` | List available environments |
 | `/fractary-core-env-show` | Show current environment status |
+| `/fractary-core-env-section-read` | Read a specific section from environment config |
+| `/fractary-core-env-section-write` | Write a specific section to environment config |
+| `/fractary-core-cloud-init` | Initialize cloud configuration |
 
 ### Agents
 
@@ -62,6 +65,7 @@ Configuration and environment management for all Fractary plugins.
 | `config-initializer` | "setup fractary", "initialize project", "configure plugins" | Fresh setup of `.fractary/config.yaml` with smart auto-detection of platforms and project info |
 | `config-updater` | "change config", "update config", "switch to jira", "enable S3" | Incrementally updates config based on natural language instructions |
 | `env-switcher` | "switch to prod", "use test environment" | Switches active environment by loading environment-specific `.env` files |
+| `cloud-initializer` | "setup cloud", "initialize cloud" | Sets up cloud configuration for remote storage and services |
 
 ---
 
@@ -113,9 +117,11 @@ Source control operations. Currently supports GitHub (GitLab and Bitbucket provi
 | Command | Description |
 |---------|-------------|
 | `/fractary-repo-branch-create` | Create a new git branch |
+| `/fractary-repo-branch-forward` | Forward (merge) a source branch into a target branch |
 | `/fractary-repo-commit` | Create a git commit with conventional format |
 | `/fractary-repo-commit-push` | Commit and push in one step |
 | `/fractary-repo-commit-push-pr` | Commit, push, and open a PR |
+| `/fractary-repo-commit-push-pr-review` | Commit, push, create PR, wait for CI, then run pr-review-agent |
 | `/fractary-repo-commit-push-pr-merge` | Full workflow: commit, push, create PR, merge, cleanup branch |
 | `/fractary-repo-pr-create` | Create a pull request |
 | `/fractary-repo-pr-merge` | Merge a pull request |
@@ -143,59 +149,6 @@ Claude: [Uses pr-review-agent for comprehensive analysis]
 
 User: Ship it - commit, PR, and merge
 Claude: /fractary-repo-commit-push-pr-merge
-```
-
----
-
-## fractary-spec
-
-Ephemeral specification management tied to work items with lifecycle-based archival. Specs are temporary working documents (unlike docs which are living).
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `/fractary-spec:spec-create` | Create specification from conversation context |
-| `/fractary-spec:spec-get` | Get specification details by ID or path |
-| `/fractary-spec:spec-list` | List specifications with optional filters |
-| `/fractary-spec:spec-update` | Update a specification |
-| `/fractary-spec:spec-delete` | Delete a specification |
-| `/fractary-spec:spec-validate` | Validate specification against implementation |
-| `/fractary-spec:spec-refine` | Refine specification through critical review |
-| `/fractary-spec:spec-archive` | Archive specifications for completed work |
-| `/fractary-spec:template-list` | List available specification templates |
-
-### Agents
-
-| Agent | Trigger | Description |
-|-------|---------|-------------|
-| `spec-creator` | "create spec", "write spec" | Creates specifications from conversation context, optionally enriched with GitHub issue data. Auto-detects work ID from branch name. |
-| `spec-getter` | (via command) | Retrieves specification details by ID or path |
-| `spec-lister` | (via command) | Lists specifications with optional filters |
-| `spec-updater` | (via command) | Updates a specification by ID |
-| `spec-deleter` | (via command) | Deletes a specification by ID |
-| `spec-validator` | "validate spec", "check implementation" | Validates that implementation matches specification requirements and acceptance criteria |
-| `spec-refiner` | "refine spec", "improve spec" | Critically reviews and refines specifications through interactive Q&A |
-| `spec-archiver` | "archive spec", "completed work" | Archives specifications to cloud storage when work is complete. Handles pre-checks, GitHub commenting, and git commits. |
-| `template-lister` | (via command) | Lists available specification templates |
-
-### Lifecycle
-
-```
-Create -> Validate -> Refine (iterate) -> Archive to cloud
-```
-
-### Usage Examples
-
-```
-User: Create a spec for the API design we discussed
-Claude: [Uses spec-creator agent with conversation context]
-
-User: Check if the implementation matches the spec
-Claude: /fractary-spec:spec-validate
-
-User: Issue #123 is done, archive the specs
-Claude: /fractary-spec:spec-archive
 ```
 
 ---
@@ -337,7 +290,7 @@ Custom Claude Code status line showing git status, issue numbers, PR numbers, an
 
 ## Commands vs Agents
 
-**Commands** are direct actions you invoke explicitly with `/plugin:command`. They execute a specific operation and return results.
+**Commands** are direct actions you invoke explicitly with `/plugin-command` (e.g., `/fractary-repo-commit`). They execute a specific operation and return results.
 
 **Agents** are autonomous task handlers that Claude triggers proactively based on conversation context. They handle complex, multi-step workflows and make decisions about how to accomplish a goal. Agents are triggered either:
 - Explicitly via a command that delegates to them (e.g., `/fractary-repo-pr-review` delegates to `pr-review-agent`)

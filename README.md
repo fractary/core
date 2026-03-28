@@ -1,32 +1,53 @@
 # Fractary Core
 
-Core SDK for Fractary - Primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation.
+Core utilities for Fractary - foundational operations for work tracking, repository management, logging, file storage, and documentation.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Overview
+## Why Fractary Core?
 
-Fractary Core provides foundational infrastructure for managing software development workflows. It implements primitive operations across 6 toolsets, accessible through 4 interfaces (SDK, CLI, MCP Server, Claude Code Plugins).
+Fractary Core was born from a simple observation: when building multiple projects with LLMs and agentic tools like Claude Code, the same challenges kept surfacing - managing issues, handling repository operations, organizing logs and documentation, dealing with files across different storage providers. Rather than reinventing these utilities in every project, Fractary Core consolidates them into a single, shared toolset that any project can use.
 
-### Platform Support
+Even on its own, Fractary Core makes everyday LLM-assisted development easier - interacting with GitHub issues, managing files and logs, organizing documentation, and supporting best practices like spec-driven development. It also serves as the foundational layer for the broader Fractary ecosystem (Codex, FABER, Forge, and others), providing the common utilities they all depend on.
 
-> **Currently only GitHub is fully implemented** for work tracking and repository operations. Jira, Linear, GitLab, and Bitbucket provider stubs exist for future implementation.
+The project is open-source so that anyone working with agentic engineering tools can benefit from and contribute to these shared primitives.
+
+## Design Philosophy
+
+### SDK-First
+
+All deterministic logic lives in the SDK. This makes core operations reliable and consistent regardless of how they're accessed, and means any program can tap into the functionality directly. The CLI wraps the SDK for terminal and scripting use. The MCP server and Claude Code plugins then layer on top, adding AI-agent accessibility. The result is maximum flexibility in how you interact with the same underlying capabilities.
+
+### Generic Over Tool-Specific
+
+Fractary Core provides abstract operations - "repo" not "GitHub", "work" not "Jira" - with a handler/adapter pattern behind the abstraction. This means workflows built on top of Fractary Core don't need to know or care which platform sits behind the interface. Switch from GitHub Issues to Jira, or from local file storage to S3, and the workflows keep working. This is what allows higher-level Fractary plugins and any custom workflows to work with any supported platform without custom integrations.
+
+### Framework-Independent
+
+While much of the early development was done with Claude Code, the architecture intentionally avoids being locked to any single agentic harness or model. The SDK and CLI work anywhere. The MCP server works with any MCP-compatible client. This flexibility is by design - the tools should be useful regardless of which AI model or orchestration framework you choose.
+
+## Platform Support
+
+> **Currently only GitHub is fully implemented** for work tracking and repository operations. Jira, Linear, GitLab, and Bitbucket handler stubs exist for future implementation.
 
 | Toolset | Supported Platforms |
 |---------|---------------------|
 | **Work** | GitHub Issues (Jira, Linear planned) |
 | **Repo** | GitHub (GitLab, Bitbucket planned) |
 | **File** | Local, AWS S3, Cloudflare R2, Google Cloud Storage, Google Drive |
-| **Spec, Logs, Docs** | Local storage |
+| **Logs** | Local storage |
+| **Docs** | Local storage |
 
 ## Interfaces
+
+Fractary Core exposes the same functionality through four interfaces, each building on the layer below:
 
 | Interface | Package | Install |
 |-----------|---------|---------|
 | **SDK** | [`@fractary/core`](./sdk/js/) | `npm install @fractary/core` |
 | **CLI** | [`@fractary/core-cli`](./cli/) | `npm install -g @fractary/core-cli` |
 | **MCP Server** | [`@fractary/core-mcp`](./mcp/server/) | `npx @fractary/core-mcp` |
-| **Plugins** | 8 Claude Code plugins | See [plugin docs](./docs/plugins/README.md) |
+| **Plugins** | 7 Claude Code plugins | See [plugin docs](./docs/plugins/README.md) |
 
 ## Quick Start
 
@@ -52,10 +73,6 @@ fractary-core work issue-create --title "Bug: Login fails" --labels "bug"
 # Repository operations
 fractary-core repo commit --message "Add feature" --type feat --all
 fractary-core repo pr-create --title "Feature PR" --draft
-
-# Specification management
-fractary-core spec spec-create-file "API Design" --template feature --work-id 123
-fractary-core spec spec-validate-check SPEC-20241216
 
 # Log management
 fractary-core logs write --type session --title "Debug session" --content "..." --issue 123
@@ -86,10 +103,10 @@ fractary-core docs doc-search --text "authentication"
 ### Claude Code Plugins
 
 ```
-/fractary-core:config-init          # Initialize configuration
-/fractary-work:issue-fetch          # Fetch an issue
-/fractary-repo:commit-push-pr       # Commit, push, and create PR
-/fractary-spec:spec-create          # Create a specification
+/fractary-core-config-init          # Initialize configuration
+/fractary-work-issue-fetch          # Fetch an issue
+/fractary-repo-commit-push-pr       # Commit, push, and create PR
+/fractary-docs-doc-create           # Create a document
 ```
 
 ## Project Structure
@@ -99,17 +116,16 @@ core/
 ├── sdk/js/                # TypeScript SDK (@fractary/core)
 ├── cli/                   # CLI (@fractary/core-cli)
 ├── mcp/server/            # MCP Server (@fractary/core-mcp)
-├── plugins/               # Claude Code plugins (8 total)
+├── plugins/               # Claude Code plugins (7 total)
 │   ├── core/              # Configuration management
 │   ├── work/              # Work item tracking
 │   ├── repo/              # Repository operations
-│   ├── spec/              # Specification management
 │   ├── logs/              # Log management
 │   ├── file/              # File storage
 │   ├── docs/              # Documentation management
 │   └── status/            # Status line
 ├── docs/                  # Documentation
-└── templates/             # Log and spec templates
+└── templates/             # Log templates
 ```
 
 ## Documentation
@@ -118,10 +134,10 @@ core/
 
 | Documentation | Description |
 |---------------|-------------|
-| [SDK Reference](./docs/sdk/js/README.md) | TypeScript API - 6 Manager classes with full method signatures |
-| [CLI Reference](./docs/cli/README.md) | 83 commands with all arguments and options |
-| [MCP Reference](./docs/mcp/server/README.md) | 80 MCP tools across 6 modules |
-| [Plugin Reference](./docs/plugins/README.md) | 81 slash commands, 32 agents across 8 plugins |
+| [SDK Reference](./docs/sdk/js/README.md) | TypeScript API - Manager classes with full method signatures |
+| [CLI Reference](./docs/cli/README.md) | Command-line reference with all arguments and options |
+| [MCP Reference](./docs/mcp/server/README.md) | MCP tools across 5 modules |
+| [Plugin Reference](./docs/plugins/README.md) | Slash commands and agents across 7 plugins |
 | [Configuration Guide](./docs/guides/configuration.md) | `.fractary/config.yaml` reference |
 | [Integration Guide](./docs/guides/integration.md) | Integration patterns |
 | [Troubleshooting](./docs/guides/troubleshooting.md) | Common issues and solutions |

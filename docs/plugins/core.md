@@ -4,7 +4,7 @@ Claude Code plugin reference for the Core toolset (`fractary-core`). Unified con
 
 ## Overview
 
-The Core plugin provides slash commands and agents for initializing, updating, validating, and displaying Fractary configuration, as well as switching between environments (test, staging, prod) mid-session. All configuration is stored in `.fractary/config.yaml` and covers the six core plugins: work, repo, logs, file, spec, and docs.
+The Core plugin provides slash commands and agents for initializing, updating, validating, and displaying Fractary configuration, as well as switching between environments (test, staging, prod) mid-session. All configuration is stored in `.fractary/config.yaml` and covers the core plugins: work, repo, logs, file, and docs.
 
 ## Installation
 
@@ -29,8 +29,6 @@ logs:
   archive_path: .fractary/logs/archive
 file:
   active_handler: local
-spec:
-  archive_path: .fractary/specs/archive
 docs: {}
 ```
 
@@ -48,7 +46,7 @@ Initialize Fractary Core configuration for all plugins.
 ```
 
 **Options:**
-- `--plugins <list>` - Comma-separated plugins to configure (default: all). Options: work, repo, logs, file, spec, docs
+- `--plugins <list>` - Comma-separated plugins to configure (default: all). Options: work, repo, logs, file, docs
 - `--work-platform <name>` - Work tracking platform: github, jira, linear (auto-detected)
 - `--repo-platform <name>` - Repository platform: github, gitlab, bitbucket (auto-detected)
 - `--file-handler <name>` - File storage handler: local, s3 (default: local)
@@ -167,7 +165,7 @@ Handles fresh setup and force-overwrite of Fractary Core configuration. Auto-det
 **Capabilities:**
 - Auto-detects work and repo platforms from git remote
 - Generates configuration via `fractary-core config configure` CLI
-- Creates required directories (`.fractary/logs`, `.fractary/specs`, etc.)
+- Creates required directories (`.fractary/logs`, etc.)
 - Sets up `.gitignore` rules for archive directories
 - Validates configuration after creation
 
@@ -215,7 +213,7 @@ Platform detected: GitHub (owner/repo)
 === CONFIGURATION COMPLETE ===
 
 Configuration: .fractary/config.yaml
-Plugins configured: work (github), repo (github), logs, file (local), spec, docs
+Plugins configured: work (github), repo (github), logs, file (local), docs
 Project: owner/repo
 
 Next steps:
@@ -232,7 +230,7 @@ User: Switch our work tracking to Jira
 Claude: /fractary-core-config-update --context "switch to jira for work tracking"
 
 Sections to MODIFY: work
-Sections PRESERVED: repo, logs, file, spec, docs
+Sections PRESERVED: repo, logs, file, docs
 
 BEFORE:
   work.active_handler: github
