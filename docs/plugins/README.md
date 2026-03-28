@@ -20,17 +20,52 @@ Fractary plugins extend Claude Code with specialized capabilities. Each plugin m
 | [`fractary-logs`](#fractary-logs) | 15 | 4 | Log management |
 | [`fractary-file`](#fractary-file) | 13 | 5 | Multi-provider file storage |
 | [`fractary-docs`](#fractary-docs) | 14 | 6 | Documentation management |
-| [`fractary-status`](#fractary-status) | 2 | 2 | Status line for Claude Code |
 
-**Totals: 78 commands, 24 agents across 7 plugins**
+**Totals: 76 commands, 22 agents across 6 plugins**
 
 ## Installation
 
-Plugins are installed via `.claude/settings.json`. The exact installation method depends on your Claude Code setup - typically plugins are added as npm packages or local paths.
+Fractary Core plugins are installed by configuring your `.claude/settings.json` with two things:
 
-### Configuration
+### 1. Register the Marketplace
 
-All plugins read configuration from `.fractary/config.yaml`. Initialize with:
+Add the Fractary Core marketplace to `extraKnownMarketplaces` so Claude Code knows where to find the plugins:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "fractary-core": {
+      "source": {
+        "source": "github",
+        "repo": "fractary/core"
+      }
+    }
+  }
+}
+```
+
+### 2. Enable Plugins
+
+Enable individual plugins in `enabledPlugins`. Each key follows the format `plugin-name@marketplace-name`:
+
+```json
+{
+  "enabledPlugins": {
+    "fractary-core@fractary-core": true,
+    "fractary-repo@fractary-core": true,
+    "fractary-work@fractary-core": true,
+    "fractary-docs@fractary-core": true,
+    "fractary-logs@fractary-core": true,
+    "fractary-file@fractary-core": true
+  }
+}
+```
+
+You can enable all plugins or just the ones you need. The `fractary-core` plugin is recommended as a baseline since it manages shared configuration.
+
+### 3. Configure
+
+All plugins read configuration from `.fractary/config.yaml`. After enabling, initialize with:
 
 ```
 /fractary-core-config-init
@@ -265,26 +300,6 @@ Documentation system with per-type skills, archival, refinement, and fulfillment
 ### Document Types
 
 `adr`, `api`, `architecture`, `audit`, `changelog`, `dataset`, `etl`, `guides`, `infrastructure`, `standards`, `testing`, `spec-basic`, `spec-feature`, `spec-bug`, `spec-api`, `spec-infrastructure`
-
----
-
-## fractary-status
-
-Custom Claude Code status line showing git status, issue numbers, PR numbers, and last prompt.
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `/fractary-status-install` | Install and configure the status line |
-| `/fractary-status-sync` | Force-refresh the status line cache |
-
-### Agents
-
-| Agent | Trigger | Description |
-|-------|---------|-------------|
-| `status-install` | "install status line", "set up status" | Installs and configures custom status line in Claude Code projects |
-| `status-sync` | "refresh status", "sync status", "status out of date" | Forces a cache refresh and displays comprehensive repository status |
 
 ---
 

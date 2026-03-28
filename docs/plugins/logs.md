@@ -8,12 +8,10 @@ The Logs plugin provides slash commands and agents for capturing, searching, and
 
 ## Installation
 
-Add to your Claude Code settings:
+See the [plugin installation guide](./README.md#installation) for marketplace and settings setup. Enable this plugin with:
 
 ```json
-{
-  "plugins": ["fractary-logs"]
-}
+{ "fractary-logs@fractary-core": true }
 ```
 
 ## Configuration
