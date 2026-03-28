@@ -127,7 +127,8 @@
     "fractary-file@fractary-core": true,
     "fractary-status@fractary-core": true,
     "fractary-codex@fractary-codex": true,
-    "fractary-faber@fractary-faber": true
+    "fractary-faber@fractary-faber": true,
+    "fractary-forge@fractary-forge": true
   },
   "extraKnownMarketplaces": {
     "fractary-core": {

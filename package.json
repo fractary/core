@@ -3,6 +3,33 @@
   "version": "1.0.0",
   "private": true,
   "description": "Fractary Core Monorepo - SDK, CLI, MCP Server, and Plugins",
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": [
+      "./plugins/core/skills",
+      "./plugins/docs/skills",
+      "./plugins/file/skills",
+      "./plugins/logs/skills",
+      "./plugins/repo/skills",
+      "./plugins/work/skills"
+    ], 
+    "prompts": [
+      "./plugins/core/commands",
+      "./plugins/docs/commands",
+      "./plugins/file/commands",
+      "./plugins/logs/commands",
+      "./plugins/repo/commands",
+      "./plugins/work/commands"
+    ],
+    "agents": [
+      "./plugins/core/agents",
+      "./plugins/docs/agents",
+      "./plugins/file/agents",
+      "./plugins/logs/agents", 
+      "./plugins/repo/agents",
+      "./plugins/work/agents"
+    ] 
+  },
   "workspaces": [
     "sdk/js",
     "cli",
