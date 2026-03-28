@@ -44,10 +44,10 @@ Fractary Core exposes the same functionality through four interfaces, each build
 
 | Interface | Package | Install |
 |-----------|---------|---------|
-| **SDK** | [`@fractary/core`](./sdk/js/) | `npm install @fractary/core` |
+| **SDK** | [`@fractary/core`](./sdk/js/) | `npm install -g @fractary/core` |
 | **CLI** | [`@fractary/core-cli`](./cli/) | `npm install -g @fractary/core-cli` |
-| **MCP Server** | [`@fractary/core-mcp`](./mcp/server/) | `npx @fractary/core-mcp` |
-| **Plugins** | 7 Claude Code plugins | See [plugin docs](./docs/plugins/README.md) |
+| **MCP Server** | [`@fractary/core-mcp`](./mcp/server/) | `npm install -g @fractary/core-mcp` |
+| **Plugins** | 6 Claude Code plugins | See [plugin docs](./docs/plugins/README.md) |
 
 ## Quick Start
 
@@ -105,8 +105,14 @@ fractary-core docs doc-search --text "authentication"
 ```
 /fractary-core-config-init          # Initialize configuration
 /fractary-work-issue-fetch          # Fetch an issue
-/fractary-repo-commit-push-pr       # Commit, push, and create PR
+```
+
+*"Come up with a plan to resolve the issue and then proceed to do so"*
+
+```
 /fractary-docs-doc-create           # Create a document
+/fractary-repo-commit-push-pr       # Commit, push, and create PR
+/fractary-repo-pr-merge             # Merge a pull request
 ```
 
 ## Project Structure
@@ -116,16 +122,15 @@ core/
 ├── sdk/js/                # TypeScript SDK (@fractary/core)
 ├── cli/                   # CLI (@fractary/core-cli)
 ├── mcp/server/            # MCP Server (@fractary/core-mcp)
-├── plugins/               # Claude Code plugins (7 total)
+├── plugins/               # Claude Code plugins (6 total)
 │   ├── core/              # Configuration management
 │   ├── work/              # Work item tracking
 │   ├── repo/              # Repository operations
 │   ├── logs/              # Log management
 │   ├── file/              # File storage
-│   ├── docs/              # Documentation management
-│   └── status/            # Status line
+│   └── docs/              # Documentation management
 ├── docs/                  # Documentation
-└── templates/             # Log templates
+└── templates/             # Log and document templates
 ```
 
 ## Documentation
@@ -137,7 +142,7 @@ core/
 | [SDK Reference](./docs/sdk/js/README.md) | TypeScript API - Manager classes with full method signatures |
 | [CLI Reference](./docs/cli/README.md) | Command-line reference with all arguments and options |
 | [MCP Reference](./docs/mcp/server/README.md) | MCP tools across 5 modules |
-| [Plugin Reference](./docs/plugins/README.md) | Slash commands and agents across 7 plugins |
+| [Plugin Reference](./docs/plugins/README.md) | Slash commands and agents across 6 plugins |
 | [Configuration Guide](./docs/guides/configuration.md) | `.fractary/config.yaml` reference |
 | [Integration Guide](./docs/guides/integration.md) | Integration patterns |
 | [Troubleshooting](./docs/guides/troubleshooting.md) | Common issues and solutions |

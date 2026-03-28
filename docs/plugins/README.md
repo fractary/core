@@ -20,9 +20,8 @@ Fractary plugins extend Claude Code with specialized capabilities. Each plugin m
 | [`fractary-logs`](#fractary-logs) | 15 | 4 | Log management |
 | [`fractary-file`](#fractary-file) | 13 | 5 | Multi-provider file storage |
 | [`fractary-docs`](#fractary-docs) | 14 | 6 | Documentation management |
-| [`fractary-status`](#fractary-status) | 2 | 2 | Status line for Claude Code |
 
-**Totals: 78 commands, 24 agents across 7 plugins**
+**Totals: 76 commands, 22 agents across 6 plugins**
 
 ## Installation
 
@@ -265,26 +264,6 @@ Documentation system with per-type skills, archival, refinement, and fulfillment
 ### Document Types
 
 `adr`, `api`, `architecture`, `audit`, `changelog`, `dataset`, `etl`, `guides`, `infrastructure`, `standards`, `testing`, `spec-basic`, `spec-feature`, `spec-bug`, `spec-api`, `spec-infrastructure`
-
----
-
-## fractary-status
-
-Custom Claude Code status line showing git status, issue numbers, PR numbers, and last prompt.
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `/fractary-status-install` | Install and configure the status line |
-| `/fractary-status-sync` | Force-refresh the status line cache |
-
-### Agents
-
-| Agent | Trigger | Description |
-|-------|---------|-------------|
-| `status-install` | "install status line", "set up status" | Installs and configures custom status line in Claude Code projects |
-| `status-sync` | "refresh status", "sync status", "status out of date" | Forces a cache refresh and displays comprehensive repository status |
 
 ---
 

@@ -66,7 +66,7 @@ MCP tools for AI agent integration via Model Context Protocol.
 
 ### 4. Claude Code Plugins
 
-78 slash commands and 24 agents across 7 plugins.
+76 slash commands and 22 agents across 6 plugins.
 
 | Plugin | Commands | Agents | Description |
 |--------|----------|--------|-------------|
@@ -76,7 +76,6 @@ MCP tools for AI agent integration via Model Context Protocol.
 | `fractary-logs` | 15 | 4 | Log management |
 | `fractary-file` | 13 | 5 | Multi-provider file storage |
 | `fractary-docs` | 14 | 6 | Documentation management |
-| `fractary-status` | 2 | 2 | Status line for Claude Code |
 
 **[Plugins Documentation](./plugins/README.md)** - All commands, agents, and triggers
 
