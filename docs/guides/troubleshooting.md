@@ -381,8 +381,8 @@ Common issues and solutions for Fractary Core.
 ## Getting Help
 
 1. **Check documentation:**
-   - [SDK Reference](/docs/sdk/js/README.md)
-   - [CLI Reference](/docs/cli/README.md)
+   - [SDK Reference](../interfaces/sdk.md)
+   - [CLI Reference](../interfaces/cli.md)
    - [Configuration Guide](/docs/guides/configuration.md)
 
 2. **Debug mode:**

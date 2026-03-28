@@ -147,7 +147,7 @@ const config = await loadConfig('.fractary/config.yaml');
 const workManager = new WorkManager(config.work);
 ```
 
-See the [SDK Documentation](/docs/sdk/js/README.md) for complete API reference.
+See the [SDK documentation](../interfaces/sdk.md) for complete API reference.
 
 ### CLI Configuration
 
@@ -167,7 +167,7 @@ fractary-core work issue fetch 123 \
   --repo myrepo
 ```
 
-See the [CLI Documentation](/docs/cli/README.md) for complete command reference.
+See the [CLI documentation](../interfaces/cli.md) for complete command reference.
 
 ### MCP Server Configuration
 
@@ -199,7 +199,7 @@ Add to `.claude/settings.json`:
 }
 ```
 
-See the [MCP Documentation](/docs/mcp/server/README.md) for complete reference.
+See the [MCP documentation](../interfaces/mcp.md) for complete reference.
 
 ### Plugin Configuration
 
@@ -209,136 +209,21 @@ Plugins read configuration from `.fractary/config.yaml`. Initialize with:
 fractary-core-config-init
 ```
 
-See the [Plugin Documentation](/docs/plugins/README.md) for plugin-specific details.
+See the [plugin documentation](../interfaces/plugins.md) for plugin-specific details.
 
-## Toolset Configuration Reference
+## Per-Toolset Configuration
 
-### Work Toolset
+Comprehensive configuration documentation for each toolset is in the feature docs:
 
-Work tracking configuration for GitHub Issues, Jira, and Linear.
+| Toolset | Config Section | Reference |
+|---------|---------------|-----------|
+| **Work** | `work:` | [Work Tracking > Configuration](../features/work.md#configuration) |
+| **Repo** | `repo:` | [Repository > Configuration](../features/repo.md#configuration) |
+| **File** | `file:` | [File Storage > Configuration](../features/file.md#configuration) |
+| **Logs** | `logs:` | [Log Management > Configuration](../features/logs.md#configuration) |
+| **Docs** | `docs:` | [Documentation > Configuration](../features/docs.md#configuration) |
 
-| Setting | Description | Required |
-|---------|-------------|----------|
-| `active_handler` | Active platform: `github`, `jira`, `linear` | Yes |
-| `handlers.github.owner` | Repository owner | Yes (GitHub) |
-| `handlers.github.repo` | Repository name | Yes (GitHub) |
-| `handlers.github.token` | Personal access token | Yes (GitHub) |
-| `handlers.github.api_url` | API URL (for GitHub Enterprise) | No |
-| `handlers.jira.host` | Jira instance URL | Yes (Jira) |
-| `handlers.jira.email` | Account email | Yes (Jira) |
-| `handlers.jira.token` | API token | Yes (Jira) |
-| `handlers.jira.project` | Project key | Yes (Jira) |
-| `handlers.linear.api_key` | Linear API key | Yes (Linear) |
-| `handlers.linear.team_id` | Team ID | Yes (Linear) |
-
-```yaml
-work:
-  active_handler: github
-  handlers:
-    github:
-      owner: myorg
-      repo: myrepo
-      token: ${GITHUB_TOKEN}
-```
-
-### Repo Toolset
-
-Repository management configuration.
-
-| Setting | Description | Required |
-|---------|-------------|----------|
-| `active_handler` | Active platform: `github`, `gitlab`, `bitbucket` | Yes |
-| `defaults.default_branch` | Default branch name | No (default: main) |
-| `defaults.branch_naming.pattern` | Branch naming pattern | No |
-
-```yaml
-repo:
-  active_handler: github
-  handlers:
-    github:
-      token: ${GITHUB_TOKEN}
-  defaults:
-    default_branch: main
-    branch_naming:
-      pattern: "{prefix}/{issue_id}-{slug}"
-```
-
-### Logs Toolset
-
-Log management configuration.
-
-| Setting | Description | Required |
-|---------|-------------|----------|
-| `storage.local_path` | Path for log files | No (default: /logs) |
-| `session_logging.enabled` | Enable session capture | No (default: true) |
-| `session_logging.redact_sensitive` | Redact tokens/passwords | No (default: true) |
-| `retention.max_age_days` | Days to retain logs | No (default: 90) |
-
-```yaml
-logs:
-  schema_version: "2.0"
-  storage:
-    local_path: /logs
-  session_logging:
-    enabled: true
-    redact_sensitive: true
-  retention:
-    max_age_days: 90
-```
-
-### File Toolset
-
-File storage configuration.
-
-| Setting | Description | Required |
-|---------|-------------|----------|
-| `active_handler` | Active handler: `local`, `s3` | Yes |
-| `handlers.local.base_path` | Base directory | No (default: .) |
-| `handlers.local.create_directories` | Auto-create directories | No (default: true) |
-| `handlers.s3.bucket` | S3 bucket name | No (default: `dev.{repo}`) |
-| `handlers.s3.region` | AWS region | Yes (S3) |
-| `handlers.s3.prefix` | Key prefix | No |
-
-#### Cloud Storage Bucket Convention
-
-When cloud storage (S3) is selected without an explicit bucket name, the default bucket is `dev.{repo}` (e.g., `dev.core` for a repository named "core"). This "dev" bucket is intended for development artifacts such as documentation and logs that don't belong to test or production environments.
-
-The naming convention follows the pattern used by other environments:
-- `dev.{repo}` — development artifacts (docs, logs, archives)
-- `test.{repo}` — test environment artifacts
-- `prod.{repo}` — production environment artifacts
-
-You can override this default by providing an explicit `--s3-bucket` argument during configuration.
-
-```yaml
-file:
-  active_handler: local
-  handlers:
-    local:
-      base_path: .
-      create_directories: true
-    s3:
-      bucket: dev.my-project
-      region: us-east-1
-      prefix: data/
-```
-
-### Docs Toolset
-
-Documentation management configuration.
-
-| Setting | Description | Required |
-|---------|-------------|----------|
-| `schema_version` | Schema version | Yes |
-| `custom_templates_path` | Path to custom doc type manifest | No |
-
-```yaml
-docs:
-  schema_version: "1.1"
-  custom_templates_path: .fractary/docs/templates/manifest.yaml  # optional
-```
-
-**Note:** Document types, output paths, and validation rules are defined in `type.yaml` files within `templates/docs/{type}/` directories, not in config.yaml.
+Each feature doc includes full field reference tables, handler setup, authentication details, and YAML examples.
 
 ## Environment Variables
 
@@ -465,8 +350,8 @@ fractary-core-config-update --context "enable S3 storage for file toolset"
 
 ## Related Documentation
 
-- [SDK Documentation](/docs/sdk/js/README.md) - Programmatic configuration details
-- [CLI Documentation](/docs/cli/README.md) - CLI flag overrides
-- [MCP Documentation](/docs/mcp/server/README.md) - MCP server configuration
-- [Plugin Documentation](/docs/plugins/README.md) - Plugin-specific settings
-- [Troubleshooting](/docs/guides/troubleshooting.md) - Common configuration issues
+- [SDK Interface](../interfaces/sdk.md) - Programmatic configuration details
+- [CLI Interface](../interfaces/cli.md) - CLI flag overrides
+- [MCP Interface](../interfaces/mcp.md) - MCP server configuration
+- [Plugin Interface](../interfaces/plugins.md) - Plugin-specific settings
+- [Troubleshooting](./troubleshooting.md) - Common configuration issues
