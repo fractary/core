@@ -34,7 +34,7 @@ npm install @fractary/core
 ### Basic Usage
 
 ```typescript
-import { WorkManager, RepoManager, SpecManager } from '@fractary/core';
+import { WorkManager, RepoManager } from '@fractary/core';
 
 // Initialize managers
 const workManager = new WorkManager({
@@ -135,9 +135,6 @@ ISSUE_NUM=$(echo $ISSUE_JSON | jq -r '.data.number')
 # Create branch
 fractary-core repo branch create "feature/$ISSUE_NUM-add-feature"
 
-# Create specification
-fractary-core spec create "Feature Spec" --work-id "$ISSUE_NUM"
-
 echo "Created feature: Issue #$ISSUE_NUM"
 ```
 
@@ -150,7 +147,6 @@ Add to `package.json`:
   "scripts": {
     "issue:create": "fractary-core work issue create",
     "branch:create": "fractary-core repo branch create",
-    "spec:validate": "fractary-core spec validate",
     "logs:archive": "fractary-core logs archive --max-age 90",
     "release:prepare": "node scripts/prepare-release.js"
   }
@@ -258,8 +254,6 @@ claude-code plugin install fractary-repo
 /fractary-repo-branch-create "feature/new-ui"
 /fractary-repo-commit "Add login" --type feat
 
-# Spec plugin
-/fractary-spec:create "API Design" --type feature
 ```
 
 #### Plugin Configuration
@@ -302,11 +296,6 @@ jobs:
       - name: Install Fractary CLI
         run: npm install -g @fractary/core-cli
 
-      - name: Validate Specifications
-        run: fractary-core spec validate --all
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Archive Logs
         run: fractary-core logs archive --max-age 30
         if: github.ref == 'refs/heads/main'
@@ -318,15 +307,6 @@ jobs:
 stages:
   - validate
   - release
-
-validate-specs:
-  stage: validate
-  image: node:18
-  script:
-    - npm install -g @fractary/core-cli
-    - fractary-core spec validate --all
-  variables:
-    GITLAB_TOKEN: $CI_JOB_TOKEN
 
 create-release:
   stage: release
@@ -353,12 +333,6 @@ pipeline {
         stage('Install') {
             steps {
                 sh 'npm install -g @fractary/core-cli'
-            }
-        }
-
-        stage('Validate') {
-            steps {
-                sh 'fractary-core spec validate --all'
             }
         }
 
@@ -514,7 +488,6 @@ services:
       - JIRA_TOKEN=${JIRA_TOKEN}
     volumes:
       - ./.fractary:/app/.fractary
-      - ./specs:/app/specs
       - ./logs:/app/logs
     ports:
       - "3000:3000"
@@ -623,7 +596,7 @@ expect(issue.number).toBe(123);
 2. **Environment variables for secrets** - Never commit tokens
 3. **Error handling** - Always handle errors from SDK methods
 4. **Logging** - Use the logs module for audit trails
-5. **Validation** - Validate specs before deployment
+5. **Validation** - Validate documentation before deployment
 6. **Testing** - Mock SDK methods in tests
 7. **Documentation** - Document integration points
 

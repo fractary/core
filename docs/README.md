@@ -1,20 +1,21 @@
 # Fractary Core Documentation
 
-Complete documentation for Fractary Core - foundational infrastructure for managing software development workflows.
+Complete documentation for Fractary Core - foundational utilities for managing software development workflows.
 
 ## What is Fractary Core?
 
-Fractary Core provides primitive operations for work tracking, repository management, specifications, logging, file storage, and documentation. It offers four interfaces (SDK, CLI, MCP Server, and Claude Code Plugins) to access these capabilities.
+Fractary Core provides primitive operations for work tracking, repository management, logging, file storage, and documentation. It offers four interfaces (SDK, CLI, MCP Server, and Claude Code Plugins) to access these capabilities.
+
+It serves as the shared utility layer for the Fractary ecosystem, and is also useful standalone for everyday LLM-assisted development. See the [main README](../README.md) for the project's design philosophy and origin.
 
 > **Platform note:** Currently, only **GitHub** is fully supported for work tracking and repository operations. Jira, Linear, GitLab, and Bitbucket providers exist as stubs for future implementation. File storage supports Local, S3, R2, GCS, and Google Drive.
 
-## The 6 Toolsets
+## The 5 Toolsets
 
 | Toolset | Description | Platform |
 |---------|-------------|----------|
 | **Work** | Work item and issue tracking | GitHub Issues (Jira, Linear planned) |
 | **Repo** | Repository and Git operations | GitHub (GitLab, Bitbucket planned) |
-| **Spec** | Technical specification management | Local storage |
 | **Logs** | Session and operational logging | Local storage |
 | **File** | File storage operations | Local, S3, R2, GCS, Google Drive |
 | **Docs** | Documentation management | Local storage |
@@ -32,11 +33,11 @@ const workManager = await createWorkManager();
 const issue = await workManager.fetchIssue(123);
 ```
 
-**[SDK Documentation](./sdk/js/README.md)** - 6 Manager classes, factory functions, full type definitions
+**[SDK Documentation](./sdk/js/README.md)** - Manager classes, factory functions, full type definitions
 
 ### 2. CLI
 
-Command-line access with 83 commands across 7 modules.
+Command-line access across 5 modules.
 
 ```bash
 fractary-core work issue-fetch 123
@@ -48,7 +49,7 @@ fractary-core file upload ./report.pdf --remote-path exports/report.pdf
 
 ### 3. MCP Server
 
-80 tools for AI agent integration via Model Context Protocol.
+MCP tools for AI agent integration via Model Context Protocol.
 
 ```json
 {
@@ -65,18 +66,17 @@ fractary-core file upload ./report.pdf --remote-path exports/report.pdf
 
 ### 4. Claude Code Plugins
 
-81 slash commands and 32 agents across 8 plugins.
+78 slash commands and 24 agents across 7 plugins.
 
 | Plugin | Commands | Agents | Description |
 |--------|----------|--------|-------------|
-| `fractary-core` | 7 | 3 | Configuration and environment management |
+| `fractary-core` | 11 | 4 | Configuration and environment management |
 | `fractary-work` | 8 | 2 | Work item tracking |
-| `fractary-repo` | 13 | 1 | Repository operations |
-| `fractary-spec` | 9 | 9 | Specification management |
+| `fractary-repo` | 15 | 1 | Repository operations |
 | `fractary-logs` | 15 | 4 | Log management |
-| `fractary-file` | 13 | 5 | File storage |
+| `fractary-file` | 13 | 5 | Multi-provider file storage |
 | `fractary-docs` | 14 | 6 | Documentation management |
-| `fractary-status` | 2 | 2 | Status line |
+| `fractary-status` | 2 | 2 | Status line for Claude Code |
 
 **[Plugins Documentation](./plugins/README.md)** - All commands, agents, and triggers
 
@@ -86,12 +86,11 @@ fractary-core file upload ./report.pdf --remote-path exports/report.pdf
 
 | Toolset | SDK | CLI | MCP | Plugin |
 |---------|-----|-----|-----|--------|
-| Work | [API](./sdk/js/README.md#workmanager) | [Commands](./cli/README.md#work-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-work) |
-| Repo | [API](./sdk/js/README.md#repomanager) | [Commands](./cli/README.md#repo-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-repo) |
-| Spec | [API](./sdk/js/README.md#specmanager) | [Commands](./cli/README.md#spec-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-spec) |
-| Logs | [API](./sdk/js/README.md#logmanager) | [Commands](./cli/README.md#logs-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-logs) |
-| File | [API](./sdk/js/README.md#filemanager) | [Commands](./cli/README.md#file-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-file) |
-| Docs | [API](./sdk/js/README.md#docsmanager) | [Commands](./cli/README.md#docs-commands) | [Tools](./mcp/server/README.md) | [Plugin](./plugins/README.md#fractary-docs) |
+| Work | [API](./sdk/js/work.md) | [Commands](./cli/work.md) | [Tools](./mcp/server/work.md) | [Plugin](./plugins/work.md) |
+| Repo | [API](./sdk/js/repo.md) | [Commands](./cli/repo.md) | [Tools](./mcp/server/repo.md) | [Plugin](./plugins/repo.md) |
+| Logs | [API](./sdk/js/logs.md) | [Commands](./cli/logs.md) | [Tools](./mcp/server/logs.md) | [Plugin](./plugins/logs.md) |
+| File | [API](./sdk/js/file.md) | [Commands](./cli/file.md) | [Tools](./mcp/server/file.md) | [Plugin](./plugins/file.md) |
+| Docs | [API](./sdk/js/docs.md) | [Commands](./cli/docs.md) | [Tools](./mcp/server/docs.md) | [Plugin](./plugins/docs.md) |
 
 ### Guides
 

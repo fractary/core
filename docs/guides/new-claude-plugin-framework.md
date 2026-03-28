@@ -155,14 +155,14 @@ class RepoManager {
 Now accessible from:
 - **Plugin** via MCP: `fractary_repo_branch_create` tool
 - **CLI** directly: `fractary-core repo branch-create`
-- **FABER workflows**: Mix repo + work + spec building blocks
+- **FABER workflows**: Mix repo + work + docs building blocks
 - **n8n workflows**: HTTP calls to SDK endpoints
 - **Custom scripts**: Import and use SDK
 - **Web apps**: Same SDK, different interface
 - **CI/CD pipelines**: SDK as library
 
 This **SDK-as-building-blocks approach** enables workflow systems that:
-- Mix and match across plugins (repo + work + spec)
+- Mix and match across plugins (repo + work + docs)
 - Orchestrate across multiple agentic frameworks
 - Compose deterministic operations reliably
 - Reuse logic without duplicating code

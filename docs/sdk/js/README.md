@@ -2,7 +2,7 @@
 
 TypeScript SDK for programmatic access to all Fractary Core toolsets.
 
-**Package:** `@fractary/core` v0.7.17
+**Package:** `@fractary/core`
 
 ## Installation
 
@@ -33,13 +33,12 @@ Each toolset is available as a separate module for tree-shaking:
 // Individual imports (recommended)
 import { WorkManager } from '@fractary/core/work';
 import { RepoManager } from '@fractary/core/repo';
-import { SpecManager } from '@fractary/core/spec';
 import { LogManager } from '@fractary/core/logs';
 import { FileManager } from '@fractary/core/file';
 import { DocsManager } from '@fractary/core/docs';
 
 // Unified import
-import { WorkManager, RepoManager, SpecManager, LogManager, FileManager, DocsManager } from '@fractary/core';
+import { WorkManager, RepoManager, LogManager, FileManager, DocsManager } from '@fractary/core';
 
 // Configuration utilities
 import { loadConfig, loadEnv } from '@fractary/core/config';
@@ -56,7 +55,6 @@ All available entry points:
 | `@fractary/core/config` | Config loading, env management, validation |
 | `@fractary/core/work` | WorkManager, types |
 | `@fractary/core/repo` | RepoManager, Git, providers |
-| `@fractary/core/spec` | SpecManager, templates |
 | `@fractary/core/logs` | LogManager, LogTypeRegistry |
 | `@fractary/core/file` | FileManager, storage backends |
 | `@fractary/core/docs` | DocsManager, DocTypeRegistry |
@@ -389,54 +387,6 @@ const pr = await repoManager.createPR({
 
 ---
 
-## SpecManager
-
-Technical specification management with templates and validation.
-
-### Constructor
-
-```typescript
-new SpecManager(config?: Partial<SpecConfig>)
-```
-
-### Methods
-
-```typescript
-createSpec(title: string, options?: SpecCreateOptions): Specification
-getSpec(idOrPath: string): Specification | null
-updateSpec(idOrPath: string, updates: SpecUpdates): Specification
-deleteSpec(idOrPath: string): boolean
-listSpecs(options?: SpecListOptions): Specification[]
-validateSpec(specIdOrPath: string): SpecValidateResult
-generateRefinementQuestions(specIdOrPath: string): RefinementQuestion[]
-refineSpec(specIdOrPath: string, answers: Record<string, string>): SpecRefineResult
-getTemplates(): SpecTemplate[]
-```
-
-**Phase & Task Operations:**
-
-```typescript
-updatePhase(specIdOrPath: string, phaseId: string, updates: PhaseUpdateOptions): Specification
-completeTask(specIdOrPath: string, phaseId: string, taskIndex: number): Specification
-addTask(specIdOrPath: string, phaseId: string, taskText: string): Specification
-```
-
-### Example
-
-```typescript
-const specManager = new SpecManager();
-
-const spec = specManager.createSpec('API Authentication Design', {
-  template: 'feature',
-  workId: '123',
-});
-
-const validation = specManager.validateSpec(spec.id);
-console.log(validation.valid, validation.issues);
-```
-
----
-
 ## LogManager
 
 Log management with type classification and session capture.
@@ -570,7 +520,7 @@ docExists(id: string): Promise<boolean>
 All SDK methods throw typed errors that extend `CoreError`:
 
 ```typescript
-import { WorkError, RepoError, SpecError, LogError, CoreError } from '@fractary/core';
+import { WorkError, RepoError, LogError, CoreError } from '@fractary/core';
 
 try {
   const issue = await workManager.fetchIssue(123);
@@ -593,8 +543,6 @@ CoreError
     BranchExistsError, BranchNotFoundError, ProtectedBranchError
     CommitError, PushError, PRNotFoundError, PRError
     MergeConflictError, DirtyWorkingDirectoryError
-  SpecError
-    SpecNotFoundError, SpecExistsError, SpecValidationError
   LogError
     NoActiveSessionError, SessionActiveError, LogNotFoundError
   ProviderError
@@ -613,7 +561,7 @@ if (!result.valid) {
 }
 ```
 
-Zod schemas are exported for all config sections: `CoreYamlConfigSchema`, `WorkConfigSchema`, `RepoConfigSchema`, `LogsConfigSchema`, `FileConfigSchema`, `SpecConfigSchema`, `DocsConfigSchema`.
+Zod schemas are exported for all config sections: `CoreYamlConfigSchema`, `WorkConfigSchema`, `RepoConfigSchema`, `LogsConfigSchema`, `FileConfigSchema`, `DocsConfigSchema`.
 
 ## Other Interfaces
 

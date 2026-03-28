@@ -1,6 +1,6 @@
 # Fractary Core MCP Server
 
-Model Context Protocol (MCP) server providing 80 tools for AI agent integration.
+Model Context Protocol (MCP) server providing tools for AI agent integration across all Fractary Core toolsets.
 
 ## What is MCP?
 
@@ -75,19 +75,17 @@ fractary_{toolset}_{resource}_{action}
 | `fractary_work_issue_fetch` | Work | Issue | Fetch |
 | `fractary_repo_branch_create` | Repo | Branch | Create |
 | `fractary_repo_pr_merge` | Repo | PR | Merge |
-| `fractary_spec_validate` | Spec | - | Validate |
 | `fractary_logs_capture` | Logs | - | Capture |
 
 ## Tool Categories by Toolset
 
-| Toolset | Tool Count | Documentation |
-|---------|------------|---------------|
-| **Work** | 19 tools | [Work Tools](/docs/mcp/server/work.md) |
-| **Repo** | 37 tools | [Repo Tools](/docs/mcp/server/repo.md) |
-| **Spec** | 5 tools | [Spec Tools](/docs/mcp/server/spec.md) |
-| **Logs** | 5 tools | [Logs Tools](/docs/mcp/server/logs.md) |
-| **File** | 7 tools | [File Tools](/docs/mcp/server/file.md) |
-| **Docs** | 7 tools | [Docs Tools](/docs/mcp/server/docs.md) |
+| Toolset | Documentation |
+|---------|---------------|
+| **Work** | [Work Tools](./work.md) |
+| **Repo** | [Repo Tools](./repo.md) |
+| **Logs** | [Logs Tools](./logs.md) |
+| **File** | [File Tools](./file.md) |
+| **Docs** | [Docs Tools](./docs.md) |
 
 ## Configuration
 
@@ -113,9 +111,6 @@ repo:
     owner: myorg
     repo: myrepo
     token: ${GITHUB_TOKEN}
-
-spec:
-  directory: ./specs
 
 logs:
   directory: ./logs
@@ -214,21 +209,6 @@ All tools return responses in a consistent format:
   "title": "Add authentication",
   "base": "main",
   "draft": false
-}
-```
-
-### Spec Tools
-
-```json
-// fractary_spec_create
-{
-  "title": "API Design",
-  "template": "api"
-}
-
-// fractary_spec_validate
-{
-  "spec_id": "SPEC-20240101"
 }
 ```
 

@@ -353,7 +353,7 @@ Common issues and solutions for Fractary Core.
 
 ### "Resource not found"
 
-**Cause:** Issue, PR, or spec doesn't exist
+**Cause:** Issue, PR, or resource doesn't exist
 
 **Solutions:**
 - Verify ID/number is correct
