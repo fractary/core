@@ -60,13 +60,13 @@ Start and stop capture manually:
 
 ```bash
 # Start capture
-/fractary-logs:capture 123
+/fractary-logs-capture 123
 
 # Work on issue...
 # All conversation automatically recorded
 
 # Stop capture
-/fractary-logs:stop
+/fractary-logs-stop
 ```
 
 ### Auto-Capture in FABER
@@ -81,7 +81,7 @@ Sessions automatically captured during FABER workflows:
 Log specific decisions or notes:
 
 ```bash
-/fractary-logs:log 123 "Decided to use PostgreSQL for better JSON support"
+/fractary-logs-log 123 "Decided to use PostgreSQL for better JSON support"
 ```
 
 ## Sensitive Data Redaction
@@ -194,13 +194,13 @@ Read sessions via:
 
 ```bash
 # Read by issue number
-/fractary-logs:read 123
+/fractary-logs-read 123
 
 # Search sessions
-/fractary-logs:search "OAuth implementation"
+/fractary-logs-search "OAuth implementation"
 
 # Analyze session
-/fractary-logs:analyze session 123
+/fractary-logs-analyze session 123
 ```
 
 Sessions remain locally accessible for 30 days (default), then automatically archived to cloud storage while remaining searchable.
@@ -211,7 +211,7 @@ Sessions remain locally accessible for 30 days (default), then automatically arc
 
 You tried to append or stop without starting capture.
 
-**Solution**: Start capture first with `/fractary-logs:capture <issue>`
+**Solution**: Start capture first with `/fractary-logs-capture <issue>`
 
 ### "Session already exists"
 

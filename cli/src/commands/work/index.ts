@@ -17,7 +17,7 @@ import { loadConfig, writeConfig, getConfigPath, type CoreConfig } from '../../u
  *
  * Commands use dashes to mirror plugin naming:
  * CLI: fractary-core work issue-create
- * Plugin: /fractary-work:issue-create
+ * Plugin: /fractary-work-issue-create
  */
 export function createWorkCommand(): Command {
   const work = new Command('work').description('Work item tracking operations');

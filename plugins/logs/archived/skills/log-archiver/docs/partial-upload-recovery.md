@@ -47,7 +47,7 @@ The archive entry tracks overall status:
 
 ### Retry Failed Uploads
 
-User executes: `/fractary-logs:archive 123 --retry`
+User executes: `/fractary-logs-archive 123 --retry`
 
 1. Agent calls `retry-failed-uploads.sh 123`
 2. Script returns JSON with files to retry:
@@ -154,7 +154,7 @@ User executes: `/fractary-logs:archive 123 --retry`
 
 **Recovery**:
 ```bash
-/fractary-logs:archive 123 --retry
+/fractary-logs-archive 123 --retry
 ```
 
 ### Local File Missing During Retry
@@ -214,7 +214,7 @@ Multiple retry attempts are safe - already-uploaded files are not re-uploaded.
 
 1. **Check partial archive status**:
    ```bash
-   /fractary-logs:read 123  # View archive index entry
+   /fractary-logs-read 123  # View archive index entry
    ```
 
 2. **Retry promptly** - local files may be cleaned up after 30 days
@@ -237,7 +237,7 @@ Multiple retry attempts are safe - already-uploaded files are not re-uploaded.
 
 ```bash
 # Archive logs
-/fractary-logs:archive 123
+/fractary-logs-archive 123
 
 # Manually mark a file as failed (testing only)
 ./update-file-status.sh 123 "/logs/sessions/session-123.md.gz" "failed"
@@ -246,7 +246,7 @@ Multiple retry attempts are safe - already-uploaded files are not re-uploaded.
 ./retry-failed-uploads.sh 123
 
 # Retry
-/fractary-logs:archive 123 --retry
+/fractary-logs-archive 123 --retry
 ```
 
 ### Verify Index State

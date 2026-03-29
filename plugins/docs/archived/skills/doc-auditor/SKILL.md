@@ -28,7 +28,7 @@ You generate specifications that can be followed to bring documentation into com
 
 **IMPORTANT:** Use fractary-spec Plugin When Available
 - Check if fractary-spec plugin is installed
-- If available: Use spec-manager agent (fractary-spec:spec-manager) to generate standardized spec
+- If available: Use spec-manager agent (fractary-spec-spec-manager) to generate standardized spec
 - If not available: Cannot generate spec (audit presents findings only)
 - Either way, output must be actionable
 
@@ -162,7 +162,7 @@ echo "State saved to: $state_dir/"
 If plugin status is `"available"`:
 - Continue with full workflow (Steps 2-8)
 - User will see "Save as Spec" option in Step 6
-- Can generate formal specification via spec-manager agent (fractary-spec:spec-manager)
+- Can generate formal specification via spec-manager agent (fractary-spec-spec-manager)
 
 If plugin status is `"unavailable"`:
 - Continue with audit and present findings (Steps 2-6 only)
@@ -303,7 +303,7 @@ Present the audit findings and proposed remediation actions:
 
 {IF $PLUGIN_STATUS == "available":}
 1. **Save as Spec**: Generate a formal remediation specification using
-   fractary-spec:spec-manager (recommended for tracking and execution)
+   fractary-spec-spec-manager (recommended for tracking and execution)
 
 2. **Refine Plan**: Provide feedback to adjust priorities, actions, or scope
    (I'll revise and present an updated plan for your approval)
@@ -342,11 +342,11 @@ Do NOT proceed to spec generation until user explicitly chooses "Save as Spec".
 
 ### Step 7.1: Create Tracking Issue
 
-Use the @agent-fractary-work:work-manager agent to create a GitHub issue for tracking the remediation work.
+Use the @agent-fractary-work-work-manager agent to create a GitHub issue for tracking the remediation work.
 
 **Natural Language Invocation**:
 ```
-Use the @agent-fractary-work:work-manager agent to create a GitHub issue with the following request:
+Use the @agent-fractary-work-work-manager agent to create a GitHub issue with the following request:
 
 {
   "operation": "create-issue",
@@ -365,11 +365,11 @@ Use the @agent-fractary-work:work-manager agent to create a GitHub issue with th
 
 ### Step 7.2: Generate Spec via Spec-Manager
 
-Use the @agent-fractary-spec:spec-manager agent to generate a formal specification from the tracking issue.
+Use the @agent-fractary-spec-spec-manager agent to generate a formal specification from the tracking issue.
 
 **Natural Language Invocation**:
 ```
-Use the @agent-fractary-spec:spec-manager agent to generate specification with the following request:
+Use the @agent-fractary-spec-spec-manager agent to generate specification with the following request:
 
 {
   "operation": "generate",
@@ -392,11 +392,11 @@ Use the @agent-fractary-spec:spec-manager agent to generate specification with t
 
 ### Step 7.3: Register Audit Logs
 
-Use the @agent-fractary-logs:logs-manager agent to register the audit logs for tracking.
+Use the @agent-fractary-logs-logs-manager agent to register the audit logs for tracking.
 
 **Natural Language Invocation**:
 ```
-Use the @agent-fractary-logs:logs-manager agent to register audit logs with the following request:
+Use the @agent-fractary-logs-logs-manager agent to register audit logs with the following request:
 
 {
   "operation": "register-log",
@@ -577,7 +577,7 @@ Display audit completion summary:
   1. Review audit report: logs/audits/docs/{timestamp}-documentation-audit.md
   2. Review remediation spec: specs/spec-{issue_number}-documentation-remediation.md
   3. Follow implementation plan
-  4. Verify with: /fractary-docs:validate
+  4. Verify with: /fractary-docs-validate
   5. View audit history: logs/audits/docs/
 
 ═══════════════════════════════════════════════════════════
@@ -734,8 +734,8 @@ Handle errors gracefully:
 
 <INTEGRATION>
 This skill is used by:
-- **audit command**: `/fractary-docs:audit`
-- **adopt command**: `/fractary-docs:adopt` (uses auditor for analysis)
+- **audit command**: `/fractary-docs-audit`
+- **adopt command**: `/fractary-docs-adopt` (uses auditor for analysis)
 - **docs-manager agent**: For audit operations
 
 **Usage Example:**
@@ -758,13 +758,13 @@ Use the doc-auditor skill to audit documentation:
   - discover-structure.sh
   - discover-frontmatter.sh
   - assess-quality.sh
-- **Spec plugin** (REQUIRED for spec generation): fractary-spec:spec-manager
+- **Spec plugin** (REQUIRED for spec generation): fractary-spec-spec-manager
   - Audit can run without it (presents findings only)
   - Spec generation requires fractary-spec plugin installed
-- **Logs manager** (REQUIRED for log tracking): fractary-logs:logs-manager
+- **Logs manager** (REQUIRED for log tracking): fractary-logs-logs-manager
   - Tracks audit runs over time in `logs/audit/{timestamp}/`
   - Enables compliance trend analysis
-- **Work manager** (REQUIRED for tracking issues): fractary-work:work-manager
+- **Work manager** (REQUIRED for tracking issues): fractary-work-work-manager
   - Creates GitHub tracking issues for remediation
 - **Configuration**: .fractary/config.yaml
 - **Project standards** (optional): Configured in validation.project_standards_doc
@@ -787,13 +787,13 @@ Document the audit process:
 **Format:**
 - Final audit report: Markdown file in `logs/audits/docs/{timestamp}-documentation-audit.md`
 - Audit findings: Formatted text presentation for user review
-- Remediation spec: Generated via fractary-spec:spec-manager (if approved)
+- Remediation spec: Generated via fractary-spec-spec-manager (if approved)
 - Temporary discovery reports: JSON files in `logs/audits/tmp/` (cleaned up after report)
 - Audit log metadata: Tracked by logs-manager for trend analysis
 
 **Log Management:**
 - All audit runs produce a permanent report in `logs/audits/docs/{timestamp}-documentation-audit.md`
-- Managed by fractary-logs:logs-manager agent
+- Managed by fractary-logs-logs-manager agent
 - Temporary discovery files in `logs/audits/tmp/` are cleaned up after final report
 - Enables tracking of compliance trends over time
 - Each audit has a unique timestamp for historical reference

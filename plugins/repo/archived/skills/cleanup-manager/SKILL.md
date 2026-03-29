@@ -14,7 +14,7 @@ Your responsibility is to identify and clean up stale branches in repositories. 
 
 You are invoked by:
 - The repo-manager agent for programmatic cleanup operations
-- The /fractary-repo:cleanup command for user-initiated cleanup
+- The /fractary-repo-cleanup command for user-initiated cleanup
 - Maintenance scripts and scheduled cleanup tasks
 - DevOps automation for repository hygiene
 
@@ -133,13 +133,13 @@ Invoke the active source control handler skill.
 
 **IMPORTANT**: You MUST use the Skill tool to invoke the handler. The handler skill name is constructed as follows:
 1. Read the platform from config: `config.handlers.source_control.active` (e.g., "github")
-2. Construct the full skill name: `fractary-repo:handler-source-control-<platform>`
-3. For example, if platform is "github", invoke: `fractary-repo:handler-source-control-github`
+2. Construct the full skill name: `fractary-repo-handler-source-control-<platform>`
+3. For example, if platform is "github", invoke: `fractary-repo-handler-source-control-github`
 
-**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo:handler-source-control-<platform>`.
+**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo-handler-source-control-<platform>`.
 
 Use the Skill tool with:
-- command: `fractary-repo:handler-source-control-<platform>` (where <platform> is from config)
+- command: `fractary-repo-handler-source-control-<platform>` (where <platform> is from config)
 - Pass parameters: {merged, inactive_days, location}
 
 The handler will return:
@@ -239,13 +239,13 @@ If not dry_run:
 
 **IMPORTANT**: You MUST use the Skill tool to invoke the handler. The handler skill name is constructed as follows:
 1. Read the platform from config: `config.handlers.source_control.active` (e.g., "github")
-2. Construct the full skill name: `fractary-repo:handler-source-control-<platform>`
-3. For example, if platform is "github", invoke: `fractary-repo:handler-source-control-github`
+2. Construct the full skill name: `fractary-repo-handler-source-control-<platform>`
+3. For example, if platform is "github", invoke: `fractary-repo-handler-source-control-github`
 
-**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo:handler-source-control-<platform>`.
+**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo-handler-source-control-<platform>`.
 
 Use the Skill tool with:
-- command: `fractary-repo:handler-source-control-<platform>` (where <platform> is from config)
+- command: `fractary-repo-handler-source-control-<platform>` (where <platform> is from config)
 - Pass parameters: {branch_name, location, force}
 
 The handler will:
@@ -597,7 +597,7 @@ OUTPUT:
 
 **Called By:**
 - `repo-manager` agent - For programmatic cleanup operations
-- `/fractary-repo:cleanup` command - For user-initiated cleanup
+- `/fractary-repo-cleanup` command - For user-initiated cleanup
 - Scheduled maintenance tasks
 - DevOps automation scripts
 

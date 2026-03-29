@@ -15,7 +15,7 @@ CONFIG_FILE="${FRACTARY_LOGS_CONFIG:-.fractary/config.yaml (logs section)}"
 # Load configuration
 if [[ ! -f "$CONFIG_FILE" ]]; then
     echo "Error: Configuration not found at $CONFIG_FILE"
-    echo "Run /fractary-logs:init to initialize"
+    echo "Run /fractary-logs-init to initialize"
     exit 1
 fi
 

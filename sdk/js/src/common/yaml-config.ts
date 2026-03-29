@@ -312,7 +312,7 @@ export function loadYamlConfig(options: ConfigLoadOptions = {}): CoreYamlConfig 
         `Configuration file not found at:\n` +
         `  - ${newConfigPath} (preferred)\n` +
         `  - ${oldConfigPath} (deprecated)\n` +
-        `Run 'fractary-core:config-init' to create it.`
+        `Run 'fractary-core-config-init' to create it.`
       );
     }
     return null;

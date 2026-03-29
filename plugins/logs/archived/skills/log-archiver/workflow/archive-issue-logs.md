@@ -120,7 +120,7 @@ The log-archiver skill returns control to the log-manager agent with the list of
 The log-manager agent then:
 
 1. For each file in the upload list:
-   - Invoke @agent-fractary-file:file-manager with upload operation:
+   - Invoke @agent-fractary-file-file-manager with upload operation:
      ```json
      {
        "operation": "upload",
@@ -181,8 +181,8 @@ Session logs and operational logs have been archived to cloud storage.
 Archived: 2025-01-15 14:00 UTC
 
 These logs are permanently stored and searchable via:
-- `/fractary-logs:read 123`
-- `/fractary-logs:search "<query>"`
+- `/fractary-logs-read 123`
+- `/fractary-logs-search "<query>"`
 ```
 
 Post comment:
@@ -260,7 +260,7 @@ If some files uploaded, others failed:
    Failed files:
      - /logs/builds/123-build.log.gz
 
-   Retry with: /fractary-logs:archive 123 --retry
+   Retry with: /fractary-logs-archive 123 --retry
    ```
 
 2. **Local files preserved** until all uploads succeed

@@ -36,7 +36,7 @@ last: update spec accordingly
 **Without clickable links:**
 ```
 [my-project] main ±0
-last: /fractary-spec:generate 99
+last: /fractary-spec-generate 99
 ```
 
 ## Global Arguments

@@ -3,7 +3,7 @@
  *
  * Commands use dashes to mirror plugin naming:
  * CLI: fractary-core docs doc-create
- * Plugin: /fractary-docs:doc-create
+ * Plugin: /fractary-docs-doc-create
  */
 
 import { Command } from 'commander';

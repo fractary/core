@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-list
+name: fractary-work-issue-list
 description: |
   MUST BE USED when user wants to list or browse issues.
   Use PROACTIVELY when user mentions "list issues", "show open issues", "what issues are there", or wants to see available work items.

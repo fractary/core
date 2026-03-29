@@ -38,7 +38,7 @@ This skill solves the "one step behind" problem by:
 </CRITICAL_RULES>
 
 <INPUTS>
-You receive sync requests from the /fractary-status:sync command.
+You receive sync requests from the /fractary-status-sync command.
 
 **Request Format**:
 ```json
@@ -161,7 +161,7 @@ Tried: ~/.claude/plugins/marketplaces/fractary/plugins/repo/scripts/update-statu
 **Cache file not found**:
 ```
 ⚠️ Warning: Cache file not found after refresh
-This may happen on first run. Try running /fractary-status:sync again.
+This may happen on first run. Try running /fractary-status-sync again.
 ```
 
 **Script execution failed**:
@@ -287,7 +287,7 @@ echo -e "${GREEN}✅ Status line will refresh with next message${NC}"
 
 **Sync status**:
 ```bash
-/fractary-status:sync
+/fractary-status-sync
 ```
 
 **Expected output**:

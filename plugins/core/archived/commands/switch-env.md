@@ -1,12 +1,12 @@
 ---
-name: fractary-core:switch-env
+name: fractary-core-switch-env
 description: Switch to a different environment (test, staging, prod) for credentials
-allowed-tools: Agent(fractary-core:switch-env)
+allowed-tools: Agent(fractary-core-switch-env)
 model: claude-haiku-4-5
 argument-hint: '<environment> | --list | --show | --clear'
 ---
 
-Use **Agent** tool with `fractary-core:switch-env` agent to switch environments mid-session.
+Use **Agent** tool with `fractary-core-switch-env` agent to switch environments mid-session.
 
 Essential for **FABR workflows** where you need different credentials for each phase:
 - **Evaluate phase**: Switch to test environment
@@ -14,7 +14,7 @@ Essential for **FABR workflows** where you need different credentials for each p
 
 ```
 Agent(
-  subagent_type="fractary-core:switch-env",
+  subagent_type="fractary-core-switch-env",
   description="Switch environment",
   prompt="Switch environment: $ARGUMENTS"
 )
@@ -24,19 +24,19 @@ Agent(
 
 ```bash
 # Switch to test environment (evaluate phase)
-/fractary-core:switch-env test
+/fractary-core-switch-env test
 
 # Switch to production (release phase)
-/fractary-core:switch-env prod
+/fractary-core-switch-env prod
 
 # List available environments
-/fractary-core:switch-env --list
+/fractary-core-switch-env --list
 
 # Show current environment status
-/fractary-core:switch-env --show
+/fractary-core-switch-env --show
 
 # Clear credentials before switching (clean slate)
-/fractary-core:switch-env --clear prod
+/fractary-core-switch-env --clear prod
 ```
 
 ## How It Works
