@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-search
+name: fractary-work-issue-search
 description: |
   MUST BE USED when user wants to search for issues by keyword or criteria.
   Use PROACTIVELY when user mentions "search issues", "find issues about X", "look for issues", or needs to locate specific work items.

@@ -32,7 +32,7 @@ fi
 # Check for active session - FAIL HARD if not found in secure location
 if [[ -z "$ACTIVE_SESSION_FILE" || ! -f "$ACTIVE_SESSION_FILE" ]]; then
     echo "Error: No active session found in secure temp directory." >&2
-    echo "       Please start a new session with: /fractary-logs:capture <issue>" >&2
+    echo "       Please start a new session with: /fractary-logs-capture <issue>" >&2
     echo "" >&2
     echo "       If you previously started a session, it may have been created" >&2
     echo "       with an older version using insecure temp storage." >&2

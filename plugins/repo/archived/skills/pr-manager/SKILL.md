@@ -14,7 +14,7 @@ Your responsibility is to manage the complete pull request lifecycle: creation, 
 
 You are invoked by:
 - The repo-manager agent for programmatic PR operations
-- The /fractary-repo:pr command for user-initiated PR management
+- The /fractary-repo-pr command for user-initiated PR management
 - FABER workflow managers during Release phase to create and merge PRs
 
 You delegate to the active source control handler to perform platform-specific PR operations.
@@ -212,13 +212,13 @@ If `wait_for_ci` parameter is `true`, poll for CI completion before analyzing:
 
 **IMPORTANT**: You MUST use the Skill tool to invoke the handler. The handler skill name is constructed as follows:
 1. Read the platform from config: `config.handlers.source_control.active` (e.g., "github")
-2. Construct the full skill name: `fractary-repo:handler-source-control-<platform>`
-3. For example, if platform is "github", invoke: `fractary-repo:handler-source-control-github`
+2. Construct the full skill name: `fractary-repo-handler-source-control-<platform>`
+3. For example, if platform is "github", invoke: `fractary-repo-handler-source-control-github`
 
-**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo:handler-source-control-<platform>`.
+**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo-handler-source-control-<platform>`.
 
 Use the Skill tool with:
-- command: `fractary-repo:handler-source-control-<platform>` (where <platform> is from config)
+- command: `fractary-repo-handler-source-control-<platform>` (where <platform> is from config)
 - Pass parameters: {pr_number}
 
 **Analyze Response:**
@@ -493,7 +493,7 @@ SUGGESTED NEXT STEPS:
    d. Resolve conflicts in: {list conflicting files}
    e. Commit resolution: git commit
    f. Push changes: git push origin {head_branch}
-   g. Wait for CI to pass and re-analyze: /fractary-repo:pr-review {pr_number}
+   g. Wait for CI to pass and re-analyze: /fractary-repo-pr-review {pr_number}
 
 {Else if CI failures exist:}
 1. [FIX CI] Address failing CI checks
@@ -502,7 +502,7 @@ SUGGESTED NEXT STEPS:
    Fix issues on branch {head_branch}
 
 2. [RE-ANALYZE] After fixes, re-run analysis
-   Use: /fractary-repo:pr-review {pr_number}
+   Use: /fractary-repo-pr-review {pr_number}
 
 {Else if changes requested or critical issues in comments:}
 1. [ADDRESS ISSUES] Fix the issues identified in code review
@@ -513,28 +513,28 @@ SUGGESTED NEXT STEPS:
    Work on branch: {head_branch}
 
 2. [RE-ANALYZE] After fixes, re-run analysis
-   Use: /fractary-repo:pr-review {pr_number}
+   Use: /fractary-repo-pr-review {pr_number}
 
 3. [DISCUSS] If you disagree with the feedback
-   Add comment to discuss: /fractary-repo:pr-comment {pr_number} --comment "Your response"
+   Add comment to discuss: /fractary-repo-pr-comment {pr_number} --comment "Your response"
 
 {Else if review required but no reviews:}
 1. [WAIT FOR REVIEW] PR requires review approval
    Request review from team members
 
 2. [CHECK STATUS] Monitor review status
-   Use: /fractary-repo:pr-review {pr_number}
+   Use: /fractary-repo-pr-review {pr_number}
 
 {Else if ready to approve:}
 1. [APPROVE & MERGE] Approve and merge this PR
-   Use: /fractary-repo:pr-review {pr_number} --action approve --comment "Looks good!"
-   Then: /fractary-repo:pr-merge {pr_number}
+   Use: /fractary-repo-pr-review {pr_number} --action approve --comment "Looks good!"
+   Then: /fractary-repo-pr-merge {pr_number}
 
 2. [REQUEST CHANGES] Request additional changes (if you found issues)
-   Use: /fractary-repo:pr-review {pr_number} --action request_changes --comment "Your feedback"
+   Use: /fractary-repo-pr-review {pr_number} --action request_changes --comment "Your feedback"
 
 3. [ADD COMMENT] Add comment without formal review
-   Use: /fractary-repo:pr-comment {pr_number} --comment "Your feedback"
+   Use: /fractary-repo-pr-comment {pr_number} --comment "Your feedback"
 ```
 
 **CRITICAL OUTPUT REQUIREMENTS:**
@@ -646,10 +646,10 @@ When the PR is merged, GitHub will automatically close issue #{work_id}.
 
 **Invoke Handler:**
 
-**IMPORTANT**: You MUST use the Skill tool. Construct the full skill name as `fractary-repo:handler-source-control-<platform>` where <platform> is from `config.handlers.source_control.active`.
+**IMPORTANT**: You MUST use the Skill tool. Construct the full skill name as `fractary-repo-handler-source-control-<platform>` where <platform> is from `config.handlers.source_control.active`.
 
 Use the Skill tool with:
-- command: `fractary-repo:handler-source-control-<platform>`
+- command: `fractary-repo-handler-source-control-<platform>`
 - Pass parameters: {title, formatted_body, head_branch, base_branch, draft}
 
 **4C. COMMENT PR WORKFLOW:**
@@ -661,7 +661,7 @@ Use the Skill tool with:
 
 **Invoke Handler:**
 
-Use the Skill tool with command `fractary-repo:handler-source-control-<platform>` where <platform> is from config.
+Use the Skill tool with command `fractary-repo-handler-source-control-<platform>` where <platform> is from config.
 Pass parameters: {pr_number, comment}
 
 **4D. REVIEW PR WORKFLOW:**
@@ -680,7 +680,7 @@ Pass parameters: {pr_number, comment}
 
 **Invoke Handler:**
 
-Use the Skill tool with command `fractary-repo:handler-source-control-<platform>` where <platform> is from config.
+Use the Skill tool with command `fractary-repo-handler-source-control-<platform>` where <platform> is from config.
 Pass parameters: {pr_number, action, comment}
 
 **Handle Response:**
@@ -755,7 +755,7 @@ For non-protected branches (feature, staging, dev, etc.):
 
 **Invoke Handler:**
 
-Use the Skill tool with command `fractary-repo:handler-source-control-<platform>` where <platform> is from config.
+Use the Skill tool with command `fractary-repo-handler-source-control-<platform>` where <platform> is from config.
 
 Pass parameters: {pr_number, strategy, delete_branch}
 
@@ -918,7 +918,7 @@ See: `plugins/faber/docs/RESPONSE-FORMAT.md` for complete specification.
       "recommendation": "READY_TO_APPROVE"
     },
     "suggested_actions": [
-      {"action": "approve_and_merge", "commands": ["/fractary-repo:pr-review 456 approve", "/fractary-repo:pr-merge 456"]}
+      {"action": "approve_and_merge", "commands": ["/fractary-repo-pr-review 456 approve", "/fractary-repo-pr-merge 456"]}
     ]
   }
 }
@@ -1405,7 +1405,7 @@ Closes #{work_id}
 
 **Called By:**
 - `repo-manager` agent - For programmatic PR operations
-- `/fractary-repo:pr` command - For user-initiated PR management
+- `/fractary-repo-pr` command - For user-initiated PR management
 - FABER `release-manager` - For creating and managing release PRs
 
 **Calls:**

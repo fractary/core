@@ -390,7 +390,7 @@ View updated issue: [GitHub URL]
 
 Next steps:
 - Review the updated issue
-- Run /fractary-spec:create to generate architectural spec
+- Run /fractary-spec-create to generate architectural spec
 - Or proceed directly to implementation if requirements are sufficient
 ```
 
@@ -607,7 +607,7 @@ View updated issue: https://github.com/[owner]/[repo]/issues/<number>
 
 Next steps:
 - Review the updated issue
-- Run /fractary-spec:create --work-id <number> to generate architectural spec
+- Run /fractary-spec-create --work-id <number> to generate architectural spec
 - Or proceed to implementation if requirements are sufficient
 ```
 
@@ -625,7 +625,7 @@ The issue includes:
 - Target users identified
 
 No refinement needed. You can proceed with:
-- /fractary-spec:create --work-id <number> to create architectural spec
+- /fractary-spec-create --work-id <number> to create architectural spec
 - Or start implementation directly
 ```
 
@@ -664,7 +664,7 @@ View issue: https://github.com/[owner]/[repo]/issues/<number>
 
 **AVOID Using For**:
 - Issues that are already well-defined
-- Technical/architectural questions (use /fractary-spec:refine instead)
+- Technical/architectural questions (use /fractary-spec-refine instead)
 - Issues that are ready for implementation
 
 ## Relationship to Other Commands:
@@ -678,9 +678,9 @@ Frame Phase (Requirements Clarity):
   [Requirements clear]
 
 Architect Phase (Technical Planning):
-  /fractary-spec:create
+  /fractary-spec-create
       ↓
-  /fractary-spec:refine
+  /fractary-spec-refine
       ↓
   [Architecture clear]
 

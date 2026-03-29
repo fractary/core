@@ -261,7 +261,7 @@ Validating final log...
 Session finalized: .fractary/logs/session/session-550e8400.md
 Duration: 2h 30m | Turns: 45 | Status: completed
 ───────────────────────────────────────
-Next: Session can be listed with /fractary-logs:list --type session
+Next: Session can be listed with /fractary-logs-list --type session
 ```
 </OUTPUTS>
 

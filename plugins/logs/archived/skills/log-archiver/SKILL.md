@@ -390,7 +390,7 @@ Archived: 45 logs across 3 types
 Protected: 7 logs (retention exceptions)
 Space freed: 2.9 MB | Uploaded: 20.3 MB
 ───────────────────────────────────────
-Next: Verify archive with /fractary-logs:verify-archive
+Next: Verify archive with /fractary-logs-verify-archive
 ```
 
 **Retention status**:
@@ -463,7 +463,7 @@ Failed:
   ✗ audit: Cloud upload failed (permission denied)
 
 Action: Audit logs kept locally, other types processed
-Retry: /fractary-logs:archive --type audit --retry
+Retry: /fractary-logs-archive --type audit --retry
 ```
 
 </ERROR_HANDLING>
@@ -500,7 +500,7 @@ Retry: /fractary-logs:archive --type audit --retry
 - Retention matches log value and use case
 
 **Migration path:**
-- Run `/fractary-logs:init --force` to generate new v2.0 config
+- Run `/fractary-logs-init --force` to generate new v2.0 config
 - Review `retention.paths` array and adjust as needed
 - Old configs (v1.x) automatically migrated to path-based structure
 - Existing `.archive-index.json` files can be safely deleted - they are no longer used

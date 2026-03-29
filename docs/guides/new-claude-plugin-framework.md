@@ -1024,7 +1024,7 @@ Commands should:
 **Tool Restriction (Critical):**
 ```yaml
 ---
-name: fractary-plugin:command
+name: fractary-plugin-command
 allowed-tools: Agent  # Physical constraint - Claude cannot use other tools
 ---
 ```
@@ -1207,7 +1207,7 @@ allowed-tools: Skill(fractary-pr-context-preparer), Agent(fractary-repo-pr-creat
 **Structure:**
 ```markdown
 ---
-name: fractary-plugin:command-name
+name: fractary-plugin-command-name
 description: Brief description - delegates to agent
 allowed-tools: Agent
 model: claude-haiku-4-5
@@ -1219,14 +1219,14 @@ Brief description of what this command does.
 Agent tool invocation pattern:
 
 Agent(
-  subagent_type="fractary-plugin:command-name",
+  subagent_type="fractary-plugin-command-name",
   description="Short description",
   prompt="Operation with arguments: $ARGUMENTS"
 )
 ```
 
 **Frontmatter Fields:**
-- `name`: Namespaced command name (fractary-plugin:command-name)
+- `name`: Namespaced command name (fractary-plugin-command-name)
 - `description`: Brief description mentioning delegation
 - `allowed-tools: Agent`: **CRITICAL** - Physical enforcement of delegation
 - `model`: Usually `claude-haiku-4-5` for efficiency
@@ -1356,8 +1356,8 @@ This ensures:
 **Structure:**
 ```markdown
 ---
-name: fractary-plugin:agent-name
-description: What this agent does. MUST BE USED for all {operation} operations from fractary-plugin:command command. Use PROACTIVELY when user requests {operation}.
+name: fractary-plugin-agent-name
+description: What this agent does. MUST BE USED for all {operation} operations from fractary-plugin-command command. Use PROACTIVELY when user requests {operation}.
 tools: fractary_plugin_tool_1, fractary_plugin_tool_2
 model: claude-haiku-4-5
 ---
@@ -1414,7 +1414,7 @@ Description of what this agent returns
 ```
 
 **Frontmatter Fields:**
-- `name`: Namespaced agent name (fractary-plugin:agent-name)
+- `name`: Namespaced agent name (fractary-plugin-agent-name)
 - `description`: Include "MUST BE USED" and "Use PROACTIVELY" for auto-triggering
 - `tools`: List of MCP tools this agent can use
 - `model`: Usually `claude-haiku-4-5` for efficiency

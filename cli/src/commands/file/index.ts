@@ -3,7 +3,7 @@
  *
  * Commands use consistent naming to mirror plugin commands:
  * CLI: fractary-core file upload
- * Plugin: /fractary-file:upload
+ * Plugin: /fractary-file-upload
  */
 
 import { Command } from 'commander';

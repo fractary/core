@@ -17,13 +17,13 @@ Find all error messages in logs with context.
 ### Usage
 ```bash
 # Analyze specific issue
-/fractary-logs:analyze errors --issue 123
+/fractary-logs-analyze errors --issue 123
 
 # Analyze all logs
-/fractary-logs:analyze errors
+/fractary-logs-analyze errors
 
 # Analyze date range
-/fractary-logs:analyze errors --since 2025-01-01
+/fractary-logs-analyze errors --since 2025-01-01
 ```
 
 ### Output
@@ -70,10 +70,10 @@ Find recurring issues across multiple logs.
 ### Usage
 ```bash
 # Find patterns since date
-/fractary-logs:analyze patterns --since 2025-01-01
+/fractary-logs-analyze patterns --since 2025-01-01
 
 # Find patterns in date range
-/fractary-logs:analyze patterns --since 2024-12-01 --until 2025-01-31
+/fractary-logs-analyze patterns --since 2024-12-01 --until 2025-01-31
 ```
 
 ### Output
@@ -117,10 +117,10 @@ Generate concise summary of a session.
 ### Usage
 ```bash
 # Summarize specific issue session
-/fractary-logs:analyze session 123
+/fractary-logs-analyze session 123
 
 # Summarize by session ID
-/fractary-logs:analyze session session-123-2025-01-15
+/fractary-logs-analyze session session-123-2025-01-15
 ```
 
 ### Output
@@ -190,13 +190,13 @@ Analyze time spent on work items and identify patterns.
 ### Usage
 ```bash
 # Analyze time since date
-/fractary-logs:analyze time --since 2025-01-01
+/fractary-logs-analyze time --since 2025-01-01
 
 # Analyze specific month
-/fractary-logs:analyze time --since 2025-01-01 --until 2025-01-31
+/fractary-logs-analyze time --since 2025-01-01 --until 2025-01-31
 
 # Analyze all time
-/fractary-logs:analyze time --since 2024-01-01
+/fractary-logs-analyze time --since 2024-01-01
 ```
 
 ### Output
@@ -273,10 +273,10 @@ Time Analysis (January 2025)
 **Error patterns over time**:
 ```bash
 # Find errors
-/fractary-logs:analyze errors --since 2024-12-01
+/fractary-logs-analyze errors --since 2024-12-01
 
 # Identify patterns
-/fractary-logs:analyze patterns --since 2024-12-01
+/fractary-logs-analyze patterns --since 2024-12-01
 
 # Compare: Are same errors recurring?
 ```
@@ -284,10 +284,10 @@ Time Analysis (January 2025)
 **Session efficiency**:
 ```bash
 # Get session summary
-/fractary-logs:analyze session 123
+/fractary-logs-analyze session 123
 
 # Check time spent
-/fractary-logs:analyze time --issue 123
+/fractary-logs-analyze time --issue 123
 
 # Calculate: Time vs. complexity
 ```
@@ -297,10 +297,10 @@ Time Analysis (January 2025)
 For custom analysis, use search + manual review:
 ```bash
 # Find specific pattern
-/fractary-logs:search "specific pattern" --since 2024-01-01
+/fractary-logs-search "specific pattern" --since 2024-01-01
 
 # Extract relevant sessions
-/fractary-logs:read <issue>
+/fractary-logs-read <issue>
 
 # Analyze manually or pipe to custom scripts
 ```

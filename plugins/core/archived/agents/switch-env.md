@@ -65,7 +65,7 @@ Available environments:
 
 Current: [environment name or "default"]
 
-Usage: /fractary-core:switch-env <environment>
+Usage: /fractary-core-switch-env <environment>
 ```
 
 ## 3. Validate Environment Name
@@ -151,8 +151,8 @@ If a credential is missing:
 ```
 Commands will now use {environment} credentials.
 
-To switch back: /fractary-core:switch-env [default|test|prod]
-To view status: /fractary-core:switch-env --show
+To switch back: /fractary-core-switch-env [default|test|prod]
+To view status: /fractary-core-switch-env --show
 ```
 
 </WORKFLOW>
@@ -190,7 +190,7 @@ Ready to use prod environment.
 
 Current environment: test
 
-Switch with: /fractary-core:switch-env <name>
+Switch with: /fractary-core-switch-env <name>
 ```
 
 ### Current Status (no args or --show)
@@ -205,8 +205,8 @@ Credential status:
   AWS_ACCESS_KEY_ID:     ✓ set
   AWS_SECRET_ACCESS_KEY: ✓ set
 
-Switch with: /fractary-core:switch-env <name>
-List available: /fractary-core:switch-env --list
+Switch with: /fractary-core-switch-env <name>
+List available: /fractary-core-switch-env --list
 ```
 
 ### Error: Invalid Name
@@ -219,7 +219,7 @@ Environment names can only contain:
   - Dashes (-)
   - Underscores (_)
 
-Example: /fractary-core:switch-env prod
+Example: /fractary-core-switch-env prod
 ```
 
 ### Warning: File Not Found

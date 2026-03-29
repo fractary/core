@@ -192,7 +192,7 @@ Logs without issue numbers:
 ### Scheduling
 Recommended: Daily at 2 AM
 ```bash
-0 2 * * * /fractary-logs:cleanup --older-than 30
+0 2 * * * /fractary-logs-cleanup --older-than 30
 ```
 
 ## Safety Mechanisms
@@ -277,27 +277,27 @@ Recommended: Daily at 2 AM
 
 ### Manual Archive
 ```bash
-/fractary-logs:archive 123
+/fractary-logs-archive 123
 ```
 
 ### Forced Re-Archive
 ```bash
-/fractary-logs:archive 123 --force
+/fractary-logs-archive 123 --force
 ```
 
 ### Time-Based Cleanup
 ```bash
-/fractary-logs:cleanup --older-than 30
+/fractary-logs-cleanup --older-than 30
 ```
 
 ### Dry Run
 ```bash
-/fractary-logs:cleanup --older-than 30 --dry-run
+/fractary-logs-cleanup --older-than 30 --dry-run
 ```
 
 ### Verify Archives
 ```bash
-/fractary-logs:verify
+/fractary-logs-verify
 ```
 
 ## Troubleshooting
@@ -320,7 +320,7 @@ Recommended: Daily at 2 AM
 ### Storage Full
 **Problem**: Local or cloud storage full
 **Solution**:
-- Run cleanup for local: `/fractary-logs:cleanup`
+- Run cleanup for local: `/fractary-logs-cleanup`
 - For cloud: Increase quota or change retention
 - Check configuration for archive paths
 
@@ -336,19 +336,19 @@ Recommended: Daily at 2 AM
 ### Regular Cleanup
 Run cleanup regularly (daily recommended):
 ```bash
-0 2 * * * /fractary-logs:cleanup --older-than 30
+0 2 * * * /fractary-logs-cleanup --older-than 30
 ```
 
 ### Monitor Archive Size
 Track cloud storage usage:
 ```bash
-/fractary-logs:stats
+/fractary-logs-stats
 ```
 
 ### Verify Archives Periodically
 Monthly verification:
 ```bash
-/fractary-logs:verify --full
+/fractary-logs-verify --full
 ```
 
 ### Backup Archive Index
@@ -360,5 +360,5 @@ cp /logs/.archive-index.json /logs/.archive-index.backup.json
 ### Review Orphaned Logs
 Periodically review orphaned logs:
 ```bash
-/fractary-logs:search --orphaned
+/fractary-logs-search --orphaned
 ```
