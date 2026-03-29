@@ -782,7 +782,7 @@ async function cloudInitCommand(options: CloudInitOptions): Promise<void> {
     const existingConfig = loadYamlConfig({ projectRoot });
     if (!existingConfig) {
       console.error(chalk.red('Error: No existing configuration found.'));
-      console.log(chalk.yellow('\nRun /fractary-core:config-init first to create a base configuration.'));
+      console.log(chalk.yellow('\nRun /fractary-core-config-init first to create a base configuration.'));
       process.exit(1);
     }
 
@@ -852,7 +852,7 @@ async function cloudInitCommand(options: CloudInitOptions): Promise<void> {
     } else if (options.provider === 'r2') {
       console.log(chalk.gray('     R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY'));
     }
-    console.log(chalk.gray('  2. Test connection: /fractary-file:test-connection'));
+    console.log(chalk.gray('  2. Test connection: /fractary-file-test-connection'));
     if (options.terraform) {
       console.log(chalk.gray('  3. Review and apply Terraform: cd infra/terraform && terraform init && terraform plan'));
     }

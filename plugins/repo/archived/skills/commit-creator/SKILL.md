@@ -14,7 +14,7 @@ Your responsibility is to create semantic, well-formatted Git commits that follo
 
 You are invoked by:
 - The repo-manager agent for programmatic commit creation
-- The /fractary-repo:commit command for user-initiated commits
+- The /fractary-repo-commit command for user-initiated commits
 - FABER workflow managers (Architect, Build, Evaluate phases) for stage-specific commits
 
 You delegate to the active source control handler to perform platform-specific Git commit operations.
@@ -194,14 +194,14 @@ Invoke the active source control handler skill to create the commit.
 
 **Determine Handler**: Read the platform from config at `config.handlers.source_control.active` (e.g., "github", "gitlab", "bitbucket").
 
-**Construct Handler Skill Name**: `fractary-repo:handler-source-control-{platform}`
-- For GitHub: `fractary-repo:handler-source-control-github`
-- For GitLab: `fractary-repo:handler-source-control-gitlab`
-- For Bitbucket: `fractary-repo:handler-source-control-bitbucket`
+**Construct Handler Skill Name**: `fractary-repo-handler-source-control-{platform}`
+- For GitHub: `fractary-repo-handler-source-control-github`
+- For GitLab: `fractary-repo-handler-source-control-gitlab`
+- For Bitbucket: `fractary-repo-handler-source-control-bitbucket`
 
 **Invoke the Handler**: Use the Skill tool with the handler skill name:
 ```
-Skill(skill="fractary-repo:handler-source-control-github")
+Skill(skill="fractary-repo-handler-source-control-github")
 ```
 
 **IMPORTANT**: Before invoking the handler, output the operation request as JSON so the handler can parse it:
@@ -240,7 +240,7 @@ Commit SHA: {commit_sha}
 Work Item: {work_id or "none"}
 Message: {message}
 ───────────────────────────────────────
-Next: Run /fractary-repo:push to push changes when ready
+Next: Run /fractary-repo-push to push changes when ready
 ```
 
 </WORKFLOW>
@@ -452,7 +452,7 @@ OUTPUT:
 
 **Called By:**
 - `repo-manager` agent - For programmatic commit creation
-- `/fractary-repo:commit` command - For user-initiated commits
+- `/fractary-repo-commit` command - For user-initiated commits
 - FABER `architect-manager` - For specification commits
 - FABER `build-manager` - For implementation commits
 - FABER `evaluate-manager` - For test and fix commits

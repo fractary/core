@@ -4,7 +4,7 @@
 
 ### Simple Text Search
 ```bash
-/fractary-logs:search "OAuth implementation"
+/fractary-logs-search "OAuth implementation"
 ```
 
 Searches both local and archived logs for the phrase "OAuth implementation".
@@ -13,21 +13,21 @@ Searches both local and archived logs for the phrase "OAuth implementation".
 All searches are case-insensitive by default.
 
 ```bash
-/fractary-logs:search "oauth"  # Matches OAuth, oauth, OAUTH
+/fractary-logs-search "oauth"  # Matches OAuth, oauth, OAUTH
 ```
 
 ## Search Filters
 
 ### By Issue Number
 ```bash
-/fractary-logs:search "error" --issue 123
+/fractary-logs-search "error" --issue 123
 ```
 
 Search only logs associated with issue #123.
 
 ### By Log Type
 ```bash
-/fractary-logs:search "failed" --type build
+/fractary-logs-search "failed" --type build
 ```
 
 Types:
@@ -38,14 +38,14 @@ Types:
 
 ### By Date Range
 ```bash
-/fractary-logs:search "timeout" --since 2025-01-01 --until 2025-01-31
+/fractary-logs-search "timeout" --since 2025-01-01 --until 2025-01-31
 ```
 
 Search logs created within the date range.
 
 ### Multiple Filters
 ```bash
-/fractary-logs:search "authentication" --type session --since 2025-01-01 --issue 123
+/fractary-logs-search "authentication" --type session --since 2025-01-01 --issue 123
 ```
 
 Combine filters for precise search.
@@ -54,21 +54,21 @@ Combine filters for precise search.
 
 ### Local Only
 ```bash
-/fractary-logs:search "recent issue" --local-only
+/fractary-logs-search "recent issue" --local-only
 ```
 
 Search only local logs (fast, last 30 days).
 
 ### Cloud Only
 ```bash
-/fractary-logs:search "old implementation" --cloud-only
+/fractary-logs-search "old implementation" --cloud-only
 ```
 
 Search only archived logs (slower, comprehensive).
 
 ### Hybrid (Default)
 ```bash
-/fractary-logs:search "pattern"
+/fractary-logs-search "pattern"
 ```
 
 Searches both local and cloud, aggregates results.
@@ -77,29 +77,29 @@ Searches both local and cloud, aggregates results.
 
 ### Enable Regex Mode
 ```bash
-/fractary-logs:search --regex "error:\s+\w+"
+/fractary-logs-search --regex "error:\s+\w+"
 ```
 
 ### Common Patterns
 
 **Find error codes**:
 ```bash
-/fractary-logs:search --regex "ERROR-\d{3,}"
+/fractary-logs-search --regex "ERROR-\d{3,}"
 ```
 
 **Find URLs**:
 ```bash
-/fractary-logs:search --regex "https?://[^\s]+"
+/fractary-logs-search --regex "https?://[^\s]+"
 ```
 
 **Find email addresses**:
 ```bash
-/fractary-logs:search --regex "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}"
+/fractary-logs-search --regex "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}"
 ```
 
 **Find API calls**:
 ```bash
-/fractary-logs:search --regex "POST|GET|PUT|DELETE /api/[^\s]+"
+/fractary-logs-search --regex "POST|GET|PUT|DELETE /api/[^\s]+"
 ```
 
 ## Result Limits
@@ -109,13 +109,13 @@ By default, returns up to 100 results.
 
 ### Custom Limit
 ```bash
-/fractary-logs:search "common term" --max-results 10
+/fractary-logs-search "common term" --max-results 10
 ```
 
 ### Context Lines
 Control how many lines of context shown around matches:
 ```bash
-/fractary-logs:search "error" --context 5
+/fractary-logs-search "error" --context 5
 ```
 
 Default: 3 lines before and after match.
@@ -182,27 +182,27 @@ Each result shows:
 
 ### Find All Errors for Issue
 ```bash
-/fractary-logs:search "error" --issue 123 --type session
+/fractary-logs-search "error" --issue 123 --type session
 ```
 
 ### Recent Authentication Work
 ```bash
-/fractary-logs:search "authentication" --since 2025-01-01 --type session
+/fractary-logs-search "authentication" --since 2025-01-01 --type session
 ```
 
 ### Database Issues Across All Time
 ```bash
-/fractary-logs:search "database.*timeout" --regex --type debug
+/fractary-logs-search "database.*timeout" --regex --type debug
 ```
 
 ### Specific Implementation Pattern
 ```bash
-/fractary-logs:search "class.*extends.*React.Component" --regex --type session
+/fractary-logs-search "class.*extends.*React.Component" --regex --type session
 ```
 
 ### Deployment Failures
 ```bash
-/fractary-logs:search "failed" --type deployment --since 2024-12-01
+/fractary-logs-search "failed" --type deployment --since 2024-12-01
 ```
 
 ## Advanced Usage
@@ -210,30 +210,30 @@ Each result shows:
 ### Combining with Read
 After finding a match:
 ```bash
-/fractary-logs:search "interesting pattern" --issue 123
+/fractary-logs-search "interesting pattern" --issue 123
 # Found in session-123-2025-01-15.md
 
-/fractary-logs:read 123
+/fractary-logs-read 123
 # View full log
 ```
 
 ### Combining with Analysis
 Search then analyze:
 ```bash
-/fractary-logs:search "error" --issue 123
+/fractary-logs-search "error" --issue 123
 # Found multiple errors
 
-/fractary-logs:analyze errors --issue 123
+/fractary-logs-analyze errors --issue 123
 # Get detailed error analysis
 ```
 
 ### Historical Pattern Research
 ```bash
 # Find how we solved similar issues before
-/fractary-logs:search "similar problem description" --cloud-only
+/fractary-logs-search "similar problem description" --cloud-only
 
 # Read historical solution
-/fractary-logs:read <old-issue>
+/fractary-logs-read <old-issue>
 
 # Apply learnings to current issue
 ```
@@ -252,7 +252,7 @@ Search then analyze:
 
 **Check archive status**:
 - Verify archive index exists: `ls /logs/.archive-index.json`
-- Run cleanup if needed: `/fractary-logs:cleanup`
+- Run cleanup if needed: `/fractary-logs-cleanup`
 
 ### Too Many Results
 

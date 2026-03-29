@@ -157,7 +157,7 @@ Found 3 errors:
    Context: User lookup query
    Build: 123-build.log
 ───────────────────────────────────────
-Next: Fix errors or analyze patterns with /fractary-logs:analyze patterns
+Next: Fix errors or analyze patterns with /fractary-logs-analyze patterns
 ```
 
 **Pattern detection**:
@@ -220,7 +220,7 @@ Session Summary: Issue #123 - User Authentication
 
 **Outcome**: Successfully implemented, all tests passing
 ───────────────────────────────────────
-Next: Read full session with /fractary-logs:read 123
+Next: Read full session with /fractary-logs-read 123
 ```
 
 **Time analysis**:

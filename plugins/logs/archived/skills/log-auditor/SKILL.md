@@ -353,7 +353,7 @@ Now create the actionable implementation plan using the Spec Manager agent.
 Invoke the spec-manager agent using natural language to generate the specification:
 
 ```
-Use the @agent-fractary-spec:spec-manager agent to generate a remediation specification with the following request:
+Use the @agent-fractary-spec-spec-manager agent to generate a remediation specification with the following request:
 
 {
   "operation": "generate",
@@ -419,8 +419,8 @@ Use the @agent-fractary-spec:spec-manager agent to generate a remediation specif
             {
               "task_id": "1.1",
               "title": "Initialize fractary-file plugin",
-              "commands": ["/fractary-file:init"],
-              "verification": ["/fractary-file:test-connection"]
+              "commands": ["/fractary-file-init"],
+              "verification": ["/fractary-file-test-connection"]
             },
             {
               "task_id": "1.2",
@@ -439,7 +439,7 @@ Use the @agent-fractary-spec:spec-manager agent to generate a remediation specif
             {
               "task_id": "2.1",
               "title": "Initialize fractary-logs",
-              "commands": ["/fractary-logs:init"],
+              "commands": ["/fractary-logs-init"],
               "verification": ["ls /logs/"]
             },
             {
@@ -499,7 +499,7 @@ Use the @agent-fractary-spec:spec-manager agent to generate a remediation specif
       "Auto-capture configured for builds/deployments"
     ],
     "verification_steps": [
-      "/fractary-logs:search \"test\"",
+      "/fractary-logs-search \"test\"",
       "git status # Should show no log files",
       "du -sh /logs/ # Check local storage",
       "# Check cloud storage for archived logs"
@@ -705,7 +705,7 @@ Handle errors gracefully:
 
 <INTEGRATION>
 This skill is used by:
-- **audit command**: `/fractary-logs:audit`
+- **audit command**: `/fractary-logs-audit`
 - **log-manager agent**: For audit operations
 
 **Usage Example:**

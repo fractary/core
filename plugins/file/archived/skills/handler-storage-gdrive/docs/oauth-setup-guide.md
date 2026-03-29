@@ -327,7 +327,7 @@ chmod 0600 .fractary/config.yaml
 Use the file-manager agent to test:
 
 ```
-Use the @agent-fractary-file:file-manager agent to upload test file:
+Use the @agent-fractary-file-file-manager agent to upload test file:
 {
   "operation": "upload",
   "parameters": {

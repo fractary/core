@@ -231,7 +231,7 @@ The log-validator skill runs these checks automatically:
 
 ```bash
 # Validate changelog log
-/fractary-logs:validate changelog-v1.2.0-20250117.md
+/fractary-logs-validate changelog-v1.2.0-20250117.md
 
 # Expected output:
 ✅ Schema validation: PASS

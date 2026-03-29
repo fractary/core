@@ -14,7 +14,7 @@ Your responsibility is to push Git branches to remote repositories safely. You h
 
 You are invoked by:
 - The repo-manager agent for programmatic push operations
-- The /fractary-repo:push command for user-initiated pushes
+- The /fractary-repo-push command for user-initiated pushes
 - FABER workflow managers during Release phase to push completed work
 
 You delegate to the active source control handler to perform platform-specific Git push operations.
@@ -162,13 +162,13 @@ Invoke the active source control handler skill.
 
 **IMPORTANT**: You MUST use the Skill tool to invoke the handler. The handler skill name is constructed as follows:
 1. Read the platform from config: `config.handlers.source_control.active` (e.g., "github")
-2. Construct the full skill name: `fractary-repo:handler-source-control-<platform>`
-3. For example, if platform is "github", invoke: `fractary-repo:handler-source-control-github`
+2. Construct the full skill name: `fractary-repo-handler-source-control-<platform>`
+3. For example, if platform is "github", invoke: `fractary-repo-handler-source-control-github`
 
-**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo:handler-source-control-<platform>`.
+**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo-handler-source-control-<platform>`.
 
 Use the Skill tool with:
-- command: `fractary-repo:handler-source-control-<platform>` (where <platform> is from config)
+- command: `fractary-repo-handler-source-control-<platform>` (where <platform> is from config)
 - Pass parameters: {branch_name, remote, set_upstream, force, push_flags, sync_strategy}
 
 The handler will:
@@ -200,9 +200,9 @@ Branch Pushed: {branch_name} → {remote}/{branch_name}
 Upstream Set: {upstream_set}
 Commits Pushed: {commit_count}
 ───────────────────────────────────────
-Next: Run /fractary-repo:pr-create to open pull request when ready
+Next: Run /fractary-repo-pr-create to open pull request when ready
 
-💡 Tip: Run /fractary-repo:init to create a configuration file for this repository.
+💡 Tip: Run /fractary-repo-init to create a configuration file for this repository.
    This allows you to customize branch naming, merge strategies, and other plugin settings.
 ```
 
@@ -214,7 +214,7 @@ Branch Pushed: {branch_name} → {remote}/{branch_name}
 Upstream Set: {upstream_set}
 Commits Pushed: {commit_count}
 ───────────────────────────────────────
-Next: Run /fractary-repo:pr-create to open pull request when ready
+Next: Run /fractary-repo-pr-create to open pull request when ready
 ```
 
 </WORKFLOW>
@@ -277,7 +277,7 @@ Return structured JSON response:
 
 This context helps the repo-manager agent determine whether to:
 - Report conflicts for manual resolution (if auto-sync failed)
-- Offer to invoke /fractary-repo:pull workflow (if strategy was manual/fail)
+- Offer to invoke /fractary-repo-pull workflow (if strategy was manual/fail)
 </OUTPUTS>
 
 <HANDLERS>
@@ -513,7 +513,7 @@ Always pull/fetch before force pushing to ensure you have latest remote state.
 
 **Called By:**
 - `repo-manager` agent - For programmatic push operations
-- `/fractary-repo:push` command - For user-initiated pushes
+- `/fractary-repo-push` command - For user-initiated pushes
 - FABER `release-manager` - Before creating PRs
 
 **Calls:**

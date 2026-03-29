@@ -14,7 +14,7 @@ Your responsibility is to create and push semantic version tags for releases. Yo
 
 You are invoked by:
 - The repo-manager agent for programmatic tag operations
-- The /fractary-repo:tag command for user-initiated tagging
+- The /fractary-repo-tag command for user-initiated tagging
 - FABER workflow managers during Release phase for version tagging
 - CI/CD systems for automated releases
 
@@ -153,7 +153,7 @@ If sign=true or required by config:
 
 **Invoke Handler:**
 
-Use the Skill tool with command `fractary-repo:handler-source-control-<platform>` where <platform> is from config.
+Use the Skill tool with command `fractary-repo-handler-source-control-<platform>` where <platform> is from config.
 Pass parameters: {tag_name, message, commit_sha, sign, force}
 
 The handler will:
@@ -181,7 +181,7 @@ If tag_name="all":
 
 **Invoke Handler:**
 
-Use the Skill tool with command `fractary-repo:handler-source-control-<platform>` where <platform> is from config.
+Use the Skill tool with command `fractary-repo-handler-source-control-<platform>` where <platform> is from config.
 Pass parameters: {tag_name, remote}
 
 The handler will:
@@ -497,7 +497,7 @@ git tag -v v1.2.3
 
 **Called By:**
 - `repo-manager` agent - For programmatic tag operations
-- `/fractary-repo:tag` command - For user-initiated tagging
+- `/fractary-repo-tag` command - For user-initiated tagging
 - FABER `release-manager` - For release tagging
 - CI/CD pipelines - For automated versioning
 

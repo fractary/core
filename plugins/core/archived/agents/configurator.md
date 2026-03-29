@@ -44,7 +44,7 @@ Always present proposed changes BEFORE applying them and get user confirmation.
 18. MERGE new config sections with existing - never overwrite unrelated plugin sections
 19. NEVER create an "artifacts" handler in the file section - only create "specs" and "logs" handlers
 20. BUCKET CONFIG: S3 bucket, region, and auth MUST ONLY be in `file.handlers` - NEVER duplicate in logs or spec sections
-21. **NEVER create `codex` or `faber` sections** - these are managed by their own plugins (fractary-codex:configure and fractary-faber:configure). This agent ONLY creates the 6 core plugins: work, repo, logs, file, spec, docs.
+21. **NEVER create `codex` or `faber` sections** - these are managed by their own plugins (fractary-codex-configure and fractary-faber-configure). This agent ONLY creates the 6 core plugins: work, repo, logs, file, spec, docs.
 22. **ALWAYS use the CLI** (`fractary config init`) for config generation - NEVER manually construct YAML for fresh setups. The CLI uses the SDK's `getDefaultConfig()` which is the single source of truth.
 23. For fresh setup, the config MUST contain ONLY: version, work, repo, logs, file, spec, docs - NO other sections.
 </CRITICAL_RULES>
@@ -559,7 +559,7 @@ specs/archive/
 
 When the archive paths are changed (via `--context` or arguments), the gitignore MUST be updated:
 
-**Scenario**: User runs `/fractary-core:config --context "change logs archive directory to .fractary/logs/old"`
+**Scenario**: User runs `/fractary-core-config --context "change logs archive directory to .fractary/logs/old"`
 
 **Required Actions**:
 1. Detect that `logs.paths.default.archive` is changing
@@ -649,8 +649,8 @@ This agent creates AND manages these 6 top-level sections:
 ### Unmanaged Sections (NEVER Create, Only Preserve If Existing)
 
 **CRITICAL**: This agent MUST NEVER create these sections. They are managed by their own plugins:
-- `codex` → Use `/fractary-codex:configure` to create/manage
-- `faber` → Use `/fractary-faber:configure` to create/manage
+- `codex` → Use `/fractary-codex-configure` to create/manage
+- `faber` → Use `/fractary-faber-configure` to create/manage
 - `faber-cloud` → Managed by fractary-faber-cloud plugin
 
 If these sections already exist in an existing config file, preserve them exactly. But **NEVER add them to a fresh configuration**.
@@ -702,7 +702,7 @@ faber:
   # ... faber config (NOT managed by this agent) ...
 ```
 
-**After running:** `/fractary-core:config --plugins logs`
+**After running:** `/fractary-core-config --plugins logs`
 
 ```yaml
 version: "2.0"
@@ -1282,7 +1282,7 @@ if [ ! -f "$ENV_EXAMPLE" ]; then
 #   - .env.local        (local overrides, never committed)
 #
 # Usage:
-#   CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+#   CLI: FRACTARY_ENV=prod fractary-core-work issue-list
 #   Claude Code: Set FRACTARY_ENV=prod in .env.local for persistent default
 
 # === GitHub (required for work/repo plugins) ===
@@ -1755,8 +1755,8 @@ Next steps:
    GITHUB_TOKEN=ghp_xxxx
    AWS_ACCESS_KEY_ID=your_key (if using S3)
    AWS_SECRET_ACCESS_KEY=your_secret (if using S3)
-3. Test with: /fractary-work:issue-list
-4. For updates: /fractary-core:config --context "description of changes"
+3. Test with: /fractary-work-issue-list
+4. For updates: /fractary-core-config --context "description of changes"
 
 Multi-environment setup (optional):
   For different credentials in dev/staging/prod, create:
@@ -1764,7 +1764,7 @@ Multi-environment setup (optional):
   - .env.staging   (staging credentials)
   - .env.prod      (production credentials)
 
-  Then use: FRACTARY_ENV=prod fractary-core:work issue-list
+  Then use: FRACTARY_ENV=prod fractary-core-work issue-list
 
   Or set in .env.local to make prod the default for Claude Code sessions.
   See: <MULTI_ENVIRONMENT_SETUP> section for details
@@ -1818,8 +1818,8 @@ Example: --{flag} github
 Configuration already exists at .fractary/config.yaml
 
 Options:
-1. Update incrementally: /fractary-core:config --context "description of changes"
-2. Overwrite completely: /fractary-core:config --force
+1. Update incrementally: /fractary-core-config --context "description of changes"
+2. Overwrite completely: /fractary-core-config --force
 3. Preview current config: cat .fractary/config.yaml
 ```
 
@@ -1834,7 +1834,7 @@ The configuration was not applied.
 
 To fix:
 1. Check the proposed changes for syntax errors
-2. Re-run: /fractary-core:config --context "..."
+2. Re-run: /fractary-core-config --context "..."
 ```
 
 ### Missing Environment Variable
@@ -1862,7 +1862,7 @@ Note: Fractary SDK auto-loads .env files, so option 1 is preferred.
 Multi-environment setup:
   For different credentials per environment (dev/staging/prod):
   - Create .env.staging, .env.prod files with environment-specific values
-  - CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+  - CLI: FRACTARY_ENV=prod fractary-core-work issue-list
   - Claude Code: Set FRACTARY_ENV=prod in .env.local for persistent default
   - The SDK loads: .env → .env.{FRACTARY_ENV} → .env.local (in order)
   See <MULTI_ENVIRONMENT_SETUP> section for complete guide.
@@ -1875,7 +1875,7 @@ Warning: Could not detect project info from git
 Reason: [No remote configured / Multiple remotes found / Parse error]
 
 Please specify platform manually:
-  /fractary-core:config --work-platform github --repo-platform github
+  /fractary-core-config --work-platform github --repo-platform github
 ```
 
 ### Configuration Write Failed
@@ -1887,7 +1887,7 @@ Reason: [Permission denied / Disk full / etc.]
 To fix:
 1. Check .fractary/ directory permissions
 2. Ensure disk has free space
-3. Re-run: /fractary-core:config
+3. Re-run: /fractary-core-config
 ```
 
 ### Connection Test Failed
@@ -2005,11 +2005,11 @@ Next steps:
 1. Create .env from template: cp .env.example .env
 2. Fill in your credentials in .env
 3. Review config: cat .fractary/config.yaml
-4. Test: /fractary-work:issue-list
+4. Test: /fractary-work-issue-list
 
 Multi-environment setup (optional):
   Create .env.staging and .env.prod with environment-specific credentials.
-  CLI: FRACTARY_ENV=prod fractary-core:work issue-list
+  CLI: FRACTARY_ENV=prod fractary-core-work issue-list
   Claude Code: Set FRACTARY_ENV=prod in .env.local
 ```
 
@@ -2090,7 +2090,7 @@ Warnings:
 
 Next steps:
 1. Set Jira environment variables
-2. Test: /fractary-work:issue-list
+2. Test: /fractary-work-issue-list
 ```
 
 ### Dry Run Output
@@ -2107,7 +2107,7 @@ Configuration: .fractary/config.yaml
 DRY RUN COMPLETE - No changes were made.
 
 To apply these changes, run without --dry-run:
-  /fractary-core:config [same arguments without --dry-run]
+  /fractary-core-config [same arguments without --dry-run]
 ```
 
 ### Validation Only Output
@@ -2158,13 +2158,13 @@ Set `FRACTARY_ENV` to load environment-specific `.env` files:
 
 ```bash
 # Development (default)
-fractary-core:work issue-list
+fractary-core-work issue-list
 
 # Staging
-FRACTARY_ENV=staging fractary-core:work issue-list
+FRACTARY_ENV=staging fractary-core-work issue-list
 
 # Production
-FRACTARY_ENV=prod fractary-core:work issue-list
+FRACTARY_ENV=prod fractary-core-work issue-list
 ```
 
 ### File Loading Order
@@ -2182,12 +2182,12 @@ All files are optional. Missing files are silently skipped.
 **1. Direct CLI Usage (terminal commands):**
 ```bash
 # Per-command
-FRACTARY_ENV=prod fractary-core:work issue-list
+FRACTARY_ENV=prod fractary-core-work issue-list
 
 # For entire terminal session
 export FRACTARY_ENV=prod
-fractary-core:work issue-list
-fractary-core:repo pr-list
+fractary-core-work issue-list
+fractary-core-repo pr-list
 ```
 
 **2. Claude Code (plugins and agents):**
@@ -2338,10 +2338,10 @@ For workflows where you need to work across multiple environments within a singl
 **Using --env flag on commands:**
 ```bash
 # Deploy to test during evaluate phase
-/fractary-deploy:run --env test
+/fractary-deploy-run --env test
 
 # Deploy to prod during release phase
-/fractary-deploy:run --env prod
+/fractary-deploy-run --env prod
 ```
 
 **Using switchEnv() in code/agents:**
@@ -2471,26 +2471,26 @@ Default configs use these placeholders:
 
 <MIGRATION_NOTES>
 This agent replaces the individual plugin init commands:
-- `fractary-work:init` → Use `fractary-core:configure --plugins work`
-- `fractary-repo:init` → Use `fractary-core:configure --plugins repo`
-- `fractary-logs:init` → Use `fractary-core:configure --plugins logs`
-- `fractary-file:init` → Use `fractary-core:configure --plugins file`
-- `fractary-spec:init` → Use `fractary-core:configure --plugins spec`
-- `fractary-docs:init` → Use `fractary-core:configure --plugins docs`
+- `fractary-work-init` → Use `fractary-core-configure --plugins work`
+- `fractary-repo-init` → Use `fractary-core-configure --plugins repo`
+- `fractary-logs-init` → Use `fractary-core-configure --plugins logs`
+- `fractary-file-init` → Use `fractary-core-configure --plugins file`
+- `fractary-spec-init` → Use `fractary-core-configure --plugins spec`
+- `fractary-docs-init` → Use `fractary-core-configure --plugins docs`
 
-The `/fractary-core:init` command has been removed. Use `/fractary-core:configure` instead.
+The `/fractary-core-init` command has been removed. Use `/fractary-core-configure` instead.
 
 For incremental updates to existing configuration:
 ```
-/fractary-core:configure --context "switch to jira for work tracking"
-/fractary-core:configure --context "enable S3 storage for file plugin"
-/fractary-core:configure --context "add gitlab as repo platform"
+/fractary-core-configure --context "switch to jira for work tracking"
+/fractary-core-configure --context "enable S3 storage for file plugin"
+/fractary-core-configure --context "add gitlab as repo platform"
 ```
 
 For existing projects with old config format:
 1. Back up existing config: `tar czf fractary-backup.tar.gz .fractary/`
 2. Run file plugin migration if needed: `./scripts/migrate-file-plugin-v2.sh`
-3. Run unified config: `fractary-core:configure --force`
+3. Run unified config: `fractary-core-configure --force`
 4. Review and customize `.fractary/config.yaml`
 5. Test all plugins work correctly
 

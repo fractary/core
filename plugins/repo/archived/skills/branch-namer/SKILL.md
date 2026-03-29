@@ -14,7 +14,7 @@ Your responsibility is to generate semantic, convention-compliant branch names f
 
 You are invoked by:
 - The repo-manager agent when branch names are needed
-- The /fractary-repo:branch command when users create branches
+- The /fractary-repo-branch command when users create branches
 - FABER workflow managers during the Frame phase
 
 You delegate to the active source control handler to generate platform-specific branch names.
@@ -104,13 +104,13 @@ Invoke the active source control handler skill.
 
 **IMPORTANT**: You MUST use the Skill tool to invoke the handler. The handler skill name is constructed as follows:
 1. Read the platform from config: `config.handlers.source_control.active` (e.g., "github")
-2. Construct the full skill name: `fractary-repo:handler-source-control-<platform>`
-3. For example, if platform is "github", invoke: `fractary-repo:handler-source-control-github`
+2. Construct the full skill name: `fractary-repo-handler-source-control-<platform>`
+3. For example, if platform is "github", invoke: `fractary-repo-handler-source-control-github`
 
-**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo:handler-source-control-<platform>`.
+**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo-handler-source-control-<platform>`.
 
 Use the Skill tool with:
-- command: `fractary-repo:handler-source-control-<platform>` (where <platform> is from config)
+- command: `fractary-repo-handler-source-control-<platform>` (where <platform> is from config)
 - Pass parameters: {work_id, prefix, description, pattern}
 
 The handler will:
@@ -282,7 +282,7 @@ OUTPUT:
 
 **Called By:**
 - `repo-manager` agent - For programmatic branch name generation
-- `/fractary-repo:branch` command - For user-initiated branch creation
+- `/fractary-repo-branch` command - For user-initiated branch creation
 - FABER `frame-manager` - During Frame phase setup
 
 **Calls:**

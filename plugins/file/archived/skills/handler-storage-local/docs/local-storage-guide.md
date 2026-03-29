@@ -69,7 +69,7 @@ Upload a file to local storage:
 
 ```bash
 # Via agent
-Use the @agent-fractary-file:file-manager agent to upload:
+Use the @agent-fractary-file-file-manager agent to upload:
 {
   "operation": "upload",
   "local_path": "./document.pdf",
@@ -95,7 +95,7 @@ Use the @agent-fractary-file:file-manager agent to upload:
 Download a file from local storage:
 
 ```bash
-Use the @agent-fractary-file:file-manager agent to download:
+Use the @agent-fractary-file-file-manager agent to download:
 {
   "operation": "download",
   "remote_path": "docs/document.pdf",
@@ -108,7 +108,7 @@ Use the @agent-fractary-file:file-manager agent to download:
 Delete a file from local storage:
 
 ```bash
-Use the @agent-fractary-file:file-manager agent to delete:
+Use the @agent-fractary-file-file-manager agent to delete:
 {
   "operation": "delete",
   "remote_path": "docs/old-document.pdf"
@@ -120,7 +120,7 @@ Use the @agent-fractary-file:file-manager agent to delete:
 List files in local storage:
 
 ```bash
-Use the @agent-fractary-file:file-manager agent to list:
+Use the @agent-fractary-file-file-manager agent to list:
 {
   "operation": "list",
   "prefix": "docs/",
@@ -153,7 +153,7 @@ Use the @agent-fractary-file:file-manager agent to list:
 Get a file:// URL for a file:
 
 ```bash
-Use the @agent-fractary-file:file-manager agent to get URL:
+Use the @agent-fractary-file-file-manager agent to get URL:
 {
   "operation": "get-url",
   "remote_path": "docs/document.pdf"
@@ -177,7 +177,7 @@ Use the @agent-fractary-file:file-manager agent to get URL:
 Read file contents without downloading:
 
 ```bash
-Use the @agent-fractary-file:file-manager agent to read:
+Use the @agent-fractary-file-file-manager agent to read:
 {
   "operation": "read",
   "remote_path": "docs/document.txt",
@@ -277,7 +277,7 @@ The local handler respects standard filesystem permissions:
 When ready to move from local to cloud storage:
 
 1. **Choose cloud provider**: S3, R2, GCS, or Google Drive
-2. **Run init command**: `/fractary-file:init --handler <provider>`
+2. **Run init command**: `/fractary-file-init --handler <provider>`
 3. **Upload existing files**: Use upload operation for each file
 4. **Update configuration**: Switch active_handler
 5. **Test**: Verify operations work with new handler

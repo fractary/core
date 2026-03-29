@@ -24,7 +24,7 @@ Your role is to search across local and archived logs with filters.
 <WORKFLOW>
 1. Parse arguments (query, filters, options, --context)
 2. If --context provided, apply as additional instructions to workflow
-3. Invoke fractary-logs:log-searcher skill
+3. Invoke fractary-logs-log-searcher skill
 3. Search local logs (fast)
 4. Search cloud logs via index if enabled
 5. Aggregate and rank results
@@ -46,7 +46,7 @@ Your role is to search across local and archived logs with filters.
 </ARGUMENTS>
 
 <SKILL_INVOCATION>
-Invoke the fractary-logs:log-searcher skill with:
+Invoke the fractary-logs-log-searcher skill with:
 ```json
 {
   "operation": "search",

@@ -1,5 +1,5 @@
 ---
-name: fractary-work:issue-create
+name: fractary-work-issue-create
 description: |
   MUST BE USED when user wants to create a new issue or work item.
   Use PROACTIVELY when user mentions "create issue", "file a bug", "add a feature request", "open ticket", or describes a problem/feature that should be tracked.
@@ -28,8 +28,8 @@ Your role is to create new issues in work tracking systems (GitHub Issues, Jira,
 3. Convert --type to label format (e.g., "type: feature")
 4. Load configuration to determine active platform
 5. Invoke handler-work-tracker-{platform} skill with create-issue operation
-6. If --branch-create: invoke fractary-repo:branch-create with new issue ID
-7. If --spec-create: invoke fractary-spec:create with new issue ID
+6. If --branch-create: invoke fractary-repo-branch-create with new issue ID
+7. If --spec-create: invoke fractary-spec-create with new issue ID
 8. Return structured result with issue URL and any created artifacts
 </WORKFLOW>
 

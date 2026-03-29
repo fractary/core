@@ -272,7 +272,7 @@ The log-validator skill runs these checks automatically:
 
 ```bash
 # Validate workflow log
-/fractary-logs:validate workflow-123-20250117T100000Z.md
+/fractary-logs-validate workflow-123-20250117T100000Z.md
 
 # Expected output:
 ✅ Schema validation: PASS
