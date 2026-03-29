@@ -221,37 +221,6 @@
         ]
       },
       {
-        "name": "fractary-status",
-        "source": "./plugins/status",
-        "description": "Custom Claude Code status line showing git status, issue numbers, PR numbers, and last prompt",
-        "version": "1.3.0",
-        "author": {
-          "name": "The Fractary",
-          "url": "https://github.com/fractary"
-        },
-        "homepage": "https://github.com/fractary/core/tree/main/plugins/status",
-        "repository": "https://github.com/fractary/core/tree/main/plugins/status",
-        "license": "Apache-2.0",
-        "keywords": [
-          "status-line",
-          "ui",
-          "git",
-          "hooks",
-          "productivity",
-          "workflow"
-        ],
-        "category": "productivity",
-        "strict": true,
-        "commands": [
-          "./commands/fractary-status-install.md",
-          "./commands/fractary-status-sync.md"
-        ],
-        "agents": [
-          "./agents/fractary-status-install.md",
-          "./agents/fractary-status-sync.md"
-        ]
-      },
-      {
         "name": "fractary-docs",
         "source": "./plugins/docs",
         "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",

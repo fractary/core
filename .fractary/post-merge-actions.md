@@ -16,4 +16,3 @@
 | `plugins/file/**` | fractary-file | Reinstall plugin or restart Claude Code |
 | `plugins/logs/**` | fractary-logs | Reinstall plugin or restart Claude Code |
 | `plugins/docs/**` | fractary-docs | Reinstall plugin or restart Claude Code |
-| `plugins/status/**` | fractary-status | `/Fractary-Status-Sync` |
