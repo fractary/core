@@ -395,7 +395,7 @@ Follow the Fractary plugin standards:
 
 ## License
 
-MIT License - See repository LICENSE file
+Apache License 2.0 - See repository LICENSE file
 
 ## Support
 
