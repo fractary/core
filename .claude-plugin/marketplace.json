@@ -22,7 +22,7 @@
         },
         "homepage": "https://github.com/fractary/core/tree/main/plugins/core",
         "repository": "https://github.com/fractary/core/tree/main/plugins/core",
-        "license": "MIT",
+        "license": "Apache-2.0",
         "keywords": [
           "configuration",
           "initialization",
@@ -58,7 +58,7 @@
         },
         "homepage": "https://github.com/fractary/core/tree/main/plugins/repo",
         "repository": "https://github.com/fractary/core/tree/main/plugins/repo",
-        "license": "MIT",
+        "license": "Apache-2.0",
         "keywords": [
           "git",
           "github",
@@ -103,7 +103,7 @@
         },
         "homepage": "https://github.com/fractary/core/tree/main/plugins/work",
         "repository": "https://github.com/fractary/core/tree/main/plugins/work",
-        "license": "MIT",
+        "license": "Apache-2.0",
         "keywords": [
           "issues",
           "work-tracking",
@@ -146,7 +146,7 @@
         },
         "homepage": "https://github.com/fractary/core/tree/main/plugins/file",
         "repository": "https://github.com/fractary/core/tree/main/plugins/file",
-        "license": "MIT",
+        "license": "Apache-2.0",
         "keywords": [
           "file-storage",
           "r2",
@@ -181,7 +181,7 @@
         },
         "homepage": "https://github.com/fractary/core/tree/main/plugins/logs",
         "repository": "https://github.com/fractary/core/tree/main/plugins/logs",
-        "license": "MIT",
+        "license": "Apache-2.0",
         "keywords": [
           "logs",
           "logging",
@@ -229,7 +229,7 @@
         },
         "homepage": "https://github.com/fractary/core/tree/main/plugins/status",
         "repository": "https://github.com/fractary/core/tree/main/plugins/status",
-        "license": "MIT",
+        "license": "Apache-2.0",
         "keywords": [
           "status-line",
           "ui",
@@ -260,7 +260,7 @@
         },
         "homepage": "https://github.com/fractary/core/tree/main/plugins/docs",
         "repository": "https://github.com/fractary/core/tree/main/plugins/docs",
-        "license": "MIT",
+        "license": "Apache-2.0",
         "keywords": [
           "documentation",
           "docs",

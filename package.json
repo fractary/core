@@ -56,5 +56,5 @@
     "url": "git+https://github.com/fractary/core.git"
   },
   "author": "Fractary Team",
-  "license": "MIT"
+  "license": "Apache-2.0"
 }
