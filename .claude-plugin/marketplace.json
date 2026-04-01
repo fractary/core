@@ -1,245 +1,240 @@
 {
     "name": "fractary-core",
     "owner": {
-      "name": "The Fractary",
-      "email": "admin@fractary.com",
-      "url": "https://github.com/fractary/"
+        "name": "The Fractary",
+        "email": "admin@fractary.com",
+        "url": "https://github.com/fractary/"
     },
     "metadata": {
-      "description": "Production-ready core plugins powered by Claude Code commands, skills and hooks.",
-      "version": "3.5.0",
-      "pluginRoot": "./plugins"
+        "description": "Production-ready core plugins powered by Claude Code commands, skills and hooks.",
+        "version": "3.5.1",
+        "pluginRoot": "./plugins"
     },
     "plugins": [
-      {
-        "name": "fractary-core",
-        "source": "./plugins/core",
-        "description": "Core initialization and configuration for Fractary plugins",
-        "version": "3.7.0",
-        "author": {
-          "name": "The Fractary",
-          "url": "https://github.com/fractary"
+        {
+            "name": "fractary-core",
+            "source": "./plugins/core",
+            "description": "Core initialization and configuration for Fractary plugins",
+            "version": "3.7.1",
+            "author": {
+                "name": "The Fractary",
+                "url": "https://github.com/fractary"
+            },
+            "homepage": "https://github.com/fractary/core/tree/main/plugins/core",
+            "repository": "https://github.com/fractary/core/tree/main/plugins/core",
+            "license": "Apache-2.0",
+            "keywords": ["configuration", "initialization", "setup", "core"],
+            "category": "development",
+            "strict": true,
+            "commands": [
+                "./commands/fractary-core-config-init.md",
+                "./commands/fractary-core-config-update.md",
+                "./commands/fractary-core-config-validate.md",
+                "./commands/fractary-core-config-show.md",
+                "./commands/fractary-core-env-switch.md",
+                "./commands/fractary-core-env-list.md",
+                "./commands/fractary-core-env-show.md"
+            ],
+            "skills": "./skills/",
+            "hooks": "./hooks/hooks.json"
         },
-        "homepage": "https://github.com/fractary/core/tree/main/plugins/core",
-        "repository": "https://github.com/fractary/core/tree/main/plugins/core",
-        "license": "Apache-2.0",
-        "keywords": [
-          "configuration",
-          "initialization",
-          "setup",
-          "core"
-        ],
-        "category": "development",
-        "strict": true,
-        "commands": [
-          "./commands/fractary-core-config-init.md",
-          "./commands/fractary-core-config-update.md",
-          "./commands/fractary-core-config-validate.md",
-          "./commands/fractary-core-config-show.md",
-          "./commands/fractary-core-env-switch.md",
-          "./commands/fractary-core-env-list.md",
-          "./commands/fractary-core-env-show.md"
-        ],
-        "skills": "./skills/",
-        "hooks": "./hooks/hooks.json"
-      },
-      {
-        "name": "fractary-repo",
-        "source": "./plugins/repo",
-        "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-        "version": "3.2.0",
-        "author": {
-          "name": "The Fractary",
-          "url": "https://github.com/fractary"
+        {
+            "name": "fractary-repo",
+            "source": "./plugins/repo",
+            "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
+            "version": "3.2.0",
+            "author": {
+                "name": "The Fractary",
+                "url": "https://github.com/fractary"
+            },
+            "homepage": "https://github.com/fractary/core/tree/main/plugins/repo",
+            "repository": "https://github.com/fractary/core/tree/main/plugins/repo",
+            "license": "Apache-2.0",
+            "keywords": [
+                "git",
+                "github",
+                "source-control",
+                "repository",
+                "version-control",
+                "branches",
+                "commits",
+                "pull-requests"
+            ],
+            "category": "development",
+            "strict": true,
+            "commands": [
+                "./commands/fractary-repo-branch-create.md",
+                "./commands/fractary-repo-branch-forward.md",
+                "./commands/fractary-repo-commit-push-pr-merge.md",
+                "./commands/fractary-repo-commit-push-pr.md",
+                "./commands/fractary-repo-commit-push.md",
+                "./commands/fractary-repo-commit.md",
+                "./commands/fractary-repo-pr-create.md",
+                "./commands/fractary-repo-pr-merge.md",
+                "./commands/fractary-repo-pr-review.md",
+                "./commands/fractary-repo-pull.md",
+                "./commands/fractary-repo-worktree-create.md",
+                "./commands/fractary-repo-worktree-list.md",
+                "./commands/fractary-repo-worktree-remove.md",
+                "./commands/fractary-repo-worktree-cleanup.md"
+            ],
+            "skills": "./skills/",
+            "hooks": "./hooks/hooks.json"
         },
-        "homepage": "https://github.com/fractary/core/tree/main/plugins/repo",
-        "repository": "https://github.com/fractary/core/tree/main/plugins/repo",
-        "license": "Apache-2.0",
-        "keywords": [
-          "git",
-          "github",
-          "source-control",
-          "repository",
-          "version-control",
-          "branches",
-          "commits",
-          "pull-requests"
-        ],
-        "category": "development",
-        "strict": true,
-        "commands": [
-          "./commands/fractary-repo-branch-create.md",
-          "./commands/fractary-repo-branch-forward.md",
-          "./commands/fractary-repo-commit-push-pr-merge.md",
-          "./commands/fractary-repo-commit-push-pr.md",
-          "./commands/fractary-repo-commit-push.md",
-          "./commands/fractary-repo-commit.md",
-          "./commands/fractary-repo-pr-create.md",
-          "./commands/fractary-repo-pr-merge.md",
-          "./commands/fractary-repo-pr-review.md",
-          "./commands/fractary-repo-pull.md",
-          "./commands/fractary-repo-worktree-create.md",
-          "./commands/fractary-repo-worktree-list.md",
-          "./commands/fractary-repo-worktree-remove.md",
-          "./commands/fractary-repo-worktree-cleanup.md"
-        ],
-        "skills": "./skills/",
-        "hooks": "./hooks/hooks.json"
-      },
-      {
-        "name": "fractary-work",
-        "source": "./plugins/work",
-        "description": "GitHub Issues management with bulk creation, refinement, and streamlined commands for creating, listing, searching, and updating issues",
-        "version": "3.2.0",
-        "author": {
-          "name": "The Fractary",
-          "url": "https://github.com/fractary"
+        {
+            "name": "fractary-work",
+            "source": "./plugins/work",
+            "description": "GitHub Issues management with bulk creation, refinement, and streamlined commands for creating, listing, searching, and updating issues",
+            "version": "3.2.0",
+            "author": {
+                "name": "The Fractary",
+                "url": "https://github.com/fractary"
+            },
+            "homepage": "https://github.com/fractary/core/tree/main/plugins/work",
+            "repository": "https://github.com/fractary/core/tree/main/plugins/work",
+            "license": "Apache-2.0",
+            "keywords": [
+                "issues",
+                "work-tracking",
+                "project-management",
+                "github-issues",
+                "tickets",
+                "tasks",
+                "bug-tracking",
+                "agile",
+                "workflow",
+                "issue-management",
+                "bulk-creation",
+                "automation"
+            ],
+            "category": "development",
+            "strict": true,
+            "commands": [
+                "./commands/fractary-work-issue-comment.md",
+                "./commands/fractary-work-issue-create.md",
+                "./commands/fractary-work-issue-create-bulk.md",
+                "./commands/fractary-work-issue-fetch.md",
+                "./commands/fractary-work-issue-list.md",
+                "./commands/fractary-work-issue-refine.md",
+                "./commands/fractary-work-issue-search.md",
+                "./commands/fractary-work-issue-update.md"
+            ],
+            "skills": "./skills/"
         },
-        "homepage": "https://github.com/fractary/core/tree/main/plugins/work",
-        "repository": "https://github.com/fractary/core/tree/main/plugins/work",
-        "license": "Apache-2.0",
-        "keywords": [
-          "issues",
-          "work-tracking",
-          "project-management",
-          "github-issues",
-          "tickets",
-          "tasks",
-          "bug-tracking",
-          "agile",
-          "workflow",
-          "issue-management",
-          "bulk-creation",
-          "automation"
-        ],
-        "category": "development",
-        "strict": true,
-        "commands": [
-          "./commands/fractary-work-issue-comment.md",
-          "./commands/fractary-work-issue-create.md",
-          "./commands/fractary-work-issue-create-bulk.md",
-          "./commands/fractary-work-issue-fetch.md",
-          "./commands/fractary-work-issue-list.md",
-          "./commands/fractary-work-issue-refine.md",
-          "./commands/fractary-work-issue-search.md",
-          "./commands/fractary-work-issue-update.md"
-        ],
-        "skills": "./skills/"
-      },
-      {
-        "name": "fractary-file",
-        "source": "./plugins/file",
-        "description": "Universal file storage operations across R2, S3, and local filesystem with modular handler architecture",
-        "version": "3.2.0",
-        "author": {
-          "name": "The Fractary",
-          "url": "https://github.com/fractary"
+        {
+            "name": "fractary-file",
+            "source": "./plugins/file",
+            "description": "Universal file storage operations across R2, S3, and local filesystem with modular handler architecture",
+            "version": "3.2.0",
+            "author": {
+                "name": "The Fractary",
+                "url": "https://github.com/fractary"
+            },
+            "homepage": "https://github.com/fractary/core/tree/main/plugins/file",
+            "repository": "https://github.com/fractary/core/tree/main/plugins/file",
+            "license": "Apache-2.0",
+            "keywords": [
+                "file-storage",
+                "r2",
+                "s3",
+                "cloudflare",
+                "aws",
+                "storage",
+                "filesystem",
+                "cloud-storage"
+            ],
+            "category": "development",
+            "strict": true,
+            "commands": [
+                "./commands/fractary-file-show-config.md",
+                "./commands/fractary-file-switch-handler.md",
+                "./commands/fractary-file-test-connection.md"
+            ],
+            "skills": "./skills/"
         },
-        "homepage": "https://github.com/fractary/core/tree/main/plugins/file",
-        "repository": "https://github.com/fractary/core/tree/main/plugins/file",
-        "license": "Apache-2.0",
-        "keywords": [
-          "file-storage",
-          "r2",
-          "s3",
-          "cloudflare",
-          "aws",
-          "storage",
-          "filesystem",
-          "cloud-storage"
-        ],
-        "category": "development",
-        "strict": true,
-        "commands": [
-          "./commands/fractary-file-show-config.md",
-          "./commands/fractary-file-switch-handler.md",
-          "./commands/fractary-file-test-connection.md"
-        ],
-        "skills": "./skills/"
-      },
-      {
-        "name": "fractary-logs",
-        "source": "./plugins/logs",
-        "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
-        "version": "4.3.0",
-        "author": {
-          "name": "The Fractary",
-          "url": "https://github.com/fractary"
+        {
+            "name": "fractary-logs",
+            "source": "./plugins/logs",
+            "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
+            "version": "4.3.0",
+            "author": {
+                "name": "The Fractary",
+                "url": "https://github.com/fractary"
+            },
+            "homepage": "https://github.com/fractary/core/tree/main/plugins/logs",
+            "repository": "https://github.com/fractary/core/tree/main/plugins/logs",
+            "license": "Apache-2.0",
+            "keywords": [
+                "logs",
+                "logging",
+                "monitoring",
+                "session-capture",
+                "archival",
+                "search",
+                "analysis",
+                "observability"
+            ],
+            "category": "development",
+            "strict": true,
+            "commands": [
+                "./commands/fractary-logs-analyze.md",
+                "./commands/fractary-logs-archive.md",
+                "./commands/fractary-logs-audit.md",
+                "./commands/fractary-logs-capture.md",
+                "./commands/fractary-logs-cleanup.md",
+                "./commands/fractary-logs-delete.md",
+                "./commands/fractary-logs-list.md",
+                "./commands/fractary-logs-log.md",
+                "./commands/fractary-logs-read.md",
+                "./commands/fractary-logs-search.md",
+                "./commands/fractary-logs-stop.md",
+                "./commands/fractary-logs-type-info.md",
+                "./commands/fractary-logs-types.md",
+                "./commands/fractary-logs-validate.md",
+                "./commands/fractary-logs-write.md"
+            ],
+            "skills": "./skills/"
         },
-        "homepage": "https://github.com/fractary/core/tree/main/plugins/logs",
-        "repository": "https://github.com/fractary/core/tree/main/plugins/logs",
-        "license": "Apache-2.0",
-        "keywords": [
-          "logs",
-          "logging",
-          "monitoring",
-          "session-capture",
-          "archival",
-          "search",
-          "analysis",
-          "observability"
-        ],
-        "category": "development",
-        "strict": true,
-        "commands": [
-          "./commands/fractary-logs-analyze.md",
-          "./commands/fractary-logs-archive.md",
-          "./commands/fractary-logs-audit.md",
-          "./commands/fractary-logs-capture.md",
-          "./commands/fractary-logs-cleanup.md",
-          "./commands/fractary-logs-delete.md",
-          "./commands/fractary-logs-list.md",
-          "./commands/fractary-logs-log.md",
-          "./commands/fractary-logs-read.md",
-          "./commands/fractary-logs-search.md",
-          "./commands/fractary-logs-stop.md",
-          "./commands/fractary-logs-type-info.md",
-          "./commands/fractary-logs-types.md",
-          "./commands/fractary-logs-validate.md",
-          "./commands/fractary-logs-write.md"
-        ],
-        "skills": "./skills/"
-      },
-      {
-        "name": "fractary-docs",
-        "source": "./plugins/docs",
-        "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-        "version": "4.2.0",
-        "author": {
-          "name": "The Fractary",
-          "url": "https://github.com/fractary"
-        },
-        "homepage": "https://github.com/fractary/core/tree/main/plugins/docs",
-        "repository": "https://github.com/fractary/core/tree/main/plugins/docs",
-        "license": "Apache-2.0",
-        "keywords": [
-          "documentation",
-          "docs",
-          "living-documentation",
-          "templates",
-          "validation",
-          "linking",
-          "knowledge-management"
-        ],
-        "category": "development",
-        "strict": true,
-        "commands": [
-          "./commands/fractary-docs-archive.md",
-          "./commands/fractary-docs-audit.md",
-          "./commands/fractary-docs-check-consistency.md",
-          "./commands/fractary-docs-doc-create.md",
-          "./commands/fractary-docs-doc-delete.md",
-          "./commands/fractary-docs-doc-get.md",
-          "./commands/fractary-docs-doc-list.md",
-          "./commands/fractary-docs-doc-search.md",
-          "./commands/fractary-docs-doc-update.md",
-          "./commands/fractary-docs-refine.md",
-          "./commands/fractary-docs-type-info.md",
-          "./commands/fractary-docs-type-list.md",
-          "./commands/fractary-docs-validate.md",
-          "./commands/fractary-docs-write.md"
-        ],
-        "skills": "./skills/"
-      }
+        {
+            "name": "fractary-docs",
+            "source": "./plugins/docs",
+            "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
+            "version": "4.2.0",
+            "author": {
+                "name": "The Fractary",
+                "url": "https://github.com/fractary"
+            },
+            "homepage": "https://github.com/fractary/core/tree/main/plugins/docs",
+            "repository": "https://github.com/fractary/core/tree/main/plugins/docs",
+            "license": "Apache-2.0",
+            "keywords": [
+                "documentation",
+                "docs",
+                "living-documentation",
+                "templates",
+                "validation",
+                "linking",
+                "knowledge-management"
+            ],
+            "category": "development",
+            "strict": true,
+            "commands": [
+                "./commands/fractary-docs-archive.md",
+                "./commands/fractary-docs-audit.md",
+                "./commands/fractary-docs-check-consistency.md",
+                "./commands/fractary-docs-doc-create.md",
+                "./commands/fractary-docs-doc-delete.md",
+                "./commands/fractary-docs-doc-get.md",
+                "./commands/fractary-docs-doc-list.md",
+                "./commands/fractary-docs-doc-search.md",
+                "./commands/fractary-docs-doc-update.md",
+                "./commands/fractary-docs-refine.md",
+                "./commands/fractary-docs-type-info.md",
+                "./commands/fractary-docs-type-list.md",
+                "./commands/fractary-docs-validate.md",
+                "./commands/fractary-docs-write.md"
+            ],
+            "skills": "./skills/"
+        }
     ]
-  }
+}
