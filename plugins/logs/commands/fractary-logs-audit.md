@@ -1,17 +1,16 @@
 ---
 name: fractary-logs-audit
-description: Audit logs - delegates to fractary-logs-audit agent
-allowed-tools: Agent(fractary-logs-audit)
-model: claude-haiku-4-5
-argument-hint: '[--project-root <path>] [--execute] [--context "<text>"]'
+description: Audit logs for compliance and health
+allowed-tools: Skill(fractary-logs-manager), Bash, Read, Write, Glob
+model: claude-sonnet-4-6
+argument-hint: '[--project-root <path>] [--execute]'
 ---
 
-Use **Agent** tool with `fractary-logs-audit` agent to audit logs and generate management plans.
+Use the **Skill** tool with `fractary-logs-manager` in audit mode.
 
 ```
-Agent(
-  subagent_type="fractary-logs-audit",
-  description="Audit logs",
-  prompt="Audit logs and generate management plan: $ARGUMENTS"
+Skill(
+  skill="fractary-logs-manager",
+  args="audit $ARGUMENTS"
 )
 ```

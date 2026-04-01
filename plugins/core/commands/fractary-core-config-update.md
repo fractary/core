@@ -1,32 +1,18 @@
 ---
 name: fractary-core-config-update
 description: Update existing Fractary Core configuration incrementally
-allowed-tools: Agent(fractary-core-config-updater)
+allowed-tools: Skill(fractary-core-config-updater), Bash, Read, Edit, Write, AskUserQuestion
 model: claude-haiku-4-5
 argument-hint: '--context "<description of changes>" [--plugins <list>] [--dry-run] [--yes]'
 ---
 
-Use **Agent** tool with `fractary-core-config-updater` agent to incrementally update existing Fractary Core configuration.
+Use the **Skill** tool with `fractary-core-config-updater` to incrementally update existing configuration.
 
-Interprets natural language descriptions of desired changes and applies them to the existing config while preserving all unrelated sections.
+Interprets natural language descriptions and applies targeted changes while preserving unrelated sections.
 
 ```
-Agent(
-  subagent_type="fractary-core-config-updater",
-  description="Update Fractary Core config",
-  prompt="Update Fractary Core configuration: $ARGUMENTS"
+Skill(
+  skill="fractary-core-config-updater",
+  args="$ARGUMENTS"
 )
-```
-
-## Usage Examples
-
-```bash
-# Switch work platform to Jira
-/fractary-core-config-update --context "switch to jira for work tracking"
-
-# Enable S3 storage
-/fractary-core-config-update --context "enable S3 storage with bucket my-bucket"
-
-# Update specific plugin
-/fractary-core-config-update --plugins logs --context "change archive path to .fractary/logs/old"
 ```

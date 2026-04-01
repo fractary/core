@@ -1,17 +1,16 @@
 ---
 name: fractary-docs-audit
-description: Audit documentation - delegates to fractary-docs-auditor agent
-allowed-tools: Agent(fractary-docs-auditor)
-model: claude-haiku-4-5
-argument-hint: '[directory] [--doc-type <type>] [--context "<text>"]'
+description: Audit documentation quality
+allowed-tools: Skill(fractary-docs-quality), Bash, Read, Glob
+model: claude-sonnet-4-6
+argument-hint: '[directory] [--doc-type <type>]'
 ---
 
-Use **Agent** tool with `fractary-docs-auditor` agent to audit documentation quality and find issues.
+Use the **Skill** tool with `fractary-docs-quality` in audit mode.
 
 ```
-Agent(
-  subagent_type="fractary-docs-auditor",
-  description="Audit documentation",
-  prompt="Audit documentation quality and find issues: $ARGUMENTS"
+Skill(
+  skill="fractary-docs-quality",
+  args="audit $ARGUMENTS"
 )
 ```

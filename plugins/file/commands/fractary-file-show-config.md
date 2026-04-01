@@ -1,17 +1,18 @@
 ---
 name: fractary-file-show-config
-description: Show file plugin configuration - delegates to fractary-file-show-config agent
-allowed-tools: Agent(fractary-file-show-config)
+description: Show file plugin configuration
+allowed-tools: Bash(fractary-core file show-config:*)
 model: claude-haiku-4-5
-argument-hint: '[--raw] [--path] [--verify] [--context "<text>"]'
+argument-hint: '[--json]'
 ---
 
-Use **Agent** tool with `fractary-file-show-config` agent to display current file plugin configuration.
+## Your task
 
-```
-Agent(
-  subagent_type="fractary-file-show-config",
-  description="Show file plugin configuration",
-  prompt="Show file plugin configuration: $ARGUMENTS"
-)
-```
+Display file plugin configuration using the CLI command `fractary-core file show-config`.
+
+Parse arguments:
+- --json: Output as JSON
+
+Call: `fractary-core file show-config [--json]`
+
+Execute the CLI command and return the result.

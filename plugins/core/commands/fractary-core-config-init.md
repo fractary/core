@@ -1,20 +1,19 @@
 ---
 name: fractary-core-config-init
 description: Initialize Fractary Core configuration for all plugins
-allowed-tools: Agent(fractary-core-config-initializer)
+allowed-tools: Skill(fractary-core-config-initializer), Bash, Read, Edit, Write, Glob, AskUserQuestion
 model: claude-haiku-4-5
-argument-hint: '[--plugins <list>] [--work-platform <name>] [--repo-platform <name>] [--file-handler <name>] [--yes] [--force] [--dry-run] [--context "<text>"]'
+argument-hint: '[--plugins <list>] [--work-platform <name>] [--repo-platform <name>] [--file-handler <name>] [--yes] [--force] [--dry-run]'
 ---
 
-Use **Agent** tool with `fractary-core-config-initializer` agent to initialize Fractary Core configuration.
+Use the **Skill** tool with `fractary-core-config-initializer` to initialize Fractary Core configuration.
 
 For fresh setup or force-overwrite of configuration. For incremental updates to existing config, use `/fractary-core-config-update` instead.
 
 ```
-Agent(
-  subagent_type="fractary-core-config-initializer",
-  description="Initialize Fractary Core config",
-  prompt="Initialize Fractary Core configuration: $ARGUMENTS"
+Skill(
+  skill="fractary-core-config-initializer",
+  args="$ARGUMENTS"
 )
 ```
 

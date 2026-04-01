@@ -1,17 +1,16 @@
 ---
 name: fractary-docs-archive
-description: Archive a document - delegates to fractary-docs-archiver agent
-allowed-tools: Agent(fractary-docs-archiver)
+description: Archive a document
+allowed-tools: Skill(fractary-docs-archiver), Bash, Read
 model: claude-haiku-4-5
-argument-hint: '<id> [--source <name>] [--context "<text>"]'
+argument-hint: '<id> [--source <name>]'
 ---
 
-Use **Agent** tool with `fractary-docs-archiver` agent to archive a document to its configured archive source.
+Use the **Skill** tool with `fractary-docs-archiver` to archive a document.
 
 ```
-Agent(
-  subagent_type="fractary-docs-archiver",
-  description="Archive document",
-  prompt="Archive document: $ARGUMENTS"
+Skill(
+  skill="fractary-docs-archiver",
+  args="$ARGUMENTS"
 )
 ```
