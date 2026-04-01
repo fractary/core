@@ -11,6 +11,5 @@
         "./commands/fractary-core-env-list.md",
         "./commands/fractary-core-env-show.md"
     ],
-    "skills": "./skills/",
-    "hooks": "./hooks/hooks.json"
+    "skills": "./skills/"
 }
