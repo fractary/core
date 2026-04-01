@@ -36,7 +36,7 @@
                 "./commands/fractary-core-env-show.md"
             ],
             "skills": "./skills/",
-            "hooks": "./hooks/hooks.json"
+            "hooks": "../hooks/hooks.json"
         },
         {
             "name": "fractary-repo",
@@ -78,8 +78,7 @@
                 "./commands/fractary-repo-worktree-remove.md",
                 "./commands/fractary-repo-worktree-cleanup.md"
             ],
-            "skills": "./skills/",
-            "hooks": "./hooks/hooks.json"
+            "skills": "./skills/"
         },
         {
             "name": "fractary-work",
