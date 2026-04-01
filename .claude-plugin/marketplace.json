@@ -36,7 +36,7 @@
                 "./commands/fractary-core-env-show.md"
             ],
             "skills": "./skills/",
-            "hooks": "../hooks/hooks.json"
+            "hooks": "./hooks/hooks.json"
         },
         {
             "name": "fractary-repo",
