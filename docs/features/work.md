@@ -10,7 +10,7 @@ Work item and issue management across platforms. Create, fetch, update, search, 
 - [Comment Operations](#comment-operations) - create and list comments
 - [Label Operations](#label-operations) - add, remove, set, list labels
 - [Milestone Operations](#milestone-operations) - create, list, assign milestones
-- [Agents](#agents) - issue-refine-agent, issue-bulk-creator
+- [Skills](#skills) - issue-refiner, issue-bulk-creator
 - [Types & Schemas](#types--schemas) - TypeScript interfaces
 - [Error Handling](#error-handling) - SDK errors, CLI exit codes, MCP error codes
 
@@ -895,11 +895,11 @@ Tool: `fractary_work_milestone_remove` with `{ "issue_number": "123" }`
 
 ---
 
-## Agents
+## Skills
 
-These agents are available in the Claude Code plugin and can be triggered proactively based on conversation context.
+These skills are available in the Claude Code plugin and can be triggered proactively based on conversation context.
 
-### issue-refine-agent
+### fractary-work-issue-refiner
 
 Reviews issues and asks clarifying questions about **what** (requirements, goals, scope, acceptance criteria), not how (implementation). Part of the "frame phase" before architectural planning.
 
@@ -907,17 +907,13 @@ Reviews issues and asks clarifying questions about **what** (requirements, goals
 
 **Triggers proactively:** "refine this issue", "clarify requirements"
 
-**Tools available:** Full tool access for reading issues, posting comments, and gathering context.
+### fractary-work-issue-bulk-creator
 
-### issue-bulk-creator
-
-Analyzes project structure and conversation context to determine what issues to create. Presents a plan for confirmation before creating anything. Useful for breaking epics into individual issues.
+Analyzes project structure and conversation context to determine what issues to create. Presents a plan for confirmation before creating anything. Useful for breaking epics into individual issues. Runs with agent-level context isolation for project scanning.
 
 **Invoked by:** `/fractary-work-issue-create-bulk` command
 
 **Triggers proactively:** "create multiple issues", "break this down into issues"
-
-**Tools available:** Full tool access for analyzing code, reading issues, and creating new issues.
 
 ---
 

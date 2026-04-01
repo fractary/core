@@ -11,10 +11,6 @@
     "./commands/fractary-core-env-list.md",
     "./commands/fractary-core-env-show.md"
   ],
-  "agents": [
-    "./agents/fractary-core-config-initializer.md",
-    "./agents/fractary-core-config-updater.md",
-    "./agents/fractary-core-env-switcher.md"
-  ],
+  "skills": "./skills/",
   "hooks": "./hooks/hooks.json"
 }

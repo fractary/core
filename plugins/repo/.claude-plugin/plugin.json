@@ -3,8 +3,5 @@
   "version": "3.2.0",
   "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
   "commands": "./commands/",
-  "agents": [
-    "./agents/fractary-repo-pr-review-agent.md"
-  ],
   "skills": "./skills/"
 }

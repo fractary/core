@@ -6,7 +6,7 @@
       "url": "https://github.com/fractary/"
     },
     "metadata": {
-      "description": "Production-ready core plugins powered by Claude Code agents, commands, skills and hooks.",
+      "description": "Production-ready core plugins powered by Claude Code commands, skills and hooks.",
       "version": "3.5.0",
       "pluginRoot": "./plugins"
     },
@@ -40,11 +40,7 @@
           "./commands/fractary-core-env-list.md",
           "./commands/fractary-core-env-show.md"
         ],
-        "agents": [
-          "./agents/fractary-core-config-initializer.md",
-          "./agents/fractary-core-config-updater.md",
-          "./agents/fractary-core-env-switcher.md"
-        ],
+        "skills": "./skills/",
         "hooks": "./hooks/hooks.json"
       },
       {
@@ -87,9 +83,7 @@
           "./commands/fractary-repo-worktree-remove.md",
           "./commands/fractary-repo-worktree-cleanup.md"
         ],
-        "agents": [
-          "./agents/fractary-repo-pr-review-agent.md"
-        ],
+        "skills": "./skills/",
         "hooks": "./hooks/hooks.json"
       },
       {
@@ -130,10 +124,7 @@
           "./commands/fractary-work-issue-search.md",
           "./commands/fractary-work-issue-update.md"
         ],
-        "agents": [
-          "./agents/fractary-work-issue-refine-agent.md",
-          "./agents/fractary-work-issue-bulk-creator.md"
-        ]
+        "skills": "./skills/"
       },
       {
         "name": "fractary-file",
@@ -164,13 +155,7 @@
           "./commands/fractary-file-switch-handler.md",
           "./commands/fractary-file-test-connection.md"
         ],
-        "agents": [
-          "./agents/fractary-file-upload.md",
-          "./agents/fractary-file-download.md",
-          "./agents/fractary-file-show-config.md",
-          "./agents/fractary-file-switch-handler.md",
-          "./agents/fractary-file-test-connection.md"
-        ]
+        "skills": "./skills/"
       },
       {
         "name": "fractary-logs",
@@ -213,12 +198,7 @@
           "./commands/fractary-logs-validate.md",
           "./commands/fractary-logs-write.md"
         ],
-        "agents": [
-          "./agents/fractary-logs-analyze.md",
-          "./agents/fractary-logs-audit.md",
-          "./agents/fractary-logs-cleanup.md",
-          "./agents/fractary-logs-log.md"
-        ]
+        "skills": "./skills/"
       },
       {
         "name": "fractary-docs",
@@ -259,14 +239,7 @@
           "./commands/fractary-docs-validate.md",
           "./commands/fractary-docs-write.md"
         ],
-        "agents": [
-          "./agents/fractary-docs-archiver.md",
-          "./agents/fractary-docs-auditor.md",
-          "./agents/fractary-docs-consistency-checker.md",
-          "./agents/fractary-docs-refiner.md",
-          "./agents/fractary-docs-validator.md",
-          "./agents/fractary-docs-writer.md"
-        ]
+        "skills": "./skills/"
       }
     ]
   }

@@ -21,14 +21,7 @@
       "./plugins/repo/commands",
       "./plugins/work/commands"
     ],
-    "agents": [
-      "./plugins/core/agents",
-      "./plugins/docs/agents",
-      "./plugins/file/agents",
-      "./plugins/logs/agents", 
-      "./plugins/repo/agents",
-      "./plugins/work/agents"
-    ] 
+    "agents": []
   },
   "workspaces": [
     "sdk/js",

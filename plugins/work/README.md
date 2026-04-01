@@ -4,7 +4,7 @@ Universal work item management across GitHub Issues, Jira Cloud, and Linear.
 
 ## Overview
 
-The **Fractary Work Plugin** provides a unified interface for managing issues, tickets, and work items across multiple project management platforms. It uses an agents + commands + skills pattern with MCP-first architecture, abstracting platform-specific differences through handler skills.
+The **Fractary Work Plugin** provides a unified interface for managing issues, tickets, and work items across multiple project management platforms. It uses a commands + skills pattern with MCP-first architecture, abstracting platform-specific differences through handler skills.
 
 **Version:** 3.0.8
 **Status:** Production Ready
@@ -29,33 +29,30 @@ The **Fractary Work Plugin** provides a unified interface for managing issues, t
 
 ## Architecture
 
-### Agents + Commands + Skills (MCP-First)
+### Commands + Skills (MCP-First)
 
 ```
 Layer 1: Commands (User Interface)
    /fractary-work-issue, /fractary-work-comment, etc.
    ↓
-Layer 2: Agents (Orchestration)
-   issue-refine, issue-bulk-creator
+Layer 2: Skills (Orchestration & Platform Abstraction)
+   issue-refiner, issue-bulk-creator, handler skills
    ↓
-Layer 3: Skills (Platform Abstraction)
-   Handler skills + shared utilities
-   ↓
-Layer 4: Scripts (Deterministic Operations)
+Layer 3: CLI/SDK (Deterministic Operations)
 ```
 
 **Benefits:**
-- Agents handle orchestration and decision-making
+- Skills lazy-load only when invoked (minimal token overhead)
 - Commands provide user-facing entry points
 - Handler skills centralize platform-specific logic
-- Scripts execute outside LLM context for efficiency
+- CLI/SDK handles deterministic operations outside LLM context
 
 ### Components
 
-#### Agents (2)
+#### Skills (Orchestration)
 
-- **`issue-refine`** - Refine and improve issue content
-- **`issue-bulk-creator`** - Create multiple issues in batch
+- **`fractary-work-issue-refiner`** - Refine and improve issue content
+- **`fractary-work-issue-bulk-creator`** - Create multiple issues in batch
 
 #### Commands (8)
 
@@ -218,7 +215,7 @@ All commands support the `--context` argument for passing additional instruction
 --context "<text>"
 ```
 
-This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+This argument is always optional and appears as the final argument. When provided, skills prepend the context as additional instructions to their workflow.
 
 **Examples:**
 
@@ -329,114 +326,25 @@ _🤖 Auto-generated work update • Branch: `feat/123-add-auth` • 2025-11-12 
 - Update repo cache: Issue ID is cached on UserPromptSubmit hook
 - Branch name doesn't match expected pattern
 
-## Agent Usage
+## CLI Usage
 
-### Protocol: JSON Request/Response
-
-The work plugin uses structured JSON for all operations:
+All work operations are available via the Fractary Core CLI:
 
 ```bash
-claude --agent work-manager '{
-  "operation": "fetch",
-  "parameters": {"issue_id": "123"}
-}'
-```
+# Fetch issue details
+fractary-core work issue-fetch 123
 
-### 18 Supported Operations
+# Create issue
+fractary-core work issue-create --title "Add dark mode" --body "Users want dark mode support" --label feature
 
-#### Read Operations
-- `fetch` - Get complete issue details
-- `classify` - Determine work type
-- `list` - Filter issues by criteria
-- `search` - Full-text search
+# List issues
+fractary-core work issue-list --state open --label bug
 
-#### Create Operations
-- `create` - Create new issue
+# Search issues
+fractary-core work issue-search "login crash" --limit 20
 
-#### Update Operations
-- `update` - Modify title/description
-- `update-state` - Change lifecycle state
-
-#### State Operations
-- `close` - Close/resolve issue (**CRITICAL**)
-- `reopen` - Reopen closed issue
-
-#### Communication
-- `comment` - Post comment with metadata
-
-#### Metadata Operations
-- `add-label` - Add label to issue
-- `remove-label` - Remove label from issue
-- `assign` - Assign user to issue
-- `unassign` - Remove assignee
-- `link` - Create relationship between issues
-
-#### Milestone Operations
-- `create-milestone` - Create milestone/sprint/cycle
-- `update-milestone` - Update milestone properties
-- `assign-milestone` - Assign issue to milestone
-
-### Example Operations
-
-#### Fetch Issue
-```bash
-claude --agent work-manager '{
-  "operation": "fetch",
-  "parameters": {"issue_id": "123"}
-}'
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "operation": "fetch",
-  "result": {
-    "id": "123",
-    "identifier": "#123",
-    "title": "Fix login bug",
-    "state": "open",
-    "labels": ["bug", "urgent"],
-    "platform": "github",
-    "url": "https://github.com/..."
-  }
-}
-```
-
-#### Close Issue (CRITICAL for FABER Release)
-```bash
-claude --agent work-manager '{
-  "operation": "close",
-  "parameters": {
-    "issue_id": "123",
-    "close_comment": "Fixed in PR #456",
-    "work_id": "abc12345"
-  }
-}'
-```
-
-#### Create Issue
-```bash
-claude --agent work-manager '{
-  "operation": "create",
-  "parameters": {
-    "title": "Add dark mode",
-    "description": "Users want dark mode support",
-    "labels": "feature,ui",
-    "assignees": "username"
-  }
-}'
-```
-
-#### Search Issues
-```bash
-claude --agent work-manager '{
-  "operation": "search",
-  "parameters": {
-    "query_text": "login crash",
-    "limit": 20
-  }
-}'
+# Close issue
+fractary-core work issue-update 123 --state closed --comment "Fixed in PR #456"
 ```
 
 ## Integration with FABER
@@ -468,11 +376,9 @@ work/
 ├── .claude-plugin/
 │   └── plugin.json                              # Plugin manifest (v3.0.8)
 ├── README.md                                    # This file
-├── agents/
-│   ├── issue-bulk-creator.md                    # Bulk issue creation agent
-│   └── issue-refine.md                          # Issue refinement agent
 ├── archived/                                    # Archived legacy components
 │   ├── README.md
+│   ├── agents-v1/                               # Old agents (v3.0)
 │   ├── agents/                                  # Old agents (v2.0)
 │   └── skills/                                  # Old focused skills (v2.0)
 ├── commands/
@@ -490,6 +396,8 @@ work/
 │   ├── generate-session-summary.sh              # Session summary generation
 │   └── process-comment-queue.sh                 # Comment queue processing
 └── skills/
+    ├── fractary-work-issue-refiner/                 # Issue refinement skill
+    ├── fractary-work-issue-bulk-creator/            # Bulk issue creation skill
     ├── fractary-work-handler-work-tracker-github/   # GitHub adapter
     ├── fractary-work-handler-work-tracker-jira/    # Jira adapter
     ├── fractary-work-handler-work-tracker-linear/  # Linear adapter
@@ -589,14 +497,15 @@ See `docs/TESTING.md` for:
 ## Statistics
 
 **Total Implementation:**
-- **2 Agents:** issue-refine, issue-bulk-creator
+- **2 Orchestration Skills:** issue-refiner, issue-bulk-creator
 - **8 Commands:** Full issue management interface
-- **5 Skills:** 3 handlers + fractary-work-common + fractary-work-initializer
+- **5 Handler/Utility Skills:** 3 handlers + fractary-work-common + fractary-work-initializer
 - **3 Platforms:** GitHub, Jira, Linear with 100% parity
 
 ## Version History
 
-- **v3.0.8** (Current) - MCP-first architecture with agents + commands + skills
+- **v3.1.0** (Current) - Skills-based architecture (agents migrated to lazy-loading skills)
+- **v3.0.8** - MCP-first architecture with agents + commands + skills
 - **v2.0.0** (2025-10-29) - Full rewrite with Linear support, 100% feature parity
 - **v1.0.0** (2025-10-22) - Initial MVP with GitHub support
 
@@ -614,10 +523,9 @@ Part of the Fractary plugin ecosystem.
 ## Contributing
 
 Follow **Fractary Plugin Standards** when contributing:
-- Commands never do work (invoke agents)
-- Agents never do work (invoke skills)
-- Skills coordinate handlers
-- Scripts contain deterministic operations
+- Commands invoke skills for orchestration or CLI for deterministic ops
+- Skills lazy-load and coordinate handlers with progressive document loading
+- CLI/SDK handles deterministic operations outside LLM context
 - Documentation uses UPPERCASE XML tags
 
 ## Support

@@ -140,13 +140,13 @@ file delete archive/SPEC-001.md --source specs
                │
                ▼
 ┌─────────────────────────────────────┐
-│  Agents                             │  ← Orchestration
-│  (file-upload, file-download, etc.) │
+│  Skills                             │  ← Orchestration
+│  (handler-switcher)                 │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
-│  @fractary/core SDK                 │  ← Storage implementations
+│  @fractary/core SDK + CLI           │  ← Storage implementations
 │  - S3Storage                        │
 │  - R2Storage                        │
 │  - GCSStorage                       │
@@ -242,21 +242,20 @@ file:
 
 ```
 plugins/file/
-├── agents/
-│   ├── file-upload.md      # Upload orchestration
-│   ├── file-download.md    # Download orchestration
-│   ├── file-list.md        # List orchestration
-│   └── file-delete.md      # Delete orchestration
 ├── commands/
-│   ├── upload.md           # Upload command
-│   ├── download.md         # Download command
-│   ├── list.md             # List command
-│   └── delete.md           # Delete command
+│   ├── upload.md           # Upload command (CLI wrapper)
+│   ├── download.md         # Download command (CLI wrapper)
+│   ├── show-config.md      # Show config command (CLI wrapper)
+│   ├── switch-handler.md   # Switch handler command (skill)
+│   └── test-connection.md  # Test connection command (CLI wrapper)
+├── skills/
+│   └── fractary-file-handler-switcher/  # Handler switching skill
 ├── scripts/
 │   └── storage.mjs         # Node.js SDK wrapper
 ├── config/
 │   └── config.example.json # Configuration template
 ├── archived/
+│   ├── agents-v1/          # Old agents (migrated to CLI/skills)
 │   └── skills/             # Legacy handler skills
 └── README.md
 ```
@@ -364,9 +363,9 @@ npm install @aws-sdk/client-s3
 
 ### v3.0.0 (2025-01-18)
 
-**Architecture Overhaul** - Commands + Agents pattern
+**Architecture Overhaul** - Commands + Skills pattern
 
-- Replaced skills with focused commands and agents
+- Replaced agents with CLI wrappers and skills (v3.1: agents migrated to lazy-loading skills)
 - Consolidated all storage logic in @fractary/core SDK
 - Simplified configuration to sources-based approach
 - Removed legacy handler skills (archived)

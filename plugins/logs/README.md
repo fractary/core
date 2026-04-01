@@ -8,7 +8,7 @@
 
 **Version**: 4.1.0
 
-Operational log management for Claude Code development sessions, including session capture, automatic cloud backup, AI-powered summaries, search, and analysis. Uses agents + commands + skills pattern with MCP-first architecture.
+Operational log management for Claude Code development sessions, including session capture, automatic cloud backup, AI-powered summaries, search, and analysis. Uses commands + skills pattern with MCP-first architecture.
 
 ## Overview
 
@@ -24,19 +24,19 @@ The fractary-logs plugin provides comprehensive logging infrastructure for devel
 
 ## Architecture
 
-The plugin uses agents + commands + skills pattern with MCP-first architecture:
+The plugin uses commands + skills pattern with MCP-first architecture:
 
 ```
 fractary-logs
-├── agents/
-│   ├── logs-analyze.md          # Analysis orchestration
-│   ├── logs-audit.md            # Log auditing
-│   ├── logs-cleanup.md          # Cleanup operations
-│   └── logs-log.md              # Log entry creation
 ├── commands/ (15 commands)      # User-facing entry points
 ├── skills/
+│   ├── fractary-logs-analyzer/               # Analysis skill (errors, patterns, sessions, time)
+│   ├── fractary-logs-logger/                 # Log entry creation skill
+│   ├── fractary-logs-manager/                # Multi-mode skill (audit + cleanup)
 │   ├── fractary-logs-log-type-selector/      # Type selection
 │   └── fractary-logs-workflow-event-emitter/ # Workflow event handling
+├── archived/
+│   └── agents-v1/                            # Old agents (migrated to skills)
 └── scripts/                     # Deterministic operations
 ```
 
@@ -200,7 +200,7 @@ All commands support the `--context` argument for passing additional instruction
 --context "<text>"
 ```
 
-This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+This argument is always optional and appears as the final argument. When provided, skills prepend the context as additional instructions to their workflow.
 
 **Examples:**
 
@@ -546,9 +546,9 @@ For configuration details, see the [Configuration Guide](../../docs/guides/confi
 
 **Required dependency** for cloud storage operations.
 
-The logs plugin integrates via **agent-to-agent invocation**:
-- log-manager agent invokes file-manager agent from fractary-file
-- file-manager handles all cloud operations (upload, read, delete)
+The logs plugin integrates via **CLI delegation**:
+- Log skills invoke the fractary-core CLI for file operations
+- CLI handles all cloud operations (upload, read, delete)
 - Supports multiple providers: R2, S3, GCS, Google Drive, Local
 
 **Setup**:
@@ -585,16 +585,12 @@ Auto-capture during FABER:
 ```
 plugins/logs/
 ├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest (v4.1.0)
+│   └── plugin.json              # Plugin manifest (v4.3.0)
 ├── README.md
 ├── STATUS.md                    # Release status
-├── agents/
-│   ├── logs-analyze.md          # Analysis agent
-│   ├── logs-audit.md            # Audit agent
-│   ├── logs-cleanup.md          # Cleanup agent
-│   └── logs-log.md              # Logging agent
 ├── archived/                    # Archived legacy components
 │   ├── README.md
+│   ├── agents-v1/               # Old agents (v4.x - migrated to skills)
 │   ├── agents/                  # Old agents (v2.0-v3.0)
 │   ├── skills/                  # Old skills (v2.0-v3.0)
 │   └── types-v2/                # Old type definitions
@@ -609,6 +605,9 @@ plugins/logs/
 │   ├── prepare-upload-metadata.sh # Upload preparation
 │   └── upload-to-cloud.sh       # Cloud upload
 └── skills/
+    ├── fractary-logs-analyzer/               # Analysis skill
+    ├── fractary-logs-logger/                 # Log entry skill
+    ├── fractary-logs-manager/                # Multi-mode: audit + cleanup
     ├── fractary-logs-log-type-selector/      # Log type selection
     └── fractary-logs-workflow-event-emitter/ # Workflow events
 ```
