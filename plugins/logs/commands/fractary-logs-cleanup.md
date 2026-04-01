@@ -1,17 +1,16 @@
 ---
 name: fractary-logs-cleanup
-description: Cleanup logs - delegates to fractary-logs-cleanup agent
-allowed-tools: Agent(fractary-logs-cleanup)
+description: Clean up old logs based on age threshold
+allowed-tools: Skill(fractary-logs-manager), Bash, Read
 model: claude-haiku-4-5
-argument-hint: '[--older-than <days>] [--dry-run] [--context "<text>"]'
+argument-hint: '[--older-than <days>] [--dry-run]'
 ---
 
-Use **Agent** tool with `fractary-logs-cleanup` agent to archive and clean up old logs.
+Use the **Skill** tool with `fractary-logs-manager` in cleanup mode.
 
 ```
-Agent(
-  subagent_type="fractary-logs-cleanup",
-  description="Cleanup logs",
-  prompt="Archive and clean up old logs: $ARGUMENTS"
+Skill(
+  skill="fractary-logs-manager",
+  args="cleanup $ARGUMENTS"
 )
 ```

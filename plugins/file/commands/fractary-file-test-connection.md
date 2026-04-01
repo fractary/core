@@ -1,17 +1,19 @@
 ---
 name: fractary-file-test-connection
-description: Test storage connection - delegates to fractary-file-test-connection agent
-allowed-tools: Agent(fractary-file-test-connection)
+description: Test storage connection
+allowed-tools: Bash(fractary-core file test-connection:*)
 model: claude-haiku-4-5
-argument-hint: '[--handler <name>] [--verbose] [--quick] [--context "<text>"]'
+argument-hint: '[--source <name>] [--json]'
 ---
 
-Use **Agent** tool with `fractary-file-test-connection` agent to test storage connectivity.
+## Your task
 
-```
-Agent(
-  subagent_type="fractary-file-test-connection",
-  description="Test storage connection",
-  prompt="Test storage connection: $ARGUMENTS"
-)
-```
+Test storage connectivity using the CLI command `fractary-core file test-connection`.
+
+Parse arguments:
+- --source: Named source to test (tests default if not specified)
+- --json: Output as JSON
+
+Call: `fractary-core file test-connection [--source <name>] [--json]`
+
+Execute the CLI command and return the result.

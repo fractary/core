@@ -1,21 +1,18 @@
 ---
 name: fractary-work-issue-refine
 description: Refine issue requirements through clarifying questions
-allowed-tools: Agent(fractary-work-issue-refine-agent)
+allowed-tools: Skill(fractary-work-issue-refiner), Bash, Read, AskUserQuestion
 model: claude-opus-4-6
 argument-hint: '<number> [--context "<text>"]'
 ---
 
-Delegates to fractary-work-issue-refine-agent for reviewing and clarifying issue requirements.
+Use the **Skill** tool with `fractary-work-issue-refiner` to refine issue requirements.
 
-This command reviews a GitHub issue and asks clarifying questions to ensure requirements are clear before implementation. It focuses on WHAT (requirements, goals, scope, acceptance criteria) rather than HOW (technical implementation, architecture).
-
-Use **Agent** tool with `fractary-work-issue-refine-agent` agent to refine issue requirements:
+Reviews a GitHub issue and asks clarifying questions to ensure requirements are clear before implementation. Focuses on WHAT (requirements, goals, scope, acceptance criteria) not HOW (implementation).
 
 ```
-Agent(
-  subagent_type="fractary-work-issue-refine-agent",
-  description="Refine issue requirements",
-  prompt="Review issue requirements and ask clarifying questions to ensure clarity: $ARGUMENTS"
+Skill(
+  skill="fractary-work-issue-refiner",
+  args="$ARGUMENTS"
 )
 ```

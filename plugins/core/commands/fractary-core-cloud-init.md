@@ -1,27 +1,19 @@
 ---
 name: fractary-core-cloud-init
 description: Initialize cloud storage for file handlers (upgrade from local to S3 or R2)
-allowed-tools: Agent(fractary-core-cloud-initializer)
+allowed-tools: Skill(fractary-core-cloud-initializer), Bash, Read, Edit, Write, Glob, AskUserQuestion
 model: claude-haiku-4-5
-argument-hint: '[--provider <s3|r2>] [--bucket <name>] [--region <region>] [--account-id <id>] [--scope <archives|all>] [--terraform] [--migrate] [--yes] [--context "<text>"]'
+argument-hint: '[--provider <s3|r2>] [--bucket <name>] [--region <region>] [--account-id <id>] [--scope <archives|all>] [--terraform] [--migrate] [--yes]'
 ---
 
-Use **Agent** tool with `fractary-core-cloud-initializer` agent to initialize cloud storage.
+Use the **Skill** tool with `fractary-core-cloud-initializer` to initialize cloud storage.
 
-This command walks the user through upgrading their file storage from local (set up by config-init)
-to a cloud provider (S3 or R2). It handles configuration, credential setup, optional Terraform
-generation, and migration of existing archives.
-
-Prerequisites: Project must already have a base configuration (`.fractary/config.yaml`).
-Run `/fractary-core-config-init` first if no configuration exists.
+Walks through upgrading file storage from local to a cloud provider (S3 or R2).
+Prerequisites: Project must already have a base configuration. Run `/fractary-core-config-init` first if no configuration exists.
 
 ```
-Agent(
-  subagent_type="fractary-core-cloud-initializer",
-  description="Initialize cloud storage",
-  prompt="Initialize cloud storage for file handlers: $ARGUMENTS"
+Skill(
+  skill="fractary-core-cloud-initializer",
+  args="$ARGUMENTS"
 )
 ```
-
-Configuration is stored at: `.fractary/config.yaml` (file section)
-Terraform output (if requested): `infra/terraform/`

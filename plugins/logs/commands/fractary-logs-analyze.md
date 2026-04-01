@@ -1,17 +1,16 @@
 ---
 name: fractary-logs-analyze
-description: Analyze logs - delegates to fractary-logs-analyze agent
-allowed-tools: Agent(fractary-logs-analyze)
-model: claude-haiku-4-5
-argument-hint: '<type> [--issue <number>] [--since <date>] [--until <date>] [--verbose] [--context "<text>"]'
+description: Analyze logs for patterns, errors, or time spent
+allowed-tools: Skill(fractary-logs-analyzer), Bash, Read
+model: claude-sonnet-4-6
+argument-hint: '<analysis_type> [--log-type <type>] [--issue <number>] [--since <date>] [--until <date>] [--verbose]'
 ---
 
-Use **Agent** tool with `fractary-logs-analyze` agent to analyze logs for patterns, errors, summaries, or time analysis.
+Use the **Skill** tool with `fractary-logs-analyzer` to analyze logs.
 
 ```
-Agent(
-  subagent_type="fractary-logs-analyze",
-  description="Analyze logs",
-  prompt="Analyze logs: $ARGUMENTS"
+Skill(
+  skill="fractary-logs-analyzer",
+  args="$ARGUMENTS"
 )
 ```

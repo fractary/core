@@ -1,17 +1,16 @@
 ---
 name: fractary-docs-write
-description: Write documentation - delegates to fractary-docs-writer agent
-allowed-tools: Agent(fractary-docs-writer)
-model: claude-haiku-4-5
-argument-hint: '<doc_type> [file_path] [--work-id <number>] [--skip-validation] [--batch] [--context "<text>"]'
+description: Write documentation
+allowed-tools: Skill(fractary-docs-writer), Skill(fractary-docs-doc-type-selector), Bash, Read, Write, AskUserQuestion
+model: claude-sonnet-4-6
+argument-hint: '<doc_type> [file_path] [--work-id <number>] [--skip-validation]'
 ---
 
-Use **Agent** tool with `fractary-docs-writer` agent to create or update documentation.
+Use the **Skill** tool with `fractary-docs-writer` to create or update documentation.
 
 ```
-Agent(
-  subagent_type="fractary-docs-writer",
-  description="Write documentation",
-  prompt="Create or update documentation: $ARGUMENTS"
+Skill(
+  skill="fractary-docs-writer",
+  args="$ARGUMENTS"
 )
 ```
