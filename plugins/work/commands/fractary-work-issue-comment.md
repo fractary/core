@@ -8,7 +8,7 @@ argument-hint: '<number> --body "<text>" [--json] [--context "<text>"]'
 
 ## Context
 
-- Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
+- Repository: !`git remote get-url origin 2>/dev/null | sed -E 's|.*[:/]([^/]+/[^/.]+)(\.git)?$|\1|'`
 
 ## Rules
 

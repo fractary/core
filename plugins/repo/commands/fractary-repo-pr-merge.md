@@ -8,7 +8,7 @@ argument-hint: '<pr_number> [--strategy <merge|squash|rebase>] [--delete-branch]
 
 ## Context
 
-- Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
+- Repository: !`git remote get-url origin 2>/dev/null | sed -E 's|.*[:/]([^/]+/[^/.]+)(\.git)?$|\1|'`
 
 ## Your task
 
