@@ -1,6 +1,6 @@
 {
     "name": "fractary-repo",
-    "version": "3.2.2",
+    "version": "3.3.0",
     "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
     "skills": "./skills/"
 }
