@@ -11,7 +11,8 @@ argument-hint: '[--work-id <id>] [--context "<text>"]'
 - Current git status: !`git status`
 - Current git diff (staged and unstaged changes): !`git diff HEAD`
 - Current branch: !`git branch --show-current`
-- Existing PR for current branch: !`GH_TOKEN=$(grep -s GITHUB_TOKEN .fractary/env/.env .env 2>/dev/null | head -1 | cut -d= -f2-) gh pr list --head $(git branch --show-current) --json number,url -q '.[0]' 2>/dev/null || echo "none"`
+- Repository: !`git remote get-url origin 2>/dev/null | sed -E 's|.*[:/]([^/]+/[^/.]+)(\.git)?$|\1|'`
+- Existing PR for current branch: !`GH_TOKEN=$(grep -s GITHUB_TOKEN .fractary/env/.env .env 2>/dev/null | head -1 | cut -d= -f2-) REPO=$(git remote get-url origin 2>/dev/null | sed -E 's|.*[:/]([^/]+/[^/.]+)(\.git)?$|\1|') gh pr list --repo "$REPO" --head $(git branch --show-current) --json number,url -q '.[0]' 2>/dev/null || echo "none"`
 
 ## Your task
 
@@ -41,7 +42,7 @@ Based on the above context:
    If a PR already exists, use the existing PR number from context.
 
 5. Poll every 15s for up to 15 minutes until all CI checks complete:
-   `gh pr view <number> --json statusCheckRollup`
+   `gh pr view <number> --repo <repo> --json statusCheckRollup`
    - If all checks pass → proceed to step 6
    - If any check fails → report failures and STOP with specific error messages from the checks
    - If checks still pending after 15 minutes → STOP with timeout message
