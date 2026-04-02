@@ -341,6 +341,16 @@ export class GitHubRepoProvider implements RepoProvider {
     return toPullRequest(pr);
   }
 
+  async getPRCheckStatuses(number: number): Promise<{ name: string; status: string; conclusion: string | null }[]> {
+    const repoFlag = this.owner && this.repo ? `-R ${this.owner}/${this.repo}` : '';
+    const result = gh<{ statusCheckRollup: { name: string; status: string; conclusion: string | null }[] }>(
+      `pr view ${number} ${repoFlag} --json statusCheckRollup`,
+      this.cwd,
+      this.ghEnv
+    );
+    return result.statusCheckRollup || [];
+  }
+
   async updatePR(number: number, options: PRUpdateOptions): Promise<PullRequest> {
     const args: string[] = ['pr', 'edit', number.toString(), ...this.repoFlag()];
 

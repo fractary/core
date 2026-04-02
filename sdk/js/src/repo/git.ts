@@ -163,7 +163,8 @@ export class Git {
     const status = this.getStatus();
     return status.staged.length > 0 ||
            status.modified.length > 0 ||
-           status.conflicts.length > 0;
+           status.conflicts.length > 0 ||
+           status.untracked.length > 0;
   }
 
   /**
@@ -181,7 +182,7 @@ export class Git {
    * Stash uncommitted changes. Returns true if something was stashed.
    */
   stash(message?: string): boolean {
-    const args = message ? `stash push -m "${message.replace(/"/g, '\\"')}"` : 'stash push';
+    const args = message ? `stash push -u -m "${message.replace(/"/g, '\\"')}"` : 'stash push -u';
     const result = git(args, this.cwd);
     return !result.includes('No local changes');
   }

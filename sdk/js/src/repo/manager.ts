@@ -388,6 +388,17 @@ export class RepoManager {
   }
 
   /**
+   * Get CI check statuses for a pull request.
+   * Returns an empty array if the provider does not support this.
+   */
+  async getPRCheckStatuses(number: number): Promise<{ name: string; status: string; conclusion: string | null }[]> {
+    if (typeof (this.provider as any).getPRCheckStatuses === 'function') {
+      return (this.provider as any).getPRCheckStatuses(number);
+    }
+    return [];
+  }
+
+  /**
    * Update a pull request
    */
   async updatePR(number: number, options: PRUpdateOptions): Promise<PullRequest> {
