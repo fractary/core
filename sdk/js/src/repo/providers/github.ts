@@ -24,13 +24,16 @@ import { findProjectRoot } from '../../common/config';
 /**
  * Execute a gh command and return JSON result
  */
-function gh<T>(args: string, cwd?: string): T {
-  const execOptions = {
+function gh<T>(args: string, cwd?: string, env?: Record<string, string>): T {
+  const execOptions: Record<string, unknown> = {
     encoding: 'utf-8' as const,
     cwd: cwd || findProjectRoot(),
     maxBuffer: 10 * 1024 * 1024,
     stdio: ['pipe', 'pipe', 'pipe'] as ['pipe', 'pipe', 'pipe'],
   };
+  if (env) {
+    execOptions.env = { ...process.env, ...env };
+  }
 
   try {
     const result = execSync(`gh ${args}`, execOptions);
@@ -45,13 +48,16 @@ function gh<T>(args: string, cwd?: string): T {
 /**
  * Execute a gh command without JSON parsing
  */
-function ghRaw(args: string[], cwd?: string): string {
-  const execOptions = {
+function ghRaw(args: string[], cwd?: string, env?: Record<string, string>): string {
+  const execOptions: Record<string, unknown> = {
     encoding: 'utf-8' as const,
     cwd: cwd || findProjectRoot(),
     maxBuffer: 10 * 1024 * 1024,
     stdio: ['pipe', 'pipe', 'pipe'] as ['pipe', 'pipe', 'pipe'],
   };
+  if (env) {
+    execOptions.env = { ...process.env, ...env };
+  }
 
   try {
     return execFileSync('gh', args, execOptions).toString().trim();
@@ -129,11 +135,25 @@ export class GitHubRepoProvider implements RepoProvider {
   private cwd: string;
   private owner: string;
   private repo: string;
+  private ghEnv: Record<string, string> | undefined;
 
   constructor(config: RepoConfig) {
     this.cwd = findProjectRoot();
     this.owner = config.owner || '';
     this.repo = config.repo || '';
+
+    // Build env overrides so `gh` uses the configured token
+    // instead of relying on its own auth store (which may have expired tokens
+    // or fail when the git remote uses an SSH alias like `github-fractary`).
+    const token = config.token || process.env.GITHUB_TOKEN;
+    if (token) {
+      this.ghEnv = { GH_TOKEN: token };
+    }
+  }
+
+  /** Returns ['-R', 'owner/repo'] args for gh pr/issue commands to bypass remote host detection. */
+  private repoFlag(): string[] {
+    return this.owner && this.repo ? ['-R', `${this.owner}/${this.repo}`] : [];
   }
 
   // =========================================================================
@@ -180,7 +200,7 @@ export class GitHubRepoProvider implements RepoProvider {
 
     if (location === 'remote' || location === 'both') {
       try {
-        ghRaw(['api', `repos/${this.owner}/${this.repo}/git/refs/heads/${name}`, '-X', 'DELETE'], this.cwd);
+        ghRaw(['api', `repos/${this.owner}/${this.repo}/git/refs/heads/${name}`, '-X', 'DELETE'], this.cwd, this.ghEnv);
       } catch {
         // Ignore if branch doesn't exist remotely
       }
@@ -192,7 +212,8 @@ export class GitHubRepoProvider implements RepoProvider {
 
     const branches = gh<GitHubBranch[]>(
       `api repos/${this.owner}/${this.repo}/branches --paginate -q '.[:${limit}]'`,
-      this.cwd
+      this.cwd,
+      this.ghEnv
     );
 
     return branches.map(b => ({
@@ -207,7 +228,8 @@ export class GitHubRepoProvider implements RepoProvider {
     try {
       const branch = gh<GitHubBranch>(
         `api repos/${this.owner}/${this.repo}/branches/${name}`,
-        this.cwd
+        this.cwd,
+        this.ghEnv
       );
 
       return {
@@ -226,7 +248,7 @@ export class GitHubRepoProvider implements RepoProvider {
   // =========================================================================
 
   async createPR(options: PRCreateOptions): Promise<PullRequest> {
-    const args: string[] = ['pr', 'create'];
+    const args: string[] = ['pr', 'create', ...this.repoFlag()];
 
     args.push('--title', options.title);
 
@@ -259,7 +281,7 @@ export class GitHubRepoProvider implements RepoProvider {
     }
 
     // Create the PR and get back the URL
-    const url = ghRaw(args, this.cwd);
+    const url = ghRaw(args, this.cwd, this.ghEnv);
 
     // Extract PR number from URL
     const match = url.match(/\/pull\/(\d+)/);
@@ -279,16 +301,18 @@ export class GitHubRepoProvider implements RepoProvider {
       'labels', 'assignees', 'reviewRequests',
     ];
 
+    const repoFlag = this.owner && this.repo ? `-R ${this.owner}/${this.repo}` : '';
     const pr = gh<GitHubPR>(
-      `pr view ${number} --json ${fields.join(',')}`,
-      this.cwd
+      `pr view ${number} ${repoFlag} --json ${fields.join(',')}`,
+      this.cwd,
+      this.ghEnv
     );
 
     return toPullRequest(pr);
   }
 
   async updatePR(number: number, options: PRUpdateOptions): Promise<PullRequest> {
-    const args: string[] = ['pr', 'edit', number.toString()];
+    const args: string[] = ['pr', 'edit', number.toString(), ...this.repoFlag()];
 
     if (options.title) {
       args.push('--title', options.title);
@@ -302,12 +326,12 @@ export class GitHubRepoProvider implements RepoProvider {
       args.push('--base', options.base);
     }
 
-    ghRaw(args, this.cwd);
+    ghRaw(args, this.cwd, this.ghEnv);
     return this.getPR(number);
   }
 
   async listPRs(options?: PRListOptions): Promise<PullRequest[]> {
-    const args: string[] = ['pr', 'list'];
+    const args: string[] = ['pr', 'list', ...this.repoFlag()];
 
     if (options?.state) {
       args.push('--state', options.state);
@@ -338,12 +362,12 @@ export class GitHubRepoProvider implements RepoProvider {
 
     args.push('--json', fields.join(','));
 
-    const prs = gh<GitHubPR[]>(args.join(' '), this.cwd);
+    const prs = gh<GitHubPR[]>(args.join(' '), this.cwd, this.ghEnv);
     return prs.map(toPullRequest);
   }
 
   async mergePR(number: number, options?: PRMergeOptions): Promise<PullRequest> {
-    const args: string[] = ['pr', 'merge', number.toString()];
+    const args: string[] = ['pr', 'merge', number.toString(), ...this.repoFlag()];
 
     const strategy = options?.strategy || 'squash';
     args.push(`--${strategy}`);
@@ -360,23 +384,23 @@ export class GitHubRepoProvider implements RepoProvider {
       args.push('--body', options.commitBody);
     }
 
-    ghRaw(args, this.cwd);
+    ghRaw(args, this.cwd, this.ghEnv);
     return this.getPR(number);
   }
 
   async addPRComment(number: number, body: string): Promise<void> {
-    ghRaw(['pr', 'comment', String(number), '--body', body], this.cwd);
+    ghRaw(['pr', 'comment', String(number), ...this.repoFlag(), '--body', body], this.cwd, this.ghEnv);
   }
 
   async requestReview(number: number, reviewers: string[]): Promise<void> {
-    ghRaw(['pr', 'edit', String(number), '--add-reviewer', reviewers.join(',')], this.cwd);
+    ghRaw(['pr', 'edit', String(number), ...this.repoFlag(), '--add-reviewer', reviewers.join(',')], this.cwd, this.ghEnv);
   }
 
   async approvePR(number: number, comment?: string): Promise<void> {
-    const args = ['pr', 'review', number.toString(), '--approve'];
+    const args = ['pr', 'review', number.toString(), ...this.repoFlag(), '--approve'];
     if (comment) {
       args.push('--body', comment);
     }
-    ghRaw(args, this.cwd);
+    ghRaw(args, this.cwd, this.ghEnv);
   }
 }
