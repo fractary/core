@@ -46,6 +46,7 @@ export interface WorkConfig {
   repo?: string;
   project?: string;
   token?: string;
+  host?: string;
 }
 
 export interface Issue {
@@ -190,6 +191,7 @@ export interface RepoConfig {
   /** Which environment is the default context (e.g., "production") */
   defaultEnvironment?: string;
   token?: string;
+  host?: string;
   branchPrefix?: BranchPrefixConfig;
   branchPrefixes?: BranchPrefixConfig;
 }
