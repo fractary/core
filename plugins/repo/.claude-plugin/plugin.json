@@ -1,7 +1,7 @@
 {
-  "name": "fractary-repo",
-  "version": "3.2.0",
-  "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
-  "commands": "./commands/",
-  "skills": "./skills/"
+    "name": "fractary-repo",
+    "version": "3.2.1",
+    "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
+    "commands": "./commands/",
+    "skills": "./skills/"
 }

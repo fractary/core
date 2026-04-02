@@ -11,7 +11,7 @@ argument-hint: '[--work-id <id>] [--context "<text>"]'
 - Current git status: !`git status`
 - Current git diff (staged and unstaged changes): !`git diff HEAD`
 - Current branch: !`git branch --show-current`
-- Existing PR for current branch: !`gh pr list --head $(git branch --show-current) --json number,url -q '.[0]' 2>/dev/null || echo "none"`
+- Existing PR for current branch: !`GH_TOKEN=$(grep -s GITHUB_TOKEN .fractary/env/.env .env 2>/dev/null | head -1 | cut -d= -f2-) gh pr list --head $(git branch --show-current) --json number,url -q '.[0]' 2>/dev/null || echo "none"`
 
 ## Your task
 
