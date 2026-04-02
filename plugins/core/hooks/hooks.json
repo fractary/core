@@ -1,5 +1,4 @@
 {
-  "description": "Set default Fractary environment at session start if none is active",
   "hooks": {
     "SessionStart": [
       {

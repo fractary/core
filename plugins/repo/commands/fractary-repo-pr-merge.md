@@ -8,7 +8,7 @@ argument-hint: '<pr_number> [--strategy <merge|squash|rebase>] [--delete-branch]
 
 ## Context
 
-- Repository: !`gh repo view --json nameWithOwner -q .nameWithOwner`
+- Repository: !`git remote get-url origin 2>/dev/null | sed -E 's|.*[:/]([^/]+/[^/.]+)(\.git)?$|\1|'`
 
 ## Your task
 
@@ -21,7 +21,7 @@ Parse arguments:
 - --json: Output as JSON for structured data
 
 Steps:
-1. Get changed files: `gh pr view <pr_number> --json files -q '.files[].path'`
+1. Get changed files: `gh pr view <pr_number> --repo <repo> --json files -q '.files[].path'`
 2. Merge the PR: `fractary-core repo pr-merge <number> --strategy <strategy> --delete-branch --json`
 3. After successful merge, analyze changed files and output **Required Actions** using the repo-specific mapping below. If no packages or plugins were changed, output: "No packages or plugins require updates."
 

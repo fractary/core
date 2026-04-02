@@ -1,17 +1,16 @@
 ---
 name: fractary-file-switch-handler
-description: Switch storage handler - delegates to fractary-file-switch-handler agent
-allowed-tools: Agent(fractary-file-switch-handler)
+description: Switch storage handler
+allowed-tools: Skill(fractary-file-handler-switcher), Bash, Read, Write
 model: claude-haiku-4-5
-argument-hint: '<handler> [--no-test] [--force] [--context "<text>"]'
+argument-hint: '<handler> [--no-test] [--force]'
 ---
 
-Use **Agent** tool with `fractary-file-switch-handler` agent to switch the active storage handler.
+Use the **Skill** tool with `fractary-file-handler-switcher` to switch the active storage handler.
 
 ```
-Agent(
-  subagent_type="fractary-file-switch-handler",
-  description="Switch storage handler",
-  prompt="Switch storage handler: $ARGUMENTS"
+Skill(
+  skill="fractary-file-handler-switcher",
+  args="$ARGUMENTS"
 )
 ```

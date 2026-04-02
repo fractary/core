@@ -149,7 +149,7 @@ Found 3 matches (2 local, 1 archived):
    Issue #89 | Archived: 2024-12-20
    [14:20] Initial OAuth research and provider comparison...
 ───────────────────────────────────────
-Next: Use /fractary-logs:read <issue> to view full log
+Next: Use /fractary-logs-read <issue> to view full log
 ```
 
 **No results**:

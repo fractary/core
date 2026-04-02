@@ -5,7 +5,7 @@
 
 ## Overview
 
-The `fractary-repo` plugin provides a unified, platform-agnostic interface for source control operations. It uses an agents + commands + skills pattern with MCP-first architecture for maximum flexibility and context efficiency.
+The `fractary-repo` plugin provides a unified, platform-agnostic interface for source control operations. It uses a commands + skills pattern with MCP-first architecture for maximum flexibility and context efficiency.
 
 ### Key Features
 
@@ -19,7 +19,7 @@ The `fractary-repo` plugin provides a unified, platform-agnostic interface for s
 
 ## Architecture
 
-The plugin uses an **agents + commands + skills** pattern with MCP-first architecture:
+The plugin uses a **commands + skills** pattern with MCP-first architecture:
 
 ```
 ┌─────────────────────────────────────────┐
@@ -28,14 +28,13 @@ The plugin uses an **agents + commands + skills** pattern with MCP-first archite
 └─────────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────────┐
-│  Agents (Orchestration)                │
-│  pr-review-agent                       │
+│  Skills (Orchestration & Knowledge)    │
+│  pr-reviewer, code-review-checklist,   │
+│  commit-format, pr-template            │
 └─────────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────────┐
-│  Skills (Knowledge & Templates)        │
-│  code-review-checklist, commit-format, │
-│  pr-template                           │
+│  CLI/SDK (Deterministic Operations)    │
 └─────────────────────────────────────────┘
 ```
 
@@ -317,7 +316,7 @@ All commands support the `--context` argument for passing additional instruction
 --context "<text>"
 ```
 
-This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+This argument is always optional and appears as the final argument. When provided, skills prepend the context as additional instructions to their workflow.
 
 **Examples:**
 
@@ -365,16 +364,14 @@ The plugin can be invoked programmatically by other plugins or FABER workflows:
 
 ## Components
 
-### Agent
+### PR Review Skill
 
-**pr-review-agent** - Pull request review orchestration
-- Analyzes PR changes
+**fractary-repo-pr-reviewer** - Pull request review orchestration
+- Analyzes PR changes, comments, reviews, and CI status
 - Applies code review checklists
-- Returns structured review feedback
+- Returns structured review feedback with blocking analysis
 
-[Agent documentation](agents/pr-review-agent.md)
-
-### Skills (Knowledge Resources)
+### Knowledge Skills
 
 - **code-review-checklist** - Standards for code review
 - **commit-format** - Commit message formatting rules
@@ -674,9 +671,8 @@ repo/
 ├── .claude-plugin/
 │   └── plugin.json                  # Plugin manifest (v3.0.8)
 ├── README.md                        # This file
-├── agents/
-│   └── pr-review-agent.md           # PR review orchestration agent
 ├── archived/                        # Archived legacy components
+│   ├── agents-v1/                   # Old agents (v3.0 - migrated to skills)
 │   ├── agents/                      # Old agents (repo-manager, pr-create, etc.)
 │   ├── scripts/                     # Old utility scripts
 │   └── skills/                      # Old specialized skills (v2.0)
@@ -697,10 +693,11 @@ repo/
 ├── config/
 │   └── repo.example.json            # Configuration template
 ├── docs/                            # Documentation
-└── skills/                          # Knowledge resources
-    ├── fractary-repo-code-review-checklist.md  # Code review standards
-    ├── fractary-repo-commit-format.md          # Commit formatting rules
-    └── fractary-repo-pr-template.md            # PR templates
+└── skills/                          # Skills and knowledge resources
+    ├── fractary-repo-pr-reviewer/             # PR review orchestration skill
+    ├── fractary-repo-code-review-checklist.md # Code review standards
+    ├── fractary-repo-commit-format.md         # Commit formatting rules
+    └── fractary-repo-pr-template.md           # PR templates
 ```
 
 ## Safety Features
@@ -798,7 +795,7 @@ git fetch --dry-run
 
 If you're upgrading from the monolithic v1.x architecture:
 
-1. **No breaking changes** - The agent interface remains compatible
+1. **No breaking changes** - The command interface remains compatible
 2. **Configuration update** - Copy new config format from `config/repo.example.json`
 3. **Commands available** - New slash commands are additions, not replacements
 4. **Handler selection** - Explicitly set active platform in config
@@ -807,7 +804,9 @@ If you're upgrading from the monolithic v1.x architecture:
 
 ## Version History
 
-- **v3.0.8** (Current) - MCP-first architecture with agents + commands + skills
+- **v3.1.0** (Current) - Skills-based architecture (agents migrated to lazy-loading skills)
+
+- **v3.0.8** - MCP-first architecture with agents + commands + skills
 
 - **v2.2.0** - Branch-aware permission system
   - Branch-aware permissions (fast on features, protected on production)

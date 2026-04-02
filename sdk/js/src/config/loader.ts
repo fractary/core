@@ -338,7 +338,7 @@ export function writeManagedSection(
  * process.env.FRACTARY_ENV = 'production';
  * loadEnv({ force: true });
  *
- * // From CLI: FRACTARY_ENV=production fractary-core:work issue-list
+ * // From CLI: FRACTARY_ENV=production fractary-core-work issue-list
  * ```
  */
 export function loadEnv(options: { cwd?: string; force?: boolean } = {}): boolean {

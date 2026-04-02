@@ -888,7 +888,7 @@ else
     else
         # Non-interactive: save all, user can test/fix later
         echo "Non-interactive mode: Saving all configurations."
-        echo "Test failed handlers manually with /fractary-file:test-connection"
+        echo "Test failed handlers manually with /fractary-file-test-connection"
     fi
 fi
 ```
@@ -988,10 +988,10 @@ Configuration details:
 
 Next steps:
   1. Test the configuration:
-     /fractary-file:test-connection
+     /fractary-file-test-connection
 
   2. Upload a file (uses default handler):
-     Use @agent-fractary-file:file-manager to upload:
+     Use @agent-fractary-file-file-manager to upload:
      {
        "operation": "upload",
        "parameters": {
@@ -1011,10 +1011,10 @@ Next steps:
      }
 
   4. View current configuration:
-     /fractary-file:show-config
+     /fractary-file-show-config
 
   5. Switch default handler:
-     /fractary-file:switch-handler
+     /fractary-file-switch-handler
 
 Documentation:
   • Plugin README: plugins/file/README.md

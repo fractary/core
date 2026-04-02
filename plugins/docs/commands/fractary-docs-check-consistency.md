@@ -1,17 +1,16 @@
 ---
 name: fractary-docs-check-consistency
-description: Check documentation consistency - delegates to fractary-docs-consistency-checker agent
-allowed-tools: Agent(fractary-docs-consistency-checker)
-model: claude-haiku-4-5
-argument-hint: '[--fix] [--targets <files>] [--base <ref>] [--context "<text>"]'
+description: Check documentation consistency with code changes
+allowed-tools: Skill(fractary-docs-quality), Bash, Read, Write, Glob
+model: claude-sonnet-4-6
+argument-hint: '[--fix] [--targets <files>] [--base <ref>] [--mode <confirm|auto|dry-run>]'
 ---
 
-Use **Agent** tool with `fractary-docs-consistency-checker` agent to check if documentation is consistent with code changes.
+Use the **Skill** tool with `fractary-docs-quality` in check-consistency mode.
 
 ```
-Agent(
-  subagent_type="fractary-docs-consistency-checker",
-  description="Check documentation consistency",
-  prompt="Check if documentation is consistent with code changes: $ARGUMENTS"
+Skill(
+  skill="fractary-docs-quality",
+  args="check-consistency $ARGUMENTS"
 )
 ```

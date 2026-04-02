@@ -125,10 +125,38 @@ export function createPRReviewCommand(): Command {
     .option('--approve', 'Approve the PR')
     .option('--request-changes', 'Request changes')
     .option('--comment <text>', 'Add review comment')
+    .option('--wait-checks', 'Wait for all CI checks to pass before reviewing (polls every 10s, up to 10 minutes)')
     .option('--json', 'Output as JSON')
     .action(async (number: string, options) => {
       try {
         const repoManager = await getRepoManager();
+
+        if (options.waitChecks) {
+          const maxAttempts = 60;
+          for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const checks = await repoManager.getPRCheckStatuses(parseInt(number, 10));
+            if (checks.length === 0) break;
+
+            const failed = checks.filter(
+              c => c.status === 'COMPLETED' && !['SUCCESS', 'NEUTRAL', 'SKIPPED'].includes(c.conclusion ?? '')
+            );
+            if (failed.length > 0) {
+              throw new Error(`CI checks failed: ${failed.map(c => c.name).join(', ')}`);
+            }
+
+            const pending = checks.filter(c => c.status !== 'COMPLETED');
+            if (pending.length === 0) break;
+
+            if (!options.json) {
+              console.log(chalk.yellow(`Waiting for ${pending.length} CI check(s)... (${attempt + 1}/${maxAttempts})`));
+            }
+            await new Promise(resolve => setTimeout(resolve, 10000));
+
+            if (attempt === maxAttempts - 1) {
+              throw new Error('Timed out waiting for CI checks to complete (10 minutes)');
+            }
+          }
+        }
 
         let action: 'approve' | 'request_changes' | 'comment' = 'comment';
         if (options.approve) {

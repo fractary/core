@@ -1,17 +1,16 @@
 ---
 name: fractary-repo-pr-review
-description: Review pull requests - delegates to fractary-repo-pr-review-agent
-allowed-tools: Agent(fractary-repo-pr-review-agent)
-model: claude-opus-4-6
-argument-hint: '<pr_number> [--approve|--request-changes|--comment] [--body "<text>"] [--context "<text>"]'
+description: Review pull requests
+allowed-tools: Skill(fractary-repo-pr-reviewer), Bash, Read
+model: claude-sonnet-4-6
+argument-hint: '<pr_number> [--approve|--request-changes|--comment] [--body "<text>"] [--wait-for-ci] [--auto-fix]'
 ---
 
-Use **Agent** tool with `fractary-repo-pr-review-agent` agent to analyze and review pull requests.
+Use the **Skill** tool with `fractary-repo-pr-reviewer` to analyze and review pull requests.
 
 ```
-Agent(
-  subagent_type="fractary-repo-pr-review-agent",
-  description="Review pull request",
-  prompt="Analyze and review pull request: $ARGUMENTS"
+Skill(
+  skill="fractary-repo-pr-reviewer",
+  args="$ARGUMENTS"
 )
 ```

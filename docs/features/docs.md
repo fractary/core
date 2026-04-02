@@ -10,7 +10,7 @@ Type-aware documentation system with creation, validation, refinement, archival,
 - [Quality Operations](#quality-operations) - write, validate, refine, audit, check consistency
 - [Archive Operations](#archive-operations) - archive documents to configured storage
 - [Type Management](#type-management) - list types, type info
-- [Agents](#agents) - writer, validator, refiner, auditor, consistency-checker, archiver
+- [Skills](#skills) - writer, archiver, refiner, quality (audit/validate/consistency)
 - [Types & Schemas](#types--schemas) - TypeScript interfaces
 - [Error Handling](#error-handling)
 
@@ -634,7 +634,7 @@ Command: `/fractary-docs-type-info`
 
 ---
 
-## Agents
+## Skills
 
 ### fractary-docs-writer
 
@@ -644,14 +644,6 @@ Creates or updates documentation using type-aware templates, the CLI, and SDK. H
 
 **Triggers proactively:** "write docs", "create documentation", "document this"
 
-### fractary-docs-validator
-
-Validates documentation against type-specific rules including frontmatter requirements, required sections, and structural schemas.
-
-**Invoked by:** `/fractary-docs-validate` command
-
-**Triggers proactively:** "validate docs", "check doc format", "lint documentation"
-
 ### fractary-docs-refiner
 
 Scans documents for gaps (missing sections, placeholder text, empty sections) and generates targeted refinement questions through interactive conversation.
@@ -660,22 +652,6 @@ Scans documents for gaps (missing sections, placeholder text, empty sections) an
 
 **Triggers proactively:** "refine doc", "improve spec", "find gaps", "tighten spec"
 
-### fractary-docs-auditor
-
-Audits documentation across a project, identifying quality issues, gaps, and stale content. Generates reports with recommendations.
-
-**Invoked by:** `/fractary-docs-audit` command
-
-**Triggers proactively:** "audit docs", "check documentation", "find doc issues"
-
-### fractary-docs-consistency-checker
-
-Compares high-level documentation (CLAUDE.md, README.md) against recent code changes to identify drift and inconsistencies.
-
-**Invoked by:** `/fractary-docs-check-consistency` command
-
-**Triggers proactively:** "docs out of date", "stale documentation", "sync docs"
-
 ### fractary-docs-archiver
 
 Archives documents to configured storage sources, verifies checksums, and handles cleanup.
@@ -683,6 +659,22 @@ Archives documents to configured storage sources, verifies checksums, and handle
 **Invoked by:** `/fractary-docs-archive` command
 
 **Triggers proactively:** "archive doc", "move to archive", "clean up old docs"
+
+### fractary-docs-quality (multi-mode)
+
+Consolidated quality skill handling three modes:
+
+- **audit** — Audits documentation across a project, identifying quality issues, gaps, and stale content. Generates reports with recommendations.
+  - **Invoked by:** `/fractary-docs-audit` command
+  - **Triggers proactively:** "audit docs", "check documentation", "find doc issues"
+
+- **validate** — Validates documentation against type-specific rules including frontmatter requirements, required sections, and structural schemas.
+  - **Invoked by:** `/fractary-docs-validate` command
+  - **Triggers proactively:** "validate docs", "check doc format", "lint documentation"
+
+- **check-consistency** — Compares high-level documentation (CLAUDE.md, README.md) against recent code changes to identify drift and inconsistencies.
+  - **Invoked by:** `/fractary-docs-check-consistency` command
+  - **Triggers proactively:** "docs out of date", "stale documentation", "sync docs"
 
 ---
 

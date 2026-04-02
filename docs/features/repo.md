@@ -13,7 +13,7 @@ Source control and Git operations across platforms. Manage branches, commits, pu
 - [Tag Operations](#tag-operations) - create, delete, push, list
 - [Worktree Operations](#worktree-operations) - create, list, remove, cleanup
 - [Status & Info](#status--info) - repo status, current branch, diff, dirty check
-- [Agents](#agents) - pr-review-agent
+- [Skills](#skills) - pr-reviewer
 - [Types & Schemas](#types--schemas) - TypeScript interfaces
 - [Error Handling](#error-handling) - SDK errors, CLI exit codes, MCP error codes
 
@@ -1165,17 +1165,15 @@ Tool: `fractary_repo_diff`
 
 ---
 
-## Agents
+## Skills
 
-### pr-review-agent
+### fractary-repo-pr-reviewer
 
 Comprehensively analyzes pull requests including comments, reviews, CI status, and merge conflicts. Provides intelligent recommendations on whether to approve based on blocking conditions.
 
 **Invoked by:** `/fractary-repo-pr-review` command, and step 7 of `/fractary-repo-commit-push-pr-review`
 
 **Triggers proactively:** "review this PR", "analyze PR #123"
-
-**Tools available:** Bash (for `gh` CLI commands), Write, Edit, Read for comprehensive PR analysis.
 
 ---
 

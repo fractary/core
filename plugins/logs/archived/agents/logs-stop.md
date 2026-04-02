@@ -24,7 +24,7 @@ Your role is to stop the active session capture and finalize the log.
 <WORKFLOW>
 1. Parse arguments (--context)
 2. If --context provided, apply as additional instructions to workflow
-3. Invoke fractary-logs:log-capturer skill with stop operation
+3. Invoke fractary-logs-log-capturer skill with stop operation
 4. Update session file with completion info
 3. Calculate and record duration
 4. Generate session summary
@@ -37,7 +37,7 @@ Your role is to stop the active session capture and finalize the log.
 </ARGUMENTS>
 
 <SKILL_INVOCATION>
-Invoke the fractary-logs:log-capturer skill with:
+Invoke the fractary-logs-log-capturer skill with:
 ```json
 {
   "operation": "stop"

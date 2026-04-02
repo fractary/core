@@ -1,13 +1,7 @@
 {
   "name": "fractary-logs",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "Log management with per-type skills for Claude auto-discovery. Each log type (session, build, deployment, etc.) has its own skill with synonyms for natural language matching.",
   "commands": "./commands/",
-  "agents": [
-    "./agents/fractary-logs-analyze.md",
-    "./agents/fractary-logs-audit.md",
-    "./agents/fractary-logs-cleanup.md",
-    "./agents/fractary-logs-log.md"
-  ],
   "skills": "./skills/"
 }

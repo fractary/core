@@ -51,11 +51,29 @@ function exec(command: string, options?: ExecSyncOptions): string {
 }
 
 /**
- * Check if gh CLI is available and authenticated
+ * Execute a command with env overrides for gh CLI authentication
  */
-function checkGhCli(): void {
+function execWithEnv(command: string, env?: Record<string, string>, options?: ExecSyncOptions): string {
+  const opts: ExecSyncOptions = { ...options };
+  if (env) {
+    opts.env = { ...process.env, ...env };
+  }
+  return exec(command, opts);
+}
+
+/**
+ * Check if gh CLI is available and authenticated.
+ * When a GH_TOKEN is provided via env overrides, skip the auth status check
+ * entirely — the token is the auth, and `gh auth status` may fail if other
+ * hosts (e.g. SSH aliases like github-fractary) have expired tokens.
+ */
+function checkGhCli(host?: string, env?: Record<string, string>): void {
+  if (env?.GH_TOKEN) {
+    return; // Token provided — no need for a preflight auth check
+  }
   try {
-    exec('gh auth status');
+    const hostnameArg = host ? ` --hostname ${host}` : '';
+    exec(`gh auth status${hostnameArg}`);
   } catch {
     throw new AuthenticationError(
       'github',
@@ -71,6 +89,7 @@ export class GitHubWorkProvider implements WorkProvider {
   readonly platform = 'github' as const;
   private owner: string;
   private repo: string;
+  private ghEnv: Record<string, string> | undefined;
 
   constructor(config: WorkConfig) {
     if (!config.owner || !config.repo) {
@@ -82,11 +101,24 @@ export class GitHubWorkProvider implements WorkProvider {
     }
     this.owner = config.owner;
     this.repo = config.repo;
-    checkGhCli();
+
+    // Inject GH_TOKEN so gh CLI uses the configured token instead of its
+    // own auth store (which may have expired or fail with SSH host aliases).
+    const token = config.token || process.env.GITHUB_TOKEN;
+    if (token) {
+      this.ghEnv = { GH_TOKEN: token };
+    }
+
+    checkGhCli(config.host, this.ghEnv);
   }
 
   private getRepoArg(): string {
     return `${this.owner}/${this.repo}`;
+  }
+
+  /** Execute a gh command with configured token injected into the environment. */
+  private gh(command: string, options?: ExecSyncOptions): string {
+    return execWithEnv(command, this.ghEnv, options);
   }
 
   // =========================================================================
@@ -123,6 +155,9 @@ export class GitHubWorkProvider implements WorkProvider {
         encoding: 'utf-8' as BufferEncoding,
         maxBuffer: 10 * 1024 * 1024,
       };
+      if (this.ghEnv) {
+        execOptions.env = { ...process.env, ...this.ghEnv };
+      }
       if (options.body) {
         execOptions.input = options.body;
         execOptions.stdio = ['pipe', 'pipe', 'pipe'];
@@ -154,7 +189,7 @@ export class GitHubWorkProvider implements WorkProvider {
   async fetchIssue(issueId: string | number, repo?: string): Promise<Issue> {
     const repoArg = repo || this.getRepoArg();
     try {
-      const result = exec(
+      const result = this.gh(
         `gh issue view ${issueId} --repo ${repoArg} --json number,title,body,state,labels,assignees,milestone,createdAt,updatedAt,closedAt,url`
       );
       return this.parseIssue(JSON.parse(result));
@@ -190,6 +225,7 @@ export class GitHubWorkProvider implements WorkProvider {
             encoding: 'utf-8',
             stdio: ['pipe', 'pipe', 'pipe'],
             maxBuffer: 10 * 1024 * 1024,
+            ...(this.ghEnv ? { env: { ...process.env, ...this.ghEnv } } : {}),
           });
         } catch (error: unknown) {
           const err = error as { status?: number; stderr?: Buffer | string };
@@ -201,7 +237,7 @@ export class GitHubWorkProvider implements WorkProvider {
           throw new CommandExecutionError(cmd, exitCode, stderr);
         }
       } else {
-        exec(cmd);
+        this.gh(cmd);
       }
     }
 
@@ -209,12 +245,12 @@ export class GitHubWorkProvider implements WorkProvider {
   }
 
   async closeIssue(issueId: string | number): Promise<Issue> {
-    exec(`gh issue close ${issueId} --repo ${this.getRepoArg()}`);
+    this.gh(`gh issue close ${issueId} --repo ${this.getRepoArg()}`);
     return this.fetchIssue(issueId);
   }
 
   async reopenIssue(issueId: string | number): Promise<Issue> {
-    exec(`gh issue reopen ${issueId} --repo ${this.getRepoArg()}`);
+    this.gh(`gh issue reopen ${issueId} --repo ${this.getRepoArg()}`);
     return this.fetchIssue(issueId);
   }
 
@@ -240,7 +276,7 @@ export class GitHubWorkProvider implements WorkProvider {
     args.push(`--search "${query}"`);
     args.push('--json number,title,body,state,labels,assignees,milestone,createdAt,updatedAt,closedAt,url');
 
-    const result = exec(`gh issue list ${args.join(' ')}`);
+    const result = this.gh(`gh issue list ${args.join(' ')}`);
     const issues = JSON.parse(result || '[]') as unknown[];
     return issues.map(i => this.parseIssue(i));
   }
@@ -249,7 +285,7 @@ export class GitHubWorkProvider implements WorkProvider {
     issueId: string | number,
     assignee: string
   ): Promise<Issue> {
-    exec(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --add-assignee ${assignee}`);
+    this.gh(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --add-assignee ${assignee}`);
     return this.fetchIssue(issueId);
   }
 
@@ -257,7 +293,7 @@ export class GitHubWorkProvider implements WorkProvider {
     // Get current assignees and remove them
     const issue = await this.fetchIssue(issueId);
     if (issue.assignees.length > 0) {
-      exec(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --remove-assignee ${issue.assignees.join(',')}`);
+      this.gh(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --remove-assignee ${issue.assignees.join(',')}`);
     }
     return this.fetchIssue(issueId);
   }
@@ -286,6 +322,7 @@ export class GitHubWorkProvider implements WorkProvider {
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe'],
         maxBuffer: 10 * 1024 * 1024, // 10MB
+        ...(this.ghEnv ? { env: { ...process.env, ...this.ghEnv } } : {}),
       });
     } catch (error: unknown) {
       const err = error as { status?: number; stderr?: Buffer | string };
@@ -312,7 +349,7 @@ export class GitHubWorkProvider implements WorkProvider {
     issueId: string | number,
     options?: { limit?: number; since?: string }
   ): Promise<Comment[]> {
-    const result = exec(
+    const result = this.gh(
       `gh api repos/${this.getRepoArg()}/issues/${issueId}/comments --jq '.[] | {id: .id, body: .body, author: .user.login, createdAt: .created_at, updatedAt: .updated_at}'`
     );
 
@@ -350,7 +387,7 @@ export class GitHubWorkProvider implements WorkProvider {
     issueId: string | number,
     labels: string[]
   ): Promise<Label[]> {
-    exec(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --add-label "${labels.join(',')}"`);
+    this.gh(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --add-label "${labels.join(',')}"`);
     const issue = await this.fetchIssue(issueId);
     return issue.labels;
   }
@@ -359,7 +396,7 @@ export class GitHubWorkProvider implements WorkProvider {
     issueId: string | number,
     labels: string[]
   ): Promise<void> {
-    exec(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --remove-label "${labels.join(',')}"`);
+    this.gh(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --remove-label "${labels.join(',')}"`);
   }
 
   async setLabels(
@@ -383,7 +420,7 @@ export class GitHubWorkProvider implements WorkProvider {
       return issue.labels;
     }
 
-    const result = exec(
+    const result = this.gh(
       `gh label list --repo ${this.getRepoArg()} --json name,color,description`
     );
     return JSON.parse(result || '[]') as Label[];
@@ -402,7 +439,7 @@ export class GitHubWorkProvider implements WorkProvider {
       args.push(`--due-date "${options.due_on}"`);
     }
 
-    const result = exec(
+    const result = this.gh(
       `gh api repos/${this.getRepoArg()}/milestones -f title="${options.title}" ${options.description ? `-f description="${options.description}"` : ''} ${options.due_on ? `-f due_on="${options.due_on}"` : ''}`
     );
 
@@ -420,18 +457,18 @@ export class GitHubWorkProvider implements WorkProvider {
     issueId: string | number,
     milestone: string
   ): Promise<Issue> {
-    exec(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --milestone "${milestone}"`);
+    this.gh(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --milestone "${milestone}"`);
     return this.fetchIssue(issueId);
   }
 
   async removeMilestone(issueId: string | number): Promise<Issue> {
-    exec(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --milestone ""`);
+    this.gh(`gh issue edit ${issueId} --repo ${this.getRepoArg()} --milestone ""`);
     return this.fetchIssue(issueId);
   }
 
   async listMilestones(state?: 'open' | 'closed' | 'all'): Promise<Milestone[]> {
     const stateArg = state && state !== 'all' ? `?state=${state}` : '';
-    const result = exec(
+    const result = this.gh(
       `gh api repos/${this.getRepoArg()}/milestones${stateArg}`
     );
 
@@ -458,7 +495,7 @@ export class GitHubWorkProvider implements WorkProvider {
 
   private ensureLabel(labelName: string, repo: string): void {
     try {
-      exec(`gh label create "${labelName}" --repo ${repo} --force`);
+      this.gh(`gh label create "${labelName}" --repo ${repo} --force`);
     } catch {
       // label already exists or creation failed — continue
     }

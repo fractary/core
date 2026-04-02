@@ -149,12 +149,12 @@ Would free: 450 KB
 Can be run as cron job:
 ```bash
 # Daily at 2 AM
-0 2 * * * /fractary-logs:cleanup --older-than 30
+0 2 * * * /fractary-logs-cleanup --older-than 30
 ```
 
 Or triggered manually:
 ```bash
-/fractary-logs:cleanup --older-than 30
+/fractary-logs-cleanup --older-than 30
 ```
 
 ## Safety Checks

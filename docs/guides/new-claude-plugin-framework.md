@@ -1,10 +1,12 @@
-# Claude Plugin Framework v3.0
+# Claude Plugin Framework v4.0
 
-**A Lightweight, MCP-First Architecture for Claude Code Plugins**
+**A Lightweight, Skills-First Architecture for Claude Code Plugins**
 
-Version: 3.0
-Date: 2025-12-17
+Version: 4.0
+Date: 2026-04-01
 Status: Active
+
+> **Migration Note (v3.0 → v4.0):** The primary change in v4.0 is replacing dedicated agents with lazy-loading skills. Skills use progressive document loading (slim SKILL.md + docs/ subdirectory) to eliminate the subprocess context reloading overhead that agents incurred. Commands now delegate to skills via `Skill()` instead of `Agent()`. The principles of focused responsibility, CLI/SDK delegation, and context efficiency remain unchanged.
 
 ---
 
@@ -13,8 +15,8 @@ Status: Active
 1. [Overview](#overview)
 2. [Architecture Principles](#architecture-principles)
    - Principle 1: MCP-First Design
-   - Principle 2: Dedicated Agents Over Manager Agents
-   - Principle 3: Skills for Expertise, Not Execution
+   - Principle 2: Dedicated Skills Over Manager Agents
+   - Principle 3: Skills for Orchestration AND Expertise
    - Principle 4: Platform Abstraction in SDK
    - Principle 5: Ultra-Lightweight Commands with Tool Restriction
    - Principle 6: Context Efficiency Through Isolation
@@ -61,24 +63,24 @@ Problems:
 - Handlers still needed for platform differences
 - Better than v1.0, but still too complex
 
-### The v3.0 Solution: MCP-First Architecture
+### The v4.0 Solution: Skills-First Architecture
 
 ```
-Command (5-10 lines)
-  → Dedicated Agent (60-100 lines)
-    → MCP Tools / SDK / CLI
+Command (5-15 lines)
+  → Skill (SKILL.md: 30-60 lines, docs/* loaded on-demand)
+    → CLI / SDK / MCP Tools
       → Business Logic
 ```
 
 Benefits:
-- ✅ 1 LLM invocation (just the agent)
-- ✅ 1-2 seconds latency
+- ✅ Lazy-loaded (only SKILL.md loaded initially, ~30-60 lines)
+- ✅ Progressive loading (heavy docs loaded on-demand via Read())
+- ✅ No subprocess overhead (skills run in-context, not as subprocesses)
 - ✅ ~500 tokens per operation
-- ✅ $0.0005-0.002 cost per operation
 - ✅ No routing decisions (hardcoded flow)
-- ✅ Isolated context (doesn't pollute main)
-- ✅ Auto-triggerable (specific agent descriptions)
+- ✅ Auto-triggerable (specific skill descriptions)
 - ✅ ~85% less code to maintain
+- ✅ Consolidation possible (multi-mode skills for related operations)
 
 ---
 
@@ -518,13 +520,15 @@ Result: Semantic commit with generated message
 
 **The plugin always exists** - it's the interface for users. The strategic question is: what logic lives where?
 
-### Principle 2: Dedicated Agents Over Manager Agents
+### Principle 2: Dedicated Skills Over Manager Agents
 
-**Each command gets its own dedicated agent.**
+**Each command delegates to a dedicated skill (or directly to CLI for deterministic ops).**
 
-This is about **correctness and effectiveness**, not just efficiency.
+This is about **correctness, effectiveness, and token efficiency**.
 
-### Why Dedicated Agents Work Better
+> **v3.0 → v4.0 Change:** In v3.0, this principle prescribed dedicated agents. In v4.0, we use dedicated skills instead. Skills provide the same benefits (focused responsibility, fine-grained tool control, isolated failures) while eliminating the subprocess context reloading overhead that agents incur. Skills lazy-load only their SKILL.md (~30-60 lines) with progressive document loading for heavy logic.
+
+### Why Dedicated Skills Work Better
 
 **1. Focus Improves Correctness**
 
@@ -934,56 +938,52 @@ Step 3: Google Gemini agent reviews changes
 
 **The isolation isn't a limitation - it's a feature.** It forces good design that makes agents truly portable building blocks.
 
-### Summary: Why Dedicated Agents Win
+### Summary: Why Dedicated Skills Win
 
-| Aspect | Manager Agent | Dedicated Agent |
+| Aspect | Manager Agent | Dedicated Skill |
 |--------|---------------|-----------------|
 | **1. Correctness** | Confused by unrelated context | Focused, does job right |
 | **2. Tool Permissions** | Wide swath (20+ tools) | Minimal (2-3 tools) |
-| **3. Model Cost** | Always expensive (Sonnet) | Right model for job (Haiku when possible) |
-| **4. Context Size** | Large (~2000 tokens) | Small (~300 tokens) |
+| **3. Token Efficiency** | Full context reload per subprocess | Lazy-loaded SKILL.md (~30-60 lines) |
+| **4. Context Size** | Large (~2000 tokens) | Small (~300 tokens, progressive loading) |
 | **5. Routing** | Must decide operation | Hardcoded flow |
-| **6. Auto-Trigger** | Generic description (~100 chars) | Detailed with examples (unlimited) |
+| **6. Auto-Trigger** | Generic description | Detailed with examples |
 | **7. Failure Scope** | Entire agent broken | Isolated to one operation |
-| **8. Development** | Sequential, bottleneck | Parallel, independent |
-| **9. Parallel Execution** | Single instance only | Multiple instances (2-3 reliable) |
-| **10. Background Ready** | Too large/complex | Small, self-contained (when available) |
-| **11. Cross-Platform** | Assumes shared context | Explicit inputs/outputs, portable |
+| **8. Consolidation** | One agent per operation | Multi-mode skills for related ops |
 
-**The primary benefit is correctness through focus.** Cost, efficiency, and flexibility are secondary bonuses.
+**The primary benefit is correctness through focus, with token efficiency as a close second.** Skills eliminate the subprocess context reloading overhead that agents incur while maintaining focused responsibility.
 
-**Dedicated agents do their jobs right because they're not distracted by unrelated concerns.**
+**Dedicated skills do their jobs right because they're not distracted by unrelated concerns, and they load only what they need.**
 
-**11 comprehensive benefits** demonstrate why dedicated agents are superior across every dimension - from correctness to cost to future-readiness.
+### Principle 3: Skills for Orchestration AND Expertise
 
-### Principle 3: Skills for Expertise, Not Execution
+**Skills serve two purposes in v4.0: orchestrating workflows AND providing organizational knowledge.**
 
-**Skills have a new purpose in v3.0: providing organizational knowledge and expertise.**
+**Orchestration skills** (SKILL.md + docs/ pattern):
+- ✅ Multi-step workflows with judgment calls
+- ✅ Progressive document loading for complex logic
+- ✅ CLI/SDK delegation for deterministic operations
+- ✅ Multi-mode consolidation (e.g., audit + cleanup in one skill)
 
-**OLD use case (obsolete):** Skills for execution
-- Orchestrating scripts → Now MCP tools handle this
-- Conditional workflows → Now agents handle this
-- Platform abstraction → Now SDK handles this
-
-**NEW use case (recommended):** Skills for expertise
+**Expertise skills** (standalone .md files):
 - ✅ Organizational standards (commit format, PR template)
 - ✅ Best practices (code review checklist, security guidelines)
 - ✅ Templates (documentation format, branch naming)
 - ✅ Domain knowledge (architecture patterns, style guides)
-- ✅ Brand voice (user-facing text tone, terminology)
 
-**When to create skills:**
-- Injecting organizational context agents should follow
-- Providing templates agents should use
-- Documenting standards agents should enforce
+**When to create orchestration skills:**
+- Operations requiring reasoning, analysis, or judgment
+- Multi-step workflows coordinating CLI/SDK calls
+- Operations that benefit from progressive document loading
+
+**When to create expertise skills:**
+- Injecting organizational context that other skills should follow
+- Providing templates and standards
 
 **Examples:**
-- `commit-format` skill: Conventional commits + FABER metadata standards
-- `pr-template` skill: Required PR description sections
-- `code-review-checklist` skill: What to check during reviews
-- `api-design-standards` skill: REST API conventions
-
-**Agents read these skills** to get expertise, then execute operations following those standards.
+- `fractary-repo-pr-reviewer` skill: Orchestrates PR review with blocking analysis (orchestration)
+- `commit-format` skill: Conventional commits + FABER metadata standards (expertise)
+- `fractary-docs-quality` skill: Multi-mode audit/validate/consistency (orchestration)
 
 ### Principle 4: Platform Abstraction in SDK
 
@@ -1013,26 +1013,25 @@ The SDK:
 
 ### Principle 5: Ultra-Lightweight Commands with Tool Restriction
 
-**Commands are thin wrappers that delegate to agents using physical enforcement.**
+**Commands are thin wrappers that delegate to skills or CLI using physical enforcement.**
 
 Commands should:
 - Be 8-18 lines of markdown
-- Use `allowed-tools: Agent` to enforce delegation
-- Show explicit Agent tool invocation with parameters
+- Use `allowed-tools: Skill(...)` or `allowed-tools: Bash(fractary-core ...)` to enforce delegation
+- Show explicit Skill or CLI invocation pattern
 - Not contain logic, parsing, or orchestration
 
 **Tool Restriction (Critical):**
 ```yaml
 ---
-name: fractary-plugin:command
-allowed-tools: Agent  # Physical constraint - Claude cannot use other tools
+name: fractary-plugin-command
+allowed-tools: Skill(fractary-plugin-skill-name), Bash, Read
 ---
 ```
 
 This is a **physical enforcement mechanism** that prevents Claude from:
-- Using Read/Write/Edit/Bash tools directly
 - Solving the problem without delegating
-- Bypassing the agent architecture
+- Bypassing the skill architecture
 
 **Parameter-Based Restrictions:**
 
@@ -1198,44 +1197,52 @@ allowed-tools: Skill(fractary-pr-context-preparer), Agent(fractary-repo-pr-creat
 
 ### Layer 1: Commands
 
-**Purpose:** Manual trigger interface with enforced delegation to agents
+**Purpose:** Manual trigger interface with enforced delegation to skills or CLI
 
 **File Location:** `plugins/{plugin}/commands/{command}.md`
 
 **Size:** 8-18 lines
 
-**Structure:**
+**Structure (Skill delegation):**
 ```markdown
 ---
-name: fractary-plugin:command-name
-description: Brief description - delegates to agent
-allowed-tools: Agent
+name: fractary-plugin-command-name
+description: Brief description
+allowed-tools: Skill(fractary-plugin-skill-name), Bash, Read
 model: claude-haiku-4-5
 argument-hint: '[arg1] [--flag] [--option <value>]'
 ---
 
-Brief description of what this command does.
+Use the **Skill** tool with `fractary-plugin-skill-name` to perform operation.
 
-Agent tool invocation pattern:
-
-Agent(
-  subagent_type="fractary-plugin:command-name",
-  description="Short description",
-  prompt="Operation with arguments: $ARGUMENTS"
+Skill(
+  skill="fractary-plugin-skill-name",
+  args="$ARGUMENTS"
 )
 ```
 
+**Structure (CLI delegation — for deterministic ops):**
+```markdown
+---
+name: fractary-plugin-command-name
+description: Brief description
+allowed-tools: Bash(fractary-core plugin operation *)
+---
+
+Run: `fractary-core plugin operation $ARGUMENTS`
+```
+
 **Frontmatter Fields:**
-- `name`: Namespaced command name (fractary-plugin:command-name)
-- `description`: Brief description mentioning delegation
-- `allowed-tools: Agent`: **CRITICAL** - Physical enforcement of delegation
+- `name`: Namespaced command name (fractary-plugin-command-name)
+- `description`: Brief description
+- `allowed-tools`: Skill(...) for orchestration, or Bash(...) for CLI-only ops
 - `model`: Usually `claude-haiku-4-5` for efficiency
 - `argument-hint`: Shows expected parameters to user
 
 **Responsibilities:**
 - Describe what the command does
-- Show explicit Agent tool invocation pattern
-- Restrict to Agent tool only (enforcement)
+- Show explicit Skill or CLI invocation pattern
+- Restrict tools to enforce delegation
 - Nothing else
 
 **Passing Arguments to Agents:**
@@ -1345,55 +1352,43 @@ This ensures:
 
 **Key Principle:** Only include information that helps Claude make CHOICES about configuration. Don't repeat what the agent already knows.
 
-### Layer 2: Dedicated Agents
+### Layer 2: Dedicated Skills
 
-**Purpose:** Orchestrate operations using MCP/SDK/CLI
+**Purpose:** Orchestrate operations using CLI/SDK/MCP with lazy-loading
 
-**File Location:** `plugins/{plugin}/agents/{command-name}.md`
+**File Location:** `plugins/{plugin}/skills/{skill-name}/SKILL.md` (+ `docs/` subdirectory)
 
-**Size:** 60-100 lines
+**Size:** SKILL.md: 30-60 lines; supporting docs loaded on-demand
 
 **Structure:**
 ```markdown
 ---
-name: fractary-plugin:agent-name
-description: What this agent does. MUST BE USED for all {operation} operations from fractary-plugin:command command. Use PROACTIVELY when user requests {operation}.
-tools: fractary_plugin_tool_1, fractary_plugin_tool_2
+name: fractary-plugin-skill-name
+description: What this skill does. MUST BE USED for all {operation} operations.
+  Use PROACTIVELY when user requests {operation}.
 model: claude-haiku-4-5
 ---
 
-# {agent-name} Agent
-
-## Description
-Detailed description of what this agent does and when to use it.
-
-## Use Cases
-**Use this agent when:**
-- User wants to [specific action]
-- User mentions "[trigger phrase]"
-- User needs to [specific goal]
-
-**Examples:**
-- "Example user request 1"
-- "Example user request 2"
-- "Example user request 3"
-
 ## Arguments
-List of arguments this agent accepts (from command or natural language)
 
-## Workflow
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<arg1>` | Yes | Description |
+| `--flag` | No | Description |
 
-<WORKFLOW>
-1. Read expertise skills if applicable (e.g., fractary-commit-format)
+## Critical Rules
 
-2. Parse/extract arguments from command invocation or natural language
+1. Rule 1
+2. Rule 2
 
-3. Conditional logic based on arguments:
+## Execution
 
-   If condition A:
-     - Call fractary_plugin_tool_1
-     - Process result
-     - Call fractary_plugin_tool_2
+**Simple path:** Run CLI directly
+```bash
+fractary-core plugin operation $ARGUMENTS
+```
+
+**Complex path:** Read docs/flow.md for detailed workflow
 
    If condition B:
      - Call fractary_plugin_tool_3
@@ -1413,48 +1408,55 @@ List of arguments this agent accepts (from command or natural language)
 Description of what this agent returns
 ```
 
+```
+
+**Progressive Document Loading:**
+
+Skills use a `docs/` subdirectory for heavy logic:
+```
+skills/fractary-plugin-skill-name/
+├── SKILL.md              # 30-60 lines, always loaded
+└── docs/
+    ├── flow.md           # Detailed workflow, loaded via Read() on-demand
+    ├── analysis.md       # Complex analysis logic
+    └── templates.md      # Output templates
+```
+
 **Frontmatter Fields:**
-- `name`: Namespaced agent name (fractary-plugin:agent-name)
+- `name`: Namespaced skill name (fractary-plugin-skill-name)
 - `description`: Include "MUST BE USED" and "Use PROACTIVELY" for auto-triggering
-- `tools`: List of MCP tools this agent can use
 - `model`: Usually `claude-haiku-4-5` for efficiency
 
 **Key Principles:**
 
-1. **Specific Auto-Trigger Description**
-   - Include concrete examples of user requests
-   - List trigger phrases
-   - Be specific about when to use this agent
+1. **Slim SKILL.md**
+   - Only argument table, critical rules, and execution routing
+   - Heavy logic in docs/ subdirectory, loaded on-demand
+   - Target: 30-60 lines
 
-2. **Hardcoded Flow**
-   - No routing decisions
-   - Clear, deterministic logic
-   - "If X, call tool A. If Y, call tool B."
+2. **CLI/SDK Delegation**
+   - Deterministic operations delegated to CLI (`fractary-core ...`)
+   - Skills provide orchestration and judgment, not deterministic execution
 
-3. **MCP-First**
-   - Prefer MCP tools for all data operations
-   - Fall back to SDK via Python only when needed
-   - Use CLI only as last resort
+3. **Progressive Loading**
+   - SKILL.md loaded when skill is invoked
+   - docs/* loaded via Read() only when needed
+   - Minimizes token consumption per invocation
 
-4. **Error Handling**
-   - Handle MCP tool failures gracefully
-   - Provide helpful error messages
-   - Don't expose internal errors to users
+4. **Multi-Mode Consolidation**
+   - Related operations can share a skill with mode routing
+   - E.g., `fractary-docs-quality` handles audit, validate, and consistency-check modes
+   - Each mode has its own doc in docs/
 
-5. **Isolated Context**
-   - Agent runs in its own context
-   - Doesn't pollute main conversation
-   - Returns clean result
-
-**What NOT to include:**
-- ❌ Logic that belongs in the SDK
+**What NOT to include in SKILL.md:**
+- ❌ Logic that belongs in the SDK/CLI
 - ❌ Platform-specific code (use SDK)
-- ❌ Script execution (use MCP or SDK)
-- ❌ Routing to other agents/skills
+- ❌ Detailed workflow steps (put in docs/)
+- ❌ Routing to other skills
 
 **Expertise Skills:**
 
-Agents should reference expertise skills when organizational standards matter:
+Orchestration skills should reference expertise skills when organizational standards matter:
 
 ```markdown
 <WORKFLOW>
@@ -1919,51 +1921,49 @@ If not, create it:
 3. Wrap in MCP tool
 4. Test MCP tool
 
-#### Step 4: Create Dedicated Agents
+#### Step 4: Create Dedicated Skills
 
-For each command, create a dedicated agent:
+For each command that requires orchestration, create a dedicated skill:
 
 **Template:**
-```markdown
-# {operation-name} Agent
-
-[Description of what this agent does]
-
-**Use this agent when:**
-- [Trigger pattern 1]
-- [Trigger pattern 2]
-- [Trigger pattern 3]
-
-**Examples:**
-- "[Example user request 1]"
-- "[Example user request 2]"
-- "[Example user request 3]"
-
-## Workflow
-
-<WORKFLOW>
-1. Extract arguments from command or natural language
-
-2. [Conditional logic]:
-
-   If [condition A]:
-     - Call: fractary_{plugin}_{tool_1}
-     - Process result
-     - Call: fractary_{plugin}_{tool_2}
-
-   If [condition B]:
-     - Call: fractary_{plugin}_{tool_3}
-
-3. Handle errors and return result
-</WORKFLOW>
+```
+skills/fractary-{plugin}-{skill-name}/
+├── SKILL.md              # 30-60 lines
+└── docs/
+    └── flow.md           # Detailed workflow
 ```
 
-**Migration checklist per agent:**
-- [ ] Identify what the old skill did
-- [ ] List all MCP tools needed
-- [ ] Write conditional logic for different paths
-- [ ] Add specific auto-trigger examples
-- [ ] Test auto-triggering
+**SKILL.md Template:**
+```markdown
+---
+name: fractary-{plugin}-{skill-name}
+description: What this skill does. MUST BE USED for {operation}.
+  Use PROACTIVELY when user requests {operation}.
+model: claude-haiku-4-5
+---
+
+## Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `<arg>` | Yes | Description |
+
+## Critical Rules
+
+1. [Key rule 1]
+2. [Key rule 2]
+
+## Execution
+
+For detailed workflow, Read docs/flow.md
+```
+
+**Migration checklist per skill:**
+- [ ] Identify what the old agent/skill did
+- [ ] Extract deterministic ops to CLI
+- [ ] Create slim SKILL.md with argument table and critical rules
+- [ ] Move heavy workflow logic to docs/flow.md
+- [ ] Add specific auto-trigger description
 - [ ] Test command invocation
 
 #### Step 5: Simplify Commands
@@ -1977,21 +1977,22 @@ Replace complex commands with ultra-lightweight versions:
 [100+ lines of argument parsing, validation, workflow logic, error handling, etc.]
 ```
 
-**After (v3.0):**
+**After (v4.0):**
 ```markdown
-# /repo:branch-create
+---
+name: fractary-repo-branch-create
+allowed-tools: Bash(fractary-core repo branch-create *)
+---
 
-Create a Git branch from work items, descriptions, or direct names.
-
-Invokes the branch-create agent to handle branch creation.
+Run: `fractary-core repo branch-create $ARGUMENTS`
 ```
 
-#### Step 6: Remove Manager Agent
+#### Step 6: Archive Old Agents
 
-If you have a manager agent that routes to skills:
-1. Delete it
-2. Each command now invokes its dedicated agent directly
-3. No routing needed
+If you have dedicated agents:
+1. Move to `archived/agents-v1/` for reference
+2. Each command now invokes its dedicated skill or CLI directly
+3. No agent subprocess overhead
 
 #### Step 7: Update Documentation
 
@@ -2018,7 +2019,7 @@ If you have a manager agent that routes to skills:
 Commit in logical chunks:
 1. Archive old components
 2. Create MCP tools (if new)
-3. Create dedicated agents (batch by similarity)
+3. Create dedicated skills (batch by similarity)
 4. Simplify commands (batch by similarity)
 5. Remove manager agent
 6. Update documentation
@@ -2027,9 +2028,9 @@ Use conventional commits:
 ```bash
 git commit -m "chore(plugin): archive skills and scripts (v3.0 migration)"
 git commit -m "feat(plugin): add MCP tools for operations"
-git commit -m "refactor(plugin): create dedicated agents (v3.0)"
-git commit -m "refactor(plugin): simplify commands to invoke agents"
-git commit -m "refactor(plugin): remove manager agent (routing obsolete)"
+git commit -m "refactor(plugin): create dedicated skills (v4.0)"
+git commit -m "refactor(plugin): simplify commands to invoke skills/CLI"
+git commit -m "refactor(plugin): archive old agents (routing obsolete)"
 git commit -m "docs(plugin): update for v3.0 architecture"
 ```
 
@@ -2037,24 +2038,23 @@ git commit -m "docs(plugin): update for v3.0 architecture"
 
 ## Best Practices
 
-### 1. Agent Design
+### 1. Skill Design
 
 **DO:**
-- ✅ Write specific, detailed descriptions with examples
-- ✅ Include common trigger phrases users might say
-- ✅ Use clear, deterministic conditional logic
-- ✅ Call MCP tools for all data operations
+- ✅ Keep SKILL.md slim (30-60 lines)
+- ✅ Move heavy logic to docs/ subdirectory
+- ✅ Write specific descriptions with trigger phrases
+- ✅ Delegate deterministic operations to CLI/SDK
 - ✅ Handle errors gracefully with helpful messages
-- ✅ Keep agents focused on one operation
+- ✅ Keep skills focused on one operation (or related operations via multi-mode)
 - ✅ Return structured, user-friendly results
 
 **DON'T:**
-- ❌ Create manager agents that route to other components
-- ❌ Put business logic in agents (that's SDK's job)
+- ❌ Put all logic in SKILL.md (use progressive loading)
+- ❌ Put business logic in skills (that's SDK/CLI's job)
 - ❌ Use vague descriptions like "handles repo operations"
-- ❌ Make routing decisions ("which skill should I use?")
-- ❌ Pollute main context with verbose output
 - ❌ Handle platform differences (SDK does this)
+- ❌ Embed deterministic operations that CLI can handle
 
 ### 2. MCP Tool Design
 
@@ -2096,21 +2096,17 @@ git commit -m "docs(plugin): update for v3.0 architecture"
 
 **DO:**
 - ✅ Keep commands ultra-lightweight (8-18 lines)
-- ✅ Use `allowed-tools: Agent` to enforce delegation (CRITICAL)
-- ✅ Show explicit Agent tool invocation pattern
+- ✅ Use `allowed-tools: Skill(...)` or `allowed-tools: Bash(...)` to enforce delegation
+- ✅ Show explicit Skill or CLI invocation pattern
 - ✅ Use clear, intuitive command names
 - ✅ Document what the command does (briefly)
-- ✅ Only mention configuration if agent has CHOICES
-- ✅ For hybrid pattern: `allowed-tools: Skill(specific-skill), Agent`
 
 **DON'T:**
 - ❌ Put any logic in commands
 - ❌ Parse arguments in commands
 - ❌ Validate inputs in commands
-- ❌ Call MCP tools from commands
 - ❌ Include workflows in commands
-- ❌ Restate what the agent will do (agent knows its job)
-- ❌ Add redundant skill references (if agent always uses them)
+- ❌ Restate what the skill will do (skill knows its job)
 
 **Tool Restriction Examples (Parameter-Based Syntax):**
 ```yaml
@@ -2141,24 +2137,22 @@ allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
 ### 5. Context Efficiency
 
 **DO:**
-- ✅ Use agents for isolation (keeps main context clean)
-- ✅ Return concise results to main context
+- ✅ Use progressive document loading (slim SKILL.md + docs/)
+- ✅ Return concise results
 - ✅ Load only what's needed in each layer
-- ✅ Use MCP tools (no context cost)
+- ✅ Delegate deterministic ops to CLI (no LLM cost)
 
 **DON'T:**
-- ❌ Run operations in main context that could be isolated
-- ❌ Return verbose MCP tool output to main context
+- ❌ Put heavy logic in SKILL.md (use docs/ subdirectory)
 - ❌ Load unnecessary files or data
-- ❌ Create skills with conditional loading (obsolete pattern)
+- ❌ Embed deterministic operations that CLI can handle
 
 ### 6. Auto-Triggering
 
 **DO:**
-- ✅ Write specific agent descriptions
-- ✅ Include multiple trigger phrase examples
+- ✅ Write specific skill descriptions
+- ✅ Include trigger phrases in description
 - ✅ Test auto-triggering with natural language
-- ✅ Document common user requests
 - ✅ Use action-oriented descriptions
 
 **DON'T:**
@@ -2195,31 +2189,24 @@ If operation === "commit":
 - Large, complex agent file
 
 **What to do instead:**
-Create dedicated agents. Each command invokes its specific agent.
+Create dedicated skills. Each command invokes its specific skill or delegates to CLI.
 
-### ❌ Anti-Pattern 2: Skills for Orchestration
+### ❌ Anti-Pattern 2: Heavy SKILL.md Files
 
 **What it looks like:**
 ```markdown
 # branch-create Skill
 
-Orchestrates branch creation using MCP tools.
-
-<WORKFLOW>
-1. Call MCP tool A
-2. Call MCP tool B
-3. Call MCP tool C
-</WORKFLOW>
+[500+ lines of workflow logic, error handling, templates, examples]
 ```
 
 **Why it's bad:**
-- Unnecessary layer (agent can call MCP directly)
-- More files to maintain
-- No context efficiency benefit with MCP
-- Routing decision needed ("which skill?")
+- All 500 lines loaded every time skill is invoked
+- Defeats the purpose of lazy-loading
+- Token-heavy
 
 **What to do instead:**
-Put orchestration logic in the dedicated agent.
+Keep SKILL.md slim (30-60 lines). Move heavy logic to `docs/` subdirectory for progressive loading.
 
 ### ❌ Anti-Pattern 3: Handlers for Platform Differences
 
@@ -2715,52 +2702,35 @@ Invokes the commit-message-generate agent to analyze changes and create an appro
 
 ## FAQ
 
-### Q: When should I use an agent vs direct MCP call?
+### Q: When should I use a skill vs direct CLI call?
 
-**A:** Always use an agent from commands. Agents provide:
-- Isolated context (no main pollution)
-- Auto-trigger capability
-- Error handling
-- User-friendly output
+**A:** Use a skill when the operation requires judgment, reasoning, or multi-step orchestration. Use CLI directly when the operation is purely deterministic.
 
-Even if the agent just calls one MCP tool, wrap it in an agent for consistency and future extensibility.
+**Use skills for:**
+- Operations requiring analysis (PR review, issue refinement)
+- Multi-step workflows with conditional logic
+- Operations that benefit from progressive document loading
 
-### Q: Can agents call other agents?
+**Use CLI directly for:**
+- Simple CRUD operations (upload, download, list)
+- Deterministic operations (commit, push, branch create)
+- Operations where CLI output is sufficient
 
-**A:** Yes! Agents can invoke other agents using the Agent tool. This is useful for:
-- Reusing complex reasoning (e.g., commit-message-generate agent)
-- Breaking down large operations
-- Sharing functionality
+### Q: What types of skills exist?
 
-Example:
-```markdown
-# pr-create Agent workflow
+**A:** Two types:
 
-1. Call commit-message-generate agent
-2. Use generated message for PR title/body
-3. Call fractary_repo_pr_create
-```
+**Orchestration skills** (SKILL.md + docs/ pattern):
+- ✅ Multi-step workflows requiring judgment
+- ✅ Operations with progressive document loading
+- ✅ Multi-mode consolidation (e.g., quality: audit/validate/consistency)
 
-### Q: Should I ever create skills?
-
-**A:** Yes, but for **expertise** not execution!
-
-**Create expertise skills for:**
+**Expertise skills** (standalone .md files):
 - ✅ Organizational standards (commit format, PR template)
 - ✅ Best practices (code review checklist, security guidelines)
 - ✅ Templates (documentation format, API design)
-- ✅ Brand voice (user-facing text tone)
-- ✅ Domain knowledge (architecture patterns)
 
-**Don't create skills for:**
-- ❌ Orchestration (use agents)
-- ❌ Data operations (use MCP tools)
-- ❌ Business logic (use SDK)
-- ❌ Platform abstraction (use SDK)
-
-**Pattern:** Agents read expertise skills to learn standards, then execute operations following those standards.
-
-**Example:** `commit` agent reads `fractary-commit-format` skill to learn conventional commit format, then creates commits following that standard.
+**Pattern:** Orchestration skills delegate deterministic ops to CLI/SDK and reference expertise skills for standards.
 
 ### Q: What if MCP doesn't support my operation?
 
@@ -2974,15 +2944,18 @@ plugins/{plugin}/
 │   ├── command-1.md
 │   ├── command-2.md
 │   └── ...
-├── agents/
-│   ├── command-1.md (same name as command)
-│   ├── command-2.md
-│   └── ...
-├── archived/ (v2.0 components)
-│   ├── README.md (explains what and why)
-│   ├── skills/
-│   ├── scripts/
-│   └── handlers/
+├── skills/
+│   ├── fractary-{plugin}-skill-1/
+│   │   ├── SKILL.md
+│   │   └── docs/
+│   │       └── flow.md
+│   ├── fractary-{plugin}-skill-2/
+│   │   └── SKILL.md
+│   └── fractary-{plugin}-expertise-skill.md   # Standalone expertise skill
+├── archived/
+│   ├── agents-v1/           # Old agents (migrated to skills)
+│   ├── skills/              # Old v2.0 skills
+│   └── scripts/
 ├── config/
 ├── docs/
 └── README.md
@@ -3007,38 +2980,37 @@ sdk/{language}/src/
 **A:** Yes! This architecture works for any Claude Code project:
 
 - Replace "command" with your entry point
-- Create dedicated agents for each operation
-- Use MCP tools for deterministic operations
+- Create dedicated skills for orchestration operations
+- Use CLI/SDK for deterministic operations
 - Put business logic in reusable SDK/library code
-- Use CLI only as last resort
 
 The principles apply broadly:
-- Isolated context via agents
-- MCP-first design
+- Lazy-loading via skills
+- CLI/SDK-first for deterministic ops
 - Ultra-lightweight entry points
-- Focused, auto-triggerable agents
+- Focused, auto-triggerable skills
 
 ---
 
 ## Conclusion
 
-The v3.0 architecture prioritizes:
+The v4.0 architecture prioritizes:
 
 1. **Simplicity** - Fewer layers, less complexity
-2. **Performance** - MCP tools are fast and free
+2. **Token Efficiency** - Lazy-loaded skills with progressive document loading
 3. **Reliability** - No routing decisions, deterministic flow
 4. **Maintainability** - Small, focused files
-5. **User Experience** - Auto-triggering, isolated context
-6. **Cost Efficiency** - Minimal LLM invocations
+5. **User Experience** - Auto-triggering, clean output
+6. **Cost Efficiency** - CLI/SDK handles deterministic ops, skills only for judgment
 
 By following this framework, you'll create Claude Code plugins that are:
-- Fast (1-2 seconds vs 8-15 seconds)
-- Cheap (~$0.001 vs ~$0.018 per operation)
+- Token-efficient (30-60 line SKILL.md vs 200+ line agents)
+- Cheap (CLI delegation eliminates LLM cost for deterministic ops)
 - Reliable (no routing decisions)
-- Maintainable (85% less code)
-- User-friendly (auto-triggering, clean output)
+- Maintainable (slim skills with progressive loading)
+- User-friendly (auto-triggering, consolidation of related operations)
 
-**Start with MCP, use dedicated agents, keep it simple.**
+**Start with CLI/SDK, use dedicated skills for orchestration, keep it simple.**
 
 ---
 

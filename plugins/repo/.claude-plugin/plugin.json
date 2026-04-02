@@ -1,10 +1,7 @@
 {
-  "name": "fractary-repo",
-  "version": "3.1.0",
-  "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
-  "commands": "./commands/",
-  "agents": [
-    "./agents/fractary-repo-pr-review-agent.md"
-  ],
-  "skills": "./skills/"
+    "name": "fractary-repo",
+    "version": "3.2.2",
+    "description": "Source control operations across GitHub, GitLab, Bitbucket, etc.",
+    "commands": "./commands/",
+    "skills": "./skills/"
 }

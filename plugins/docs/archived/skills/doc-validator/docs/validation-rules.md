@@ -356,7 +356,7 @@ Projects can extend schema validation via `custom_rules_script`:
 
 Validate one document with all checks:
 ```bash
-/fractary-docs:validate path/to/doc.md
+/fractary-docs-validate path/to/doc.md
 ```
 
 **Performs**:
@@ -369,7 +369,7 @@ Validate one document with all checks:
 
 Validate all documents in directory:
 ```bash
-/fractary-docs:validate path/to/docs/
+/fractary-docs-validate path/to/docs/
 ```
 
 **Performs**:
@@ -382,7 +382,7 @@ Validate all documents in directory:
 
 Enable additional warnings:
 ```bash
-/fractary-docs:validate doc.md --strict
+/fractary-docs-validate doc.md --strict
 ```
 
 **Adds warnings for**:
@@ -394,7 +394,7 @@ Enable additional warnings:
 
 Check external links (slower):
 ```bash
-/fractary-docs:validate doc.md --check-external
+/fractary-docs-validate doc.md --check-external
 ```
 
 **Note**: External checks can be slow and may have false positives due to rate limiting, timeouts, or firewalls.
@@ -474,13 +474,13 @@ All validation scripts return structured JSON:
 ### 1. Validate Before Commit
 Always validate documents before committing:
 ```bash
-/fractary-docs:validate docs/ && git commit -m "Update docs"
+/fractary-docs-validate docs/ && git commit -m "Update docs"
 ```
 
 ### 2. Use Strict Mode in CI
 Enable strict mode in CI pipelines for higher quality:
 ```bash
-/fractary-docs:validate docs/ --strict
+/fractary-docs-validate docs/ --strict
 ```
 
 ### 3. Fix Errors First
@@ -493,7 +493,7 @@ Address errors before warnings:
 Run link checking periodically (not on every commit):
 ```bash
 # Weekly link check
-/fractary-docs:validate docs/ --check-external
+/fractary-docs-validate docs/ --check-external
 ```
 
 ### 5. Ignore Draft Documents
@@ -571,9 +571,9 @@ date: "2025-01-15"
 
 **Solution**: Increase timeout or disable external checking:
 ```bash
-/fractary-docs:validate doc.md --timeout 30
+/fractary-docs-validate doc.md --timeout 30
 # or
-/fractary-docs:validate doc.md  # skip external
+/fractary-docs-validate doc.md  # skip external
 ```
 
 ### markdownlint Not Found

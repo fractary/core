@@ -2,25 +2,25 @@
 
 Type-agnostic documentation system with operation-specific skills and data-driven type context.
 
-**Version**: 4.0.0 | **Architecture**: Agents + commands + skills with MCP-first architecture
+**Version**: 4.1.0 | **Architecture**: Commands + skills with MCP-first architecture
 
 ## Overview
 
-The `fractary-docs` plugin provides a flexible documentation management system with per-type skills, archival, refinement, fulfillment validation, and work-linking. It uses an agents + commands + skills pattern with MCP-first architecture.
+The `fractary-docs` plugin provides a flexible documentation management system with per-type skills, archival, refinement, fulfillment validation, and work-linking. It uses a commands + skills pattern with MCP-first architecture.
 
 ### What's New in v4.0
 
 **Architecture Transformation**:
 - ✅ **Per-type skills** with archival, refinement, and fulfillment validation
 - ✅ **Work-linking** - Link documentation to work items
-- ✅ **Agent-based orchestration** - 6 specialized agents
+- ✅ **Skill-based orchestration** - 4 specialized skills (writer, archiver, refiner, quality)
 - ✅ **Data-driven behavior** - Type context via SDK/CLI
 - ✅ **Auto-indexing** - Configurable flat/hierarchical organization per type
 
 **Migration from earlier versions**:
 - v1.x: 11 type-specific skills (`docs-manage-api`, `docs-manage-adr`, etc.)
 - v2.0-v3.1: 4 operation skills (`doc-writer`, `doc-validator`, `doc-classifier`, `doc-lister`)
-- v4.0: 6 agents + commands + skills with archival and refinement
+- v4.0: 6 agents + commands + skills (agents later migrated to skills in v4.1)
 - Frontmatter field: `type:` → `fractary_doc_type:`
 
 ### Key Features
@@ -104,7 +104,7 @@ The `fractary-docs` plugin provides a flexible documentation management system w
 
 ## Architecture
 
-The plugin uses an **agents + commands + skills** pattern with MCP-first architecture:
+The plugin uses a **commands + skills** pattern with MCP-first architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -114,15 +114,10 @@ The plugin uses an **agents + commands + skills** pattern with MCP-first archite
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Agents (Orchestration)                                 │
-│  docs-writer, docs-validator, docs-auditor,            │
-│  docs-archiver, docs-refiner, docs-consistency-checker │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────┐
-│  Skills (Knowledge & Utilities)                         │
-│  doc-type-selector, common/_shared utilities           │
+│  Skills (Orchestration & Knowledge)                     │
+│  docs-writer, docs-archiver, docs-refiner,             │
+│  docs-quality (audit/validate/consistency)              │
+│  doc-type-selector, common/_shared utilities            │
 └──────────────────────┬──────────────────────────────────┘
                        │
                        ▼
@@ -479,20 +474,12 @@ Orchestrates write → validate → index pipeline for single documents.
 - `index`: Update index for document's directory
 
 **Example invocation**:
-```
-Use the @agent-fractary-docs-manager agent with:
-{
-  "operation": "write",
-  "file_path": "docs/api/user-login/README.md",
-  "doc_type": "api",
-  "context": {
-    "title": "User Login",
-    "endpoint": "/api/auth/login",
-    "method": "POST",
-    "service": "AuthService",
-    "version": "1.0.0"
-  }
-}
+```bash
+# Via command
+/fractary-docs-write api
+
+# Via CLI
+fractary-core docs create my-doc --doc-type api --title "User Login"
 ```
 
 ### docs-director-skill (Multi-Document)
@@ -512,34 +499,6 @@ Handles batch operations with pattern matching and parallel execution.
 **Example**:
 ```bash
 /fractary-docs-write api docs/api/**/README.md --batch
-```
-
-## Agent Invocation
-
-Use declarative invocation to interact with the docs-manager agent:
-
-```
-Use the @agent-fractary-docs-manager agent to write API documentation:
-{
-  "operation": "write",
-  "doc_type": "api",
-  "parameters": {
-    "title": "User Login Endpoint",
-    "endpoint": "/api/auth/login",
-    "method": "POST",
-    "service": "AuthService",
-    "version": "1.0.0",
-    "status": "draft",
-    "overview": "Authenticates users with email/password credentials",
-    "request_details": "...",
-    "response_details": "...",
-    "examples": "..."
-  },
-  "options": {
-    "validate_after": true,
-    "update_index": true
-  }
-}
 ```
 
 ## Adding New Document Types
@@ -802,7 +761,7 @@ All commands support the `--context` argument for passing additional instruction
 --context "<text>"
 ```
 
-This argument is always optional and appears as the final argument. When provided, agents prepend the context as additional instructions to their workflow.
+This argument is always optional and appears as the final argument. When provided, skills prepend the context as additional instructions to their workflow.
 
 **Examples:**
 
@@ -906,19 +865,13 @@ cat .fractary/docs/templates/manifest.yaml
 ```
 plugins/docs/                          # Plugin directory
 ├── .claude-plugin/
-│   └── plugin.json                    # Plugin manifest (v4.0.0)
+│   └── plugin.json                    # Plugin manifest (v4.1.0)
 ├── README.md
 ├── CHANGELOG.md                       # Version history
 ├── CONTRIBUTING.md                    # Contribution guide
-├── agents/                            # Agent definitions
-│   ├── docs-archiver.md              # Archive documentation
-│   ├── docs-auditor.md               # Audit documentation quality
-│   ├── docs-consistency-checker.md   # Check consistency
-│   ├── docs-refiner.md               # Refine documentation
-│   ├── docs-validator.md             # Validate documentation
-│   └── docs-writer.md                # Write documentation
 ├── archived/                          # Archived legacy components
 │   ├── README.md
+│   ├── agents-v1/                     # Old agents (v4.0 - migrated to skills)
 │   ├── skills/                        # Old operation skills (v2.0-v3.1)
 │   └── types-v2/                      # Old type definitions
 ├── commands/
@@ -941,6 +894,10 @@ plugins/docs/                          # Plugin directory
 ├── examples/                          # Usage examples
 ├── samples/                           # Sample documents
 ├── skills/
+│   ├── fractary-docs-writer/             # Documentation writing skill
+│   ├── fractary-docs-archiver/           # Documentation archival skill
+│   ├── fractary-docs-refiner/            # Documentation refinement skill
+│   ├── fractary-docs-quality/            # Multi-mode quality skill (audit/validate/consistency)
 │   └── fractary-docs-doc-type-selector/  # Type selection (uses CLI)
 
 templates/docs/                        # Core doc types (in repo root)
@@ -962,6 +919,13 @@ templates/docs/                        # Core doc types (in repo root)
 ```
 
 ## Version
+
+**4.1.0** - Skills-based architecture (agents migrated to lazy-loading skills)
+
+**Changes in 4.1.0**:
+- 6 agents consolidated into 4 skills (writer, archiver, refiner, quality)
+- Quality skill handles audit, validate, and consistency-check modes
+- Skills use lazy-loading with progressive document loading for token efficiency
 
 **4.0.0** - Per-type skills with archival, refinement, fulfillment validation, and work-linking
 
@@ -986,7 +950,7 @@ To contribute:
 
 1. **Add new core doc type**: Create 3 files in `templates/docs/{doc_type}/` (type.yaml, template.md, standards.md)
 2. **Enhance SDK/CLI**: Modify `sdk/js/src/docs/` or `cli/src/commands/docs/`
-3. **Improve agents**: Update agents in `plugins/docs/agents/`
+3. **Improve skills**: Update skills in `plugins/docs/skills/`
 4. **Test thoroughly**: Validate with `fractary-core docs types` and test document creation
 
 ## See Also
@@ -1000,7 +964,6 @@ To contribute:
 
 For more information:
 - Plugin manifest: `.claude-plugin/plugin.json`
-- Agent specification: `agents/docs-manager.md`
-- Operation skills: `skills/doc-*/`
-- Type context: `types/*/`
+- Skills: `skills/fractary-docs-*/`
+- Type context: `templates/docs/*/`
 - Commands: `commands/*.md`

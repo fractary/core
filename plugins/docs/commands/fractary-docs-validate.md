@@ -1,17 +1,16 @@
 ---
 name: fractary-docs-validate
-description: Validate documentation - delegates to fractary-docs-validator agent
-allowed-tools: Agent(fractary-docs-validator)
+description: Validate documentation against type-specific rules
+allowed-tools: Skill(fractary-docs-quality), Bash, Read, Glob
 model: claude-haiku-4-5
-argument-hint: '[file_path|pattern] [doc_type] [--context "<text>"]'
+argument-hint: '[file_path|pattern] [doc_type]'
 ---
 
-Use **Agent** tool with `fractary-docs-validator` agent to validate documentation against type-specific rules.
+Use the **Skill** tool with `fractary-docs-quality` in validate mode.
 
 ```
-Agent(
-  subagent_type="fractary-docs-validator",
-  description="Validate documentation",
-  prompt="Validate documentation against type-specific rules: $ARGUMENTS"
+Skill(
+  skill="fractary-docs-quality",
+  args="validate $ARGUMENTS"
 )
 ```

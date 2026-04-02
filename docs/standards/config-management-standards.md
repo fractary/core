@@ -10,24 +10,25 @@ All plugins share a common configuration approach to ensure:
 - Non-conflicting gitignore management
 - Predictable behavior when plugins work together
 
-## Agent Naming Convention
+## Skill Naming Convention
 
-Configuration agents use noun forms of their corresponding command verbs:
+Configuration skills use noun forms of their corresponding command verbs:
 - `fractary-core-config-initializer` - Core plugin configuration (fresh setup)
+- `fractary-core-cloud-initializer` - Cloud storage setup (S3/R2)
 - `fractary-core-config-updater` - Core plugin incremental updates
 - `fractary-core-env-switcher` - Environment switching
-- `fractary-faber:configurator` - FABER workflow configuration
-- `fractary-codex:configurator` - Codex plugin configuration
+- `fractary-faber-configurator` - FABER workflow configuration
+- `fractary-codex-configurator` - Codex plugin configuration
 
 ### Migration History
 
-The core agents were renamed from `configurator` to operation-specific noun-form names for alignment with the CLI:
+Configuration agents were migrated to lazy-loading skills for token efficiency. Skills use the same noun-form naming convention:
 
-| Old Name | New Name |
+| Original Agent | Current Skill |
 |----------|----------|
-| `fractary-core-configurator` | `fractary-core-config-initializer` (fresh setup) |
-| `fractary-core-configurator` | `fractary-core-config-updater` (incremental) |
-| `fractary-core-switch-env` | `fractary-core-env-switcher` |
+| `fractary-core-config-initializer` (agent) | `fractary-core-config-initializer` (skill) |
+| `fractary-core-config-updater` (agent) | `fractary-core-config-updater` (skill) |
+| `fractary-core-env-switcher` (agent) | `fractary-core-env-switcher` (skill) |
 
 Core plugin commands:
 - `/fractary-core-config-init` - Initialize configuration
@@ -96,7 +97,7 @@ Examples:
 
 ### Tracking File
 
-`.fractary/backups/.last-backup` contains the path to the most recent backup for rollback purposes. This is necessary because agent contexts are stateless between tool calls.
+`.fractary/backups/.last-backup` contains the path to the most recent backup for rollback purposes.
 
 ### Retention
 
@@ -131,11 +132,11 @@ Context should be plain descriptive text only:
 - "enable S3 storage with bucket my-bucket" ✓
 - "change logs path to .fractary/session-logs" ✓
 
-## Agent Model
+## Skill Model
 
 ### Standard Model
 
-**`claude-haiku-4-5`** for all configurator agents.
+**`claude-haiku-4-5`** for all configurator skills.
 
 Configuration operations are primarily file I/O and validation, which don't require more powerful models.
 
@@ -185,8 +186,8 @@ When updating configuration:
 | Core (init) | `/fractary-core-config-init` |
 | Core (update) | `/fractary-core-config-update` |
 | Core (validate) | `/fractary-core-config-validate` |
-| Faber | `/fractary-faber:configure` |
-| Codex | `/fractary-codex:configure` |
+| Faber | `/fractary-faber-configure` |
+| Codex | `/fractary-codex-configure` |
 
 All commands support:
 - `--context "<text>"` - Natural language description of changes
@@ -215,10 +216,11 @@ If configuration write or validation fails:
 
 ## Cross-Reference
 
-- Core config-initializer: `core/plugins/core/agents/config-initializer.md`
-- Core config-updater: `core/plugins/core/agents/config-updater.md`
-- Core env-switcher: `core/plugins/core/agents/env-switcher.md`
-- Core archived configurator: `core/plugins/core/archived/agents/configurator.md`
+- Core config-initializer: `core/plugins/core/skills/fractary-core-config-initializer/SKILL.md`
+- Core cloud-initializer: `core/plugins/core/skills/fractary-core-cloud-initializer/SKILL.md`
+- Core config-updater: `core/plugins/core/skills/fractary-core-config-updater/SKILL.md`
+- Core env-switcher: `core/plugins/core/skills/fractary-core-env-switcher/SKILL.md`
+- Core archived agents: `core/plugins/core/archived/agents-v1/`
 - Faber configurator: `faber/plugins/faber/agents/configurator.md`
 - Codex configurator: `codex/plugins/codex/agents/configurator.md`
 - Codex gitignore utils: `codex/cli/src/config/gitignore-utils.ts`

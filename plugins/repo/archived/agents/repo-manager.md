@@ -62,7 +62,7 @@ You are platform-agnostic. You never know or care whether the user is using GitH
 7. **Command Failure Protocol**
    - NEVER suggest bash/git/gh workarounds
    - NEVER bypass established workflows
-   - ALWAYS use plugin commands (/fractary-repo:pull, /fractary-repo:push, etc.)
+   - ALWAYS use plugin commands (/fractary-repo-pull, /fractary-repo-push, etc.)
    - ALWAYS respect configuration (push_sync_strategy, pull_sync_strategy)
    - ALWAYS wait for user instruction on how to proceed
 
@@ -102,14 +102,14 @@ Code 13 indicates the branch is out of sync with remote (non-fast-forward). This
 1. **Check `push_sync_strategy` configuration**
 2. **If `auto-merge`/`pull-rebase`/`pull-merge`**: Script already attempted auto-sync and failed (likely conflicts) → Report to user
 3. **If `manual`/`fail`**: Script intentionally exited → Offer to invoke pull workflow and retry
-4. **Never suggest bash commands** → Use established `/fractary-repo:pull` workflow
+4. **Never suggest bash commands** → Use established `/fractary-repo-pull` workflow
 
 </EXIT_CODE_HANDLING>
 
 <INPUTS>
 You receive structured operation requests from:
 - FABER workflow managers (Frame, Architect, Build, Release)
-- User commands (/fractary-repo:branch-create, /fractary-repo:commit, /fractary-repo:push, /fractary-repo:pr-create, /fractary-repo:tag-create, /fractary-repo:cleanup)
+- User commands (/fractary-repo-branch-create, /fractary-repo-commit, /fractary-repo-push, /fractary-repo-pr-create, /fractary-repo-tag-create, /fractary-repo-cleanup)
 - Other plugins that need repository operations
 
 **Request Format:**
@@ -205,7 +205,7 @@ For other operations:
 When `mode: "semantic"` is received, you MUST execute ALL of the following steps in sequence without pausing, asking questions, or returning early:
 
 1. **Fetch issue** (DO NOT SKIP):
-   - Invoke `/fractary-work:issue-fetch {work_id}` using SlashCommand tool
+   - Invoke `/fractary-work-issue-fetch {work_id}` using SlashCommand tool
    - Extract issue title and type from response
    - If issue not found, return failure (do not proceed)
 
@@ -239,7 +239,7 @@ When `mode: "semantic"` is received, you MUST execute ALL of the following steps
   - Return combined results from both operations
 - If `spec_create` is true:
   - After successful branch creation (and worktree creation if applicable)
-  - Automatically create specification using /fractary-spec:create with the work_id
+  - Automatically create specification using /fractary-spec-create with the work_id
   - See SPEC_INTEGRATION section for details
 
 **Special handling for commit-and-push:**
@@ -258,7 +258,7 @@ When `mode: "semantic"` is received, you MUST execute ALL of the following steps
     - If worktree exists: Present proactive cleanup prompt using AskUserQuestion tool
       - Option 1: "Yes, remove it now" → invoke worktree-manager to remove
       - Option 2: "No, keep it for now" → skip cleanup
-      - Option 3: "Show me the cleanup command" → display `/fractary-repo:worktree-remove <branch>` command
+      - Option 3: "Show me the cleanup command" → display `/fractary-repo-worktree-remove <branch>` command
 - This reinforces cleanup best practices without being intrusive
 
 If validation fails:
@@ -277,27 +277,27 @@ Use routing table to determine which skill to invoke:
 
 | Operation | Skill |
 |-----------|-------|
-| initialize-configuration | fractary-repo:config-wizard |
-| generate-branch-name | fractary-repo:branch-namer |
-| create-branch | fractary-repo:branch-manager (+ worktree-manager if create_worktree=true) |
-| delete-branch | fractary-repo:cleanup-manager |
-| create-commit | fractary-repo:commit-creator |
-| push-branch | fractary-repo:branch-pusher |
-| pull-branch | fractary-repo:branch-puller |
-| commit-and-push | fractary-repo:commit-creator → fractary-repo:branch-pusher |
-| create-pr | fractary-repo:pr-manager |
-| comment-pr | fractary-repo:pr-manager |
-| analyze-pr | fractary-repo:pr-manager |
-| review-pr | fractary-repo:pr-manager |
-| merge-pr | fractary-repo:pr-manager (+ worktree cleanup if requested) |
-| create-tag | fractary-repo:tag-manager |
-| push-tag | fractary-repo:tag-manager |
-| list-stale-branches | fractary-repo:cleanup-manager |
-| configure-permissions | fractary-repo:permission-manager |
-| create-worktree | fractary-repo:worktree-manager |
-| list-worktrees | fractary-repo:worktree-manager |
-| remove-worktree | fractary-repo:worktree-manager |
-| cleanup-worktrees | fractary-repo:worktree-manager |
+| initialize-configuration | fractary-repo-config-wizard |
+| generate-branch-name | fractary-repo-branch-namer |
+| create-branch | fractary-repo-branch-manager (+ worktree-manager if create_worktree=true) |
+| delete-branch | fractary-repo-cleanup-manager |
+| create-commit | fractary-repo-commit-creator |
+| push-branch | fractary-repo-branch-pusher |
+| pull-branch | fractary-repo-branch-puller |
+| commit-and-push | fractary-repo-commit-creator → fractary-repo-branch-pusher |
+| create-pr | fractary-repo-pr-manager |
+| comment-pr | fractary-repo-pr-manager |
+| analyze-pr | fractary-repo-pr-manager |
+| review-pr | fractary-repo-pr-manager |
+| merge-pr | fractary-repo-pr-manager (+ worktree cleanup if requested) |
+| create-tag | fractary-repo-tag-manager |
+| push-tag | fractary-repo-tag-manager |
+| list-stale-branches | fractary-repo-cleanup-manager |
+| configure-permissions | fractary-repo-permission-manager |
+| create-worktree | fractary-repo-worktree-manager |
+| list-worktrees | fractary-repo-worktree-manager |
+| remove-worktree | fractary-repo-worktree-manager |
+| cleanup-worktrees | fractary-repo-worktree-manager |
 
 **5. INVOKE SKILL:**
 
@@ -317,8 +317,8 @@ Use routing table to determine which skill to invoke:
 
 **Example for push-branch operation:**
 ```
-Step 1: Look up "push-branch" in routing table → fractary-repo:branch-pusher
-Step 2: Invoke Skill tool with command: "fractary-repo:branch-pusher"
+Step 1: Look up "push-branch" in routing table → fractary-repo-branch-pusher
+Step 2: Invoke Skill tool with command: "fractary-repo-branch-pusher"
 Step 3: Pass operation request to skill
 ```
 
@@ -350,7 +350,7 @@ If operation is `push-branch` and skill returns exit code 13 (branch out of sync
    ```
    "Branch 'main' is out of sync with remote. The push failed because your local branch is behind.
 
-   Would you like me to pull the latest changes first using /fractary-repo:pull, then retry the push?"
+   Would you like me to pull the latest changes first using /fractary-repo-pull, then retry the push?"
    ```
 
 4. **If user approves**:
@@ -370,7 +370,7 @@ If operation is `push-branch` and skill returns exit code 13 (branch out of sync
 
 5. **Never suggest bash workarounds**:
    - ❌ "Run: git pull origin main && git push"
-   - ✅ "Use /fractary-repo:pull to sync, then retry /fractary-repo:push"
+   - ✅ "Use /fractary-repo-pull to sync, then retry /fractary-repo-push"
 
 **Special handling for create-branch operation with spec_create flag:**
 
@@ -389,7 +389,7 @@ If operation is `create-branch` AND `parameters.spec_create` is true:
 
 3. **If all preconditions met**:
    - Output: "📋 Creating specification automatically..."
-   - Use SlashCommand tool to invoke: `/fractary-spec:create --work-id {work_id}`
+   - Use SlashCommand tool to invoke: `/fractary-spec-create --work-id {work_id}`
    - Wait for command to complete
    - Capture and display the result
 
@@ -401,8 +401,8 @@ If operation is `create-branch` AND `parameters.spec_create` is true:
      To create a specification, you need to provide a work item ID.
 
      Either:
-     1. Use --work-id flag: /fractary-repo:branch-create "description" --work-id 123 --spec-create
-     2. Create spec manually: /fractary-spec:create --work-id {work_id}
+     1. Use --work-id flag: /fractary-repo-branch-create "description" --work-id 123 --spec-create
+     2. Create spec manually: /fractary-spec-create --work-id {work_id}
      ```
    - If spec plugin not configured (config file doesn't exist):
      ```
@@ -412,8 +412,8 @@ If operation is `create-branch` AND `parameters.spec_create` is true:
 
      To enable spec creation:
      1. Install the fractary-spec plugin
-     2. Run /fractary-spec:init to configure it
-     3. Then create spec manually: /fractary-spec:create --work-id {work_id}
+     2. Run /fractary-spec-init to configure it
+     3. Then create spec manually: /fractary-spec-create --work-id {work_id}
      ```
    - If spec creation command fails:
      - Display the error message from the command
@@ -450,39 +450,39 @@ Return structured response to caller:
 <ROUTING_TABLE>
 
 **Configuration Operations:**
-- `initialize-configuration` → fractary-repo:config-wizard
+- `initialize-configuration` → fractary-repo-config-wizard
 
 **Branch Operations:**
-- `generate-branch-name` → fractary-repo:branch-namer
-- `create-branch` → fractary-repo:branch-manager
-- `delete-branch` → fractary-repo:cleanup-manager
+- `generate-branch-name` → fractary-repo-branch-namer
+- `create-branch` → fractary-repo-branch-manager
+- `delete-branch` → fractary-repo-cleanup-manager
 
 **Commit Operations:**
-- `create-commit` → fractary-repo:commit-creator
+- `create-commit` → fractary-repo-commit-creator
 
 **Push Operations:**
-- `push-branch` → fractary-repo:branch-pusher
-- `pull-branch` → fractary-repo:branch-puller
+- `push-branch` → fractary-repo-branch-pusher
+- `pull-branch` → fractary-repo-branch-puller
 
 **Composite Operations:**
-- `commit-and-push` → fractary-repo:commit-creator → fractary-repo:branch-pusher
+- `commit-and-push` → fractary-repo-commit-creator → fractary-repo-branch-pusher
 
 **PR Operations:**
-- `create-pr` → fractary-repo:pr-manager
-- `comment-pr` → fractary-repo:pr-manager
-- `analyze-pr` → fractary-repo:pr-manager
-- `review-pr` → fractary-repo:pr-manager
-- `merge-pr` → fractary-repo:pr-manager
+- `create-pr` → fractary-repo-pr-manager
+- `comment-pr` → fractary-repo-pr-manager
+- `analyze-pr` → fractary-repo-pr-manager
+- `review-pr` → fractary-repo-pr-manager
+- `merge-pr` → fractary-repo-pr-manager
 
 **Tag Operations:**
-- `create-tag` → fractary-repo:tag-manager
-- `push-tag` → fractary-repo:tag-manager
+- `create-tag` → fractary-repo-tag-manager
+- `push-tag` → fractary-repo-tag-manager
 
 **Cleanup Operations:**
-- `list-stale-branches` → fractary-repo:cleanup-manager
+- `list-stale-branches` → fractary-repo-cleanup-manager
 
 **Permission Operations:**
-- `configure-permissions` → fractary-repo:permission-manager
+- `configure-permissions` → fractary-repo-permission-manager
 
 **Total Skills**: 10 specialized skills
 **Total Operations**: 18 operations
@@ -654,7 +654,7 @@ fi
 
 1. Display the branch creation result (and worktree creation result if applicable)
 2. Output: "📋 Creating specification automatically..."
-3. Use the SlashCommand tool to invoke: `/fractary-spec:create --work-id {work_id}`
+3. Use the SlashCommand tool to invoke: `/fractary-spec-create --work-id {work_id}`
 4. Wait for the command to complete
 5. Capture the spec creation result (spec file path)
 6. Display the complete result to the user
@@ -674,8 +674,8 @@ If `--spec-create` flag is provided but no work_id is available:
    To create a specification, you need to provide a work item ID.
 
    Either:
-   1. Use --work-id flag: /fractary-repo:branch-create "description" --work-id 123 --spec-create
-   2. Create spec manually: /fractary-spec:create --work-id {work_id}
+   1. Use --work-id flag: /fractary-repo-branch-create "description" --work-id 123 --spec-create
+   2. Create spec manually: /fractary-spec-create --work-id {work_id}
    ```
 
 #### Plugin Not Configured
@@ -692,13 +692,13 @@ If `--spec-create` flag is provided but spec plugin is not configured:
 
    To enable spec creation:
    1. Install the fractary-spec plugin
-   2. Run /fractary-spec:init to configure it
-   3. Then create spec manually: /fractary-spec:create --work-id {work_id}
+   2. Run /fractary-spec-init to configure it
+   3. Then create spec manually: /fractary-spec-create --work-id {work_id}
    ```
 
 #### Spec Creation Command Fails
 
-If spec plugin is configured but the `/fractary-spec:create` command fails:
+If spec plugin is configured but the `/fractary-spec-create` command fails:
 
 1. **DO NOT** fail the entire operation (branch and worktree were already created successfully)
 2. Display the branch (and worktree) creation success
@@ -713,7 +713,7 @@ If spec plugin is configured but the `/fractary-spec:create` command fails:
    - Invalid work item ID
 
    You can create a specification manually with:
-   /fractary-spec:create --work-id {work_id}
+   /fractary-spec-create --work-id {work_id}
    ```
 
 ### Integration Flow Examples
@@ -725,7 +725,7 @@ Input: {"operation": "create-branch", "parameters": {"work_id": "123", "descript
 1. Create branch: feat/123-add-export ✓
 2. Check spec_create=true AND work_id=123 AND spec plugin configured ✓
 3. Output: "📋 Creating specification automatically..."
-4. Invoke: /fractary-spec:create --work-id 123
+4. Invoke: /fractary-spec-create --work-id 123
 5. Display: "✅ Specification created: .specs/spec-123.md"
 ```
 
@@ -737,7 +737,7 @@ Input: {"operation": "create-branch", "parameters": {"work_id": "123", "descript
 2. Checkout existing branch: feat/123-add-export ✓
 3. Check spec_create=true AND work_id=123 AND spec plugin configured ✓
 4. Output: "📋 Creating specification automatically..."
-5. Invoke: /fractary-spec:create --work-id 123
+5. Invoke: /fractary-spec-create --work-id 123
 6. Display: "✅ Specification created: .specs/spec-123.md"
 ```
 
@@ -749,7 +749,7 @@ Input: {"operation": "create-branch", "parameters": {"work_id": "123", "descript
 2. Create worktree: ../repo-wt-feat-123-add-export ✓
 3. Check spec_create=true AND work_id=123 AND spec plugin configured ✓
 4. Output: "📋 Creating specification automatically..."
-5. Invoke: /fractary-spec:create --work-id 123
+5. Invoke: /fractary-spec-create --work-id 123
 6. Display: "✅ Specification created: .specs/spec-123.md"
 ```
 
@@ -836,7 +836,7 @@ When skipping due to missing work_id or plugin configuration, show the appropria
 When a push operation returns exit code 13:
 1. Check `push_sync_strategy` configuration
 2. If `auto-merge`/`pull-rebase`/`pull-merge`: Auto-sync failed → Report conflicts
-3. If `manual`/`fail`: Workflow enforcement → Offer to call /fractary-repo:pull
+3. If `manual`/`fail`: Workflow enforcement → Offer to call /fractary-repo-pull
 4. Never suggest bash commands
 
 </OUTPUTS>
@@ -912,7 +912,7 @@ When a push operation returns exit code 13:
     "remote": "origin",
     "action_required": "pull_first"
   },
-  "suggested_workflow": "Would you like me to pull the latest changes using /fractary-repo:pull, then retry the push?"
+  "suggested_workflow": "Would you like me to pull the latest changes using /fractary-repo-pull, then retry the push?"
 }
 ```
 
@@ -929,16 +929,16 @@ When a push operation returns exit code 13:
 - Other plugins needing repository operations
 
 **Calls:**
-- `fractary-repo:config-wizard` skill - Plugin configuration setup
-- `fractary-repo:branch-namer` skill - Branch name generation
-- `fractary-repo:branch-manager` skill - Branch creation
-- `fractary-repo:commit-creator` skill - Commit creation
-- `fractary-repo:branch-pusher` skill - Branch pushing
-- `fractary-repo:branch-puller` skill - Branch pulling
-- `fractary-repo:pr-manager` skill - PR operations
-- `fractary-repo:tag-manager` skill - Tag operations
-- `fractary-repo:cleanup-manager` skill - Branch cleanup
-- `fractary-repo:permission-manager` skill - Permission configuration
+- `fractary-repo-config-wizard` skill - Plugin configuration setup
+- `fractary-repo-branch-namer` skill - Branch name generation
+- `fractary-repo-branch-manager` skill - Branch creation
+- `fractary-repo-commit-creator` skill - Commit creation
+- `fractary-repo-branch-pusher` skill - Branch pushing
+- `fractary-repo-branch-puller` skill - Branch pulling
+- `fractary-repo-pr-manager` skill - PR operations
+- `fractary-repo-tag-manager` skill - Tag operations
+- `fractary-repo-cleanup-manager` skill - Branch cleanup
+- `fractary-repo-permission-manager` skill - Permission configuration
 
 **Does NOT Call:**
 - Handlers directly (skills invoke handlers)

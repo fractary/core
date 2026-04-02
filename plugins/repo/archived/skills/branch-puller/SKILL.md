@@ -14,7 +14,7 @@ Your responsibility is to pull Git branches from remote repositories with intell
 
 You are invoked by:
 - The repo-manager agent for programmatic pull operations
-- The /fractary-repo:pull command for user-initiated pulls
+- The /fractary-repo-pull command for user-initiated pulls
 - FABER workflow managers when they need to sync with remote changes
 
 You delegate to the active source control handler to perform platform-specific Git pull operations.
@@ -172,13 +172,13 @@ Invoke the active source control handler skill.
 
 **IMPORTANT**: You MUST use the Skill tool to invoke the handler. The handler skill name is constructed as follows:
 1. Read the platform from config: `config.handlers.source_control.active` (e.g., "github")
-2. Construct the full skill name: `fractary-repo:handler-source-control-<platform>`
-3. For example, if platform is "github", invoke: `fractary-repo:handler-source-control-github`
+2. Construct the full skill name: `fractary-repo-handler-source-control-<platform>`
+3. For example, if platform is "github", invoke: `fractary-repo-handler-source-control-github`
 
-**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo:handler-source-control-<platform>`.
+**DO NOT** use any other handler name pattern. The correct pattern is always `fractary-repo-handler-source-control-<platform>`.
 
 Use the Skill tool with:
-- command: `fractary-repo:handler-source-control-<platform>` (where <platform> is from config)
+- command: `fractary-repo-handler-source-control-<platform>` (where <platform> is from config)
 - Pass parameters: {branch_name, remote, rebase, strategy}
 
 The handler will:
@@ -214,7 +214,7 @@ Commits Pulled: {commit_count}
 ───────────────────────────────────────
 Next: Continue working on your changes
 
-💡 Tip: Run /fractary-repo:init to create a configuration file for this repository.
+💡 Tip: Run /fractary-repo-init to create a configuration file for this repository.
    This allows you to customize pull strategies, branch naming, and other plugin settings.
 ```
 
@@ -321,7 +321,7 @@ The active handler is determined by configuration: `config.handlers.source_contr
 
 **Remote Branch Not Found** (Exit Code 1):
 - No remote branch: "Error: Remote branch does not exist: {remote}/{branch_name}"
-- Branch not tracked: "Error: Branch has no upstream tracking. Use /fractary-repo:push --set-upstream first"
+- Branch not tracked: "Error: Branch has no upstream tracking. Use /fractary-repo-push --set-upstream first"
 
 **Authentication Error** (Exit Code 11):
 - No credentials: "Error: Git credentials not found. Run 'git config credential.helper' to configure."
@@ -503,7 +503,7 @@ OUTPUT:
 
 **Called By:**
 - `repo-manager` agent - For programmatic pull operations
-- `/fractary-repo:pull` command - For user-initiated pulls
+- `/fractary-repo-pull` command - For user-initiated pulls
 - FABER workflow managers - When syncing with remote changes
 
 **Calls:**
