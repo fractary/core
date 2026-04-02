@@ -23,9 +23,9 @@ Use this checklist when reviewing pull requests to ensure code quality, security
 
 **v3.0 Plugin Architecture:**
 - [ ] Commands are ultra-lightweight (8-15 lines)
-- [ ] Commands restricted with `allowed-tools: Agent`
+- [ ] Commands delegate to agents for execution
 - [ ] Agents are self-sufficient and focused (60-100 lines)
-- [ ] Agents use MCP tools (not CLI bash scripts)
+- [ ] Agents use structured tools (not raw CLI scripts)
 - [ ] No manager agents or routing logic
 - [ ] Skills used for expertise, not execution
 
@@ -161,11 +161,11 @@ Use this checklist when reviewing pull requests to ensure code quality, security
 - [ ] Arguments table clear (conditional vs required)
 
 **Command Design:**
-- [ ] Command uses `allowed-tools: Agent` restriction
+- [ ] Command delegates to agent for execution
 - [ ] Command provides clear invocation instructions
 - [ ] Command references expertise skills where appropriate
 - [ ] Argument hints are accurate
-- [ ] Model specified (usually claude-haiku-4-5)
+- [ ] Model routing specified where supported
 
 ## Review Actions
 

@@ -2,14 +2,5 @@
     "name": "fractary-core",
     "version": "3.7.8",
     "description": "Core configuration and environment management for Fractary plugins",
-    "commands": [
-        "./commands/fractary-core-config-init.md",
-        "./commands/fractary-core-config-update.md",
-        "./commands/fractary-core-config-validate.md",
-        "./commands/fractary-core-config-show.md",
-        "./commands/fractary-core-env-switch.md",
-        "./commands/fractary-core-env-list.md",
-        "./commands/fractary-core-env-show.md"
-    ],
     "skills": "./skills/"
 }

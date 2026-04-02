@@ -46,9 +46,9 @@ gh issue comment <number> --body "<formatted questions>"
 ```
 Format as structured markdown with numbered questions, options, and WHY explanations.
 
-## Step 5: Present via AskUserQuestion (MANDATORY)
+## Step 5: Present Questions to User (MANDATORY)
 
-For each question, use AskUserQuestion with:
+For each question, present to the user with:
 - Clear question text with context
 - Meaningful answer options
 - "Skip this question" and "Custom answer" options

@@ -238,51 +238,42 @@ Add event emission at orchestration points in your manager skill:
 
 WORKFLOW_ID="workflow-${work_id}-$(date -u +%Y%m%dT%H%M%SZ)"
 
-Skill("fractary-logs-workflow-event-emitter", {
-  "operation": "emit",
-  "event_type": "workflow_start",
-  "workflow_id": WORKFLOW_ID,
-  "payload": {
-    "context": {
-      "work_item_id": work_id,
-      "entity_id": entity_id,
-      "action": requested_action
-    }
-  }
-})
+Invoke the workflow-event-emitter skill with:
+  operation: "emit"
+  event_type: "workflow_start"
+  workflow_id: WORKFLOW_ID
+  payload:
+    context:
+      work_item_id: work_id
+      entity_id: entity_id
+      action: requested_action
 
 ## After Each Step
 
-Skill("fractary-logs-workflow-event-emitter", {
-  "operation": "emit",
-  "event_type": "step_complete",
-  "workflow_id": WORKFLOW_ID,
-  "payload": {
-    "phase": current_phase,
-    "step": {
-      "name": step_name,
-      "status": "success",
-      "duration_ms": step_duration
-    },
-    "artifacts": created_artifacts
-  }
-})
+Invoke the workflow-event-emitter skill with:
+  operation: "emit"
+  event_type: "step_complete"
+  workflow_id: WORKFLOW_ID
+  payload:
+    phase: current_phase
+    step:
+      name: step_name
+      status: "success"
+      duration_ms: step_duration
+    artifacts: created_artifacts
 
 ## At Workflow End
 
-Skill("fractary-logs-workflow-event-emitter", {
-  "operation": "emit",
-  "event_type": "workflow_complete",
-  "workflow_id": WORKFLOW_ID,
-  "payload": {
-    "status": "success",
-    "duration_ms": total_duration,
-    "summary": {
-      "steps_executed": steps.length,
-      "artifacts_created": artifacts.length
-    }
-  }
-})
+Invoke the workflow-event-emitter skill with:
+  operation: "emit"
+  event_type: "workflow_complete"
+  workflow_id: WORKFLOW_ID
+  payload:
+    status: "success"
+    duration_ms: total_duration
+    summary:
+      steps_executed: steps.length
+      artifacts_created: artifacts.length
 </WORKFLOW>
 ```
 

@@ -2,6 +2,7 @@
   "name": "@fractary/core-monorepo",
   "version": "1.0.0",
   "private": true,
+  "main": ".opencode/plugins/fractary.js",
   "description": "Fractary Core Monorepo - SDK, CLI, MCP Server, and Plugins",
   "keywords": ["pi-package"],
   "pi": {
@@ -13,14 +14,6 @@
       "./plugins/repo/skills",
       "./plugins/work/skills"
     ], 
-    "prompts": [
-      "./plugins/core/commands",
-      "./plugins/docs/commands",
-      "./plugins/file/commands",
-      "./plugins/logs/commands",
-      "./plugins/repo/commands",
-      "./plugins/work/commands"
-    ],
     "agents": []
   },
   "workspaces": [

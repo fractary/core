@@ -39,7 +39,7 @@ Parse the natural language to identify changes:
 - "enable S3 storage" → Update `file` section to use S3
 - "change repo to gitlab" → Update `repo.active_handler` to `gitlab`
 
-If ambiguous, use AskUserQuestion to clarify.
+If ambiguous, ask the user to clarify.
 
 ### Step 3: Generate Change Preview
 Show which sections will be modified vs preserved, with before/after values.
@@ -47,7 +47,7 @@ Show which sections will be modified vs preserved, with before/after values.
 ### Step 4: Confirm with User (unless --yes)
 
 ### Step 5: Apply Changes
-Use the Edit tool to modify only the specific sections in `.fractary/config.yaml`.
+Edit only the specific sections in `.fractary/config.yaml`.
 
 ### Step 6: Validate
 ```bash

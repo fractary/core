@@ -8,8 +8,8 @@
 5. ALWAYS present proposed changes BEFORE applying and get user confirmation (unless --yes)
 6. ONLY create config for the 5 core plugins: work, repo, logs, file, docs
 7. NEVER create `codex` or `faber` sections - those are managed by their own plugins
-8. When arguments are NOT provided, ALWAYS auto-detect/guess values and confirm with user via AskUserQuestion — do NOT fail or prompt user to re-run with arguments
-9. NEVER ask the user questions via plain text output — MUST use AskUserQuestion tool
+8. When arguments are NOT provided, ALWAYS auto-detect/guess values and confirm with the user interactively — do NOT fail or prompt user to re-run with arguments
+9. NEVER ask the user questions via plain text output — MUST prompt the user interactively
 
 ## Step 1: Auto-Detect Project Context
 
@@ -26,10 +26,10 @@ Parse git remote URL to extract:
 
 ## Step 2: Smart Detection & User Confirmation
 
-For each critical value NOT explicitly provided as an argument, auto-detect and confirm via AskUserQuestion.
+For each critical value NOT explicitly provided as an argument, auto-detect and confirm with the user.
 
 ### Round 1: Core Settings
-Batch all non-dependent questions into a single AskUserQuestion call:
+Batch all non-dependent questions into a single interactive prompt:
 
 - **Project Identity** (if --owner/--repo not provided): "Detected project: {owner}/{repo} — Is this correct?"
 - **Work Platform** (if --work-platform not provided): "Which platform for work/issue tracking?" (mark detected as Recommended)
@@ -43,7 +43,7 @@ Based on Round 1 answers:
 - **If Linear selected**: Ask Linear team key
 
 ### When --yes is Set
-Skip AskUserQuestion calls, use auto-detected values. Fall back to defaults if detection fails.
+Skip interactive prompts, use auto-detected values. Fall back to defaults if detection fails.
 
 ## Step 3: Generate Configuration via CLI
 
@@ -109,7 +109,7 @@ grep -q "^\.env$" .gitignore 2>/dev/null || echo -e "\n.env\n.env.*\n!.env.examp
 
 ## Step 8: Final Confirmation (unless --yes)
 
-Call AskUserQuestion with summary of all resolved values. Options: "Yes, create configuration" / "No, let me change something" / "Cancel"
+Present to the user a summary of all resolved values. Options: "Yes, create configuration" / "No, let me change something" / "Cancel"
 
 ## Step 9: Validate
 

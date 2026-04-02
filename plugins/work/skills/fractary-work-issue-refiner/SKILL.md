@@ -18,7 +18,7 @@ Reviews issues for clarity gaps and generates targeted questions to ensure requi
 1. ALWAYS fetch the issue first using `gh issue view`
 2. ALWAYS generate 3-5 specific, actionable questions focused on requirements
 3. ALWAYS post questions to GitHub issue as a comment
-4. ALWAYS use AskUserQuestion to present questions interactively
+4. ALWAYS present questions to the user interactively
 5. ALWAYS update the issue with improvements based on answers
 6. NEVER ask technical/architectural questions — defer those to architect phase
 
