@@ -142,12 +142,19 @@ export class GitHubRepoProvider implements RepoProvider {
     this.owner = config.owner || '';
     this.repo = config.repo || '';
 
-    // Build env overrides so `gh` uses the configured token
-    // instead of relying on its own auth store (which may have expired tokens
-    // or fail when the git remote uses an SSH alias like `github-fractary`).
+    // Build env overrides so `gh` uses the configured token and API host
+    // instead of auto-detecting from the git remote (which may be an SSH alias
+    // like `github-fractary` that gh treats as a separate host and fails to
+    // resolve as a real DNS name).
     const token = config.token || process.env.GITHUB_TOKEN;
     if (token) {
-      this.ghEnv = { GH_TOKEN: token };
+      // Derive GH_HOST from api_url (e.g. "https://api.github.com" → "github.com").
+      // Defaults to github.com so gh never falls back to auto-detecting the remote host.
+      const rawApiUrl = (config as any).api_url as string | undefined;
+      const apiHost = rawApiUrl
+        ? new URL(rawApiUrl).hostname.replace(/^api\./, '')
+        : 'github.com';
+      this.ghEnv = { GH_TOKEN: token, GH_HOST: apiHost };
     }
   }
 
