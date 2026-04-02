@@ -1,7 +1,7 @@
 {
-  "name": "fractary-work",
-  "version": "3.2.0",
-  "description": "Work item management across GitHub, Jira, Linear, etc.",
-  "commands": "./commands/",
-  "skills": "./skills/"
+    "name": "fractary-work",
+    "version": "3.2.1",
+    "description": "Work item management across GitHub, Jira, Linear, etc.",
+    "commands": "./commands/",
+    "skills": "./skills/"
 }
