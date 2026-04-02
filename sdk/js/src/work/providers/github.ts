@@ -62,14 +62,18 @@ function execWithEnv(command: string, env?: Record<string, string>, options?: Ex
 }
 
 /**
- * Check if gh CLI is available and authenticated
- * @param host - Optional GitHub hostname to check (e.g., 'github.com'). Without this, gh checks ALL hosts.
- * @param env - Optional env overrides (e.g., GH_TOKEN) to pass to the subprocess.
+ * Check if gh CLI is available and authenticated.
+ * When a GH_TOKEN is provided via env overrides, skip the auth status check
+ * entirely — the token is the auth, and `gh auth status` may fail if other
+ * hosts (e.g. SSH aliases like github-fractary) have expired tokens.
  */
 function checkGhCli(host?: string, env?: Record<string, string>): void {
+  if (env?.GH_TOKEN) {
+    return; // Token provided — no need for a preflight auth check
+  }
   try {
     const hostnameArg = host ? ` --hostname ${host}` : '';
-    execWithEnv(`gh auth status${hostnameArg}`, env);
+    exec(`gh auth status${hostnameArg}`);
   } catch {
     throw new AuthenticationError(
       'github',
