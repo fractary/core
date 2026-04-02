@@ -6,7 +6,7 @@
         "url": "https://github.com/fractary/"
     },
     "metadata": {
-        "description": "Production-ready core plugins powered by Claude Code commands, skills and hooks.",
+        "description": "Production-ready core plugins powered by Claude Code skills and hooks.",
         "version": "3.7.10",
         "pluginRoot": "./plugins"
     },
@@ -23,18 +23,14 @@
             "homepage": "https://github.com/fractary/core/tree/main/plugins/core",
             "repository": "https://github.com/fractary/core/tree/main/plugins/core",
             "license": "Apache-2.0",
-            "keywords": ["configuration", "initialization", "setup", "core"],
+            "keywords": [
+                "configuration",
+                "initialization",
+                "setup",
+                "core"
+            ],
             "category": "development",
             "strict": true,
-            "commands": [
-                "./commands/fractary-core-config-init.md",
-                "./commands/fractary-core-config-update.md",
-                "./commands/fractary-core-config-validate.md",
-                "./commands/fractary-core-config-show.md",
-                "./commands/fractary-core-env-switch.md",
-                "./commands/fractary-core-env-list.md",
-                "./commands/fractary-core-env-show.md"
-            ],
             "skills": "./skills/"
         },
         {
@@ -61,22 +57,6 @@
             ],
             "category": "development",
             "strict": true,
-            "commands": [
-                "./commands/fractary-repo-branch-create.md",
-                "./commands/fractary-repo-branch-forward.md",
-                "./commands/fractary-repo-commit-push-pr-merge.md",
-                "./commands/fractary-repo-commit-push-pr.md",
-                "./commands/fractary-repo-commit-push.md",
-                "./commands/fractary-repo-commit.md",
-                "./commands/fractary-repo-pr-create.md",
-                "./commands/fractary-repo-pr-merge.md",
-                "./commands/fractary-repo-pr-review.md",
-                "./commands/fractary-repo-pull.md",
-                "./commands/fractary-repo-worktree-create.md",
-                "./commands/fractary-repo-worktree-list.md",
-                "./commands/fractary-repo-worktree-remove.md",
-                "./commands/fractary-repo-worktree-cleanup.md"
-            ],
             "skills": "./skills/"
         },
         {
@@ -107,16 +87,6 @@
             ],
             "category": "development",
             "strict": true,
-            "commands": [
-                "./commands/fractary-work-issue-comment.md",
-                "./commands/fractary-work-issue-create.md",
-                "./commands/fractary-work-issue-create-bulk.md",
-                "./commands/fractary-work-issue-fetch.md",
-                "./commands/fractary-work-issue-list.md",
-                "./commands/fractary-work-issue-refine.md",
-                "./commands/fractary-work-issue-search.md",
-                "./commands/fractary-work-issue-update.md"
-            ],
             "skills": "./skills/"
         },
         {
@@ -143,11 +113,6 @@
             ],
             "category": "development",
             "strict": true,
-            "commands": [
-                "./commands/fractary-file-show-config.md",
-                "./commands/fractary-file-switch-handler.md",
-                "./commands/fractary-file-test-connection.md"
-            ],
             "skills": "./skills/"
         },
         {
@@ -174,23 +139,6 @@
             ],
             "category": "development",
             "strict": true,
-            "commands": [
-                "./commands/fractary-logs-analyze.md",
-                "./commands/fractary-logs-archive.md",
-                "./commands/fractary-logs-audit.md",
-                "./commands/fractary-logs-capture.md",
-                "./commands/fractary-logs-cleanup.md",
-                "./commands/fractary-logs-delete.md",
-                "./commands/fractary-logs-list.md",
-                "./commands/fractary-logs-log.md",
-                "./commands/fractary-logs-read.md",
-                "./commands/fractary-logs-search.md",
-                "./commands/fractary-logs-stop.md",
-                "./commands/fractary-logs-type-info.md",
-                "./commands/fractary-logs-types.md",
-                "./commands/fractary-logs-validate.md",
-                "./commands/fractary-logs-write.md"
-            ],
             "skills": "./skills/"
         },
         {
@@ -216,22 +164,6 @@
             ],
             "category": "development",
             "strict": true,
-            "commands": [
-                "./commands/fractary-docs-archive.md",
-                "./commands/fractary-docs-audit.md",
-                "./commands/fractary-docs-check-consistency.md",
-                "./commands/fractary-docs-doc-create.md",
-                "./commands/fractary-docs-doc-delete.md",
-                "./commands/fractary-docs-doc-get.md",
-                "./commands/fractary-docs-doc-list.md",
-                "./commands/fractary-docs-doc-search.md",
-                "./commands/fractary-docs-doc-update.md",
-                "./commands/fractary-docs-refine.md",
-                "./commands/fractary-docs-type-info.md",
-                "./commands/fractary-docs-type-list.md",
-                "./commands/fractary-docs-validate.md",
-                "./commands/fractary-docs-write.md"
-            ],
             "skills": "./skills/"
         }
     ]

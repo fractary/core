@@ -1,0 +1,30 @@
+---
+description: Fractary Core skills and CLI reference for repository, work, docs, logs, and file operations
+globs:
+alwaysApply: true
+---
+
+# Fractary Core
+
+This project uses the `fractary-core` CLI and Fractary skills for development operations.
+
+## Skills
+
+Skills are in `plugins/*/skills/*/SKILL.md`. Read the relevant skill for detailed guidance on:
+- Commit format conventions, code review checklist, PR templates (repo)
+- Issue refinement, bulk creation (work)
+- Documentation writing, quality auditing, type selection (docs)
+- Log writing, analysis, session capture (logs)
+- File storage operations and handler switching (file)
+- Configuration initialization and updates (core)
+
+## CLI
+
+Run `fractary-core --help` for full usage. Key commands:
+- `fractary-core repo commit|push|branch-create|pr-create|pr-merge|pull`
+- `fractary-core work issue-create|issue-fetch|issue-list|issue-update|issue-search`
+- `fractary-core docs doc-create|doc-list|doc-get|doc-update|doc-search`
+- `fractary-core logs write|list|read|search|archive|analyze`
+- `fractary-core file upload|download|list|copy|move|delete`
+
+Configuration is at `.fractary/config.yaml`.

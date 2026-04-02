@@ -1,7 +1,7 @@
 # Bulk Issue Creation Flow
 
 ## Critical Rules
-1. ALWAYS present plan and get confirmation via AskUserQuestion before creating ANY issues
+1. ALWAYS present plan and get confirmation from the user before creating ANY issues
 2. ALWAYS check for existing issues to avoid duplicates
 3. ALWAYS track success/failure for each issue
 4. ALWAYS return summary with issue URLs
@@ -24,7 +24,7 @@
 
 ## Step 2: Present Plan (MANDATORY)
 
-Use AskUserQuestion to present:
+Present to the user:
 - Number of issues to create
 - Title/body for each issue (with placeholders resolved)
 - Labels and assignee

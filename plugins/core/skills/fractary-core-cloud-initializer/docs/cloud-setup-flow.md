@@ -3,10 +3,10 @@
 ## Critical Rules
 1. ALWAYS verify existing configuration exists before proceeding
 2. ALWAYS use CLI (`fractary-core config cloud-init`) for config changes — NEVER manually construct YAML
-3. ALWAYS present proposed changes and get confirmation via AskUserQuestion before applying
+3. ALWAYS present proposed changes and get confirmation from the user before applying
 4. NEVER store credentials directly in config — use `${ENV_VAR}` syntax
 5. ALWAYS offer 'archives' scope as recommended default
-6. NEVER ask questions via plain text — ALWAYS use AskUserQuestion tool
+6. NEVER ask questions via plain text — ALWAYS prompt the user interactively
 7. ALWAYS test connection after configuration is applied
 
 ## Step 1: Verify Prerequisites
@@ -27,7 +27,7 @@ Extract repo name for default bucket name (`dev.{repo}`).
 
 ## Step 3: Interactive Selection (Round 1)
 
-Unless flags provided, call AskUserQuestion with:
+Unless flags provided, prompt the user with:
 
 **Provider Selection**: "Which cloud storage provider?" — "AWS S3 (Recommended)" / "Cloudflare R2"
 **Handler Scope**: "Which handlers should use cloud?" — "Archives only (Recommended)" / "All handlers"
@@ -40,7 +40,7 @@ Unless flags provided, call AskUserQuestion with:
 
 ## Step 5: Final Confirmation (Round 3, unless --yes)
 
-Present summary, get approval via AskUserQuestion.
+Present summary, get approval from the user.
 
 ## Step 6: Apply Configuration
 
