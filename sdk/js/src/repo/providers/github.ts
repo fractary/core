@@ -142,6 +142,29 @@ export class GitHubRepoProvider implements RepoProvider {
     this.owner = config.owner || '';
     this.repo = config.repo || '';
 
+    // If owner/repo not in config, detect from the git remote URL.
+    // This ensures repoFlag() always returns a valid -R owner/repo arg so
+    // gh never falls back to auto-detecting the repo from the remote host
+    // (which breaks when origin uses an SSH alias like github-fractary).
+    if (!this.owner || !this.repo) {
+      try {
+        const { execFileSync } = require('child_process');
+        const remoteUrl = execFileSync('git', ['remote', 'get-url', 'origin'], {
+          cwd: this.cwd,
+          encoding: 'utf-8',
+        }).toString().trim();
+        const sshMatch = remoteUrl.match(/^git@[^:]+:([^/]+)\/(.+?)(?:\.git)?$/);
+        const httpsMatch = remoteUrl.match(/^https?:\/\/[^/]+\/([^/]+)\/(.+?)(?:\.git)?$/);
+        const m = sshMatch || httpsMatch;
+        if (m) {
+          this.owner = this.owner || m[1];
+          this.repo = this.repo || m[2];
+        }
+      } catch {
+        // Silent — will fall back to gh auto-detection
+      }
+    }
+
     // Build env overrides so `gh` uses the configured token and API host
     // instead of auto-detecting from the git remote (which may be an SSH alias
     // like `github-fractary` that gh treats as a separate host and fails to
