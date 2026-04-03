@@ -34,7 +34,7 @@ export interface LogTypeDefinition {
   outputPath: string;
 
   /** File naming configuration */
-  fileNaming: {
+  fileNaming?: {
     pattern: string;
     dateFormat?: string;
     slugSource?: string;
@@ -42,7 +42,7 @@ export interface LogTypeDefinition {
   };
 
   /** Frontmatter field configuration */
-  frontmatter: {
+  frontmatter?: {
     requiredFields: string[];
     optionalFields?: string[];
     defaults?: Record<string, unknown>;
@@ -220,17 +220,21 @@ function convertYamlToLogType(
     description: raw.description,
     template,
     outputPath: raw.output_path,
-    fileNaming: {
-      pattern: raw.file_naming.pattern,
-      dateFormat: raw.file_naming.date_format,
-      slugSource: raw.file_naming.slug_source,
-      slugMaxLength: raw.file_naming.slug_max_length,
-    },
-    frontmatter: {
-      requiredFields: raw.frontmatter.required_fields,
-      optionalFields: raw.frontmatter.optional_fields,
-      defaults: raw.frontmatter.defaults,
-    },
+    fileNaming: raw.file_naming
+      ? {
+          pattern: raw.file_naming.pattern,
+          dateFormat: raw.file_naming.date_format,
+          slugSource: raw.file_naming.slug_source,
+          slugMaxLength: raw.file_naming.slug_max_length,
+        }
+      : undefined,
+    frontmatter: raw.frontmatter
+      ? {
+          requiredFields: raw.frontmatter.required_fields,
+          optionalFields: raw.frontmatter.optional_fields,
+          defaults: raw.frontmatter.defaults,
+        }
+      : undefined,
     structure: raw.structure
       ? {
           requiredSections: raw.structure.required_sections,

@@ -162,18 +162,22 @@ function convertYamlToDocType(
     description: raw.description,
     template,
     outputPath: raw.output_path,
-    fileNaming: {
-      pattern: raw.file_naming.pattern,
-      autoNumber: raw.file_naming.auto_number,
-      numberFormat: raw.file_naming.number_format,
-      slugSource: raw.file_naming.slug_source,
-      slugMaxLength: raw.file_naming.slug_max_length,
-    },
-    frontmatter: {
-      requiredFields: raw.frontmatter.required_fields,
-      optionalFields: raw.frontmatter.optional_fields,
-      defaults: raw.frontmatter.defaults,
-    },
+    fileNaming: raw.file_naming
+      ? {
+          pattern: raw.file_naming.pattern,
+          autoNumber: raw.file_naming.auto_number,
+          numberFormat: raw.file_naming.number_format,
+          slugSource: raw.file_naming.slug_source,
+          slugMaxLength: raw.file_naming.slug_max_length,
+        }
+      : undefined,
+    frontmatter: raw.frontmatter
+      ? {
+          requiredFields: raw.frontmatter.required_fields,
+          optionalFields: raw.frontmatter.optional_fields,
+          defaults: raw.frontmatter.defaults,
+        }
+      : undefined,
     structure: raw.structure
       ? {
           requiredSections: raw.structure.required_sections,

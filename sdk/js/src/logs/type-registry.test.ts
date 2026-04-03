@@ -661,9 +661,9 @@ ${types.map((t) => `  - id: ${t.id}
 
       expect(logType).not.toBeNull();
       expect(logType?.fileNaming).toBeDefined();
-      expect(logType?.fileNaming.pattern).toBeDefined();
+      expect(logType?.fileNaming?.pattern).toBeDefined();
       expect(logType?.frontmatter).toBeDefined();
-      expect(logType?.frontmatter.requiredFields).toBeDefined();
+      expect(logType?.frontmatter?.requiredFields).toBeDefined();
       expect(logType?.structure).toBeDefined();
       expect(logType?.status).toBeDefined();
       expect(logType?.retention).toBeDefined();
