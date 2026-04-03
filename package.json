@@ -2,7 +2,7 @@
   "name": "@fractary/core-monorepo",
   "version": "1.0.0",
   "private": true,
-  "main": ".opencode/plugins/fractary.js",
+  "main": ".opencode/plugins/fractary-core.js",
   "description": "Fractary Core Monorepo - SDK, CLI, MCP Server, and Plugins",
   "keywords": ["pi-package"],
   "pi": {
