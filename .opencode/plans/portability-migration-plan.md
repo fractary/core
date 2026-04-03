@@ -1,3 +1,13 @@
+# ⚠️ DEPRECATED
+
+**This document has moved to the canonical location:**
+
+📄 **[Current Version: `/docs/specs/portability-migration-plan.md`](../../docs/specs/portability-migration-plan.md)**
+
+This copy is maintained for historical reference only. Please update all bookmarks and links to point to the canonical documentation at `/docs/specs/portability-migration-plan.md`.
+
+---
+
 # Portability Migration Plan for Fractary Core
 
 **Status:** Planning Phase
