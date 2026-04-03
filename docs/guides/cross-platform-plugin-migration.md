@@ -299,27 +299,39 @@ Remove any platform-specific prompt registrations (e.g., `pi.prompts` arrays). A
 
 Platform adapters are thin files that tell each platform where to find skills and that the CLI exists. They do NOT contain skill logic — that lives in the skill files.
 
-### 5.1 OpenCode (`.opencode/plugins/<name>.js`)
+### 5.1 OpenCode (`.opencode/plugins/<project-name>.js`)
 
-OpenCode uses JavaScript plugins with hooks:
+OpenCode uses JavaScript plugins with hooks. Each plugin project gets its own adapter file named after the project (e.g., `fractary-core.js`, `fractary-faber.js`).
+
+The adapter needs to find skills in two locations:
+1. **Local monorepo** — when developing the plugin project itself
+2. **Claude marketplace install** — when the plugin is installed in another project (`~/.claude/plugins/marketplaces/<project-name>/`)
 
 ```javascript
 import fs from 'fs'
 import path from 'path'
+import os from 'os'
+
+const PLUGIN_NAMES = ['core', 'repo', 'work'] // your plugin names
+const MARKETPLACE_PATH = path.join(
+  os.homedir(),
+  '.claude',
+  'plugins',
+  'marketplaces',
+  'your-project-name',
+)
 
 export const MyPlugin = async ({ directory }) => {
   const pluginRoot = findPluginRoot(directory)
-  const pluginNames = ['core', 'repo', 'work'] // your plugin names
 
   return {
     config: async (config) => {
-      for (const name of pluginNames) {
+      for (const name of PLUGIN_NAMES) {
         const skillsDir = path.join(pluginRoot, 'plugins', name, 'skills')
         if (fs.existsSync(skillsDir)) {
-          config.instructions = config.instructions || []
-          if (Array.isArray(config.instructions)) {
-            config.instructions.push(skillsDir)
-          }
+          config.skills = config.skills || {}
+          config.skills.paths = config.skills.paths || []
+          config.skills.paths.push(skillsDir)
         }
       }
     },
@@ -339,7 +351,7 @@ export const MyPlugin = async ({ directory }) => {
   }
 }
 
-function findPluginRoot(dir) {
+function findMonorepoRoot(dir) {
   let current = dir
   while (current !== path.dirname(current)) {
     if (fs.existsSync(path.join(current, 'plugins', 'core', '.claude-plugin'))) {
@@ -347,18 +359,31 @@ function findPluginRoot(dir) {
     }
     current = path.dirname(current)
   }
-  return dir
+  return null
+}
+
+function findPluginRoot(directory) {
+  const monorepo = findMonorepoRoot(directory)
+  if (monorepo) return monorepo
+
+  if (fs.existsSync(path.join(MARKETPLACE_PATH, 'plugins', 'core'))) {
+    return MARKETPLACE_PATH
+  }
+
+  return directory
 }
 ```
 
-Also create `.opencode/package.json`:
+Also create `.opencode/package.json` for npm publishing:
 
 ```json
 {
-  "name": "@your-org/your-plugin-opencode",
+  "name": "@your-org/opencode-your-project",
   "version": "1.0.0",
   "type": "module",
-  "main": "./plugins/your-plugin.js"
+  "main": "./plugins/your-project-name.js",
+  "keywords": ["opencode-plugin"],
+  "license": "Apache-2.0"
 }
 ```
 
