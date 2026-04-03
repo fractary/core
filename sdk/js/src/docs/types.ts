@@ -191,7 +191,7 @@ export interface DocType {
   /**
    * File naming configuration
    */
-  fileNaming: {
+  fileNaming?: {
     pattern: string;
     autoNumber?: boolean;
     numberFormat?: string;
@@ -202,7 +202,7 @@ export interface DocType {
   /**
    * Frontmatter field configuration
    */
-  frontmatter: {
+  frontmatter?: {
     requiredFields: string[];
     optionalFields?: string[];
     defaults?: Record<string, unknown>;
