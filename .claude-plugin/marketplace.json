@@ -15,7 +15,7 @@
             "name": "fractary-core",
             "source": "./plugins/core",
             "description": "Core initialization and configuration for Fractary plugins",
-            "version": "3.7.8",
+            "version": "3.8.0",
             "author": {
                 "name": "The Fractary",
                 "url": "https://github.com/fractary"
@@ -37,7 +37,7 @@
             "name": "fractary-repo",
             "source": "./plugins/repo",
             "description": "Universal source control operations across GitHub, GitLab, and Bitbucket with modular handler architecture",
-            "version": "3.2.2",
+            "version": "3.3.1",
             "author": {
                 "name": "The Fractary",
                 "url": "https://github.com/fractary"
@@ -63,7 +63,7 @@
             "name": "fractary-work",
             "source": "./plugins/work",
             "description": "GitHub Issues management with bulk creation, refinement, and streamlined commands for creating, listing, searching, and updating issues",
-            "version": "3.2.1",
+            "version": "3.3.1",
             "author": {
                 "name": "The Fractary",
                 "url": "https://github.com/fractary"
@@ -93,7 +93,7 @@
             "name": "fractary-file",
             "source": "./plugins/file",
             "description": "Universal file storage operations across R2, S3, and local filesystem with modular handler architecture",
-            "version": "3.2.0",
+            "version": "3.3.0",
             "author": {
                 "name": "The Fractary",
                 "url": "https://github.com/fractary"
@@ -119,7 +119,7 @@
             "name": "fractary-logs",
             "source": "./plugins/logs",
             "description": "Operational log management with session capture, hybrid retention, archival, search, and analysis",
-            "version": "4.3.0",
+            "version": "4.4.0",
             "author": {
                 "name": "The Fractary",
                 "url": "https://github.com/fractary"
@@ -145,7 +145,7 @@
             "name": "fractary-docs",
             "source": "./plugins/docs",
             "description": "Type-agnostic documentation system with operation-specific skills and data-driven type context (93% less code duplication)",
-            "version": "4.2.0",
+            "version": "4.3.1",
             "author": {
                 "name": "The Fractary",
                 "url": "https://github.com/fractary"
