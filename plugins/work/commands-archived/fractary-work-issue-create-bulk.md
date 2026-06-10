@@ -2,7 +2,7 @@
 name: fractary-work-issue-create-bulk
 description: Create multiple issues at once using AI analysis
 allowed-tools: Skill(fractary-work-issue-bulk-creator), Bash, Read, Glob, Grep, AskUserQuestion
-model: claude-opus-4-6
+model: claude-opus-4-8
 argument-hint: '[--prompt "<text>"] [--title "<template>"] [--body "<template>"] [--repo <owner/repo>] [--type <type>] [--label <label>] [--assignee <user>] [--update-existing]'
 ---
 

@@ -5,7 +5,7 @@ description: |
   Use PROACTIVELY when user mentions "refine doc", "improve spec", "find gaps", "review documentation", "tighten spec".
   Triggers: refine, improve, find gaps, review quality, tighten, make more specific
 color: orange
-model: claude-opus-4-6
+model: claude-opus-4-8
 memory: project
 ---
 

@@ -2,7 +2,7 @@
 name: fractary-work-issue-refine
 description: Refine issue requirements through clarifying questions
 allowed-tools: Skill(fractary-work-issue-refiner), Bash, Read, AskUserQuestion
-model: claude-opus-4-6
+model: claude-opus-4-8
 argument-hint: '<number> [--context "<text>"]'
 ---
 

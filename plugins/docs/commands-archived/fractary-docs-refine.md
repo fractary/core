@@ -2,7 +2,7 @@
 name: fractary-docs-refine
 description: Refine a document through gap scanning and interactive Q&A
 allowed-tools: Skill(fractary-docs-refiner), Bash, Read, Write, AskUserQuestion
-model: claude-opus-4-6
+model: claude-opus-4-8
 argument-hint: '<id> [--context "<text>"]'
 ---
 
