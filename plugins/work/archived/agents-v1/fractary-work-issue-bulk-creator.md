@@ -5,7 +5,7 @@ description: |
   Analyzes project structure and conversation context to intelligently determine what issues to create.
   Always presents a plan for confirmation before creating anything.
 color: blue
-model: claude-opus-4-6
+model: claude-opus-4-8
 memory: project
 allowed-tools: Bash(gh issue *), Bash(gh repo view), Bash(fractary-core work issue-create:*), Read(*), Glob(*), Grep(*), AskUserQuestion(*)
 ---

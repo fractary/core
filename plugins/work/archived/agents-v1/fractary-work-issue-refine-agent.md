@@ -5,7 +5,7 @@ description: |
   Focuses on WHAT (requirements, goals, scope, acceptance criteria) not HOW (implementation).
   Part of the "frame phase" before architectural planning.
 color: orange
-model: claude-opus-4-6
+model: claude-opus-4-8
 memory: project
 allowed-tools: Bash(gh issue *), AskUserQuestion(*)
 ---
