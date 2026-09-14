@@ -605,50 +605,13 @@ Benefits:
 - ✅ Clarity: obvious which tool to use
 - ✅ Less confusion = higher correctness
 
-**3. Model Selection Optimization**
+**3. Model Selection**
 
-Different operations need different model capabilities:
+Skills do not choose a model. They run in the current session with its model and context, so a skill automatically uses whatever current Claude model the user is running.
 
-**Manager agent (highest common denominator):**
-```yaml
-# Must use most expensive model for ANY operation
-model: claude-sonnet-4-6  # $15/million tokens
-```
-
-Why? Because:
-- Some operations need complex reasoning
-- Can't switch models mid-agent
-- Must provision for worst case
-- **Pay premium for simple operations**
-
-**Dedicated agents (right model for job):**
-```yaml
-# branch-create agent (deterministic)
-model: claude-haiku-4-5  # $1/million tokens
-
-# pr-review agent (complex reasoning)
-model: claude-sonnet-4-6  # $15/million tokens
-
-# commit agent (simple)
-model: claude-haiku-4-5  # $1/million tokens
-```
-
-Benefits:
-- ✅ **15x cost savings** on simple operations
-- ✅ Fast operations use fast model
-- ✅ Complex operations get powerful model
-- ✅ Right tool for right job
-
-**Example cost comparison:**
-
-| Operation | Manager (Sonnet) | Dedicated (Haiku) | Savings |
-|-----------|-----------------|-------------------|---------|
-| List branches | $0.015 | $0.001 | **93%** |
-| Create branch | $0.015 | $0.001 | **93%** |
-| Simple commit | $0.015 | $0.001 | **93%** |
-| Review PR | $0.015 | $0.015 | 0% (needs Sonnet) |
-
-**With dedicated agents:** 3 of 4 operations run 15x cheaper.
+- ❌ Don't add `model`, `context: fork`, `agent`, or `run_as` to skill frontmatter
+- ❌ Don't pin model IDs; pinned IDs go stale with every model release
+- ✅ Keep skills cheap with the patterns in this guide instead: slim SKILL.md, lazy-loaded `docs/`, and deterministic work delegated to the CLI
 
 **4. Context and Token Optimization**
 
@@ -1209,7 +1172,6 @@ allowed-tools: Skill(fractary-pr-context-preparer), Agent(fractary-repo-pr-creat
 name: fractary-plugin-command-name
 description: Brief description
 allowed-tools: Skill(fractary-plugin-skill-name), Bash, Read
-model: claude-haiku-4-5
 argument-hint: '[arg1] [--flag] [--option <value>]'
 ---
 
@@ -1236,7 +1198,6 @@ Run: `fractary-core plugin operation $ARGUMENTS`
 - `name`: Namespaced command name (fractary-plugin-command-name)
 - `description`: Brief description
 - `allowed-tools`: Skill(...) for orchestration, or Bash(...) for CLI-only ops
-- `model`: Usually `claude-haiku-4-5` for efficiency
 - `argument-hint`: Shows expected parameters to user
 
 **Responsibilities:**
@@ -1271,7 +1232,6 @@ The `$ARGUMENTS` value becomes: `"Fix bug" --type fix --work-id 123`
 name: fractary-repo-commit
 description: Create semantic commits - delegates to fractary-repo-commit agent
 allowed-tools: Agent
-model: claude-haiku-4-5
 argument-hint: '["message"] [--type <type>] [--work-id <id>] [--scope <scope>]'
 ---
 
@@ -1290,7 +1250,6 @@ Agent(
 name: fractary-repo-pr-create
 description: Create pull request with conversation context
 allowed-tools: Skill(fractary-pr-context-preparer), Agent(fractary-repo-pr-create), TodoWrite
-model: claude-sonnet-4-6
 argument-hint: '["title"] [--body "<text>"] [--base <branch>]'
 ---
 
@@ -1366,7 +1325,6 @@ This ensures:
 name: fractary-plugin-skill-name
 description: What this skill does. MUST BE USED for all {operation} operations.
   Use PROACTIVELY when user requests {operation}.
-model: claude-haiku-4-5
 ---
 
 ## Arguments
@@ -1425,7 +1383,7 @@ skills/fractary-plugin-skill-name/
 **Frontmatter Fields:**
 - `name`: Namespaced skill name (fractary-plugin-skill-name)
 - `description`: Include "MUST BE USED" and "Use PROACTIVELY" for auto-triggering
-- `model`: Usually `claude-haiku-4-5` for efficiency
+- No `model` field: skills run in the current session's model
 
 **Key Principles:**
 
@@ -1939,7 +1897,6 @@ skills/fractary-{plugin}-{skill-name}/
 name: fractary-{plugin}-{skill-name}
 description: What this skill does. MUST BE USED for {operation}.
   Use PROACTIVELY when user requests {operation}.
-model: claude-haiku-4-5
 ---
 
 ## Arguments

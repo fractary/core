@@ -1,7 +1,6 @@
 ---
 name: fractary-docs-doc-type-selector
 description: Helps select the right document type. Use when creating documentation without a specific type indicated.
-model: claude-haiku-4-5
 ---
 
 <CONTEXT>

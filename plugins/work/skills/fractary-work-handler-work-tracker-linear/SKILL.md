@@ -1,7 +1,6 @@
 ---
 name: fractary-work-handler-work-tracker-linear
 description: "[DEPRECATED] Linear handler - Use Fractary Core CLI instead"
-model: haiku
 handler_type: work-tracker
 platform: linear
 deprecated: true

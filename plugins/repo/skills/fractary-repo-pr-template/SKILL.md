@@ -174,8 +174,10 @@ Use new syntax:
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Co-Authored-By: Claude <model name> <noreply@anthropic.com>
 ```
+
+Replace `<model name>` in the `Co-Authored-By` trailer with the name of the model actually writing the PR.
 
 ## Quick Reference
 
