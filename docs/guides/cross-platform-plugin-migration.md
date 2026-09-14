@@ -176,7 +176,7 @@ Apply these transformations when converting each command:
 | `name` | `name` | Keep as-is |
 | `description` | `description` | Enhance with "Use when..." trigger phrase for auto-discovery |
 | `allowed-tools` | _(remove)_ | Not portable |
-| `model` | _(remove)_ | Not portable |
+| `model` | _(remove)_ | Not portable; skills always run in the current session's model |
 | `argument-hint` | _(remove)_ | Replaced by Arguments table in body |
 
 #### Context injections

@@ -1,7 +1,6 @@
 ---
 name: fractary-logs-workflow-event-emitter
 description: Emits structured workflow events for cross-project visibility and downstream consumption
-model: claude-haiku-4-5
 ---
 
 # Workflow Event Emitter Skill

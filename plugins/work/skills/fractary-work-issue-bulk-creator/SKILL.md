@@ -1,14 +1,11 @@
 ---
 name: fractary-work-issue-bulk-creator
 description: Create multiple related issues at once — analyzes project structure, presents plan for confirmation, then creates issues
-run_as: agent
 ---
 
 # Issue Bulk Creator
 
 Intelligently creates multiple related issues at once. Analyzes user request and project context to determine what issues to create, presents a plan for approval, and creates after confirmation.
-
-**Note:** This skill runs as an agent (isolated context) because it performs extensive project scanning.
 
 ## Arguments
 

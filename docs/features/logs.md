@@ -417,7 +417,7 @@ Start recording a session associated with an issue.
 const capture = logManager.startCapture({
   issueNumber: 123,
   redactSensitive: true,
-  model: 'claude-sonnet-4-6'
+  model: 'claude-opus-5'
 });
 console.log('Session ID:', capture.sessionId);
 ```

@@ -1,7 +1,6 @@
 ---
 name: fractary-work-handler-work-tracker-jira
 description: "[DEPRECATED] Jira Cloud handler - Use Fractary Core CLI instead"
-model: haiku
 handler_type: work-tracker
 platform: jira
 deprecated: true

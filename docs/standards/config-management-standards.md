@@ -134,11 +134,9 @@ Context should be plain descriptive text only:
 
 ## Skill Model
 
-### Standard Model
+### No Model Selection
 
-**`claude-haiku-4-5`** for all configurator skills.
-
-Configuration operations are primarily file I/O and validation, which don't require more powerful models.
+Configurator skills, like all skills, do **not** declare `model`, `context: fork`, `agent`, or `run_as` in frontmatter. They run in the current session with its model and context.
 
 ## Version Field
 

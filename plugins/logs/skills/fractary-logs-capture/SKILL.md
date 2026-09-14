@@ -20,5 +20,5 @@ Start a session capture using the CLI command `fractary-core logs capture`.
 
 Examples:
 - `fractary-core logs capture 42`
-- `fractary-core logs capture 15 --model claude-sonnet-4-6 --json`
+- `fractary-core logs capture 15 --model claude-opus-5 --json`
 - `fractary-core logs capture 99 --json`

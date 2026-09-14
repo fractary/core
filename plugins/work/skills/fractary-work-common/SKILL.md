@@ -1,7 +1,6 @@
 ---
 name: fractary-work-common
 description: Common utilities for work plugin operations
-model: claude-haiku-4-5
 type: library
 ---
 

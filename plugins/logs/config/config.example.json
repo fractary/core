@@ -273,7 +273,7 @@
   "summarization": {
     "enabled": true,
     "auto_generate_on_archive": true,
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-5",
     "store_with_logs": false,
     "separate_paths": true,
     "format": "markdown"
@@ -296,7 +296,7 @@
     "include_timestamps": true,
     "redact_sensitive": true,
     "auto_name_by_issue": true,
-    "model_name": "claude-sonnet-4-6",
+    "model_name": "claude-opus-5",
     "redaction_patterns": {
       "api_keys": true,
       "jwt_tokens": true,
